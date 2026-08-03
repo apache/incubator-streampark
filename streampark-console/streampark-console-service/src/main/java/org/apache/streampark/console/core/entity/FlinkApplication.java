@@ -47,6 +47,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -64,6 +65,10 @@ import java.util.Optional;
 @TableName("t_flink_app")
 @Slf4j
 public class FlinkApplication extends BaseEntity {
+
+    private static final TypeReference<Map<String, Object>> STRING_OBJECT_MAP =
+        new TypeReference<Map<String, Object>>() {
+        };
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -492,12 +497,11 @@ public class FlinkApplication extends BaseEntity {
 
     @JsonIgnore
     @SneakyThrows
-    @SuppressWarnings("unchecked")
     public Map<String, Object> getOptionMap() {
         if (StringUtils.isBlank(this.options)) {
             return new HashMap<>();
         }
-        Map<String, Object> optionMap = JacksonUtils.read(this.options, Map.class);
+        Map<String, Object> optionMap = JacksonUtils.read(this.options, STRING_OBJECT_MAP);
         optionMap.entrySet().removeIf(entry -> entry.getValue() == null);
         return optionMap;
     }
@@ -596,10 +600,9 @@ public class FlinkApplication extends BaseEntity {
 
     @JsonIgnore
     @SneakyThrows
-    @SuppressWarnings("unchecked")
     public Map<String, Object> getHotParamsMap() {
         if (this.hotParams != null) {
-            Map<String, Object> map = JacksonUtils.read(this.hotParams, Map.class);
+            Map<String, Object> map = JacksonUtils.read(this.hotParams, STRING_OBJECT_MAP);
             map.entrySet().removeIf(entry -> entry.getValue() == null);
             return map;
         }

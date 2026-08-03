@@ -175,7 +175,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
             backUpService.rollbackFlinkSql(application, sql);
         } catch (Exception e) {
             log.error("Backup and Roll back FlinkSql before start failed.");
-            throw new RuntimeException(e.getMessage());
+            throw new IllegalStateException("Backup and rollback FlinkSql failed", e);
         }
     }
 

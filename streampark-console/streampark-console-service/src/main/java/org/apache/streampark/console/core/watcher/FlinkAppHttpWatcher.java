@@ -589,7 +589,7 @@ public class FlinkAppHttpWatcher {
             YarnAppInfo yarnAppInfo = httpYarnAppInfo(application);
             if (yarnAppInfo == null) {
                 if (!FlinkDeployMode.REMOTE.equals(application.getDeployModeEnum())) {
-                    throw new RuntimeException(
+                    throw new IllegalStateException(
                         "[StreamPark][FlinkAppHttpWatcher] getFromYarnRestApi failed ");
                 }
             } else {
@@ -628,8 +628,8 @@ public class FlinkAppHttpWatcher {
                     }
                 } catch (Exception e) {
                     if (!FlinkDeployMode.REMOTE.equals(application.getDeployModeEnum())) {
-                        throw new RuntimeException(
-                            "[StreamPark][FlinkAppHttpWatcher] getFromYarnRestApi error,", e);
+                        throw new IllegalStateException(
+                            "[StreamPark][FlinkAppHttpWatcher] getFromYarnRestApi error", e);
                     }
                 }
             }

@@ -507,7 +507,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
                         }
                     } catch (IOException e) {
                         log.error("Error in checksumCRC32 for {}.", jarFile);
-                        throw new RuntimeException(e);
+                        throw new IllegalStateException("Failed to compute jar checksum for " + jarFile, e);
                     }
                 }
             }
