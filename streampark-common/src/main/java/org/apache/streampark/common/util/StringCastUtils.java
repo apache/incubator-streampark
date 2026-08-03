@@ -23,26 +23,27 @@ public final class StringCastUtils {
     private StringCastUtils() {
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> T cast(String v, Class<?> classType) {
+    public static <T> T cast(String v, Class<T> classType) {
+        Object result;
         if (classType == String.class) {
-            return (T) v;
-        } else if (classType == byte.class || classType == Byte.class) {
-            return (T) (classType == byte.class ? (Object) Byte.parseByte(v) : Byte.valueOf(v));
-        } else if (classType == int.class || classType == Integer.class) {
-            return (T) (classType == int.class ? (Object) Integer.parseInt(v) : Integer.valueOf(v));
-        } else if (classType == long.class || classType == Long.class) {
-            return (T) (classType == long.class ? (Object) Long.parseLong(v) : Long.valueOf(v));
-        } else if (classType == float.class || classType == Float.class) {
-            return (T) (classType == float.class ? (Object) Float.parseFloat(v) : Float.valueOf(v));
-        } else if (classType == double.class || classType == Double.class) {
-            return (T) (classType == double.class ? (Object) Double.parseDouble(v) : Double.valueOf(v));
-        } else if (classType == short.class || classType == Short.class) {
-            return (T) (classType == short.class ? (Object) Short.parseShort(v) : Short.valueOf(v));
-        } else if (classType == boolean.class || classType == Boolean.class) {
-            return (T) (classType == boolean.class ? (Object) Boolean.parseBoolean(v) : Boolean.valueOf(v));
+            result = v;
+        } else if (classType == Byte.class || classType == byte.class) {
+            result = Byte.parseByte(v);
+        } else if (classType == Integer.class || classType == int.class) {
+            result = Integer.parseInt(v);
+        } else if (classType == Long.class || classType == long.class) {
+            result = Long.parseLong(v);
+        } else if (classType == Float.class || classType == float.class) {
+            result = Float.parseFloat(v);
+        } else if (classType == Double.class || classType == double.class) {
+            result = Double.parseDouble(v);
+        } else if (classType == Short.class || classType == short.class) {
+            result = Short.parseShort(v);
+        } else if (classType == Boolean.class || classType == boolean.class) {
+            result = Boolean.parseBoolean(v);
         } else {
             throw new IllegalArgumentException("Unsupported type: " + classType);
         }
+        return classType.cast(result);
     }
 }

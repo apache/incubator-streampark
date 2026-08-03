@@ -264,7 +264,7 @@ public final class JdbcUtils {
             }
             return ds.getConnection();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to obtain JDBC connection for alias: " + alias, e);
         } finally {
             lock.unlock();
         }

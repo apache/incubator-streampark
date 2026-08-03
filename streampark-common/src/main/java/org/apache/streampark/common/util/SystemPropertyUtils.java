@@ -129,9 +129,11 @@ public final class SystemPropertyUtils {
         Class<?> clazz = Class.forName("java.util.Collections$UnmodifiableMap");
         java.lang.reflect.Field field = clazz.getDeclaredField("m");
         field.setAccessible(true);
-        @SuppressWarnings("unchecked")
-        Map<String, String> map = (Map<String, String>) field.get(unmodifiableEnvironment);
-        map.put(name, value);
+        Object envMap = field.get(unmodifiableEnvironment);
+        if (!(envMap instanceof Map)) {
+            throw new IllegalStateException("Process environment is not a map");
+        }
+        Map.class.getMethod("put", Object.class, Object.class).invoke(envMap, name, value);
     }
 
     public static String getOrElseUpdate(String key, String defaultValue) {

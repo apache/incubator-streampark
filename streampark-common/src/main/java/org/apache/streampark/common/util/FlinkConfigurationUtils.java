@@ -61,7 +61,7 @@ public final class FlinkConfigurationUtils {
             return loadFlinkConf(
                 org.apache.commons.io.FileUtils.readFileToString(file, StandardCharsets.UTF_8));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to read Flink configuration file: " + file, e);
         }
     }
 
@@ -79,7 +79,7 @@ public final class FlinkConfigurationUtils {
             return loadLegacyFlinkConf(
                 org.apache.commons.io.FileUtils.readFileToString(file, StandardCharsets.UTF_8));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to read legacy Flink configuration file: " + file, e);
         }
     }
 

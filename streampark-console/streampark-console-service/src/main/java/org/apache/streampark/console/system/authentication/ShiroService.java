@@ -50,7 +50,7 @@ public class ShiroService {
         try {
             shiroFilter = shiroFilterFactoryBean.getObject();
         } catch (Exception e) {
-            throw new RuntimeException("Fail to get ShiroFilter from shiroFilterFactoryBean!");
+            throw new IllegalStateException("Fail to get ShiroFilter from shiroFilterFactoryBean!", e);
         }
         securityManager = (DefaultWebSecurityManager) shiroFilter.getSecurityManager();
         PathMatchingFilterChainResolver filterChainResolver = (PathMatchingFilterChainResolver) shiroFilter

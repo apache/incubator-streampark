@@ -68,7 +68,7 @@ public final class ClassLoaderUtils {
         try {
             loadPath(f.getAbsolutePath());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to load jar: " + jarFilePath, e);
         }
     }
 
@@ -91,7 +91,7 @@ public final class ClassLoaderUtils {
             try {
                 loadPath(x.getAbsolutePath());
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException("Failed to load jar: " + x.getAbsolutePath(), e);
             }
         }
     }

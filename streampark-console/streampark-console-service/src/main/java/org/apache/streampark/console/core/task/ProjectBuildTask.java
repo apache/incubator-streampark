@@ -154,7 +154,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
         // project) under the project path
         findTarOrJar(apps, path);
         if (apps.isEmpty()) {
-            throw new RuntimeException(
+            throw new IllegalStateException(
                 "[StreamPark] can't find tar.gz or jar in " + path.getAbsolutePath());
         }
         for (File app : apps) {

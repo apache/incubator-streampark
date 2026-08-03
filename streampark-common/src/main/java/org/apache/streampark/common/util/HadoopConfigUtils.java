@@ -179,7 +179,7 @@ public final class HadoopConfigUtils {
             }
             org.apache.commons.io.FileUtils.writeLines(configFile, lines);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to rewrite Hadoop configuration file: " + configFile, e);
         }
     }
 
@@ -216,7 +216,8 @@ public final class HadoopConfigUtils {
                                     org.apache.commons.io.FileUtils.readFileToString(
                                         f, StandardCharsets.UTF_8));
                             } catch (IOException e) {
-                                throw new RuntimeException(e);
+                                throw new IllegalStateException(
+                                    "Failed to read Hadoop configuration file: " + f.getAbsolutePath(), e);
                             }
                         }
                     }
@@ -249,7 +250,8 @@ public final class HadoopConfigUtils {
                                     org.apache.commons.io.FileUtils.readFileToString(
                                         f, StandardCharsets.UTF_8));
                             } catch (IOException e) {
-                                throw new RuntimeException(e);
+                                throw new IllegalStateException(
+                                    "Failed to read Hive configuration file: " + f.getAbsolutePath(), e);
                             }
                         }
                     }

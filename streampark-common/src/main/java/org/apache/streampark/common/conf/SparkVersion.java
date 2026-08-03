@@ -66,7 +66,7 @@ public class SparkVersion implements Serializable {
                     sparkVersion[1] = m1.group(1);
             });
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to parse Spark version from " + sparkHome, e);
         }
         LOG.info("[StreamPark] {}", buffer);
         if (sparkVersion[0] == null || sparkVersion[1] == null) {
