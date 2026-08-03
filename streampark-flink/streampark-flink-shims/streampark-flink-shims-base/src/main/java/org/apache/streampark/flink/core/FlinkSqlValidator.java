@@ -73,15 +73,25 @@ public final class FlinkSqlValidator {
         if (earlyReturn[0] != null) {
             return earlyReturn[0];
         }
+        if (sqlCommands == null || sqlCommands.isEmpty()) {
+            return FlinkSqlValidationResult.builder()
+                .success(false)
+                .failedType(FlinkSqlValidationFailedType.VERIFY_FAILED)
+                .exception("verify failed: flink sql cannot be empty.")
+                .build();
+        }
 
         String sqlDialect = SqlDialect.DEFAULT.name().toLowerCase();
         boolean hasInsert = false;
         for (SqlCommandCall call : sqlCommands) {
-            String args = call.operands[0];
+            String args =
+                call.operands == null || call.operands.length == 0 ? null : call.operands[0];
             SqlCommand command = call.command;
             switch (command) {
                 case SET:
-                    if (TableConfigOptions.TABLE_SQL_DIALECT.key().equals(args)) {
+                    if (args != null
+                        && TableConfigOptions.TABLE_SQL_DIALECT.key().equals(args)
+                        && call.operands.length > 1) {
                         sqlDialect = call.operands[call.operands.length - 1];
                     }
                     break;

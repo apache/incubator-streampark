@@ -22,21 +22,14 @@ import org.apache.flink.kubernetes.kubeclient.resources.KubernetesService;
 
 import java.util.Optional;
 
-/** Flink Kubernetes client operations. */
-public abstract class FlinkKubernetesClientTrait {
+/** Flink 2.x Kubernetes client. */
+public class FlinkKubernetesClient extends FlinkKubernetesClientTrait {
 
-    protected final FlinkKubeClient kubeClient;
-
-    protected FlinkKubernetesClientTrait(FlinkKubeClient kubeClient) {
-        this.kubeClient = kubeClient;
+    public FlinkKubernetesClient(FlinkKubeClient kubeClient) {
+        super(kubeClient);
     }
 
-    /**
-     * Get the kubernetes service of the given flink clusterId.
-     *
-     * @param serviceName the name of the service
-     * @return Return the optional kubernetes service of the specified name.
-     */
+    @Override
     public Optional<KubernetesService> getService(String serviceName) {
         return kubeClient.getService(serviceName);
     }

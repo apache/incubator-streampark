@@ -17,11 +17,11 @@
 
 package org.apache.streampark.flink.core;
 
-import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.types.Row;
 
-/** Table API extensions for Flink 1.18 Java stream-table applications. */
+/** Table API extensions for Flink 2.x Java stream-table applications. */
 public final class TableExt {
 
     private TableExt() {
@@ -46,21 +46,17 @@ public final class TableExt {
 
         private final org.apache.flink.table.api.Table table;
 
-        public TableConversions(org.apache.flink.table.api.Table table) {
+        private final StreamTableEnvironment streamTableEnv;
+
+        public TableConversions(
+                                org.apache.flink.table.api.Table table, StreamTableEnvironment streamTableEnv) {
             this.table = table;
+            this.streamTableEnv = streamTableEnv;
         }
 
         /** Changelog stream conversion (Scala {@code \\} operator equivalent). */
-        public DataStream<Row> toChangelogDataStream(StreamTableContext context) {
-            context.isConvertedToDataStream = true;
-            return context.toDataStream(table);
-        }
-
-        /** Append stream conversion (Scala {@code >>} operator equivalent). */
-        public <T> DataStream<T> toAppendDataStream(
-                                                    TypeInformation<T> typeInfo, StreamTableContext context) {
-            context.isConvertedToDataStream = true;
-            return context.toAppendStream(table, typeInfo);
+        public DataStream<Row> toChangelogDataStream() {
+            return streamTableEnv.toDataStream(table);
         }
     }
 }

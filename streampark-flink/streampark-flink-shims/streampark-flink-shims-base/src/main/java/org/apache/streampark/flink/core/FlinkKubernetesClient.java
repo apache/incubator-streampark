@@ -17,19 +17,20 @@
 
 package org.apache.streampark.flink.core;
 
+import org.apache.flink.kubernetes.kubeclient.FlinkKubeClient;
+import org.apache.flink.kubernetes.kubeclient.resources.KubernetesService;
+
 import java.util.Optional;
 
-/** SQL command operand converters. */
-public final class SqlCommandConverters {
+/** Flink 1.17+ Kubernetes client. */
+public class FlinkKubernetesClient extends FlinkKubernetesClientTrait {
 
-    private SqlCommandConverters() {
+    public FlinkKubernetesClient(FlinkKubeClient kubeClient) {
+        super(kubeClient);
     }
 
-    /** Converter that produces no operands. */
-    public static final SqlCommandConverter NO_OPERANDS =
-        groups -> Optional.of(new String[0]);
-
-    /** Default converter that uses the first capture group as the sole operand. */
-    public static final SqlCommandConverter DEFAULT =
-        groups -> Optional.of(new String[]{groups[0]});
+    @Override
+    public Optional<KubernetesService> getService(String serviceName) {
+        return kubeClient.getService(serviceName);
+    }
 }

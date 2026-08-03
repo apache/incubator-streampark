@@ -35,6 +35,12 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.streampark</groupId>
+            <artifactId>streampark-flink-shims-base</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.streampark</groupId>
             <artifactId>streampark-common</artifactId>
         </dependency>
 

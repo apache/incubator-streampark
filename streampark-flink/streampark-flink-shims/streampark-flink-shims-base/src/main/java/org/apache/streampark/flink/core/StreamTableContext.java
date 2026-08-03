@@ -17,20 +17,25 @@
 
 package org.apache.streampark.flink.core;
 
-import org.apache.flink.kubernetes.kubeclient.FlinkKubeClient;
-import org.apache.flink.kubernetes.kubeclient.resources.KubernetesService;
+import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
-import java.util.Optional;
+/** Flink 1.17+ stream-table environment context. */
+public class StreamTableContext extends FlinkStreamTableTrait {
 
-/** Flink 2.0 Kubernetes client. */
-public class FlinkKubernetesClient extends FlinkKubernetesClientTrait {
-
-    public FlinkKubernetesClient(FlinkKubeClient kubeClient) {
-        super(kubeClient);
+    public StreamTableContext(
+                              ParameterTool parameter,
+                              StreamExecutionEnvironment streamEnv,
+                              StreamTableEnvironment tableEnv) {
+        super(parameter, streamEnv, tableEnv);
     }
 
-    @Override
-    public Optional<KubernetesService> getService(String serviceName) {
-        return kubeClient.getService(serviceName);
+    public StreamTableContext(FlinkTableInitializer.StreamTableInitResult init) {
+        this(init.parameter, init.streamEnv, init.streamTableEnv);
+    }
+
+    public StreamTableContext(StreamTableEnvConfig config) {
+        this(FlinkTableInitializer.initialize(config));
     }
 }
