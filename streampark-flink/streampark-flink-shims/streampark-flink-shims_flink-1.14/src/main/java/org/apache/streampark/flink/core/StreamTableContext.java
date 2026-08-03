@@ -164,37 +164,30 @@ public class StreamTableContext extends FlinkStreamTableTrait {
         return tableEnv.createStatementSet();
     }
 
-    @Deprecated
     public org.apache.flink.table.api.Table fromTableSource(org.apache.flink.table.sources.TableSource<?> source) {
         return tableEnv.fromTableSource(source);
     }
 
-    @Deprecated
     public void insertInto(org.apache.flink.table.api.Table table, String sinkPath, String... sinkPathContinued) {
         tableEnv.insertInto(table, sinkPath, sinkPathContinued);
     }
 
-    @Deprecated
     public void insertInto(String targetPath, org.apache.flink.table.api.Table table) {
         tableEnv.insertInto(targetPath, table);
     }
 
-    @Deprecated
     public String explain(org.apache.flink.table.api.Table table) {
         return tableEnv.explain(table);
     }
 
-    @Deprecated
     public String explain(org.apache.flink.table.api.Table table, boolean extended) {
         return tableEnv.explain(table, extended);
     }
 
-    @Deprecated
     public String explain(boolean extended) {
         return tableEnv.explain(extended);
     }
 
-    @Deprecated
     public void sqlUpdate(String stmt) {
         tableEnv.sqlUpdate(stmt);
     }

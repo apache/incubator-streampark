@@ -50,7 +50,6 @@ public class StreamTableContext extends FlinkStreamTableTrait {
         this(FlinkTableInitializer.initialize(args));
     }
 
-    @Deprecated
     @Override
     public org.apache.flink.table.descriptors.StreamTableDescriptor connect(
                                                                             org.apache.flink.table.descriptors.ConnectorDescriptor connectorDescriptor) {
@@ -70,43 +69,36 @@ public class StreamTableContext extends FlinkStreamTableTrait {
         return tableEnv.createStatementSet();
     }
 
-    @Deprecated
     @Override
     public org.apache.flink.table.api.Table fromTableSource(org.apache.flink.table.sources.TableSource<?> source) {
         return tableEnv.fromTableSource(source);
     }
 
-    @Deprecated
     @Override
     public void insertInto(org.apache.flink.table.api.Table table, String sinkPath, String... sinkPathContinued) {
         tableEnv.insertInto(table, sinkPath, sinkPathContinued);
     }
 
-    @Deprecated
     @Override
     public void insertInto(String targetPath, org.apache.flink.table.api.Table table) {
         tableEnv.insertInto(targetPath, table);
     }
 
-    @Deprecated
     @Override
     public String explain(org.apache.flink.table.api.Table table) {
         return tableEnv.explain(table);
     }
 
-    @Deprecated
     @Override
     public String explain(org.apache.flink.table.api.Table table, boolean extended) {
         return tableEnv.explain(table, extended);
     }
 
-    @Deprecated
     @Override
     public String explain(boolean extended) {
         return tableEnv.explain(extended);
     }
 
-    @Deprecated
     @Override
     public void sqlUpdate(String stmt) {
         tableEnv.sqlUpdate(stmt);

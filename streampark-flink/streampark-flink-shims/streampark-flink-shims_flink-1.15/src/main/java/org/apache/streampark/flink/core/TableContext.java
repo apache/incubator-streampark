@@ -71,8 +71,7 @@ public class TableContext extends FlinkTableTrait {
 
     @Override
     public JobExecutionResult execute(String jobName) {
-        Utils.printLogo("FlinkTable " + jobName + " Starting...");
-        return null;
+        return printStartupLogo(jobName);
     }
 
     /** @since 1.15 */

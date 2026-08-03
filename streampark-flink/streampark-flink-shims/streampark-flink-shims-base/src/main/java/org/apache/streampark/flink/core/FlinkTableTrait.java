@@ -52,10 +52,10 @@ public abstract class FlinkTableTrait implements TableEnvironment {
 
     public JobExecutionResult start() {
         String appName = FlinkEnvironmentUtils.getAppName(parameter, null, true);
-        return execute(appName);
+        return printStartupLogo(appName);
     }
 
-    public JobExecutionResult execute(String jobName) {
+    JobExecutionResult printStartupLogo(String jobName) {
         Utils.printLogo("FlinkTable " + jobName + " Starting...");
         return null;
     }
@@ -267,25 +267,21 @@ public abstract class FlinkTableTrait implements TableEnvironment {
         return delegate().createStatementSet();
     }
 
-    @Deprecated
     @Override
     public void registerFunction(String name, ScalarFunction function) {
         delegate().registerFunction(name, function);
     }
 
-    @Deprecated
     @Override
     public void registerTable(String name, Table table) {
         delegate().registerTable(name, table);
     }
 
-    @Deprecated
     @Override
     public Table scan(String... tablePath) {
         return delegate().scan(tablePath);
     }
 
-    @Deprecated
     @Override
     public String[] getCompletionHints(String statement, int position) {
         return delegate().getCompletionHints(statement, position);

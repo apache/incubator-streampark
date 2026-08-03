@@ -54,7 +54,6 @@ public class TableContext extends FlinkTableTrait {
         return delegate().listFullModules();
     }
 
-    @Deprecated
     @Override
     public ConnectTableDescriptor connect(ConnectorDescriptor connectorDescriptor) {
         return delegate().connect(connectorDescriptor);
@@ -62,47 +61,39 @@ public class TableContext extends FlinkTableTrait {
 
     @Override
     public JobExecutionResult execute(String jobName) {
-        Utils.printLogo("FlinkTable " + jobName + " Starting...");
-        return null;
+        return printStartupLogo(jobName);
     }
 
-    @Deprecated
     @Override
     public Table fromTableSource(TableSource<?> source) {
         return delegate().fromTableSource(source);
     }
 
-    @Deprecated
     @Override
     public void insertInto(Table table, String sinkPath, String... sinkPathContinued) {
         delegate().insertInto(table, sinkPath, sinkPathContinued);
     }
 
-    @Deprecated
     @Override
     public void insertInto(String targetPath, Table table) {
         delegate().insertInto(targetPath, table);
     }
 
-    @Deprecated
     @Override
     public String explain(Table table) {
         return delegate().explain(table);
     }
 
-    @Deprecated
     @Override
     public String explain(Table table, boolean extended) {
         return delegate().explain(table, extended);
     }
 
-    @Deprecated
     @Override
     public String explain(boolean extended) {
         return delegate().explain(extended);
     }
 
-    @Deprecated
     @Override
     public void sqlUpdate(String stmt) {
         delegate().sqlUpdate(stmt);

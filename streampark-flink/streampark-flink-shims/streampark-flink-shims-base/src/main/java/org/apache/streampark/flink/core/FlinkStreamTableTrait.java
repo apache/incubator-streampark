@@ -73,7 +73,10 @@ import scala.collection.Seq;
 import scala.runtime.BoxedUnit;
 
 /**
- * Integration api of stream and table
+ * Integration api of stream and table.
+ *
+ * <p>Methods prefixed with {@code $} implement the Flink Scala {@code StreamTableEnvironment} API
+ * and retain Scala-compatible names required by that interface.
  */
 public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
 
@@ -114,7 +117,7 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
         return execute(appName);
     }
 
-    @Deprecated
+    @Override
     public JobExecutionResult execute(String jobName) {
         Utils.printLogo("FlinkStreamTable " + jobName + " Starting...");
         if (isConvertedToDataStream) {
@@ -366,7 +369,6 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
         return streamEnv.isForceUnalignedCheckpoints();
     }
 
-    @Deprecated
     public StreamExecutionEnvironment $enableCheckpointing(
                                                            long interval,
                                                            CheckpointingMode mode,
@@ -374,17 +376,14 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
         return streamEnv.enableCheckpointing(interval, mode, force);
     }
 
-    @Deprecated
     public StreamExecutionEnvironment $enableCheckpointing() {
         return streamEnv.enableCheckpointing();
     }
 
-    @Deprecated
     public DataStream<Object> $generateSequence(long from, long to) {
         return streamEnv.generateSequence(from, to);
     }
 
-    @Deprecated
     public DataStream<String> $readFileStream(
                                               String streamPath,
                                               long intervalMillis,
@@ -392,7 +391,6 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
         return streamEnv.readFileStream(streamPath, intervalMillis, watchType);
     }
 
-    @Deprecated
     public <T> DataStream<T> $readFile(
                                        FileInputFormat<T> inputFormat,
                                        String filePath,
@@ -630,13 +628,11 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
         return tableEnv.getConfig();
     }
 
-    @Deprecated
     @Override
     public <T> void registerFunction(String name, TableFunction<T> tf, TypeInformation<T> typeInfo) {
         tableEnv.registerFunction(name, tf, typeInfo);
     }
 
-    @Deprecated
     @Override
     public <T, ACC> void registerFunction(
                                           String name,
@@ -646,7 +642,6 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
         tableEnv.registerFunction(name, f, typeInfo1, typeInfo2);
     }
 
-    @Deprecated
     @Override
     public <T, ACC> void registerFunction(
                                           String name,
@@ -656,37 +651,31 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
         tableEnv.registerFunction(name, f, typeInfo1, typeInfo2);
     }
 
-    @Deprecated
     @Override
     public <T> void registerDataStream(String name, DataStream<T> dataStream) {
         tableEnv.registerDataStream(name, dataStream);
     }
 
-    @Deprecated
     @Override
     public <T> void registerDataStream(String name, DataStream<T> dataStream, Seq<Expression> fields) {
         tableEnv.registerDataStream(name, dataStream, fields);
     }
 
-    @Deprecated
     @Override
     public void registerFunction(String name, ScalarFunction function) {
         tableEnv.registerFunction(name, function);
     }
 
-    @Deprecated
     @Override
     public void registerTable(String name, Table table) {
         tableEnv.registerTable(name, table);
     }
 
-    @Deprecated
     @Override
     public Table scan(String... tablePath) {
         return tableEnv.scan(tablePath);
     }
 
-    @Deprecated
     @Override
     public String[] getCompletionHints(String statement, int position) {
         return tableEnv.getCompletionHints(statement, position);

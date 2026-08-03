@@ -29,8 +29,8 @@ import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableResult;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
@@ -193,13 +193,15 @@ public final class FlinkSqlExecutor {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private static void resetConfiguration(TableEnvironment context, SqlCommand command, String args) {
         try {
             Field confDataField = Configuration.class.getDeclaredField("confData");
             confDataField.setAccessible(true);
-            HashMap<String, Object> confData =
-                (HashMap<String, Object>) confDataField.get(context.getConfig().getConfiguration());
+            Object confDataObject = confDataField.get(context.getConfig().getConfiguration());
+            if (!(confDataObject instanceof Map)) {
+                throw new IllegalStateException("Unexpected Flink configuration internal structure");
+            }
+            Map<?, ?> confData = (Map<?, ?>) confDataObject;
             synchronized (confData) {
                 if (command == SqlCommand.RESET) {
                     confData.remove(args);

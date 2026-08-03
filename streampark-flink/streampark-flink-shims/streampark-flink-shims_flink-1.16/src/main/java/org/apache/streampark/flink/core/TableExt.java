@@ -24,6 +24,7 @@ import org.apache.flink.table.api.Table;
 /**
  * Table extension utilities for Flink Table API.
  */
+
 public final class TableExt {
 
     private TableExt() {
@@ -49,9 +50,6 @@ public final class TableExt {
             return table.as(field, fields);
         }
 
-        public Table $minus$greater(String field, String... fields) {
-            return alias(field, fields);
-        }
     }
 
     public static final class TableConversions extends org.apache.flink.table.api.bridge.scala.TableConversions {
