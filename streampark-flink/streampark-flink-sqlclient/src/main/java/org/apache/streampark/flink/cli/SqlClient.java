@@ -21,12 +21,13 @@ import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.common.util.SystemPropertyUtils;
-import org.apache.streampark.flink.core.FlinkTableInitializer;
 import org.apache.streampark.flink.core.SqlCommand;
 import org.apache.streampark.flink.core.SqlCommandCall;
 import org.apache.streampark.flink.core.SqlCommandParser;
 import org.apache.streampark.flink.core.StreamTableContext;
+import org.apache.streampark.flink.core.StreamTableEnvConfig;
 import org.apache.streampark.flink.core.TableContext;
+import org.apache.streampark.flink.core.TableEnvConfig;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.RuntimeExecutionMode;
@@ -62,8 +63,8 @@ public final class SqlClient {
         }
 
         List<SqlCommandCall> sets = new ArrayList<>();
-        for (SqlCommandCall call : SqlCommandParser.parseSQL(flinkSql)) {
-            if (call.command() == SqlCommand.SET) {
+        for (SqlCommandCall call : SqlCommandParser.parseSQL(flinkSql, null)) {
+            if (call.command == SqlCommand.SET) {
                 sets.add(call);
             }
         }
@@ -92,9 +93,9 @@ public final class SqlClient {
                                        List<String> arguments,
                                        String defaultMode) {
         for (SqlCommandCall setCall : sets) {
-            if (setCall.operands().length > 0
-                && ExecutionOptions.RUNTIME_MODE.key().equals(setCall.operands()[0])) {
-                String runtimeMode = setCall.operands()[1].toUpperCase();
+            if (setCall.operands.length > 0
+                && ExecutionOptions.RUNTIME_MODE.key().equals(setCall.operands[0])) {
+                String runtimeMode = setCall.operands[1].toUpperCase();
                 arguments.add("-D" + ExecutionOptions.RUNTIME_MODE.key() + "=" + runtimeMode);
                 return runtimeMode;
             }
@@ -128,8 +129,8 @@ public final class SqlClient {
 
         static void run(String[] args) {
             SystemPropertyUtils.setAppHome(ConfigKeys.KEY_APP_HOME(), SqlClient.class);
-            TableContext context = new TableContext(FlinkTableInitializer.initialize(args, null));
-            context.sql();
+            TableContext context = new TableContext(new TableEnvConfig(args, null));
+            context.sql(null);
             context.start();
         }
     }
@@ -142,8 +143,8 @@ public final class SqlClient {
         static void run(String[] args) {
             SystemPropertyUtils.setAppHome(ConfigKeys.KEY_APP_HOME(), SqlClient.class);
             StreamTableContext context =
-                new StreamTableContext(FlinkTableInitializer.initialize(args, null, null));
-            context.sql();
+                new StreamTableContext(new StreamTableEnvConfig(args, null, null));
+            context.sql(null);
             context.start();
         }
     }

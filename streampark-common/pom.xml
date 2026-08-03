@@ -24,7 +24,7 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>streampark-common_${scala.binary.version}</artifactId>
+    <artifactId>streampark-common</artifactId>
     <name>StreamPark : Common</name>
 
     <dependencies>
@@ -132,8 +132,8 @@
         <plugins>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
             </plugin>
 
             <plugin>

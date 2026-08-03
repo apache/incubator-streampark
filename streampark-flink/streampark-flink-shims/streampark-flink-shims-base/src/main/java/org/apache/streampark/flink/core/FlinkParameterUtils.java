@@ -47,7 +47,7 @@ public final class FlinkParameterUtils {
         String appName;
         if (name == null) {
             appName = null;
-            String zippedAppName = parameterTool.get(ConfigKeys.KEY_APP_NAME, null);
+            String zippedAppName = parameterTool.get(ConfigKeys.KEY_APP_NAME(), null);
             if (zippedAppName != null) {
                 try {
                     appName = DeflaterUtils.unzipString(zippedAppName);
@@ -56,7 +56,7 @@ public final class FlinkParameterUtils {
                 }
             }
             if (appName == null) {
-                appName = parameterTool.get(ConfigKeys.KEY_FLINK_APP_NAME, null);
+                appName = parameterTool.get(ConfigKeys.KEY_FLINK_APP_NAME(), null);
             }
         } else {
             appName = name;

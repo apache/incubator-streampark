@@ -25,7 +25,7 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>streampark-flink-kubernetes_${scala.binary.version}</artifactId>
+    <artifactId>streampark-flink-kubernetes</artifactId>
     <name>StreamPark : Flink Kubernetes Integration</name>
 
     <properties>
@@ -89,14 +89,14 @@
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-common_${scala.binary.version}</artifactId>
+            <artifactId>streampark-common</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-${streampark.flink.shims.version}_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-shims_flink-${streampark.flink.shims.version}</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -119,18 +119,6 @@
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5-fluent</artifactId>
             <version>${apache.httpclient5.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
 
         <!-- snake yaml -->
@@ -160,12 +148,6 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
         </dependency>
 
     </dependencies>

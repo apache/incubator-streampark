@@ -33,8 +33,8 @@ import java.util.Map;
 /** Parses Flink application CLI parameters from configuration files. */
 public final class ParameterCli {
 
-    private static final String PROPERTY_PREFIX = ConfigKeys.KEY_FLINK_PROPERTY_PREFIX;
-    private static final String OPTION_PREFIX = ConfigKeys.KEY_FLINK_OPTION_PREFIX;
+    private static final String PROPERTY_PREFIX = ConfigKeys.KEY_FLINK_PROPERTY_PREFIX();
+    private static final String OPTION_PREFIX = ConfigKeys.KEY_FLINK_OPTION_PREFIX();
     private static final String OPTION_MAIN = PROPERTY_PREFIX + "$internal.application.main";
 
     private static final Options FLINK_OPTIONS = FlinkRunOption.allOptions();
@@ -114,7 +114,7 @@ public final class ParameterCli {
                                 && !value.isEmpty()) {
                                 String propertyKey = key.substring(PROPERTY_PREFIX.length()).trim();
                                 String propertyValue = value.trim();
-                                if (ConfigKeys.KEY_FLINK_APP_NAME.equals(propertyKey)) {
+                                if (ConfigKeys.KEY_FLINK_APP_NAME().equals(propertyKey)) {
                                     propertyBuffer
                                         .append(" -D")
                                         .append(propertyKey)
@@ -133,7 +133,7 @@ public final class ParameterCli {
                     case "--name":
                         String appName =
                             map.getOrDefault(
-                                PROPERTY_PREFIX.concat(ConfigKeys.KEY_FLINK_APP_NAME), "");
+                                PROPERTY_PREFIX.concat(ConfigKeys.KEY_FLINK_APP_NAME()), "");
                         appName = appName.trim();
                         return appName.isEmpty() ? "" : appName;
                     case "--detached":

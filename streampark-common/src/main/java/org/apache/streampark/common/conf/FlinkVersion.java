@@ -31,8 +31,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import scala.collection.JavaConverters;
-
 /** @param flinkHome actual flink home that must be a readable local path */
 public class FlinkVersion implements Serializable {
 
@@ -88,9 +86,9 @@ public class FlinkVersion implements Serializable {
         return getVersion();
     }
 
-    /** Scala API alias for {@link #getFlinkLibs()}. */
-    public scala.collection.immutable.List<URL> flinkLibs() throws Exception {
-        return JavaConverters.asScalaIteratorConverter(getFlinkLibs().iterator()).asScala().toList();
+    /** Backward-compatible alias for {@link #getFlinkLibs()}. */
+    public List<URL> flinkLibs() throws Exception {
+        return getFlinkLibs();
     }
 
     public String getScalaVersion() {

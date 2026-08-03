@@ -63,7 +63,7 @@ public final class FlinkSqlExecutor {
                                   Consumer<String> callbackFunc) {
         String flinkSql =
             StringUtils.isBlank(sql)
-                ? parameter.get(ConfigKeys.KEY_FLINK_SQL)
+                ? parameter.get(ConfigKeys.KEY_FLINK_SQL())
                 : parameter.get(sql);
         if (StringUtils.isBlank(flinkSql)) {
             throw new IllegalArgumentException("verify failed: flink sql cannot be empty");
