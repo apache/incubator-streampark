@@ -196,6 +196,16 @@ public final class ApplicationBuildPipelineUtils {
                                                          Long teamId,
                                                          ResourceService resourceService,
                                                          Logger log) {
+        return getMergedDependencyInfo(dependencyInfo, teamResource, teamId, resourceService, log, false);
+    }
+
+    public static DependencyInfo getMergedDependencyInfo(
+                                                         DependencyInfo dependencyInfo,
+                                                         String teamResource,
+                                                         Long teamId,
+                                                         ResourceService resourceService,
+                                                         Logger log,
+                                                         boolean errorOnFailure) {
         if (StringUtils.isBlank(teamResource)) {
             return dependencyInfo;
         }
@@ -231,7 +241,11 @@ public final class ApplicationBuildPipelineUtils {
                     });
             return dependencyInfo.merge(mvnArtifacts, jarLibs);
         } catch (Exception e) {
-            log.warn("Merge team dependency failed.", e);
+            if (errorOnFailure) {
+                log.error("Merge team dependency failed.", e);
+            } else {
+                log.warn("Merge team dependency failed.", e);
+            }
             return dependencyInfo;
         }
     }

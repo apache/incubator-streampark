@@ -522,6 +522,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
             application.getTeamResource(),
             application.getTeamId(),
             resourceService,
-            log);
+            log,
+            true);
     }
 }

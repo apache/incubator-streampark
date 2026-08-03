@@ -23,8 +23,9 @@ public final class StringCastUtils {
     private StringCastUtils() {
     }
 
-    public static <T> T cast(String v, Class<T> classType) {
-        return classType.cast(parseValue(v, classType));
+    @SuppressWarnings("unchecked")
+    public static <T> T cast(String v, Class<?> classType) {
+        return (T) classType.cast(parseValue(v, classType));
     }
 
     private static Object parseValue(String v, Class<?> classType) {
