@@ -25,6 +25,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import java.io.PrintStream;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -45,7 +46,11 @@ public final class ParameterCli {
     }
 
     public static void main(String[] args) {
-        System.out.print(read(args));
+        emit(read(args), System.out);
+    }
+
+    static void emit(String output, PrintStream out) {
+        out.print(output);
     }
 
     public static String read(String[] args) {
@@ -155,6 +160,12 @@ public final class ParameterCli {
 
     public static String[] getOption(Map<String, String> map, String[] args) {
         Map<String, Object> optionMap = new LinkedHashMap<>();
+        mergeConfigOptions(map, optionMap);
+        mergeProgramOptions(args, optionMap);
+        return flattenOptions(optionMap);
+    }
+
+    private static void mergeConfigOptions(Map<String, String> map, Map<String, Object> optionMap) {
         map.entrySet().stream()
             .filter(x -> x.getKey().startsWith(OPTION_PREFIX))
             .filter(x -> x.getValue() != null && !x.getValue().isEmpty())
@@ -173,22 +184,27 @@ public final class ParameterCli {
                         optionMap.put(optKey, value);
                     }
                 });
+    }
 
-        if (args.length > 0) {
-            try {
-                CommandLine line = PARSER.parse(FLINK_OPTIONS, args, false);
-                for (org.apache.commons.cli.Option x : line.getOptions()) {
-                    if (x.hasArg()) {
-                        optionMap.put("-" + x.getLongOpt().trim(), x.getValue());
-                    } else {
-                        optionMap.put("-" + x.getLongOpt().trim(), true);
-                    }
-                }
-            } catch (ParseException e) {
-                // Ignore unrecognized CLI tokens merged from program arguments.
-            }
+    private static void mergeProgramOptions(String[] args, Map<String, Object> optionMap) {
+        if (args.length == 0) {
+            return;
         }
+        try {
+            CommandLine line = PARSER.parse(FLINK_OPTIONS, args, false);
+            for (org.apache.commons.cli.Option x : line.getOptions()) {
+                if (x.hasArg()) {
+                    optionMap.put("-" + x.getLongOpt().trim(), x.getValue());
+                } else {
+                    optionMap.put("-" + x.getLongOpt().trim(), true);
+                }
+            }
+        } catch (ParseException e) {
+            // Ignore unrecognized CLI tokens merged from program arguments.
+        }
+    }
 
+    private static String[] flattenOptions(Map<String, Object> optionMap) {
         List<String> array = new ArrayList<>();
         optionMap.forEach(
             (key, value) -> {

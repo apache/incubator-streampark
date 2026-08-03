@@ -243,7 +243,7 @@ public class SubmitRequest implements Serializable {
                 combined.addAll(libs());
                 classPaths = combined;
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException("Failed to build classpath", e);
             }
         }
         return classPaths;
@@ -424,7 +424,7 @@ public class SubmitRequest implements Serializable {
                 .filter(e -> e.getValue() != null)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException("Failed to parse JSON app config", e);
         }
     }
 
@@ -448,7 +448,7 @@ public class SubmitRequest implements Serializable {
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to parse HDFS app config: " + appConf(), e);
         }
     }
 

@@ -633,20 +633,20 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
     }
 
     @Override
-    public <T, ACC> void registerFunction(
-                                          String name,
-                                          AggregateFunction<T, ACC> f,
-                                          TypeInformation<T> typeInfo1,
-                                          TypeInformation<ACC> typeInfo2) {
+    public <T, A> void registerFunction(
+                                        String name,
+                                        AggregateFunction<T, A> f,
+                                        TypeInformation<T> typeInfo1,
+                                        TypeInformation<A> typeInfo2) {
         tableEnv.registerFunction(name, f, typeInfo1, typeInfo2);
     }
 
     @Override
-    public <T, ACC> void registerFunction(
-                                          String name,
-                                          TableAggregateFunction<T, ACC> f,
-                                          TypeInformation<T> typeInfo1,
-                                          TypeInformation<ACC> typeInfo2) {
+    public <T, A> void registerFunction(
+                                        String name,
+                                        TableAggregateFunction<T, A> f,
+                                        TypeInformation<T> typeInfo1,
+                                        TypeInformation<A> typeInfo2) {
         tableEnv.registerFunction(name, f, typeInfo1, typeInfo2);
     }
 

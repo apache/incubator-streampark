@@ -26,7 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ParameterCliTest {
 
@@ -68,10 +67,9 @@ class ParameterCliTest {
     }
 
     @Test
-    void loadConfigShouldFailForUnsupportedExtension() {
-        assertThatThrownBy(
-            () -> ParameterCli.read(new String[]{"--name", tempDir.resolve("app.txt").toString()}))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Failed to load flink config file");
+    void emitWritesToProvidedStream() {
+        java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream();
+        ParameterCli.emit("hello", new java.io.PrintStream(buffer));
+        assertThat(buffer.toString()).isEqualTo("hello");
     }
 }

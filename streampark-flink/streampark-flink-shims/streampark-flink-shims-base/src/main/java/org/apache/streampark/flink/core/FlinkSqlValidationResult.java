@@ -31,7 +31,9 @@ public class FlinkSqlValidationResult {
     private String sql;
     private String exception;
 
+    /** Default success result; mirrors the Scala case-class no-arg constructor. */
     public FlinkSqlValidationResult() {
+        // Intentionally empty: fields default to a successful validation result.
     }
 
     /** Builds a failed validation result without exposing an oversized public constructor. */
