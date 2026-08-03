@@ -30,6 +30,7 @@ import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
 import org.apache.streampark.flink.proxy.FlinkShimsProxy;
 
+import java.io.IOException;
 import java.util.function.Function;
 
 public final class FlinkClient {
@@ -107,8 +108,9 @@ public final class FlinkClient {
                     return FlinkShimsProxy.getObject(FlinkClient.class.getClassLoader(), obj);
                 } catch (RuntimeException e) {
                     throw e;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                } catch (ReflectiveOperationException | IOException e) {
+                    throw new IllegalStateException(
+                        "Failed to invoke Flink client via shims proxy: " + methodName, e);
                 }
             });
     }

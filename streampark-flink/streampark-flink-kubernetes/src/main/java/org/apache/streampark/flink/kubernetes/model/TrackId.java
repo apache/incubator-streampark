@@ -128,11 +128,7 @@ public class TrackId {
     }
 
     private static boolean isNotEmpty(String value) {
-        try {
-            return value != null && !value.isEmpty();
-        } catch (Exception e) {
-            return false;
-        }
+        return value != null && !value.isEmpty();
     }
 
     @Override

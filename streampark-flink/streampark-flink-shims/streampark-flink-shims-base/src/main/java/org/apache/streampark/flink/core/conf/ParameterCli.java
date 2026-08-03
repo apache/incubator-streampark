@@ -27,7 +27,6 @@ import org.apache.commons.cli.ParseException;
 
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -96,7 +95,8 @@ public final class ParameterCli {
                         "[StreamPark] Usage:flink.conf file error,must be (yml|conf|properties)");
             }
         } catch (Exception e) {
-            return Collections.emptyMap();
+            throw new IllegalArgumentException(
+                "[StreamPark] Failed to load flink config file: " + conf, e);
         }
     }
 
@@ -112,7 +112,7 @@ public final class ParameterCli {
                 }
             }
         } catch (ParseException exception) {
-            exception.printStackTrace();
+            // Ignore unrecognized CLI tokens; valid options are still collected below.
         }
         String mainClass = map.get(OPTION_MAIN);
         if (mainClass != null) {
@@ -151,7 +151,7 @@ public final class ParameterCli {
                     || line.hasOption(FlinkRunOption.DETACHED_OPTION.getLongOpt());
             return detached ? "Detached" : "Attach";
         } catch (ParseException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException("Failed to parse Flink detached mode options", e);
         }
     }
 
@@ -187,7 +187,7 @@ public final class ParameterCli {
                     }
                 }
             } catch (ParseException e) {
-                e.printStackTrace();
+                // Ignore unrecognized CLI tokens merged from program arguments.
             }
         }
 

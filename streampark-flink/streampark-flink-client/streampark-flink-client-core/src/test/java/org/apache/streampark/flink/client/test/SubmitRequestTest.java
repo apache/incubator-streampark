@@ -100,6 +100,12 @@ class SubmitRequestTest {
     }
 
     @Test
+    void flinkSqlShouldReturnNullWhenExtraParameterMissing() {
+        SubmitRequest request = createRequest(FlinkJobType.FLINK_SQL, null);
+        assertThat(request.flinkSQL()).isNull();
+    }
+
+    @Test
     void flinkSqlShouldReadFromExtraParameter() {
         Map<String, Object> extra = new HashMap<>();
         extra.put(ConfigKeys.KEY_FLINK_SQL(), "select 1");
@@ -113,6 +119,13 @@ class SubmitRequestTest {
                 null,
                 extra);
         assertThat(request.flinkSQL()).isEqualTo("select 1");
+    }
+
+    @Test
+    void getExtraShouldBeNullSafe() {
+        SubmitRequest request = createRequest(FlinkJobType.FLINK_JAR, null);
+        assertThat(request.getExtra("missing")).isNull();
+        assertThat(request.hasExtra("missing")).isFalse();
     }
 
     @Test

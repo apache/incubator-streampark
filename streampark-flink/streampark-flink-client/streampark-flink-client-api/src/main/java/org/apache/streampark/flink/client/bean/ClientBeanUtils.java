@@ -26,7 +26,9 @@ import org.apache.commons.io.FileUtils;
 import javax.annotation.Nullable;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
+import java.io.UncheckedIOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,8 +47,9 @@ final class ClientBeanUtils {
                 FileUtils.isSymlink(flinkHomeDir)
                     ? flinkHomeDir.getCanonicalFile().getName()
                     : flinkHomeDir.getName();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new UncheckedIOException(
+                "Failed to resolve Flink home directory name: " + flinkHome, e);
         }
         String flinkHdfsHome = workspace.APP_FLINK() + "/" + flinkName;
         return new HdfsWorkspace(
