@@ -56,9 +56,8 @@ public final class InternalConfigHolder {
 
     /** Initialize the ConfigHub. */
     public static void initConfigHub() {
-        // trigger static initialization of CommonConfig and K8sFlinkConfig
-        Class<?> unused1 = CommonConfig.class;
-        Class<?> unused2 = K8sFlinkConfig.class;
+        CommonConfig.STREAMPARK_WORKSPACE_LOCAL();
+        InternalOption unused = K8sFlinkConfig.jobStatusTrackTaskTimeoutSec;
     }
 
     static void register(@Nonnull InternalOption conf) {

@@ -17,9 +17,18 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
+/** Trait for watching a BuildPipeline instance */
 public interface PipeWatcher {
 
+    /** called when the pipeline is launched. */
     void onStart(PipelineSnapshot snapshot) throws Exception;
+
+    /** called when the any status of building step is changed. */
     void onStepStateChange(PipelineSnapshot snapshot) throws Exception;
+
+    /**
+     * called when the pipeline is finished, or you can get the results directly from the
+     * BuildPipeline.launch() synchronously.
+     */
     void onFinish(PipelineSnapshot snapshot, BuildResult result) throws Exception;
 }

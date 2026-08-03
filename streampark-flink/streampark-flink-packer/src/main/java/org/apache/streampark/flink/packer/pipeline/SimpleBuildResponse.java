@@ -18,23 +18,19 @@
 package org.apache.streampark.flink.packer.pipeline;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 
-@Data
-@Accessors(fluent = true)
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SimpleBuildResponse implements FlinkBuildResult {
+public class SimpleBuildResponse extends AbstractFlinkBuildResponse {
 
-    private String workspacePath = null;
-    private boolean pass = true;
+    public SimpleBuildResponse() {
+    }
+
+    public SimpleBuildResponse(String workspacePath, boolean pass) {
+        super(workspacePath, pass);
+    }
 
     @Override
     public String toString() {
-        return "{ workspacePath: " + workspacePath + ", pass: " + pass + " }";
+        return "{ workspacePath: " + workspacePath() + ", pass: " + pass() + " }";
     }
 }

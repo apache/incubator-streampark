@@ -17,21 +17,55 @@
 
 package org.apache.streampark.flink.client.bean;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.io.Serializable;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class HdfsWorkspace {
+public class HdfsWorkspace implements Serializable {
 
-    private String flinkName;
-    private String flinkHome;
-    private String flinkDistJar;
-    private String flinkLib;
-    private String flinkPlugins;
-    private String appJars;
+    private static final long serialVersionUID = 1L;
+
+    private final String flinkName;
+    private final String flinkHome;
+    private final String flinkDistJar;
+    private final String flinkLib;
+    private final String flinkPlugins;
+    private final String appJars;
+
+    public HdfsWorkspace(
+                         String flinkName,
+                         String flinkHome,
+                         String flinkDistJar,
+                         String flinkLib,
+                         String flinkPlugins,
+                         String appJars) {
+        this.flinkName = flinkName;
+        this.flinkHome = flinkHome;
+        this.flinkDistJar = flinkDistJar;
+        this.flinkLib = flinkLib;
+        this.flinkPlugins = flinkPlugins;
+        this.appJars = appJars;
+    }
+
+    public String flinkName() {
+        return flinkName;
+    }
+
+    public String flinkHome() {
+        return flinkHome;
+    }
+
+    public String flinkDistJar() {
+        return flinkDistJar;
+    }
+
+    public String flinkLib() {
+        return flinkLib;
+    }
+
+    public String flinkPlugins() {
+        return flinkPlugins;
+    }
+
+    public String appJars() {
+        return appJars;
+    }
 }

@@ -17,12 +17,12 @@
 
 package org.apache.streampark.flink.client.impl;
 
-import org.apache.streampark.common.util.StreamParkLoggerFactory;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.flink.client.bean.CancelRequest;
 import org.apache.streampark.flink.client.bean.CancelResponse;
 import org.apache.streampark.flink.client.bean.DeployRequest;
 import org.apache.streampark.flink.client.bean.DeployResponse;
+import org.apache.streampark.flink.client.bean.HdfsWorkspace;
 import org.apache.streampark.flink.client.bean.SavepointResponse;
 import org.apache.streampark.flink.client.bean.ShutDownRequest;
 import org.apache.streampark.flink.client.bean.ShutDownResponse;
@@ -30,17 +30,16 @@ import org.apache.streampark.flink.client.bean.SubmitRequest;
 import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
 import org.apache.streampark.flink.client.trait.YarnClientTrait;
-import org.apache.streampark.flink.client.util.FlinkConfigurationEnhancer;
-
-import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.client.deployment.ClusterSpecification;
 import org.apache.flink.client.program.ClusterClient;
 import org.apache.flink.client.program.PackagedProgram;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.DeploymentOptions;
 import org.apache.flink.configuration.DeploymentOptionsInternal;
 import org.apache.flink.runtime.jobgraph.JobGraph;
+import org.apache.flink.util.FlinkException;
 import org.apache.flink.yarn.YarnClusterDescriptor;
 import org.apache.flink.yarn.configuration.YarnConfigOptions;
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget;
@@ -50,16 +49,14 @@ import org.apache.hadoop.yarn.exceptions.ApplicationNotFoundException;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
-/** Submit Job to YARN Session Cluster */
+import scala.Tuple2;
+
+/** Submit Flink jobs to a YARN session cluster. */
 public final class YarnSessionClient extends YarnClientTrait {
 
     public static final YarnSessionClient INSTANCE = new YarnSessionClient();
-
-    private static final Logger LOG =
-        StreamParkLoggerFactory.loggerFactory().getLogger(YarnSessionClient.class.getName());
 
     private YarnSessionClient() {
     }
@@ -67,70 +64,67 @@ public final class YarnSessionClient extends YarnClientTrait {
     @Override
     public void setConfig(SubmitRequest submitRequest, Configuration flinkConfig) {
         super.setConfig(submitRequest, flinkConfig);
-        FlinkConfigurationEnhancer.safeSet(
+        FlinkConfigurationOps.safeSet(
             flinkConfig, DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName());
-        LOG.info(
-            "\n------------------------------------------------------------------\n"
-                + "Effective submit configuration: {}\n"
-                + "------------------------------------------------------------------\n",
-            flinkConfig);
+        logEffectiveSubmitConfiguration(flinkConfig);
     }
 
     public void deployClusterConfig(DeployRequest deployRequest, Configuration flinkConfig) {
-        List<String> shipFiles = new ArrayList<>();
-        shipFiles.add(deployRequest.getFlinkVersion().flinkHome + "/lib");
-        shipFiles.add(deployRequest.getFlinkVersion().flinkHome + "/plugins");
+        ArrayList<String> shipFiles = new ArrayList<>();
+        shipFiles.add(deployRequest.flinkVersion().getFlinkHome() + "/lib");
+        shipFiles.add(deployRequest.flinkVersion().getFlinkHome() + "/plugins");
 
-        FlinkConfigurationEnhancer.safeSet(
-            flinkConfig, YarnConfigOptions.FLINK_DIST_JAR, deployRequest.getHdfsWorkspace().getFlinkDistJar());
-        FlinkConfigurationEnhancer.safeSet(flinkConfig, YarnConfigOptions.SHIP_FILES, shipFiles);
-        FlinkConfigurationEnhancer.safeSet(
+        HdfsWorkspace hdfsWorkspace = deployRequest.hdfsWorkspace();
+        FlinkConfigurationOps.safeSet(
+            flinkConfig, YarnConfigOptions.FLINK_DIST_JAR, hdfsWorkspace.flinkDistJar());
+        FlinkConfigurationOps.safeSet(flinkConfig, YarnConfigOptions.SHIP_FILES, shipFiles);
+        FlinkConfigurationOps.safeSet(
             flinkConfig, DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName());
-        FlinkConfigurationEnhancer.safeSet(
+        FlinkConfigurationOps.safeSet(
             flinkConfig,
             DeploymentOptionsInternal.CONF_DIR,
-            deployRequest.getFlinkVersion().flinkHome + "/conf");
+            deployRequest.flinkVersion().getFlinkHome() + "/conf");
 
-        LOG.info(
-            "\n------------------------------------------------------------------\n"
-                + "Effective submit configuration: {}\n"
-                + "------------------------------------------------------------------\n",
-            flinkConfig);
+        logEffectiveSubmitConfiguration(flinkConfig);
     }
 
     @Override
-    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws Exception {
-        YarnClusterDescriptorResult descriptorResult = getYarnClusterDescriptor(flinkConfig);
-        JobGraphPackagedProgram programJobGraph =
-            getJobGraph(flinkConfig, submitRequest, submitRequest.getUserJarFile());
-        PackagedProgram packageProgram = programJobGraph.packagedProgram;
-        JobGraph jobGraph = programJobGraph.jobGraph;
-        ClusterClient<ApplicationId> client =
-            descriptorResult.clusterDescriptor.retrieve(descriptorResult.applicationId).getClusterClient();
-        String jobId = client.submitJob(jobGraph).get().toString();
-        String jobManagerUrl = client.getWebInterfaceURL();
+    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws FlinkException {
+        return callAsFlinkException(
+            () -> {
+                Tuple2<ApplicationId, YarnClusterDescriptor> yarnClusterDescriptor =
+                    getYarnClusterDescriptor(flinkConfig);
+                ApplicationId yarnClusterId = yarnClusterDescriptor._1();
+                YarnClusterDescriptor clusterDescriptor = yarnClusterDescriptor._2();
 
-        LOG.info(
-            "\n-------------------------<<applicationId>>------------------------\n"
-                + "Flink Job Started: jobId: {} , applicationId: {}\n"
-                + "__________________________________________________________________\n",
-            jobId,
-            descriptorResult.applicationId);
+                Tuple2<PackagedProgram, JobGraph> programJobGraph =
+                    getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile());
+                PackagedProgram packageProgram = programJobGraph._1();
+                JobGraph jobGraph = programJobGraph._2();
 
-        SubmitResponse resp =
-            SubmitResponse.builder()
-                .clusterId(descriptorResult.applicationId.toString())
-                .flinkConfig(flinkConfig.toMap())
-                .jobId(jobId)
-                .jobManagerUrl(jobManagerUrl)
-                .build();
-        closeSubmit(submitRequest, packageProgram, client, descriptorResult.clusterDescriptor);
-        return resp;
+                ClusterClient<ApplicationId> client =
+                    clusterDescriptor.retrieve(yarnClusterId).getClusterClient();
+                String jobId = client.submitJob(jobGraph).get().toString();
+                String jobManagerUrl = client.getWebInterfaceURL();
+
+                logInfo(
+                    String.format(
+                        "%n-------------------------<<applicationId>>------------------------%n"
+                            + "Flink Job Started: jobId: %s , applicationId: %s%n"
+                            + "__________________________________________________________________%n",
+                        jobId, yarnClusterId));
+
+                SubmitResponse resp =
+                    new SubmitResponse(
+                        yarnClusterId.toString(), flinkConfig.toMap(), jobId, jobManagerUrl);
+                closeSubmit(submitRequest, packageProgram, client, clusterDescriptor);
+                return resp;
+            });
     }
 
     @Override
-    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig) throws Exception {
-        FlinkConfigurationEnhancer.safeSet(
+    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig) throws FlinkException {
+        FlinkConfigurationOps.safeSet(
             flinkConfig, DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName());
         return super.doCancel(cancelRequest, flinkConfig);
     }
@@ -138,78 +132,95 @@ public final class YarnSessionClient extends YarnClientTrait {
     @Override
     public SavepointResponse doTriggerSavepoint(
                                                 TriggerSavepointRequest request,
-                                                Configuration flinkConfig) throws Exception {
-        FlinkConfigurationEnhancer.safeSet(
+                                                Configuration flinkConfig) throws FlinkException {
+        FlinkConfigurationOps.safeSet(
             flinkConfig, DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName());
         return super.doTriggerSavepoint(request, flinkConfig);
     }
 
     public DeployResponse deploy(DeployRequest deployRequest) throws Exception {
-        LOG.info(
-            "\n--------------------------------------- flink yarn sesion start ---------------------------------------\n"
-                + "    userFlinkHome    : {}\n"
-                + "    flinkVersion     : {}\n"
-                + "    deployMode       : {}\n"
-                + "    clusterId        : {}\n"
-                + "    properties       : {}\n"
-                + "-------------------------------------------------------------------------------------------------------\n",
-            deployRequest.getFlinkVersion().flinkHome,
-            deployRequest.getFlinkVersion().version(),
-            deployRequest.getDeployMode().name(),
-            deployRequest.getClusterId(),
-            formatProperties(deployRequest.getProperties()));
+        logInfo(
+            String.format(
+                "%n--------------------------------------- flink yarn sesion start "
+                    + "---------------------------------------%n"
+                    + "    userFlinkHome    : %s%n"
+                    + "    flinkVersion     : %s%n"
+                    + "    deployMode       : %s%n"
+                    + "    clusterId        : %s%n"
+                    + "    properties       : %s%n"
+                    + "-------------------------------------------------------------------------------------------------------%n",
+                deployRequest.flinkVersion().getFlinkHome(),
+                deployRequest.flinkVersion().version(),
+                deployRequest.deployMode().name(),
+                deployRequest.clusterId(),
+                deployRequest.properties()));
 
         YarnClusterDescriptor clusterDescriptor = null;
         ClusterClient<ApplicationId> client = null;
         try {
             Configuration flinkConfig =
                 extractConfiguration(
-                    deployRequest.getFlinkVersion().flinkHome, deployRequest.getProperties());
+                    deployRequest.flinkVersion().getFlinkHome(), deployRequest.properties());
             deployClusterConfig(deployRequest, flinkConfig);
-            YarnClusterDeployDescriptorResult yarnClusterDescriptor =
+            Tuple2<ClusterSpecification, YarnClusterDescriptor> yarnClusterDescriptor =
                 getYarnClusterDeployDescriptor(flinkConfig);
-            clusterDescriptor = yarnClusterDescriptor.clusterDescriptor;
-            if (StringUtils.isNotBlank(deployRequest.getClusterId())) {
-                try {
-                    FinalApplicationStatus applicationStatus =
-                        clusterDescriptor
-                            .getYarnClient()
-                            .getApplicationReport(ApplicationId.fromString(deployRequest.getClusterId()))
-                            .getFinalApplicationStatus();
-                    if (FinalApplicationStatus.UNDEFINED == applicationStatus) {
-                        ClusterClient<ApplicationId> yarnClient =
-                            clusterDescriptor
-                                .retrieve(ApplicationId.fromString(deployRequest.getClusterId()))
-                                .getClusterClient();
-                        if (yarnClient.getWebInterfaceURL() != null) {
-                            return DeployResponse.builder()
-                                .address(yarnClient.getWebInterfaceURL())
-                                .clusterId(yarnClient.getClusterId().toString())
-                                .build();
-                        }
-                    }
-                } catch (ApplicationNotFoundException e) {
-                    LOG.info("this applicationId have not managed by yarn ,need deploy ...");
+            clusterDescriptor = yarnClusterDescriptor._2();
+
+            if (StringUtils.isNotBlank(deployRequest.clusterId())) {
+                DeployResponse existingSession =
+                    tryReuseExistingYarnSession(deployRequest, clusterDescriptor);
+                if (existingSession != null) {
+                    return existingSession;
                 }
             }
+
             client =
                 clusterDescriptor
-                    .deploySessionCluster(yarnClusterDescriptor.clusterSpecification)
+                    .deploySessionCluster(yarnClusterDescriptor._1())
                     .getClusterClient();
             if (client.getWebInterfaceURL() != null) {
-                return DeployResponse.builder()
-                    .address(client.getWebInterfaceURL())
-                    .clusterId(client.getClusterId().toString())
-                    .build();
+                return new DeployResponse(
+                    client.getWebInterfaceURL(), client.getClusterId().toString(), null);
             }
-            return DeployResponse.builder()
-                .error(new RuntimeException("get the cluster getWebInterfaceURL failed."))
-                .build();
+            return new DeployResponse(
+                null,
+                null,
+                new RuntimeException("get the cluster getWebInterfaceURL failed."));
         } catch (Exception e) {
-            LOG.error("start flink session fail in {} mode", deployRequest.getDeployMode(), e);
+            logError("start flink session fail in " + deployRequest.deployMode() + " mode");
             throw e;
         } finally {
             Utils.close(client, clusterDescriptor);
+        }
+    }
+
+    private DeployResponse tryReuseExistingYarnSession(
+                                                       DeployRequest deployRequest,
+                                                       YarnClusterDescriptor clusterDescriptor) throws Exception {
+        try {
+            FinalApplicationStatus applicationStatus =
+                clusterDescriptor
+                    .getYarnClient()
+                    .getApplicationReport(
+                        ApplicationId.fromString(deployRequest.clusterId()))
+                    .getFinalApplicationStatus();
+            if (FinalApplicationStatus.UNDEFINED != applicationStatus) {
+                return null;
+            }
+            ClusterClient<ApplicationId> yarnClient =
+                clusterDescriptor
+                    .retrieve(ApplicationId.fromString(deployRequest.clusterId()))
+                    .getClusterClient();
+            if (yarnClient.getWebInterfaceURL() == null) {
+                return null;
+            }
+            return new DeployResponse(
+                yarnClient.getWebInterfaceURL(),
+                yarnClient.getClusterId().toString(),
+                null);
+        } catch (ApplicationNotFoundException e) {
+            logInfo("this applicationId have not managed by yarn ,need deploy ...");
+            return null;
         }
     }
 
@@ -218,62 +229,53 @@ public final class YarnSessionClient extends YarnClientTrait {
         ClusterClient<ApplicationId> client = null;
         try {
             Configuration flinkConfig =
-                getFlinkDefaultConfiguration(shutDownRequest.getFlinkVersion().flinkHome);
-            if (shutDownRequest.getProperties() != null) {
-                for (Map.Entry<String, Object> entry : shutDownRequest.getProperties().entrySet()) {
+                getFlinkDefaultConfiguration(shutDownRequest.flinkVersion().getFlinkHome());
+            if (shutDownRequest.properties() != null) {
+                for (Map.Entry<String, Object> entry : shutDownRequest.properties().entrySet()) {
                     if (entry.getValue() != null) {
                         flinkConfig.setString(entry.getKey(), entry.getValue().toString());
                     }
                 }
             }
-            FlinkConfigurationEnhancer.safeSet(
-                flinkConfig, YarnConfigOptions.APPLICATION_ID, shutDownRequest.getClusterId());
-            FlinkConfigurationEnhancer.safeSet(
+            FlinkConfigurationOps.safeSet(
+                flinkConfig, YarnConfigOptions.APPLICATION_ID, shutDownRequest.clusterId());
+            FlinkConfigurationOps.safeSet(
                 flinkConfig, DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName());
-            YarnClusterDescriptorResult yarnClusterDescriptor = getYarnClusterDescriptor(flinkConfig);
-            clusterDescriptor = yarnClusterDescriptor.clusterDescriptor;
+
+            Tuple2<ApplicationId, YarnClusterDescriptor> yarnClusterDescriptor =
+                getYarnClusterDescriptor(flinkConfig);
+            clusterDescriptor = yarnClusterDescriptor._2();
+
             boolean shutDownState =
                 FinalApplicationStatus.UNDEFINED.equals(
                     clusterDescriptor
                         .getYarnClient()
                         .getApplicationReport(
-                            ApplicationId.fromString(shutDownRequest.getClusterId()))
+                            ApplicationId.fromString(shutDownRequest.clusterId()))
                         .getFinalApplicationStatus());
             if (shutDownState) {
                 client =
                     clusterDescriptor
-                        .retrieve(yarnClusterDescriptor.applicationId)
+                        .retrieve(yarnClusterDescriptor._1())
                         .getClusterClient();
                 client.shutDownCluster();
             }
-            LOG.info(
-                "the {}'s final status is {}",
-                shutDownRequest.getClusterId(),
-                clusterDescriptor
-                    .getYarnClient()
-                    .getApplicationReport(
-                        ConverterUtils.toApplicationId(shutDownRequest.getClusterId()))
-                    .getFinalApplicationStatus());
-            return new ShutDownResponse(shutDownRequest.getClusterId());
+
+            logInfo(
+                "the "
+                    + shutDownRequest.clusterId()
+                    + "'s final status is "
+                    + clusterDescriptor
+                        .getYarnClient()
+                        .getApplicationReport(
+                            ConverterUtils.toApplicationId(shutDownRequest.clusterId()))
+                        .getFinalApplicationStatus());
+            return new ShutDownResponse(shutDownRequest.clusterId());
         } catch (Exception e) {
-            LOG.error("shutdown flink session fail in {} mode", shutDownRequest.getDeployMode(), e);
+            logError("shutdown flink session fail in " + shutDownRequest.deployMode() + " mode");
             throw e;
         } finally {
             Utils.close(client, clusterDescriptor);
         }
-    }
-
-    private String formatProperties(Map<String, Object> properties) {
-        if (properties == null) {
-            return "";
-        }
-        StringBuilder builder = new StringBuilder();
-        for (Map.Entry<String, Object> entry : properties.entrySet()) {
-            if (builder.length() > 0) {
-                builder.append(',');
-            }
-            builder.append(entry.getKey()).append('=').append(entry.getValue());
-        }
-        return builder.toString();
     }
 }

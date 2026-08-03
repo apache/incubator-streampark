@@ -17,40 +17,59 @@
 
 package org.apache.streampark.flink.client.bean;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
-
 import javax.annotation.Nullable;
 
+import java.io.Serializable;
 import java.util.Map;
 
-@Data
-@Accessors(fluent = true)
-@Builder
-@NoArgsConstructor
-public class SubmitResponse {
+public class SubmitResponse implements Serializable {
 
-    private String clusterId;
-    private Map<String, String> flinkConfig;
+    private static final long serialVersionUID = 1L;
 
+    private final String clusterId;
+    private final Map<String, String> flinkConfig;
     @Nullable
-    @Builder.Default
-    private String jobId = "";
-
+    private final String jobId;
     @Nullable
-    @Builder.Default
-    private String jobManagerUrl = "";
+    private final String jobManagerUrl;
+
+    public SubmitResponse(String clusterId, Map<String, String> flinkConfig) {
+        this(clusterId, flinkConfig, "", "");
+    }
 
     public SubmitResponse(
                           String clusterId,
                           Map<String, String> flinkConfig,
-                          String jobId,
-                          String jobManagerUrl) {
+                          @Nullable String jobManagerUrl) {
+        this(clusterId, flinkConfig, "", jobManagerUrl);
+    }
+
+    public SubmitResponse(
+                          String clusterId,
+                          Map<String, String> flinkConfig,
+                          @Nullable String jobId,
+                          @Nullable String jobManagerUrl) {
         this.clusterId = clusterId;
         this.flinkConfig = flinkConfig;
-        this.jobId = jobId;
-        this.jobManagerUrl = jobManagerUrl;
+        this.jobId = jobId != null ? jobId : "";
+        this.jobManagerUrl = jobManagerUrl != null ? jobManagerUrl : "";
+    }
+
+    public String clusterId() {
+        return clusterId;
+    }
+
+    public Map<String, String> flinkConfig() {
+        return flinkConfig;
+    }
+
+    @Nullable
+    public String jobId() {
+        return jobId;
+    }
+
+    @Nullable
+    public String jobManagerUrl() {
+        return jobManagerUrl;
     }
 }

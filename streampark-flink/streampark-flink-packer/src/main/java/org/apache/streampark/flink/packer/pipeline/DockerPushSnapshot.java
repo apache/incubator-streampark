@@ -20,31 +20,56 @@ package org.apache.streampark.flink.packer.pipeline;
 import org.apache.streampark.common.util.Utils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
 
-import java.util.Collections;
 import java.util.List;
 
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
+/** snapshot for pushing docker image progress. */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DockerPushSnapshot {
 
-    private List<DockerLayerProgress> detail;
-    private String error;
-    private long emitTime;
-    private double percent;
+    private final List<DockerLayerProgress> detail;
+    private final String error;
+    private final long emitTime;
+    private final double percent;
 
-    public List<DockerLayerProgress> detailAsJava() {
-        return detail == null ? Collections.emptyList() : detail;
+    public DockerPushSnapshot(
+                              List<DockerLayerProgress> detail,
+                              String error,
+                              long emitTime,
+                              double percent) {
+        this.detail = detail;
+        this.error = error;
+        this.emitTime = emitTime;
+        this.percent = percent;
     }
 
-    public static DockerPushSnapshot of(List<DockerLayerProgress> detail, String error, long emitTime) {
-        long current = detail.stream().mapToLong(DockerLayerProgress::current).sum();
-        long total = detail.stream().mapToLong(DockerLayerProgress::total).sum();
-        return new DockerPushSnapshot(detail, error, emitTime, Utils.calPercent(current, total));
+    public List<DockerLayerProgress> detail() {
+        return detail;
+    }
+
+    public String error() {
+        return error;
+    }
+
+    public long emitTime() {
+        return emitTime;
+    }
+
+    public double percent() {
+        return percent;
+    }
+
+    public List<DockerLayerProgress> detailAsJava() {
+        return detail;
+    }
+
+    public static DockerPushSnapshot of(
+                                        List<DockerLayerProgress> detail,
+                                        String error,
+                                        long emitTime) {
+        long currentSum = detail.stream().mapToLong(DockerLayerProgress::current).sum();
+        long totalSum = detail.stream().mapToLong(DockerLayerProgress::total).sum();
+        return new DockerPushSnapshot(
+            detail, error, emitTime, Utils.calPercent(currentSum, totalSum));
     }
 }

@@ -22,6 +22,7 @@ import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.util.AssertUtils;
+import org.apache.streampark.common.util.LoggerSupport;
 import org.apache.streampark.common.util.Utils;
 
 import org.apache.maven.plugins.shade.DefaultShader;
@@ -33,20 +34,15 @@ import org.apache.maven.plugins.shade.resource.ServicesResourceTransformer;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 
 import com.google.common.collect.Lists;
-import lombok.extern.slf4j.Slf4j;
-import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.logging.console.ConsoleLogger;
-import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
-import org.eclipse.aether.impl.DefaultServiceLocator;
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactDescriptorRequest;
 import org.eclipse.aether.resolution.ArtifactRequest;
-import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
@@ -58,18 +54,23 @@ import javax.annotation.Nullable;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Slf4j
-public final class MavenTool {
+/** Maven build utilities. */
+public final class MavenTool extends LoggerSupport {
 
-    private static final Logger PLEXUS_LOG = new ConsoleLogger(Logger.LEVEL_INFO, "streampark-maven");
+    private static final MavenTool INSTANCE = new MavenTool();
+
+    private static final org.codehaus.plexus.logging.Logger PLEXUS_LOG =
+        new ConsoleLogger(org.codehaus.plexus.logging.Logger.LEVEL_INFO, "streampark-maven");
 
     private static final List<Artifact> EXCLUDE_ARTIFACT =
-        Lists.newArrayList(
+        Arrays.asList(
             Artifact.of("org.apache.flink:force-shading:*"),
             Artifact.of("com.google.code.findbugs:jsr305:*"),
             Artifact.of("org.apache.logging.log4j:*:*"));
@@ -77,10 +78,61 @@ public final class MavenTool {
     private MavenTool() {
     }
 
+    private static List<RemoteRepository> getRemoteRepos() {
+        RemoteRepository.Builder builder =
+            new RemoteRepository.Builder(
+                "central",
+                Constants.DEFAULT,
+                InternalConfigHolder.get(CommonConfig.MAVEN_REMOTE_URL()));
+        RemoteRepository remoteRepository;
+        if (InternalConfigHolder.get(CommonConfig.MAVEN_AUTH_USER()) == null
+            || InternalConfigHolder.get(CommonConfig.MAVEN_AUTH_PASSWORD()) == null) {
+            remoteRepository = builder.build();
+        } else {
+            String username = InternalConfigHolder.get(CommonConfig.MAVEN_AUTH_USER());
+            String password = InternalConfigHolder.get(CommonConfig.MAVEN_AUTH_PASSWORD());
+            org.eclipse.aether.repository.Authentication authentication =
+                new AuthenticationBuilder()
+                    .addUsername(username)
+                    .addPassword(password)
+                    .build();
+            remoteRepository = builder.setAuthentication(authentication).build();
+        }
+        return Collections.singletonList(remoteRepository);
+    }
+
+    private static boolean isJarFile(File file) {
+        if (!file.isFile()) {
+            return false;
+        }
+        try {
+            Utils.requireCheckJarFile(file.toURI().toURL());
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Build a fat-jar with custom jar libraries.
+     *
+     * @param mainClass main class name
+     * @param jarLibs list of jar lib paths for building fat-jar
+     * @param outFatJarPath output paths of fat-jar
+     * @return File Object of output fat-jar
+     */
     @Nonnull
     public static File buildFatJar(
-                                   @Nullable String mainClass, @Nonnull Set<String> jarLibs,
+                                   @Nullable String mainClass,
+                                   @Nonnull Set<String> jarLibs,
                                    @Nonnull String outFatJarPath) throws Exception {
+        return INSTANCE.buildFatJarInternal(mainClass, jarLibs, outFatJarPath);
+    }
+
+    private File buildFatJarInternal(
+                                     @Nullable String mainClass,
+                                     @Nonnull Set<String> jarLibs,
+                                     @Nonnull String outFatJarPath) throws Exception {
         File uberJar = new File(outFatJarPath);
         if (!outFatJarPath.endsWith(Constants.JAR_SUFFIX) || uberJar.isDirectory()) {
             throw new IllegalArgumentException(
@@ -89,7 +141,9 @@ public final class MavenTool {
                     + ") should be a JAR file.");
         }
         if (uberJar.exists() && !uberJar.delete()) {
-            throw new IllegalStateException("Failed to delete existing fat jar: " + outFatJarPath);
+            throw new java.io.IOException(
+                "[StreamPark] streampark-packer: failed to delete existing uber jar: "
+                    + outFatJarPath);
         }
         Set<File> jarSet = new HashSet<>();
         for (String lib : jarLibs) {
@@ -110,27 +164,34 @@ public final class MavenTool {
                 }
             }
         }
-        log.info("start shaded fat-jar: {}", jarLibs);
+        logInfo("start shaded fat-jar: " + String.join(",", jarLibs));
         ShadeRequest shadeRequest = new ShadeRequest();
         shadeRequest.setJars(jarSet);
         shadeRequest.setUberJar(uberJar);
-        List<ResourceTransformer> transformers = new ArrayList<>();
-        transformers.add(new ServicesResourceTransformer());
+        List<ResourceTransformer> transformer = new ArrayList<>();
+        transformer.add(new ServicesResourceTransformer());
         if (mainClass != null) {
             ManifestResourceTransformer manifest = new ManifestResourceTransformer();
             manifest.setMainClass(mainClass);
-            transformers.add(manifest);
+            transformer.add(manifest);
         }
-        shadeRequest.setResourceTransformers(transformers);
-        shadeRequest.setFilters(Lists.newArrayList(new ShadeFilter()));
+        shadeRequest.setResourceTransformers(transformer);
+        shadeRequest.setFilters(Collections.singletonList(new ShadeFilter()));
         shadeRequest.setRelocators(Lists.newArrayList());
         DefaultShader shader = new DefaultShader();
         shader.enableLogging(PLEXUS_LOG);
         shader.shade(shadeRequest);
-        log.info("finish build fat-jar: {}", uberJar.getAbsolutePath());
+        logInfo("finish build fat-jar: " + uberJar.getAbsolutePath());
         return uberJar;
     }
 
+    /**
+     * Build a fat-jar with custom jar libraries and maven artifacts.
+     *
+     * @param mainClass main class name
+     * @param dependencyInfo maven artifacts and jar libraries for building a fat-jar
+     * @param outFatJarPath output paths of fat-jar
+     */
     @Nonnull
     public static File buildFatJar(
                                    @Nullable String mainClass,
@@ -142,99 +203,94 @@ public final class MavenTool {
             !(jarLibs.isEmpty() && arts.isEmpty()),
             "[StreamPark] streampark-packer: empty artifacts.");
         List<String> artFilePaths =
-            resolveArtifacts(arts).stream()
-                .map(File::getAbsolutePath)
-                .collect(Collectors.toList());
-        Set<String> allLibs = new HashSet<>(jarLibs);
-        allLibs.addAll(artFilePaths);
-        return buildFatJar(mainClass, allLibs, outFatJarPath);
+            resolveArtifacts(arts).stream().map(File::getAbsolutePath).collect(Collectors.toList());
+        Set<String> allJars = new HashSet<>(jarLibs);
+        allJars.addAll(artFilePaths);
+        return INSTANCE.buildFatJarInternal(mainClass, allJars, outFatJarPath);
     }
 
     @Nonnull
     public static List<File> resolveArtifacts(Artifact mavenArtifact) throws Exception {
-        return resolveArtifacts(Set.of(mavenArtifact));
+        return resolveArtifacts(Collections.singleton(mavenArtifact));
     }
 
+    /**
+     * Resolve the collection of artifacts. Artifacts will be download to local maven repo if
+     * necessary. Only compile scope dependencies will be resolved.
+     */
     @Nonnull
-    public static List<File> resolveArtifacts(Set<Artifact> mavenArtifacts) throws Exception {
-        if (mavenArtifacts == null || mavenArtifacts.isEmpty()) {
-            return List.of();
+    public static List<File> resolveArtifacts(@Nullable Set<Artifact> mavenArtifacts) throws Exception {
+        if (mavenArtifacts == null) {
+            return Collections.emptyList();
         }
         RepositorySystem repoSystem;
         RepositorySystemSession session;
-        DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
-        locator.addService(
-            RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
-        locator.addService(TransporterFactory.class, FileTransporterFactory.class);
-        locator.addService(TransporterFactory.class, HttpTransporterFactory.class);
-        repoSystem = locator.getService(RepositorySystem.class);
-        DefaultRepositorySystemSession sysSession = MavenRepositorySystemUtils.newSession();
-        sysSession.setLocalRepositoryManager(
-            repoSystem.newLocalRepositoryManager(
-                sysSession, new LocalRepository(Workspace.mavenLocalPath())));
-        session = sysSession;
+        MavenEndpoint endpoint = getMavenEndpoint();
+        repoSystem = endpoint.repoSystem;
+        session = endpoint.session;
 
         List<org.eclipse.aether.artifact.Artifact> artifacts = new ArrayList<>();
         for (Artifact e : mavenArtifacts) {
-            artifacts.add(new DefaultArtifact(e.groupId(), e.artifactId(), e.classifier(), "jar", e.version()));
+            org.eclipse.aether.artifact.Artifact artifact =
+                new DefaultArtifact(e.groupId(), e.artifactId(), e.classifier(), "jar", e.version());
+            artifacts.add(artifact);
         }
-        log.info("start resolving dependencies: {}", artifacts);
+        INSTANCE.logInfo("start resolving dependencies: " + artifacts);
 
         List<RemoteRepository> remoteRepos = getRemoteRepos();
         List<org.eclipse.aether.artifact.Artifact> resolvedArtifacts = new ArrayList<>();
         for (org.eclipse.aether.artifact.Artifact artifact : artifacts) {
-            ArtifactDescriptorRequest descriptorRequest =
+            ArtifactDescriptorRequest artDescReq =
                 new ArtifactDescriptorRequest(artifact, remoteRepos, null);
             resolvedArtifacts.addAll(
-                repoSystem
-                    .readArtifactDescriptor(session, descriptorRequest)
-                    .getDependencies()
-                    .stream()
-                    .filter(d -> "compile".equals(d.getScope()))
+                repoSystem.readArtifactDescriptor(session, artDescReq).getDependencies().stream()
+                    .filter(dep -> "compile".equals(dep.getScope()))
                     .filter(
-                        x -> EXCLUDE_ARTIFACT.stream()
-                            .noneMatch(e -> e.eq(x.getArtifact())))
-                    .map(d -> d.getArtifact())
+                        dep -> EXCLUDE_ARTIFACT.stream()
+                            .noneMatch(ex -> ex.eq(dep.getArtifact())))
+                    .map(dep -> dep.getArtifact())
                     .collect(Collectors.toList()));
         }
-        resolvedArtifacts.addAll(artifacts);
-        log.info("resolved dependencies: {}", resolvedArtifacts);
 
-        List<ArtifactRequest> artReqs = new ArrayList<>();
-        for (org.eclipse.aether.artifact.Artifact artifact : resolvedArtifacts) {
-            artReqs.add(new ArtifactRequest(artifact, remoteRepos, null));
-        }
-        List<ArtifactResult> results = repoSystem.resolveArtifacts(session, artReqs);
-        return results.stream().map(r -> r.getArtifact().getFile()).collect(Collectors.toList());
+        List<org.eclipse.aether.artifact.Artifact> mergedArtifacts = new ArrayList<>(artifacts);
+        mergedArtifacts.addAll(resolvedArtifacts);
+        INSTANCE.logInfo("resolved dependencies: " + mergedArtifacts);
+
+        List<ArtifactRequest> artReqs =
+            mergedArtifacts.stream()
+                .map(artifact -> new ArtifactRequest(artifact, remoteRepos, null))
+                .collect(Collectors.toList());
+        return repoSystem.resolveArtifacts(session, artReqs).stream()
+            .map(result -> result.getArtifact().getFile())
+            .collect(Collectors.toList());
     }
 
-    private static List<RemoteRepository> getRemoteRepos() {
-        RemoteRepository.Builder builder =
-            new RemoteRepository.Builder(
-                "central", "default", InternalConfigHolder.get(CommonConfig.MAVEN_REMOTE_URL));
-        String user = InternalConfigHolder.get(CommonConfig.MAVEN_AUTH_USER);
-        String password = InternalConfigHolder.get(CommonConfig.MAVEN_AUTH_PASSWORD);
-        RemoteRepository remoteRepository;
-        if (user == null || password == null) {
-            remoteRepository = builder.build();
-        } else {
-            remoteRepository =
-                builder.setAuthentication(
-                    new AuthenticationBuilder()
-                        .addUsername(user)
-                        .addPassword(password)
-                        .build())
-                    .build();
-        }
-        return List.of(remoteRepository);
+    private static MavenEndpoint getMavenEndpoint() {
+        org.eclipse.aether.impl.DefaultServiceLocator locator =
+            MavenRepositorySystemUtils.newServiceLocator();
+        LocalRepository localRepo = new LocalRepository(Workspace.MAVEN_LOCAL_PATH());
+
+        locator.addService(
+            RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
+        locator.addService(TransporterFactory.class, FileTransporterFactory.class);
+        locator.addService(TransporterFactory.class, HttpTransporterFactory.class);
+        RepositorySystem repoSystem = locator.getService(RepositorySystem.class);
+
+        org.eclipse.aether.DefaultRepositorySystemSession session =
+            MavenRepositorySystemUtils.newSession();
+        session.setLocalRepositoryManager(
+            repoSystem.newLocalRepositoryManager(session, localRepo));
+        return new MavenEndpoint(repoSystem, session);
     }
 
-    private static boolean isJarFile(File file) {
-        try {
-            Utils.requireCheckJarFile(file.toURI().toURL());
-            return true;
-        } catch (Exception e) {
-            return false;
+    private static final class MavenEndpoint {
+
+        private final RepositorySystem repoSystem;
+        private final RepositorySystemSession session;
+
+        private MavenEndpoint(RepositorySystem repoSystem, RepositorySystemSession session) {
+            this.repoSystem = repoSystem;
+            this.session = session;
         }
     }
 
@@ -247,15 +303,15 @@ public final class MavenTool {
 
         @Override
         public boolean isFiltered(String name) {
-            boolean filtered =
-                name.startsWith("META-INF/")
-                    && (name.endsWith(".SF")
-                        || name.endsWith(".DSA")
-                        || name.endsWith(".RSA"));
-            if (filtered) {
-                log.info("shade ignore file: {}", name);
+            boolean isFilteredState =
+                name.startsWith("META-INF/") && name.endsWith(".SF")
+                    || name.endsWith(".DSA")
+                    || name.endsWith(".RSA");
+            if (isFilteredState) {
+                INSTANCE.logInfo("shade ignore file: " + name);
+                return true;
             }
-            return filtered;
+            return false;
         }
 
         @Override

@@ -17,14 +17,31 @@
 
 package org.apache.streampark.flink.core;
 
-/** Table environment configuration. */
 public class TableEnvConfig {
 
-    public final String[] args;
-    public final TableEnvConfigFunction conf;
+    private final String[] args;
+    private final TableEnvConfigFunction conf;
 
     public TableEnvConfig(String[] args, TableEnvConfigFunction conf) {
         this.args = args;
         this.conf = conf;
+    }
+
+    public String[] getArgs() {
+        return args;
+    }
+
+    public TableEnvConfigFunction getConf() {
+        return conf;
+    }
+
+    /** Scala API alias for {@link #getArgs()}. */
+    public String[] args() {
+        return args;
+    }
+
+    /** Scala API alias for {@link #getConf()}. */
+    public TableEnvConfigFunction conf() {
+        return conf;
     }
 }

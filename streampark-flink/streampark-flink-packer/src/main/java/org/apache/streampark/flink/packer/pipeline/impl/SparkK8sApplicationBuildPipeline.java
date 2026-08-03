@@ -20,22 +20,26 @@ package org.apache.streampark.flink.packer.pipeline.impl;
 import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.flink.kubernetes.PodTemplateTool;
-import org.apache.streampark.flink.packer.docker.DockerClients;
+import org.apache.streampark.flink.packer.docker.DockerConf;
+import org.apache.streampark.flink.packer.docker.DockerUtils;
 import org.apache.streampark.flink.packer.docker.SparkDockerfileTemplate;
 import org.apache.streampark.flink.packer.docker.SparkDockerfileTemplateTrait;
 import org.apache.streampark.flink.packer.docker.SparkHadoopDockerfileTemplate;
-import org.apache.streampark.flink.packer.pipeline.BuildParam;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
-import org.apache.streampark.flink.packer.pipeline.BuildResult;
+import org.apache.streampark.flink.packer.pipeline.DockerBuildProgress;
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse;
 import org.apache.streampark.flink.packer.pipeline.DockerProgressWatcher;
+import org.apache.streampark.flink.packer.pipeline.DockerPullProgress;
+import org.apache.streampark.flink.packer.pipeline.DockerPushProgress;
 import org.apache.streampark.flink.packer.pipeline.DockerResolveProgress;
 import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
 import org.apache.streampark.flink.packer.pipeline.SilentDockerProgressWatcher;
 import org.apache.streampark.flink.packer.pipeline.SparkK8sApplicationBuildRequest;
+import org.apache.streampark.spark.kubernetes.model.SparkK8sPodTemplates;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.github.dockerjava.api.command.PushImageCmd;
 import com.github.dockerjava.core.command.HackBuildImageCmd;
 import com.github.dockerjava.core.command.HackPullImageCmd;
 import com.github.dockerjava.core.command.HackPushImageCmd;
@@ -46,14 +50,16 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-/** Building pipeline for Spark kubernetes-native application mode. */
+/** Building pipeline for Spark kubernetes-native application mode */
 public class SparkK8sApplicationBuildPipeline extends BuildPipeline {
 
-    private static final ThreadPoolExecutor DOCKER_EXEC_POOL =
+    private static final ExecutorService DOCKER_EXECUTOR =
         new ThreadPoolExecutor(
             Runtime.getRuntime().availableProcessors() * 5,
             Runtime.getRuntime().availableProcessors() * 10,
@@ -64,15 +70,27 @@ public class SparkK8sApplicationBuildPipeline extends BuildPipeline {
             new ThreadPoolExecutor.DiscardOldestPolicy());
 
     private final SparkK8sApplicationBuildRequest request;
+
     private DockerProgressWatcher dockerProcessWatcher = new SilentDockerProgressWatcher();
-    private final DockerResolveProgress dockerProcess = DockerResolveProgress.createEmpty();
+
+    private final DockerResolveProgress dockerProcess =
+        new DockerResolveProgress(
+            DockerPullProgress.empty(),
+            DockerBuildProgress.empty(),
+            DockerPushProgress.empty());
 
     public SparkK8sApplicationBuildPipeline(SparkK8sApplicationBuildRequest request) {
         this.request = request;
     }
 
-    public static SparkK8sApplicationBuildPipeline of(SparkK8sApplicationBuildRequest request) {
-        return new SparkK8sApplicationBuildPipeline(request);
+    @Override
+    public PipelineTypeEnum pipeType() {
+        return PipelineTypeEnum.SPARK_NATIVE_K8S_APPLICATION;
+    }
+
+    @Override
+    public SparkK8sApplicationBuildRequest offerBuildParam() {
+        return request;
     }
 
     public void registerDockerProgressWatcher(DockerProgressWatcher watcher) {
@@ -80,30 +98,23 @@ public class SparkK8sApplicationBuildPipeline extends BuildPipeline {
     }
 
     @Override
-    public PipelineTypeEnum getPipeType() {
-        return PipelineTypeEnum.SPARK_NATIVE_K8S_APPLICATION;
-    }
-
-    @Override
-    protected BuildParam offerBuildParam() {
-        return request;
-    }
-
-    @Override
-    protected BuildResult buildProcess() throws Throwable {
+    public DockerImageBuildResponse buildProcess() {
         String buildWorkspace =
             execStep(
                 1,
                 () -> {
-                    String ws = request.workspace() + "/" + request.k8sNamespace();
-                    LfsOperator.getInstance().mkCleanDirs(ws);
-                    log.info("Recreate building workspace: {}", ws);
-                    return ws;
+                    String workspace = request.workspace() + "/" + request.k8sNamespace();
+                    LfsOperator.mkCleanDirs(workspace);
+                    logInfo("Recreate building workspace: " + workspace);
+                    return workspace;
                 })
-                    .orElseThrow(() -> getError().exception());
+                    .orElseThrow(() -> {
+                        throw pipelineException();
+                    });
 
         Map<String, String> podTemplatePaths;
-        if (request.sparkPodTemplate() == null || request.sparkPodTemplate().isEmpty()) {
+        SparkK8sPodTemplates podTemplate = request.sparkPodTemplate();
+        if (podTemplate.isEmpty()) {
             skipStep(2);
             podTemplatePaths = Collections.emptyMap();
         } else {
@@ -111,35 +122,39 @@ public class SparkK8sApplicationBuildPipeline extends BuildPipeline {
                 execStep(
                     2,
                     () -> {
-                        Map<String, String> files =
-                            PodTemplateTool.preparePodTemplateFiles(
-                                buildWorkspace,
-                                request.sparkPodTemplate())
+                        Map<String, String> podTemplateFiles =
+                            PodTemplateTool.preparePodTemplateFiles(buildWorkspace, podTemplate)
                                 .tmplFiles();
-                        log.info(
-                            "Export spark podTemplates: {}",
-                            String.join(",", files.values()));
-                        return files;
+                        logInfo(
+                            "Export spark podTemplates: "
+                                + String.join(",", podTemplateFiles.values()));
+                        return podTemplateFiles;
                     })
-                        .orElseThrow(() -> getError().exception());
+                        .orElseThrow(() -> {
+                            throw pipelineException();
+                        });
         }
 
-        String mainJarPath =
+        final String mainJarPath =
             execStep(
                 3,
                 () -> {
                     String mainJarName =
                         Paths.get(request.mainJar()).getFileName().toString();
-                    String target = buildWorkspace + "/" + mainJarName;
-                    LfsOperator.getInstance().copy(request.mainJar(), target);
-                    log.info("Prepared spark job jar: {}", target);
-                    return target;
+                    String path = buildWorkspace + "/" + mainJarName;
+                    LfsOperator.copy(request.mainJar(), path);
+                    logInfo("Prepared spark job jar: " + path);
+                    return path;
                 })
-                    .orElseThrow(() -> getError().exception());
+                    .orElseThrow(
+                        () -> {
+                            throw pipelineException();
+                        });
+        final Set<String> extJarLibs = new HashSet<>();
 
         File dockerfile;
         SparkDockerfileTemplateTrait dockerFileTemplate;
-        var step4 =
+        Object[] dockerResult =
             execStep(
                 4,
                 () -> {
@@ -150,71 +165,74 @@ public class SparkK8sApplicationBuildPipeline extends BuildPipeline {
                                 buildWorkspace,
                                 request.sparkBaseImage(),
                                 mainJarPath,
-                                new HashSet<>());
+                                extJarLibs);
                     } else {
                         template =
                             new SparkDockerfileTemplate(
                                 buildWorkspace,
                                 request.sparkBaseImage(),
                                 mainJarPath,
-                                new HashSet<>());
+                                extJarLibs);
                     }
-                    File file = template.writeDockerfile();
-                    log.info(
-                        "Output spark dockerfile: {}, content: \n{}",
-                        file.getAbsolutePath(),
-                        template.offerDockerfileContent());
-                    return Map.entry(file, template);
-                });
-        if (step4.isEmpty()) {
-            throw getError().exception();
-        }
-        dockerfile = step4.get().getKey();
-        dockerFileTemplate = step4.get().getValue();
+                    File dockerFile = template.writeDockerfile();
+                    logInfo(
+                        "Output spark dockerfile: "
+                            + dockerFile.getAbsolutePath()
+                            + ", content: \n"
+                            + template.offerDockerfileContent());
+                    return new Object[]{dockerFile, template};
+                })
+                    .orElseThrow(() -> {
+                        throw pipelineException();
+                    });
+        dockerfile = (File) dockerResult[0];
+        dockerFileTemplate = (SparkDockerfileTemplateTrait) dockerResult[1];
 
-        var dockerConf = request.dockerConfig();
+        DockerConf dockerConf = request.dockerConfig();
         String baseImageTag = request.sparkBaseImage().trim();
         if (request.k8sNamespace().isEmpty() || request.appName().isEmpty()) {
             throw new IllegalArgumentException("k8sNamespace or appName cannot be empty");
         }
+        String expectedImageTag =
+            "streampark-sparkjob-" + request.k8sNamespace() + "-" + request.appName();
         String pushImageTag =
             compileTag(
-                "streampark-sparkjob-" + request.k8sNamespace() + "-" + request.appName(),
-                dockerConf.registerAddress(),
-                dockerConf.imageNamespace());
+                expectedImageTag, dockerConf.registerAddress(), dockerConf.imageNamespace());
 
         execStep(
             5,
             () -> {
-                DockerClients.usingDockerClient(
+                DockerUtils.usingDockerClient(
                     dockerClient -> {
-                        HackPullImageCmd pullImageCmd =
-                            (HackPullImageCmd) dockerClient.pullImageCmd(baseImageTag);
-                        if (dockerConf.registerAddress() == null
-                            || baseImageTag.startsWith(dockerConf.registerAddress())) {
-                            pullImageCmd.withAuthConfig(dockerConf.toAuthConf());
+                        HackPullImageCmd pullImageCmd;
+                        if (dockerConf.registerAddress() != null
+                            && !baseImageTag.startsWith(dockerConf.registerAddress())) {
+                            pullImageCmd =
+                                (HackPullImageCmd) dockerClient.pullImageCmd(baseImageTag);
+                        } else {
+                            pullImageCmd =
+                                (HackPullImageCmd) dockerClient
+                                    .pullImageCmd(baseImageTag)
+                                    .withAuthConfig(dockerConf.toAuthConf());
                         }
                         try {
                             pullImageCmd
                                 .start(
-                                    DockerClients.watchDockerPullProcess(
+                                    DockerUtils.watchDockerPullProcess(
                                         pullRsp -> {
                                             dockerProcess.getPull().update(pullRsp);
-                                            DOCKER_EXEC_POOL.execute(
-                                                () -> dockerProcessWatcher
-                                                    .onDockerPullProgressChange(
-                                                        dockerProcess
-                                                            .getPull()
-                                                            .snapshot()));
+                                            DOCKER_EXECUTOR.submit(
+                                                () -> dockerProcessWatcher.onDockerPullProgressChange(
+                                                    dockerProcess.getPull().snapshot()));
                                         }))
                                 .awaitCompletion();
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
                             throw new RuntimeException(e);
                         }
-                        log.info(
-                            "Already pulled docker image from remote register, imageTag={}",
-                            baseImageTag);
+                        logInfo(
+                            "Already pulled docker image from remote register, imageTag="
+                                + baseImageTag);
                         return null;
                     },
                     err -> {
@@ -223,12 +241,14 @@ public class SparkK8sApplicationBuildPipeline extends BuildPipeline {
                     });
                 return null;
             })
-                .orElseThrow(() -> getError().exception());
+                .orElseThrow(() -> {
+                    throw pipelineException();
+                });
 
         execStep(
             6,
             () -> {
-                DockerClients.usingDockerClient(
+                DockerUtils.usingDockerClient(
                     dockerClient -> {
                         HackBuildImageCmd buildImageCmd =
                             (HackBuildImageCmd) dockerClient
@@ -239,21 +259,20 @@ public class SparkK8sApplicationBuildPipeline extends BuildPipeline {
                         String imageId =
                             buildImageCmd
                                 .start(
-                                    DockerClients.watchDockerBuildStep(
+                                    DockerUtils.watchDockerBuildStep(
                                         buildStep -> {
                                             dockerProcess.getBuild().update(buildStep);
-                                            DOCKER_EXEC_POOL.execute(
+                                            DOCKER_EXECUTOR.submit(
                                                 () -> dockerProcessWatcher
                                                     .onDockerBuildProgressChange(
-                                                        dockerProcess
-                                                            .getBuild()
-                                                            .snapshot()));
+                                                        dockerProcess.getBuild().snapshot()));
                                         }))
                                 .awaitImageId();
-                        log.info(
-                            "Built docker image, imageId={}, imageTag={}",
-                            imageId,
-                            pushImageTag);
+                        logInfo(
+                            "Built docker image, imageId="
+                                + imageId
+                                + ", imageTag="
+                                + pushImageTag);
                         return null;
                     },
                     err -> {
@@ -262,37 +281,35 @@ public class SparkK8sApplicationBuildPipeline extends BuildPipeline {
                     });
                 return null;
             })
-                .orElseThrow(() -> getError().exception());
+                .orElseThrow(() -> {
+                    throw pipelineException();
+                });
 
         execStep(
             7,
             () -> {
-                DockerClients.usingDockerClient(
+                DockerUtils.usingDockerClient(
                     dockerClient -> {
-                        HackPushImageCmd pushCmd =
-                            (HackPushImageCmd) dockerClient
+                        PushImageCmd pushCmd =
+                            dockerClient
                                 .pushImageCmd(pushImageTag)
                                 .withAuthConfig(dockerConf.toAuthConf());
                         try {
-                            pushCmd.start(
-                                DockerClients.watchDockerPushProcess(
-                                    pushRsp -> {
-                                        dockerProcess.getPush().update(pushRsp);
-                                        DOCKER_EXEC_POOL.execute(
-                                            () -> dockerProcessWatcher
-                                                .onDockerPushProgressChange(
-                                                    dockerProcess
-                                                        .getPush()
-                                                        .snapshot()));
-                                    }))
+                            ((HackPushImageCmd) pushCmd)
+                                .start(
+                                    DockerUtils.watchDockerPushProcess(
+                                        pushRsp -> {
+                                            dockerProcess.getPush().update(pushRsp);
+                                            DOCKER_EXECUTOR.submit(
+                                                () -> dockerProcessWatcher.onDockerPushProgressChange(
+                                                    dockerProcess.getPush().snapshot()));
+                                        }))
                                 .awaitCompletion();
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
                             throw new RuntimeException(e);
                         }
-                        log.info(
-                            "Already pushed docker image, imageTag={}",
-                            pushImageTag);
+                        logInfo("Already pushed docker image, imageTag=" + pushImageTag);
                         return null;
                     },
                     err -> {
@@ -301,7 +318,9 @@ public class SparkK8sApplicationBuildPipeline extends BuildPipeline {
                     });
                 return null;
             })
-                .orElseThrow(() -> getError().exception());
+                .orElseThrow(() -> {
+                    throw pipelineException();
+                });
 
         return new DockerImageBuildResponse(
             buildWorkspace,
@@ -316,5 +335,9 @@ public class SparkK8sApplicationBuildPipeline extends BuildPipeline {
             tagName = registerAddress + "/" + tagName;
         }
         return tagName.toLowerCase();
+    }
+
+    public static SparkK8sApplicationBuildPipeline of(SparkK8sApplicationBuildRequest request) {
+        return new SparkK8sApplicationBuildPipeline(request);
     }
 }

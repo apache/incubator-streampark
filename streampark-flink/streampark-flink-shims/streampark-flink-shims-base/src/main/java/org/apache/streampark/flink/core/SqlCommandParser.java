@@ -25,72 +25,64 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
 
-/** Parser for Flink SQL commands. */
-public final class SqlCommandParser {
-
-    private static final String SQL_EMPTY_ERROR = "verify failed: flink sql cannot be empty.";
+/** Parses Flink SQL scripts into {@link SqlCommandCall} instances. */
+public final class SqlCommandParser extends org.apache.streampark.common.util.LoggerSupport {
 
     private SqlCommandParser() {
     }
 
-    public static List<SqlCommandCall> parseSQL(String sql, Consumer<FlinkSqlValidationResult> callback) {
-        if (StringUtils.isBlank(sql)) {
-            if (callback != null) {
-                callback.accept(
-                    FlinkSqlValidationResult.builder()
-                        .success(false)
-                        .failedType(FlinkSqlValidationFailedType.VERIFY_FAILED)
-                        .exception(SQL_EMPTY_ERROR)
-                        .build());
-                return null;
-            }
-            throw new IllegalArgumentException(SQL_EMPTY_ERROR);
-        }
+    public static List<SqlCommandCall> parseSQL(String sql) {
+        return parseSQL(sql, null);
+    }
 
+    public static List<SqlCommandCall> parseSQL(
+                                                String sql,
+                                                Consumer<FlinkSqlValidationResult> validationCallback) {
+        String sqlEmptyError = "verify failed: flink sql cannot be empty.";
+        if (StringUtils.isBlank(sql)) {
+            throw new IllegalArgumentException(sqlEmptyError);
+        }
         List<SqlSegment> sqlSegments = SqlSplitter.splitSql(sql);
         if (sqlSegments.isEmpty()) {
-            if (callback != null) {
-                callback.accept(
-                    FlinkSqlValidationResult.builder()
-                        .success(false)
-                        .failedType(FlinkSqlValidationFailedType.VERIFY_FAILED)
-                        .exception(SQL_EMPTY_ERROR)
-                        .build());
+            if (validationCallback != null) {
+                validationCallback.accept(
+                    new FlinkSqlValidationResult()
+                        .withSuccess(false)
+                        .withFailedType(FlinkSqlValidationFailedType.VERIFY_FAILED)
+                        .withException(sqlEmptyError));
                 return null;
             }
-            throw new IllegalArgumentException(SQL_EMPTY_ERROR);
+            throw new IllegalArgumentException(sqlEmptyError);
         }
 
         List<SqlCommandCall> calls = new ArrayList<>();
         for (SqlSegment segment : sqlSegments) {
-            Optional<SqlCommandCall> parsed = parseLine(segment);
-            if (parsed.isPresent()) {
-                calls.add(parsed.get());
-            } else if (callback != null) {
-                callback.accept(
-                    FlinkSqlValidationResult.builder()
-                        .success(false)
-                        .failedType(FlinkSqlValidationFailedType.UNSUPPORTED_SQL)
-                        .lineStart(segment.start)
-                        .lineEnd(segment.end)
-                        .exception("unsupported sql")
-                        .sql(segment.sql)
-                        .build());
+            Optional<SqlCommandCall> call = parseLine(segment);
+            if (call.isPresent()) {
+                calls.add(call.get());
+            } else if (validationCallback != null) {
+                validationCallback.accept(
+                    new FlinkSqlValidationResult()
+                        .withSuccess(false)
+                        .withFailedType(FlinkSqlValidationFailedType.UNSUPPORTED_SQL)
+                        .withLineStart(segment.start())
+                        .withLineEnd(segment.end())
+                        .withException("unsupported sql")
+                        .withSql(segment.sql()));
+                return null;
             } else {
-                throw new UnsupportedOperationException("unsupported sql: " + segment.sql);
+                throw new UnsupportedOperationException("unsupported sql: " + segment.sql());
             }
         }
 
         if (calls.isEmpty()) {
-            if (callback != null) {
-                callback.accept(
-                    FlinkSqlValidationResult.builder()
-                        .success(false)
-                        .failedType(FlinkSqlValidationFailedType.VERIFY_FAILED)
-                        .exception("flink sql syntax error, no executable sql")
-                        .build());
+            if (validationCallback != null) {
+                validationCallback.accept(
+                    new FlinkSqlValidationResult()
+                        .withSuccess(false)
+                        .withFailedType(FlinkSqlValidationFailedType.VERIFY_FAILED)
+                        .withException("flink sql syntax error, no executable sql"));
                 return null;
             }
             throw new UnsupportedOperationException("flink sql syntax error, no executable sql");
@@ -99,26 +91,22 @@ public final class SqlCommandParser {
     }
 
     private static Optional<SqlCommandCall> parseLine(SqlSegment sqlSegment) {
-        SqlCommand sqlCommand = SqlCommand.get(sqlSegment.sql.trim());
+        SqlCommand sqlCommand = SqlCommand.get(sqlSegment.sql().trim());
         if (sqlCommand == null) {
             return Optional.empty();
         }
-
-        Matcher matcher = sqlCommand.getMatcher();
-        String[] groups = new String[matcher.groupCount()];
+        String[] groups = new String[sqlCommand.matcher().groupCount()];
         for (int i = 0; i < groups.length; i++) {
-            groups[i] = matcher.group(i + 1);
+            groups[i] = sqlCommand.matcher().group(i + 1);
         }
-
         return sqlCommand
-            .getConverter()
             .convert(groups)
             .map(
                 operands -> new SqlCommandCall(
-                    sqlSegment.start,
-                    sqlSegment.end,
+                    sqlSegment.start(),
+                    sqlSegment.end(),
                     sqlCommand,
                     operands,
-                    sqlSegment.sql.trim()));
+                    sqlSegment.sql().trim()));
     }
 }

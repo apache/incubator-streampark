@@ -18,21 +18,42 @@
 package org.apache.streampark.flink.packer.pipeline;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ShadedBuildResponse implements FlinkBuildResult {
+public class ShadedBuildResponse extends AbstractFlinkBuildResponse {
 
-    private String workspacePath;
     private String shadedJarPath;
-    private boolean pass = true;
 
     public ShadedBuildResponse(String workspacePath, String shadedJarPath) {
         this(workspacePath, shadedJarPath, true);
+    }
+
+    public ShadedBuildResponse(String workspacePath, String shadedJarPath, boolean pass) {
+        super(workspacePath, pass);
+        this.shadedJarPath = shadedJarPath;
+    }
+
+    public ShadedBuildResponse() {
+    }
+
+    public String shadedJarPath() {
+        return shadedJarPath;
+    }
+
+    @JsonProperty("shadedJarPath")
+    public void setShadedJarPath(String shadedJarPath) {
+        this.shadedJarPath = shadedJarPath;
+    }
+
+    @Override
+    public String toString() {
+        return "{ workspacePath: "
+            + workspacePath()
+            + ", shadedJarPath: "
+            + shadedJarPath
+            + ", pass: "
+            + pass()
+            + " }";
     }
 }

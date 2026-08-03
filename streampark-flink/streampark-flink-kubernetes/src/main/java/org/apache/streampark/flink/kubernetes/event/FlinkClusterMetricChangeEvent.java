@@ -20,15 +20,21 @@ package org.apache.streampark.flink.kubernetes.event;
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
-
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
 public class FlinkClusterMetricChangeEvent implements BuildInEvent {
 
-    private TrackId trackId;
-    private FlinkMetricCV metrics;
+    private final TrackId trackId;
+    private final FlinkMetricCV metrics;
+
+    public FlinkClusterMetricChangeEvent(TrackId trackId, FlinkMetricCV metrics) {
+        this.trackId = trackId;
+        this.metrics = metrics;
+    }
+
+    public TrackId trackId() {
+        return trackId;
+    }
+
+    public FlinkMetricCV metrics() {
+        return metrics;
+    }
 }

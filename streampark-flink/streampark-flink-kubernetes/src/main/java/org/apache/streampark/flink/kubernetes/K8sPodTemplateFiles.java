@@ -19,19 +19,24 @@ package org.apache.streampark.flink.kubernetes;
 
 import org.apache.flink.configuration.Configuration;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
-
 import java.util.Map;
 
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
+/**
+ * @param tmplFiles key of flink pod template configuration -> absolute file path of pod template
+ */
 public class K8sPodTemplateFiles {
 
-    private Map<String, String> tmplFiles;
+    private final Map<String, String> tmplFiles;
 
+    public K8sPodTemplateFiles(Map<String, String> tmplFiles) {
+        this.tmplFiles = tmplFiles;
+    }
+
+    public Map<String, String> tmplFiles() {
+        return tmplFiles;
+    }
+
+    /** merge k8s pod template configuration to Flink Configuration */
     public void mergeToFlinkConf(Configuration flinkConf) {
         tmplFiles.entrySet().stream()
             .filter(e -> e.getValue() != null && !e.getValue().isEmpty())

@@ -19,6 +19,7 @@ package org.apache.streampark.flink.client.trait;
 
 import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkJobType;
@@ -28,7 +29,7 @@ import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.FlinkConfigurationUtils;
-import org.apache.streampark.common.util.StreamParkLoggerFactory;
+import org.apache.streampark.common.util.LoggerSupport;
 import org.apache.streampark.common.util.SystemPropertyUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.flink.client.bean.CancelRequest;
@@ -38,11 +39,8 @@ import org.apache.streampark.flink.client.bean.SavepointResponse;
 import org.apache.streampark.flink.client.bean.SubmitRequest;
 import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
-import org.apache.streampark.flink.client.util.FlinkConfigurationEnhancer;
 import org.apache.streampark.flink.core.FlinkClusterClient;
 import org.apache.streampark.flink.core.conf.FlinkRunOption;
-
-import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -62,7 +60,6 @@ import org.apache.flink.client.program.PackagedProgramUtils;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.ConfigConstants;
 import org.apache.flink.configuration.ConfigOption;
-import org.apache.flink.configuration.ConfigOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.CoreOptions;
 import org.apache.flink.configuration.DeploymentOptions;
@@ -73,190 +70,471 @@ import org.apache.flink.configuration.PipelineOptionsInternal;
 import org.apache.flink.python.PythonOptions;
 import org.apache.flink.runtime.jobgraph.JobGraph;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
+import org.apache.flink.util.FlinkException;
 import org.apache.flink.util.Preconditions;
 
 import com.google.common.collect.Lists;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-/** Base Flink client operations shared by all deploy-mode implementations. */
-public abstract class FlinkClientTrait {
+import scala.Tuple2;
 
-    private static final Logger LOG =
-        StreamParkLoggerFactory.loggerFactory().getLogger(FlinkClientTrait.class.getName());
+/** Base trait for Flink client implementations. */
+public abstract class FlinkClientTrait extends LoggerSupport {
 
-    private final String paramKeyFlinkConf = ConfigKeys.keyFlinkConf(ConfigKeys.PARAM_PREFIX);
-    private final String paramKeyFlinkSql = ConfigKeys.keyFlinkSql(ConfigKeys.PARAM_PREFIX);
-    private final String paramKeyAppConf = ConfigKeys.keyAppConf(ConfigKeys.PARAM_PREFIX);
-    private final String paramKeyAppName = ConfigKeys.keyAppName(ConfigKeys.PARAM_PREFIX);
+    private final String paramKeyFlinkConf =
+        ConfigKeys.KEY_FLINK_CONF(ConfigKeys.PARAM_PREFIX());
+    private final String paramKeyFlinkSql =
+        ConfigKeys.KEY_FLINK_SQL(ConfigKeys.PARAM_PREFIX());
+    private final String paramKeyAppConf =
+        ConfigKeys.KEY_APP_CONF(ConfigKeys.PARAM_PREFIX());
+    private final String paramKeyAppName =
+        ConfigKeys.KEY_APP_NAME(ConfigKeys.PARAM_PREFIX());
     private final String paramKeyFlinkParallelism =
-        ConfigKeys.keyFlinkParallelism(ConfigKeys.PARAM_PREFIX);
+        ConfigKeys.KEY_FLINK_PARALLELISM(ConfigKeys.PARAM_PREFIX());
 
-    public SubmitResponse submit(SubmitRequest submitRequest) throws Exception {
-        LOG.info(
-            "\n--------------------------------------- flink job start ---------------------------------------\n"
-                + "    userFlinkHome    : {}\n"
-                + "    flinkVersion     : {}\n"
-                + "    appName          : {}\n"
-                + "    jobType          : {}\n"
-                + "    deployMode       : {}\n"
-                + "    k8sNamespace     : {}\n"
-                + "    flinkExposedType : {}\n"
-                + "    clusterId        : {}\n"
-                + "    applicationType  : {}\n"
-                + "    savePoint        : {}\n"
-                + "    properties       : {}\n"
-                + "    args             : {}\n"
-                + "    appConf          : {}\n"
-                + "    flinkBuildResult : {}\n"
-                + "-------------------------------------------------------------------------------------------\n",
-            submitRequest.getFlinkVersion().flinkHome,
-            submitRequest.getFlinkVersion().version(),
-            submitRequest.getEffectiveAppName(),
-            submitRequest.getJobType().name(),
-            submitRequest.getDeployMode().name(),
-            submitRequest.getKubernetesNamespace(),
-            submitRequest.getFlinkRestExposedType(),
-            submitRequest.getClusterId(),
-            submitRequest.getApplicationType().getName(),
-            submitRequest.getSavePoint(),
-            formatProperties(submitRequest.getProperties()),
-            submitRequest.getArgs(),
-            submitRequest.getAppConf(),
-            submitRequest.getBuildResult());
+    protected static FlinkException asFlinkException(Throwable throwable) {
+        if (throwable instanceof FlinkException) {
+            return (FlinkException) throwable;
+        }
+        if (throwable instanceof Exception) {
+            return new FlinkException((Exception) throwable);
+        }
+        return new FlinkException(throwable.getMessage(), throwable);
+    }
 
-        Configuration flinkConfig = prepareConfig(submitRequest);
+    @FunctionalInterface
+    protected interface FlinkCallable<T> {
+
+        T call() throws Exception;
+    }
+
+    protected static <T> T callAsFlinkException(FlinkCallable<T> callable) throws FlinkException {
+        return callAsFlinkException(callable, e -> {
+        });
+    }
+
+    protected static <T> T callAsFlinkException(
+                                                FlinkCallable<T> callable,
+                                                java.util.function.Consumer<Exception> onFailure) throws FlinkException {
+        try {
+            return callable.call();
+        } catch (FlinkException e) {
+            onFailure.accept(e);
+            throw e;
+        } catch (Exception e) {
+            onFailure.accept(e);
+            throw asFlinkException(e);
+        }
+    }
+
+    protected static <T> T callAsFlinkExceptionMapping(
+                                                       FlinkCallable<T> callable,
+                                                       java.util.function.Function<Exception, FlinkException> exceptionMapper) throws FlinkException {
+        try {
+            return callable.call();
+        } catch (FlinkException e) {
+            throw e;
+        } catch (Exception e) {
+            throw exceptionMapper.apply(e);
+        }
+    }
+
+    protected CancelResponse toCancelResponse(
+                                              CancelRequest request, JobID jobId,
+                                              ClusterClient<?> client) throws FlinkException {
+        return callAsFlinkException(() -> new CancelResponse(cancelJob(request, jobId, client)));
+    }
+
+    protected SavepointResponse toSavepointResponse(
+                                                    TriggerSavepointRequest request,
+                                                    JobID jobId,
+                                                    ClusterClient<?> client) throws FlinkException {
+        return callAsFlinkException(
+            () -> new SavepointResponse(triggerSavepoint(request, jobId, client)));
+    }
+
+    protected void logEffectiveSubmitConfiguration(Configuration flinkConfig) {
+        logInfo(
+            String.format(
+                "%n------------------------------------------------------------------%n"
+                    + "Effective submit configuration: %s%n"
+                    + "------------------------------------------------------------------%n",
+                flinkConfig));
+    }
+
+    protected void logSavepointClientRequest(String operation, SavepointRequestTrait request) {
+        StringBuilder message =
+            new StringBuilder()
+                .append("\n----------------------------------------- flink job ")
+                .append(operation)
+                .append(" --------------------------------\n")
+                .append("     userFlinkHome     : ")
+                .append(request.flinkVersion().getFlinkHome())
+                .append("\n")
+                .append("     flinkVersion      : ")
+                .append(request.flinkVersion().version())
+                .append("\n")
+                .append("     clusterId         : ")
+                .append(request.clusterId())
+                .append("\n");
+        if (request instanceof CancelRequest) {
+            CancelRequest cancelRequest = (CancelRequest) request;
+            message
+                .append("     withSavePoint     : ")
+                .append(cancelRequest.withSavepoint())
+                .append("\n");
+        }
+        message
+            .append("     savePointPath     : ")
+            .append(request.savepointPath())
+            .append("\n");
+        if (request instanceof CancelRequest) {
+            message
+                .append("     withDrain         : ")
+                .append(((CancelRequest) request).withDrain())
+                .append("\n");
+        }
+        message
+            .append("     nativeFormat      : ")
+            .append(request.nativeFormat())
+            .append("\n")
+            .append("     k8sNamespace      : ")
+            .append(request.kubernetesNamespace())
+            .append("\n")
+            .append("     appId             : ")
+            .append(request.clusterId())
+            .append("\n")
+            .append("     jobId             : ")
+            .append(request.jobId())
+            .append("\n")
+            .append(
+                "-------------------------------------------------------------------------------------------\n");
+        logInfo(message.toString());
+    }
+
+    protected SubmitResponse submitJobGraphToCluster(
+                                                     SubmitRequest submitRequest,
+                                                     Configuration flinkConfig,
+                                                     File jarFile,
+                                                     FlinkCallable<ClusterClient<?>> clientSupplier,
+                                                     FlinkCallable<String> clusterIdSupplier,
+                                                     AutoCloseable... extraResources) throws FlinkException {
+        return callAsFlinkException(
+            () -> {
+                Tuple2<PackagedProgram, JobGraph> programJobGraph =
+                    getJobGraph(flinkConfig, submitRequest, jarFile);
+                PackagedProgram packageProgram = programJobGraph._1();
+                JobGraph jobGraph = programJobGraph._2();
+                ClusterClient<?> client = clientSupplier.call();
+                String jobId = client.submitJob(jobGraph).get().toString();
+                SubmitResponse result =
+                    new SubmitResponse(
+                        clusterIdSupplier.call(),
+                        flinkConfig.toMap(),
+                        jobId,
+                        client.getWebInterfaceURL());
+                AutoCloseable[] resources = new AutoCloseable[extraResources.length + 2];
+                resources[0] = packageProgram;
+                resources[1] = client;
+                System.arraycopy(extraResources, 0, resources, 2, extraResources.length);
+                closeSubmit(submitRequest, resources);
+                return result;
+            });
+    }
+
+    public SubmitResponse submit(SubmitRequest submitRequest) throws FlinkException {
+        logInfo(
+            "\n"
+                + "--------------------------------------- flink job start ---------------------------------------\n"
+                + "    userFlinkHome    : "
+                + submitRequest.flinkVersion().getFlinkHome()
+                + "\n"
+                + "    flinkVersion     : "
+                + submitRequest.flinkVersion().version()
+                + "\n"
+                + "    appName          : "
+                + submitRequest.effectiveAppName()
+                + "\n"
+                + "    jobType          : "
+                + submitRequest.jobType().name()
+                + "\n"
+                + "    deployMode       : "
+                + submitRequest.deployMode().name()
+                + "\n"
+                + "    k8sNamespace     : "
+                + submitRequest.kubernetesNamespace()
+                + "\n"
+                + "    flinkExposedType : "
+                + submitRequest.flinkRestExposedType()
+                + "\n"
+                + "    clusterId        : "
+                + submitRequest.clusterId()
+                + "\n"
+                + "    applicationType  : "
+                + submitRequest.applicationType().getName()
+                + "\n"
+                + "    savePoint        : "
+                + submitRequest.savePoint()
+                + "\n"
+                + "    properties       : "
+                + formatProperties(submitRequest.properties())
+                + "\n"
+                + "    args             : "
+                + submitRequest.args()
+                + "\n"
+                + "    appConf          : "
+                + submitRequest.appConf()
+                + "\n"
+                + "    flinkBuildResult : "
+                + submitRequest.buildResult()
+                + "\n"
+                + "-------------------------------------------------------------------------------------------\n");
+
+        Configuration flinkConfig = callAsFlinkException(() -> prepareConfig(submitRequest));
         setConfig(submitRequest, flinkConfig);
 
-        try {
-            return doSubmit(submitRequest, flinkConfig);
-        } catch (Exception e) {
-            LOG.error(
-                "flink job {} start failed, deployMode: {}, detail: {}",
-                submitRequest.getAppName(),
-                submitRequest.getDeployMode().getName(),
-                ExceptionUtils.stringifyException(e));
-            throw e;
+        return callAsFlinkException(
+            () -> doSubmit(submitRequest, flinkConfig),
+            e -> {
+                logSubmitFailure(submitRequest, e);
+            });
+    }
+
+    private void logSubmitFailure(SubmitRequest submitRequest, Exception e) {
+        logError(
+            "flink job "
+                + submitRequest.appName()
+                + " start failed, "
+                + "deployMode: "
+                + submitRequest.deployMode().getName()
+                + ", "
+                + "detail: "
+                + ExceptionUtils.stringifyException(e));
+    }
+
+    private Configuration prepareConfig(SubmitRequest submitRequest) throws Exception {
+        CommandLineAndConfig commandLineAndConfig = getCommandLineAndFlinkConfig(submitRequest);
+        Configuration flinkConfig = commandLineAndConfig.flinkConfig;
+        applyJobTypeConfig(submitRequest, commandLineAndConfig.commandLine, flinkConfig);
+        applyCommonPipelineConfig(submitRequest, flinkConfig);
+        applyCheckpointDefaults(submitRequest, flinkConfig);
+        applySavepointConfig(submitRequest, flinkConfig);
+        applyEnvProperties(submitRequest, flinkConfig);
+        return flinkConfig;
+    }
+
+    private void applyJobTypeConfig(
+                                    SubmitRequest submitRequest, CommandLine commandLine,
+                                    Configuration flinkConfig) throws Exception {
+        if (submitRequest.jobType() == FlinkJobType.PYFLINK) {
+            applyPyFlinkConfig(submitRequest, flinkConfig);
+            return;
+        }
+        if (submitRequest.userJarFile() != null) {
+            URI uri =
+                PackagedProgramUtils.resolveURI(
+                    submitRequest.userJarFile().getAbsolutePath());
+            ProgramOptions programOptions = ProgramOptions.create(commandLine);
+            ExecutionConfigAccessor executionParameters =
+                ExecutionConfigAccessor.fromProgramOptions(
+                    programOptions, Collections.singletonList(uri.toString()));
+            executionParameters.applyToConfiguration(flinkConfig);
+        }
+    }
+
+    private void applyPyFlinkConfig(SubmitRequest submitRequest, Configuration flinkConfig) throws Exception {
+        String pythonVenv = Workspace.local().APP_PYTHON_VENV();
+        AssertUtils.required(
+            FsOperator.lfs().exists(pythonVenv),
+            pythonVenv + " File does not exist");
+
+        safeSet(flinkConfig, PythonOptions.PYTHON_ARCHIVES, pythonVenv);
+        safeSet(
+            flinkConfig,
+            PythonOptions.PYTHON_CLIENT_EXECUTABLE,
+            Constants.PYTHON_EXECUTABLE);
+        safeSet(flinkConfig, PythonOptions.PYTHON_EXECUTABLE, Constants.PYTHON_EXECUTABLE);
+
+        String flinkOptPath = System.getenv(ConfigConstants.ENV_FLINK_OPT_DIR);
+        if (StringUtils.isBlank(flinkOptPath)) {
+            logWarn(
+                "Get environment variable "
+                    + ConfigConstants.ENV_FLINK_OPT_DIR
+                    + " fail");
+            String flinkHome = submitRequest.flinkVersion().getFlinkHome();
+            SystemPropertyUtils.setEnv(
+                ConfigConstants.ENV_FLINK_OPT_DIR, flinkHome + "/opt");
+            logInfo(
+                "Set temporary environment variables "
+                    + ConfigConstants.ENV_FLINK_OPT_DIR
+                    + " = "
+                    + flinkHome
+                    + "/opt");
+        }
+    }
+
+    private void applyCommonPipelineConfig(SubmitRequest submitRequest, Configuration flinkConfig) {
+        safeSet(flinkConfig, PipelineOptions.NAME, submitRequest.effectiveAppName());
+        safeSet(flinkConfig, DeploymentOptions.TARGET, submitRequest.deployMode().getName());
+        safeSet(flinkConfig, SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint());
+        safeSet(
+            flinkConfig,
+            ApplicationConfiguration.APPLICATION_MAIN_CLASS,
+            submitRequest.appMain());
+        safeSet(
+            flinkConfig,
+            ApplicationConfiguration.APPLICATION_ARGS,
+            extractProgramArgs(submitRequest));
+        safeSet(
+            flinkConfig,
+            PipelineOptionsInternal.PIPELINE_FIXED_JOB_ID,
+            submitRequest.jobId());
+    }
+
+    private void applyCheckpointDefaults(SubmitRequest submitRequest, Configuration flinkConfig) throws Exception {
+        if (!submitRequest.hasProp(CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.key())) {
+            Configuration flinkDefaultConfiguration =
+                getFlinkDefaultConfiguration(submitRequest.flinkVersion().getFlinkHome());
+            ConfigOption<Integer> retainedOption =
+                CheckpointingOptions.MAX_RETAINED_CHECKPOINTS;
+            flinkConfig.set(
+                retainedOption, flinkDefaultConfiguration.get(retainedOption));
+        }
+    }
+
+    private void applySavepointConfig(SubmitRequest submitRequest, Configuration flinkConfig) {
+        if (StringUtils.isBlank(submitRequest.savePoint())) {
+            return;
+        }
+        safeSet(
+            flinkConfig,
+            SavepointConfigOptions.SAVEPOINT_PATH,
+            submitRequest.savePoint());
+        flinkConfig.setBoolean(
+            SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE,
+            submitRequest.allowNonRestoredState());
+        boolean enableRestoreMode =
+            submitRequest.restoreMode() != null
+                && submitRequest
+                    .flinkVersion()
+                    .checkVersion(FlinkRestoreMode.SINCE_FLINK_VERSION);
+        if (enableRestoreMode) {
+            flinkConfig.setString(
+                FlinkRestoreMode.RESTORE_MODE, submitRequest.restoreMode().getName());
+        }
+    }
+
+    private void applyEnvProperties(SubmitRequest submitRequest, Configuration flinkConfig) {
+        if (MapUtils.isEmpty(submitRequest.properties())) {
+            return;
+        }
+        if (submitRequest.hasProp(CoreOptions.FLINK_JVM_OPTIONS.key())) {
+            Object jvmOptObj =
+                submitRequest.getProp(CoreOptions.FLINK_JVM_OPTIONS.key());
+            String jvmOpt = jvmOptObj.toString();
+            if (!jvmOpt.contains("-Dfile.encoding=")) {
+                submitRequest.putProperty(
+                    CoreOptions.FLINK_JVM_OPTIONS.key(), "-Dfile.encoding=UTF-8 " + jvmOpt);
+            }
+        }
+
+        for (Map.Entry<String, Object> entry : submitRequest.properties().entrySet()) {
+            if (entry.getKey().startsWith("env.")) {
+                logInfo("env opts:  " + entry.getKey() + ": " + entry.getValue());
+                flinkConfig.setString(entry.getKey(), entry.getValue().toString());
+            }
         }
     }
 
     public abstract void setConfig(SubmitRequest submitRequest, Configuration flinkConf);
 
-    public SavepointResponse triggerSavepoint(TriggerSavepointRequest savepointRequest) throws Exception {
-        LOG.info(
-            "\n----------------------------------------- flink job trigger savepoint ---------------------\n"
-                + "     userFlinkHome  : {}\n"
-                + "     flinkVersion   : {}\n"
-                + "     clusterId      : {}\n"
-                + "     savePointPath  : {}\n"
-                + "     nativeFormat   : {}\n"
-                + "     k8sNamespace   : {}\n"
-                + "     appId          : {}\n"
-                + "     jobId          : {}\n"
-                + "-------------------------------------------------------------------------------------------\n",
-            savepointRequest.getFlinkVersion().flinkHome,
-            savepointRequest.getFlinkVersion().version(),
-            savepointRequest.getClusterId(),
-            savepointRequest.getSavepointPath(),
-            savepointRequest.isNativeFormat(),
-            savepointRequest.getKubernetesNamespace(),
-            savepointRequest.getClusterId(),
-            savepointRequest.getJobId());
+    public SavepointResponse triggerSavepoint(TriggerSavepointRequest savepointRequest) throws FlinkException {
+        logSavepointClientRequest("trigger savepoint", savepointRequest);
         Configuration flinkConf = new Configuration();
-        return doTriggerSavepoint(savepointRequest, flinkConf);
+        return callAsFlinkException(() -> doTriggerSavepoint(savepointRequest, flinkConf));
     }
 
-    public CancelResponse cancel(CancelRequest cancelRequest) throws Exception {
-        LOG.info(
-            "\n----------------------------------------- flink job cancel --------------------------------\n"
-                + "     userFlinkHome     : {}\n"
-                + "     flinkVersion      : {}\n"
-                + "     clusterId         : {}\n"
-                + "     withSavePoint     : {}\n"
-                + "     savePointPath     : {}\n"
-                + "     withDrain         : {}\n"
-                + "     nativeFormat      : {}\n"
-                + "     k8sNamespace      : {}\n"
-                + "     appId             : {}\n"
-                + "     jobId             : {}\n"
-                + "-------------------------------------------------------------------------------------------\n",
-            cancelRequest.getFlinkVersion().flinkHome,
-            cancelRequest.getFlinkVersion().version(),
-            cancelRequest.getClusterId(),
-            cancelRequest.isWithSavepoint(),
-            cancelRequest.getSavepointPath(),
-            cancelRequest.isWithDrain(),
-            cancelRequest.isNativeFormat(),
-            cancelRequest.getKubernetesNamespace(),
-            cancelRequest.getClusterId(),
-            cancelRequest.getJobId());
+    public CancelResponse cancel(CancelRequest cancelRequest) throws FlinkException {
+        logSavepointClientRequest("cancel", cancelRequest);
         Configuration flinkConf = new Configuration();
-        return doCancel(cancelRequest, flinkConf);
+        return callAsFlinkException(() -> doCancel(cancelRequest, flinkConf));
     }
 
-    public abstract SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConf) throws Exception;
+    public abstract SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConf) throws FlinkException;
 
     public abstract SavepointResponse doTriggerSavepoint(
                                                          TriggerSavepointRequest request,
-                                                         Configuration flinkConf) throws Exception;
+                                                         Configuration flinkConf) throws FlinkException;
 
-    public abstract CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConf) throws Exception;
+    public abstract CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConf) throws FlinkException;
 
     protected SubmitResponse trySubmit(
                                        SubmitRequest submitRequest,
                                        Configuration flinkConfig,
                                        File jarFile,
-                                       SubmitFunction jobGraphFunc,
-                                       SubmitFunction restApiFunc) throws Exception {
+                                       SubmitFunc jobGraphFunc,
+                                       SubmitFunc restApiFunc) throws FlinkException {
         try {
-            LOG.info("[flink-submit] Submit job with JobGraph Plan.");
+            logInfo("[flink-submit] Submit job with JobGraph Plan.");
             return jobGraphFunc.apply(submitRequest, flinkConfig, jarFile);
-        } catch (Exception e) {
+        } catch (FlinkException e) {
             try {
                 return restApiFunc.apply(submitRequest, flinkConfig, jarFile);
-            } catch (Exception e1) {
-                throw new RuntimeException(
+            } catch (FlinkException fallbackException) {
+                throw new FlinkException(
                     "[flink-submit] Both JobGraph submit plan and Rest API submit plan all failed!\n"
                         + "JobGraph Submit plan failed detail:\n"
                         + "------------------------------------------------------------------\n"
                         + ExceptionUtils.stringifyException(e)
-                        + "\n------------------------------------------------------------------\n\n"
+                        + "\n"
+                        + "------------------------------------------------------------------\n"
+                        + "\n"
                         + " RestAPI Submit plan failed detail:\n"
                         + " ------------------------------------------------------------------\n"
-                        + ExceptionUtils.stringifyException(e1)
-                        + "\n------------------------------------------------------------------\n");
+                        + ExceptionUtils.stringifyException(fallbackException)
+                        + "\n"
+                        + "------------------------------------------------------------------\n",
+                    fallbackException);
             }
         }
     }
 
-    protected JobGraphPackagedProgram getJobGraph(
-                                                  Configuration flinkConfig, SubmitRequest submitRequest,
-                                                  File jarFile) throws Exception {
+    public Tuple2<PackagedProgram, JobGraph> getJobGraph(
+                                                         Configuration flinkConfig, SubmitRequest submitRequest,
+                                                         File jarFile) throws Exception {
         PackagedProgram.Builder builder =
             PackagedProgram.newBuilder()
-                .setSavepointRestoreSettings(submitRequest.getSavepointRestoreSettings())
+                .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings())
                 .setEntryPointClassName(
                     flinkConfig
                         .getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS)
-                        .get())
+                        .orElseThrow(
+                            () -> new IllegalStateException(
+                                "Application main class is not configured")))
                 .setArguments(
                     flinkConfig
                         .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
                         .orElse(Lists.newArrayList())
                         .toArray(new String[0]));
 
-        if (submitRequest.getJobType() == FlinkJobType.PYFLINK) {
-            if (!submitRequest.getLibs().isEmpty()) {
+        if (submitRequest.jobType() == FlinkJobType.PYFLINK) {
+            if (!submitRequest.libs().isEmpty()) {
                 // BUG: https://github.com/apache/streampark/issues/3761
+                // builder.setUserClassPaths(Lists.newArrayList(submitRequest.libs()))
             }
         } else {
             builder.setJarFile(jarFile);
+            // BUG: https://github.com/apache/streampark/issues/3761
+            // .setUserClassPaths(Lists.newArrayList(submitRequest.classPaths()))
         }
 
         PackagedProgram packageProgram = builder.build();
@@ -267,10 +545,11 @@ public abstract class FlinkClientTrait {
                 getParallelism(submitRequest),
                 null,
                 false);
-        return new JobGraphPackagedProgram(packageProgram, jobGraph);
+
+        return new Tuple2<>(packageProgram, jobGraph);
     }
 
-    protected JobID getJobID(String jobId) throws CliArgsException {
+    public JobID getJobID(String jobId) throws CliArgsException {
         try {
             return JobID.fromHexString(jobId);
         } catch (Exception e) {
@@ -278,14 +557,14 @@ public abstract class FlinkClientTrait {
         }
     }
 
-    protected CustomCommandLine validateAndGetActiveCommandLine(
-                                                                List<CustomCommandLine> customCommandLines,
-                                                                CommandLine commandLine) {
+    CustomCommandLine validateAndGetActiveCommandLine(
+                                                      List<CustomCommandLine> customCommandLines,
+                                                      CommandLine commandLine) {
         CommandLine line = Preconditions.checkNotNull(commandLine);
-        LOG.info("Custom commandline: {}", customCommandLines);
+        logInfo("Custom commandline: " + customCommandLines);
         for (CustomCommandLine cli : customCommandLines) {
             boolean isActive = cli.isActive(line);
-            LOG.info("Checking custom commandline {}, isActive: {}", cli, isActive);
+            logInfo("Checking custom commandline " + cli + ", isActive: " + isActive);
             if (isActive) {
                 return cli;
             }
@@ -293,7 +572,7 @@ public abstract class FlinkClientTrait {
         throw new IllegalStateException("No valid command-line found.");
     }
 
-    protected Configuration getFlinkDefaultConfiguration(String flinkHome) {
+    public Configuration getFlinkDefaultConfiguration(String flinkHome) {
         try {
             return GlobalConfiguration.loadConfiguration(flinkHome + "/conf");
         } catch (Exception e) {
@@ -301,35 +580,27 @@ public abstract class FlinkClientTrait {
         }
     }
 
-    protected <T> T getOptionFromDefaultFlinkConfig(String flinkHome, ConfigOption<T> option) {
+    <T> T getOptionFromDefaultFlinkConfig(String flinkHome, ConfigOption<T> option) {
         return getFlinkDefaultConfiguration(flinkHome).get(option);
     }
 
-    protected Integer getParallelism(SubmitRequest submitRequest) {
-        if (submitRequest.hasProp(ConfigKeys.KEY_FLINK_PARALLELISM)) {
-            return Integer.valueOf(submitRequest.getProp(ConfigKeys.KEY_FLINK_PARALLELISM).toString());
+    List<CustomCommandLine> getCustomCommandLines(String flinkHome) {
+        Configuration flinkDefaultConfiguration = getFlinkDefaultConfiguration(flinkHome);
+        String confDir = flinkHome + "/conf";
+        return CliFrontend.loadCustomCommandLines(flinkDefaultConfiguration, confDir);
+    }
+
+    public Integer getParallelism(SubmitRequest submitRequest) {
+        if (submitRequest.hasProp(ConfigKeys.KEY_FLINK_PARALLELISM())) {
+            return Integer.valueOf(
+                submitRequest.getProp(ConfigKeys.KEY_FLINK_PARALLELISM()).toString());
         }
-        return getFlinkDefaultConfiguration(submitRequest.getFlinkVersion().flinkHome)
+        return getFlinkDefaultConfiguration(submitRequest.flinkVersion().getFlinkHome())
             .getInteger(
                 CoreOptions.DEFAULT_PARALLELISM, CoreOptions.DEFAULT_PARALLELISM.defaultValue());
     }
 
-    protected Configuration extractConfiguration(String flinkHome, Map<String, Object> properties) throws Exception {
-        Options commandLineOptions = getCommandLineOptions(flinkHome);
-        List<String> cliArgs = new ArrayList<>();
-        if (MapUtils.isNotEmpty(properties)) {
-            for (Map.Entry<String, Object> entry : properties.entrySet()) {
-                cliArgs.add("-D" + entry.getKey() + "=" + entry.getValue().toString().trim());
-            }
-        }
-        CommandLine commandLine =
-            FlinkRunOption.parse(commandLineOptions, cliArgs.toArray(new String[0]), true);
-        CustomCommandLine activeCommandLine =
-            validateAndGetActiveCommandLine(getCustomCommandLines(flinkHome), commandLine);
-        return applyConfiguration(flinkHome, activeCommandLine, commandLine);
-    }
-
-    protected Options getCommandLineOptions(String flinkHome) throws Exception {
+    Options getCommandLineOptions(String flinkHome) {
         List<CustomCommandLine> customCommandLines = getCustomCommandLines(flinkHome);
         Options customCommandLineOptions = new Options();
         for (CustomCommandLine customCommandLine : customCommandLines) {
@@ -340,184 +611,150 @@ public abstract class FlinkClientTrait {
             CliFrontendParser.getRunCommandOptions(), customCommandLineOptions);
     }
 
-    protected String cancelJob(CancelRequest cancelRequest, JobID jobID, ClusterClient<?> client) throws Exception {
+    public Configuration extractConfiguration(String flinkHome, Map<String, Object> properties) throws Exception {
+        Options commandLineOptions = getCommandLineOptions(flinkHome);
+        List<String> cliArgs = new ArrayList<>();
+        if (MapUtils.isNotEmpty(properties)) {
+            for (Map.Entry<String, Object> entry : properties.entrySet()) {
+                cliArgs.add("-D" + entry.getKey() + "=" + entry.getValue().toString().trim());
+            }
+        }
+        CommandLine commandLine =
+            FlinkRunOption.parse(
+                commandLineOptions, cliArgs.toArray(new String[0]), true);
+        CustomCommandLine activeCommandLine =
+            validateAndGetActiveCommandLine(getCustomCommandLines(flinkHome), commandLine);
+        return applyConfiguration(flinkHome, activeCommandLine, commandLine);
+    }
+
+    public String cancelJob(CancelRequest cancelRequest, JobID jobID, ClusterClient<?> client) throws Exception {
         String savePointDir = tryGetSavepointPathIfNeed(cancelRequest);
+
         FlinkClusterClient<?> clientWrapper = new FlinkClusterClient<>(client);
-        if (!cancelRequest.isWithSavepoint() && !cancelRequest.isWithDrain()) {
+        boolean withSavepoint = cancelRequest.withSavepoint();
+        boolean withDrain = cancelRequest.withDrain();
+
+        if (!withSavepoint && !withDrain) {
             client.cancel(jobID).get();
             return null;
         }
         return clientWrapper
             .stopWithSavepoint(
-                jobID,
-                cancelRequest.isWithDrain(),
-                savePointDir,
-                cancelRequest.isNativeFormat())
+                jobID, cancelRequest.withDrain(), savePointDir, cancelRequest.nativeFormat())
             .get();
     }
 
-    protected String triggerSavepoint(
-                                      TriggerSavepointRequest savepointRequest, JobID jobID,
-                                      ClusterClient<?> client) throws Exception {
+    public String triggerSavepoint(
+                                   TriggerSavepointRequest savepointRequest, JobID jobID,
+                                   ClusterClient<?> client) throws Exception {
         String savepointPath = tryGetSavepointPathIfNeed(savepointRequest);
         FlinkClusterClient<?> clientWrapper = new FlinkClusterClient<>(client);
         return clientWrapper
-            .triggerSavepoint(jobID, savepointPath, savepointRequest.isNativeFormat())
+            .triggerSavepoint(jobID, savepointPath, savepointRequest.nativeFormat())
             .get();
     }
 
-    protected void closeSubmit(SubmitRequest submitRequest, AutoCloseable... close) {
-        for (AutoCloseable autoCloseable : close) {
-            if (autoCloseable instanceof PackagedProgram) {
-                if (submitRequest.isSafePackageProgram()) {
-                    Utils.close(autoCloseable);
+    public void closeSubmit(SubmitRequest submitRequest, AutoCloseable... close) {
+        for (AutoCloseable resource : close) {
+            if (resource instanceof PackagedProgram) {
+                if (submitRequest.safePackageProgram()) {
+                    Utils.close(resource);
                 }
             } else {
-                Utils.close(autoCloseable);
+                Utils.close(resource);
             }
         }
     }
 
-    private Configuration prepareConfig(SubmitRequest submitRequest) throws Exception {
-        CommandLineAndConfig commandLineAndConfig = getCommandLineAndFlinkConfig(submitRequest);
-        CommandLine commandLine = commandLineAndConfig.commandLine;
-        Configuration flinkConfig = commandLineAndConfig.flinkConfig;
-
-        if (submitRequest.getJobType() == FlinkJobType.PYFLINK) {
-            String pythonVenv = Workspace.local().getAppPythonVenv();
-            AssertUtils.required(
-                FsOperator.lfs().exists(pythonVenv), pythonVenv + " File does not exist");
-            FlinkConfigurationEnhancer.safeSet(flinkConfig, PythonOptions.PYTHON_ARCHIVES, pythonVenv);
-            FlinkConfigurationEnhancer.safeSet(
-                flinkConfig, PythonOptions.PYTHON_CLIENT_EXECUTABLE,
-                org.apache.streampark.common.constants.Constants.PYTHON_EXECUTABLE);
-            FlinkConfigurationEnhancer.safeSet(
-                flinkConfig, PythonOptions.PYTHON_EXECUTABLE,
-                org.apache.streampark.common.constants.Constants.PYTHON_EXECUTABLE);
-
-            String flinkOptPath = System.getenv(ConfigConstants.ENV_FLINK_OPT_DIR);
-            if (StringUtils.isBlank(flinkOptPath)) {
-                LOG.warn("Get environment variable {} fail", ConfigConstants.ENV_FLINK_OPT_DIR);
-                String flinkHome = submitRequest.getFlinkVersion().flinkHome;
-                SystemPropertyUtils.setEnv(
-                    ConfigConstants.ENV_FLINK_OPT_DIR, flinkHome + "/opt");
-                LOG.info(
-                    "Set temporary environment variables {} = {}/opt",
-                    ConfigConstants.ENV_FLINK_OPT_DIR,
-                    flinkHome);
-            }
-        } else if (submitRequest.getUserJarFile() != null) {
-            java.net.URI uri =
-                PackagedProgramUtils.resolveURI(submitRequest.getUserJarFile().getAbsolutePath());
-            ProgramOptions programOptions = ProgramOptions.create(commandLine);
-            ExecutionConfigAccessor executionParameters =
-                ExecutionConfigAccessor.fromProgramOptions(
-                    programOptions, Collections.singletonList(uri.toString()));
-            executionParameters.applyToConfiguration(flinkConfig);
+    static <T> Configuration safeSet(Configuration flinkConfig, ConfigOption<T> option, T value) {
+        if (value != null && !value.toString().isEmpty()) {
+            flinkConfig.set(option, value);
         }
-
-        FlinkConfigurationEnhancer.safeSet(
-            flinkConfig, PipelineOptions.NAME, submitRequest.getEffectiveAppName());
-        FlinkConfigurationEnhancer.safeSet(
-            flinkConfig, DeploymentOptions.TARGET, submitRequest.getDeployMode().getName());
-        FlinkConfigurationEnhancer.safeSet(
-            flinkConfig, SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.getSavePoint());
-        FlinkConfigurationEnhancer.safeSet(
-            flinkConfig,
-            ApplicationConfiguration.APPLICATION_MAIN_CLASS,
-            submitRequest.getAppMain());
-        FlinkConfigurationEnhancer.safeSet(
-            flinkConfig,
-            ApplicationConfiguration.APPLICATION_ARGS,
-            extractProgramArgs(submitRequest));
-        FlinkConfigurationEnhancer.safeSet(
-            flinkConfig, PipelineOptionsInternal.PIPELINE_FIXED_JOB_ID, submitRequest.getJobId());
-
-        if (!submitRequest.hasProp(CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.key())) {
-            Configuration flinkDefaultConfiguration =
-                getFlinkDefaultConfiguration(submitRequest.getFlinkVersion().flinkHome);
-            ConfigOption<Integer> retainedOption = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS;
-            FlinkConfigurationEnhancer.safeSet(
-                flinkConfig, retainedOption, flinkDefaultConfiguration.get(retainedOption));
-        }
-
-        if (StringUtils.isNotBlank(submitRequest.getSavePoint())) {
-            FlinkConfigurationEnhancer.safeSet(
-                flinkConfig, SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.getSavePoint());
-            flinkConfig.setBoolean(
-                SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE,
-                submitRequest.isAllowNonRestoredState());
-            boolean enableRestoreMode =
-                submitRequest.getRestoreMode() != null
-                    && submitRequest
-                        .getFlinkVersion()
-                        .checkVersion(FlinkRestoreMode.SINCE_FLINK_VERSION);
-            if (enableRestoreMode) {
-                flinkConfig.setString(
-                    FlinkRestoreMode.RESTORE_MODE, submitRequest.getRestoreMode().getName());
-            }
-        }
-
-        if (MapUtils.isNotEmpty(submitRequest.getProperties())) {
-            if (submitRequest.hasProp(CoreOptions.FLINK_JVM_OPTIONS.key())) {
-                String jvmOpt =
-                    submitRequest.getProp(CoreOptions.FLINK_JVM_OPTIONS.key()).toString();
-                if (!jvmOpt.contains("-Dfile.encoding=")) {
-                    submitRequest
-                        .getProperties()
-                        .put(CoreOptions.FLINK_JVM_OPTIONS.key(), "-Dfile.encoding=UTF-8 " + jvmOpt);
-                }
-            }
-            for (Map.Entry<String, Object> entry : submitRequest.getProperties().entrySet()) {
-                if (entry.getKey().startsWith("env.")) {
-                    LOG.info("env opts:  {}: {}", entry.getKey(), entry.getValue());
-                    flinkConfig.setString(entry.getKey(), entry.getValue().toString());
-                }
-            }
-        }
-
         return flinkConfig;
     }
 
-    private List<CustomCommandLine> getCustomCommandLines(String flinkHome) throws Exception {
-        Configuration flinkDefaultConfiguration = getFlinkDefaultConfiguration(flinkHome);
-        String confDir = flinkHome + "/conf";
-        return CliFrontend.loadCustomCommandLines(flinkDefaultConfiguration, confDir);
+    private String tryGetSavepointPathIfNeed(SavepointRequestTrait request) {
+        if (!request.withSavepoint()) {
+            return null;
+        }
+        if (StringUtils.isNotBlank(request.savepointPath())) {
+            return request.savepointPath();
+        }
+        String configDir =
+            getOptionFromDefaultFlinkConfig(
+                request.flinkVersion().getFlinkHome(),
+                org.apache.flink.configuration.ConfigOptions.key(
+                    CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
+                    .stringType()
+                    .defaultValue(
+                        request.deployMode() == FlinkDeployMode.YARN_APPLICATION
+                            ? Workspace.remote().APP_SAVEPOINTS()
+                            : null));
+
+        AssertUtils.required(
+            StringUtils.isNotBlank(configDir),
+            "[StreamPark] deployMode: "
+                + request.deployMode().getName()
+                + ", savePoint path is null or invalid.");
+        return configDir;
     }
 
     private CommandLineAndConfig getCommandLineAndFlinkConfig(SubmitRequest submitRequest) throws Exception {
         Options commandLineOptions =
-            getCommandLineOptions(submitRequest.getFlinkVersion().flinkHome);
-        Map<String, Object> optionMap = new HashMap<>();
+            getCommandLineOptions(submitRequest.flinkVersion().getFlinkHome());
+        Map<String, Object> optionMap = buildOptionMap(submitRequest, commandLineOptions);
+        List<String> cliArgs = buildCliArgs(submitRequest, optionMap);
+        logger().info("cliArgs: " + String.join(" ", cliArgs));
+        CommandLine commandLine =
+            FlinkRunOption.parse(commandLineOptions, cliArgs.toArray(new String[0]), true);
 
-        for (Map.Entry<String, String> opt : submitRequest.getAppOption().entrySet()) {
+        CustomCommandLine activeCommandLine =
+            validateAndGetActiveCommandLine(
+                getCustomCommandLines(submitRequest.flinkVersion().getFlinkHome()), commandLine);
+
+        Configuration configuration =
+            applyConfiguration(
+                submitRequest.flinkVersion().getFlinkHome(), activeCommandLine, commandLine);
+
+        return new CommandLineAndConfig(commandLine, configuration);
+    }
+
+    private Map<String, Object> buildOptionMap(
+                                               SubmitRequest submitRequest,
+                                               Options commandLineOptions) {
+        Map<String, Object> optionMap = new HashMap<>();
+        Map<String, String> appOption = submitRequest.appOption();
+        for (Map.Entry<String, String> opt : appOption.entrySet()) {
             if (!commandLineOptions.hasOption(opt.getKey())) {
-                LOG.warn("param:{} is error,skip it.", opt.getKey());
+                logWarn("param:" + opt.getKey() + " is error,skip it.");
                 continue;
             }
             String option = commandLineOptions.getOption(opt.getKey().trim()).getOpt();
-            String optValue = opt.getValue();
-            if ("true".equalsIgnoreCase(optValue) || "false".equalsIgnoreCase(optValue)) {
-                if (Boolean.parseBoolean(optValue)) {
-                    optionMap.put("-" + option, true);
-                }
-            } else {
-                optionMap.put("-" + option, optValue);
+            Object parsedValue = parseOptionValue(opt.getValue());
+            if (Boolean.TRUE.equals(parsedValue)) {
+                optionMap.put("-" + option, true);
+            } else if (!(parsedValue instanceof Boolean)) {
+                optionMap.put("-" + option, parsedValue);
             }
         }
 
-        if (submitRequest.getSavePoint() != null) {
+        if (submitRequest.savePoint() != null) {
             optionMap.put(
-                "-" + FlinkRunOption.SAVEPOINT_PATH_OPTION.getOpt(), submitRequest.getSavePoint());
+                "-" + FlinkRunOption.SAVEPOINT_PATH_OPTION.getOpt(),
+                submitRequest.savePoint());
         }
 
-        for (String key : new String[]{"-e", "--executor", "-t", "--target"}) {
-            optionMap.remove(key);
+        optionMap.remove("-e");
+        optionMap.remove("--executor");
+        optionMap.remove("-t");
+        optionMap.remove("--target");
+        if (submitRequest.deployMode() != null) {
+            optionMap.put("-t", submitRequest.deployMode().getName());
         }
-        if (submitRequest.getDeployMode() != null) {
-            optionMap.put("-t", submitRequest.getDeployMode().getName());
-        }
+        return optionMap;
+    }
 
+    private List<String> buildCliArgs(SubmitRequest submitRequest, Map<String, Object> optionMap) {
         List<String> array = new ArrayList<>();
         for (Map.Entry<String, Object> opt : optionMap.entrySet()) {
             array.add(opt.getKey());
@@ -526,76 +763,72 @@ public abstract class FlinkClientTrait {
             }
         }
 
-        if (MapUtils.isNotEmpty(submitRequest.getProperties())) {
-            for (Map.Entry<String, Object> entry : submitRequest.getProperties().entrySet()) {
-                if (!entry.getKey().startsWith("env.")) {
-                    LOG.info("application dynamicProperties:  {} :{}", entry.getKey(), entry.getValue());
-                    array.add("-D" + entry.getKey() + "=" + entry.getValue());
+        if (MapUtils.isNotEmpty(submitRequest.properties())) {
+            for (Map.Entry<String, Object> key : submitRequest.properties().entrySet()) {
+                if (!key.getKey().startsWith("env.")) {
+                    logInfo(
+                        "application dynamicProperties:  "
+                            + key.getKey()
+                            + " :"
+                            + key.getValue());
+                    array.add("-D" + key.getKey() + "=" + key.getValue());
                 }
             }
         }
-
-        LOG.info("cliArgs: {}", String.join(" ", array));
-
-        CommandLine commandLine =
-            FlinkRunOption.parse(commandLineOptions, array.toArray(new String[0]), true);
-        CustomCommandLine activeCommandLine =
-            validateAndGetActiveCommandLine(
-                getCustomCommandLines(submitRequest.getFlinkVersion().flinkHome), commandLine);
-        Configuration configuration =
-            applyConfiguration(
-                submitRequest.getFlinkVersion().flinkHome, activeCommandLine, commandLine);
-        return new CommandLineAndConfig(commandLine, configuration);
+        return array;
     }
 
-    private List<String> extractProgramArgs(SubmitRequest submitRequest) throws Exception {
+    private List<String> extractProgramArgs(SubmitRequest submitRequest) {
         List<String> programArgs = new ArrayList<>();
-        programArgs.addAll(FlinkConfigurationUtils.extractArguments(submitRequest.getArgs()));
+        programArgs.addAll(FlinkConfigurationUtils.extractArguments(submitRequest.args()));
 
-        if (submitRequest.getApplicationType() == ApplicationType.STREAMPARK_FLINK) {
+        if (submitRequest.applicationType() == ApplicationType.STREAMPARK_FLINK) {
             programArgs.add(paramKeyFlinkConf);
-            programArgs.add(submitRequest.getFlinkYaml());
+            programArgs.add(submitRequest.flinkYaml());
             programArgs.add(paramKeyAppName);
-            programArgs.add(DeflaterUtils.zipString(submitRequest.getEffectiveAppName()));
+            programArgs.add(DeflaterUtils.zipString(submitRequest.effectiveAppName()));
             programArgs.add(paramKeyFlinkParallelism);
             programArgs.add(getParallelism(submitRequest).toString());
 
-            if (submitRequest.getJobType() == FlinkJobType.FLINK_SQL) {
+            if (submitRequest.jobType() == FlinkJobType.FLINK_SQL) {
                 programArgs.add(paramKeyFlinkSql);
-                programArgs.add(submitRequest.getFlinkSQL());
-                if (submitRequest.getAppConf() != null) {
+                programArgs.add(submitRequest.flinkSQL());
+                if (submitRequest.appConf() != null) {
                     programArgs.add(paramKeyAppConf);
-                    programArgs.add(submitRequest.getAppConf());
+                    programArgs.add(submitRequest.appConf());
                 }
-            } else if (submitRequest.getAppConf() == null
-                || !submitRequest.getAppConf().startsWith("json:")) {
+            } else if (shouldAddAppConf(submitRequest.appConf())) {
                 programArgs.add(paramKeyAppConf);
-                programArgs.add(submitRequest.getAppConf());
+                programArgs.add(submitRequest.appConf());
             }
         }
 
-        if (submitRequest.getProperties().containsKey(ExecutionOptions.RUNTIME_MODE.key())) {
+        if (MapUtils.isNotEmpty(submitRequest.properties())
+            && submitRequest.properties().containsKey(ExecutionOptions.RUNTIME_MODE.key())) {
+            String runtimeMode =
+                submitRequest.properties().get(ExecutionOptions.RUNTIME_MODE.key()).toString();
             programArgs.add("--" + ExecutionOptions.RUNTIME_MODE.key());
-            programArgs.add(
-                submitRequest.getProperties().get(ExecutionOptions.RUNTIME_MODE.key()).toString());
+            programArgs.add(runtimeMode);
         }
 
-        if (submitRequest.getJobType() == FlinkJobType.PYFLINK
-            && submitRequest.getDeployMode() != FlinkDeployMode.YARN_APPLICATION) {
+        if (submitRequest.jobType() == FlinkJobType.PYFLINK
+            && submitRequest.deployMode() != FlinkDeployMode.YARN_APPLICATION) {
             programArgs.add("-py");
-            programArgs.add(submitRequest.getUserJarFile().getAbsolutePath());
+            programArgs.add(submitRequest.userJarFile().getAbsolutePath());
         }
 
-        return programArgs;
+        return Lists.newArrayList(programArgs);
     }
 
     private Configuration applyConfiguration(
                                              String flinkHome, CustomCommandLine activeCustomCommandLine,
                                              CommandLine commandLine) throws Exception {
-        Preconditions.checkNotNull(activeCustomCommandLine, "activeCustomCommandLine must not be null.");
+        Preconditions.checkNotNull(
+            activeCustomCommandLine, "activeCustomCommandLine must not be null.");
         Configuration configuration = new Configuration();
         Configuration flinkDefaultConfiguration = getFlinkDefaultConfiguration(flinkHome);
-        for (String key : flinkDefaultConfiguration.keySet()) {
+        Set<String> keys = flinkDefaultConfiguration.keySet();
+        for (String key : keys) {
             String value = flinkDefaultConfiguration.getString(key, null);
             if (value != null) {
                 configuration.setString(key, value);
@@ -605,32 +838,26 @@ public abstract class FlinkClientTrait {
         return configuration;
     }
 
-    private String tryGetSavepointPathIfNeed(SavepointRequestTrait request) {
-        if (!request.isWithSavepoint()) {
-            return null;
+    private static Object parseOptionValue(String value) {
+        if ("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
+            return Boolean.parseBoolean(value);
         }
-        if (StringUtils.isNotBlank(request.getSavepointPath())) {
-            return request.getSavepointPath();
-        }
-        String configDir =
-            getOptionFromDefaultFlinkConfig(
-                request.getFlinkVersion().flinkHome,
-                ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
-                    .stringType()
-                    .defaultValue(
-                        request.getDeployMode() == FlinkDeployMode.YARN_APPLICATION
-                            ? Workspace.remote().getAppSavepoints()
-                            : null));
-        AssertUtils.required(
-            StringUtils.isNotBlank(configDir),
-            "[StreamPark] deployMode: "
-                + request.getDeployMode().getName()
-                + ", savePoint path is null or invalid.");
-        return configDir;
+        return value;
     }
 
-    private String formatProperties(Map<String, Object> properties) {
-        if (properties == null) {
+    private static boolean shouldAddAppConf(String appConf) {
+        if (appConf == null) {
+            return true;
+        }
+        try {
+            return !appConf.startsWith("json:");
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
+    private static String formatProperties(Map<String, Object> properties) {
+        if (MapUtils.isEmpty(properties)) {
             return "";
         }
         return properties.entrySet().stream()
@@ -638,37 +865,20 @@ public abstract class FlinkClientTrait {
             .collect(Collectors.joining(" "));
     }
 
-    protected static final class JobGraphPackagedProgram {
+    @FunctionalInterface
+    protected interface SubmitFunc {
 
-        public final PackagedProgram packagedProgram;
-        public final JobGraph jobGraph;
-
-        JobGraphPackagedProgram(PackagedProgram packagedProgram, JobGraph jobGraph) {
-            this.packagedProgram = packagedProgram;
-            this.jobGraph = jobGraph;
-        }
+        SubmitResponse apply(SubmitRequest request, Configuration config, File jarFile) throws FlinkException;
     }
 
     private static final class CommandLineAndConfig {
 
-        private final CommandLine commandLine;
-        private final Configuration flinkConfig;
+        final CommandLine commandLine;
+        final Configuration flinkConfig;
 
         CommandLineAndConfig(CommandLine commandLine, Configuration flinkConfig) {
             this.commandLine = commandLine;
             this.flinkConfig = flinkConfig;
         }
-    }
-
-    @FunctionalInterface
-    protected interface SubmitFunction {
-
-        SubmitResponse apply(SubmitRequest submitRequest, Configuration flinkConfig, File jarFile) throws Exception;
-    }
-
-    @FunctionalInterface
-    protected interface ClusterClientAction<O, C> {
-
-        O apply(JobID jobId, ClusterClient<C> client) throws Exception;
     }
 }

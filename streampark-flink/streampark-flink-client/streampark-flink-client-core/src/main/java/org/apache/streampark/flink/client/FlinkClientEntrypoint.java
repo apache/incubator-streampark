@@ -37,10 +37,12 @@ import org.apache.streampark.flink.client.impl.YarnPerJobClient;
 import org.apache.streampark.flink.client.impl.YarnSessionClient;
 import org.apache.streampark.flink.client.trait.FlinkClientTrait;
 
+import org.apache.flink.util.FlinkException;
+
 import java.util.EnumMap;
 import java.util.Map;
 
-/** Flink client entrypoint invoked from version-specific classloader. */
+/** Entry point for Flink client operations routed by deploy mode. */
 public final class FlinkClientEntrypoint {
 
     private static final Map<FlinkDeployMode, FlinkClientTrait> CLIENTS = new EnumMap<>(FlinkDeployMode.class);
@@ -51,59 +53,69 @@ public final class FlinkClientEntrypoint {
         CLIENTS.put(FlinkDeployMode.YARN_APPLICATION, YarnApplicationClient.INSTANCE);
         CLIENTS.put(FlinkDeployMode.YARN_SESSION, YarnSessionClient.INSTANCE);
         CLIENTS.put(FlinkDeployMode.YARN_PER_JOB, YarnPerJobClient.INSTANCE);
-        CLIENTS.put(FlinkDeployMode.KUBERNETES_NATIVE_SESSION, KubernetesNativeSessionClient.INSTANCE);
-        CLIENTS.put(FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION, KubernetesNativeApplicationClient.INSTANCE);
+        CLIENTS.put(
+            FlinkDeployMode.KUBERNETES_NATIVE_SESSION, KubernetesNativeSessionClient.INSTANCE);
+        CLIENTS.put(
+            FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION,
+            KubernetesNativeApplicationClient.INSTANCE);
     }
 
     private FlinkClientEntrypoint() {
     }
 
-    public static SubmitResponse submit(SubmitRequest submitRequest) throws Exception {
-        FlinkClientTrait client = CLIENTS.get(submitRequest.getDeployMode());
-        if (client == null) {
-            throw new UnsupportedOperationException(
-                "Unsupported " + submitRequest.getDeployMode() + " submit ");
-        }
-        return client.submit(submitRequest);
+    @FunctionalInterface
+    private interface ClientInvoker<R> {
+
+        R invoke(FlinkClientTrait client) throws FlinkException;
     }
 
-    public static CancelResponse cancel(CancelRequest cancelRequest) throws Exception {
-        FlinkClientTrait client = CLIENTS.get(cancelRequest.getDeployMode());
-        if (client == null) {
-            throw new UnsupportedOperationException(
-                "Unsupported " + cancelRequest.getDeployMode() + " cancel ");
+    private static <R> R invokeClient(
+                                      FlinkDeployMode deployMode,
+                                      ClientInvoker<R> invoker,
+                                      String action) throws FlinkException {
+        FlinkClientTrait client = CLIENTS.get(deployMode);
+        if (client != null) {
+            return invoker.invoke(client);
         }
-        return client.cancel(cancelRequest);
+        throw new UnsupportedOperationException("Unsupported " + deployMode + " " + action);
     }
 
-    public static SavepointResponse triggerSavepoint(TriggerSavepointRequest savepointRequest) throws Exception {
-        FlinkClientTrait client = CLIENTS.get(savepointRequest.getDeployMode());
-        if (client == null) {
-            throw new UnsupportedOperationException(
-                "Unsupported " + savepointRequest.getDeployMode() + " triggerSavepoint ");
-        }
-        return client.triggerSavepoint(savepointRequest);
+    public static SubmitResponse submit(SubmitRequest submitRequest) throws FlinkException {
+        return invokeClient(
+            submitRequest.deployMode(), client -> client.submit(submitRequest), "submit");
+    }
+
+    public static CancelResponse cancel(CancelRequest cancelRequest) throws FlinkException {
+        return invokeClient(
+            cancelRequest.deployMode(), client -> client.cancel(cancelRequest), "cancel");
+    }
+
+    public static SavepointResponse triggerSavepoint(TriggerSavepointRequest savepointRequest) throws FlinkException {
+        return invokeClient(
+            savepointRequest.deployMode(),
+            client -> client.triggerSavepoint(savepointRequest),
+            "triggerSavepoint");
     }
 
     public static DeployResponse deploy(DeployRequest deployRequest) throws Exception {
-        if (deployRequest.getDeployMode() == FlinkDeployMode.YARN_SESSION) {
+        if (deployRequest.deployMode() == FlinkDeployMode.YARN_SESSION) {
             return YarnSessionClient.INSTANCE.deploy(deployRequest);
         }
-        if (deployRequest.getDeployMode() == FlinkDeployMode.KUBERNETES_NATIVE_SESSION) {
+        if (deployRequest.deployMode() == FlinkDeployMode.KUBERNETES_NATIVE_SESSION) {
             return KubernetesNativeSessionClient.INSTANCE.deploy(deployRequest);
         }
         throw new UnsupportedOperationException(
-            "Unsupported " + deployRequest.getDeployMode() + " deploy cluster ");
+            "Unsupported " + deployRequest.deployMode() + " deploy cluster ");
     }
 
     public static ShutDownResponse shutdown(ShutDownRequest shutDownRequest) throws Exception {
-        if (shutDownRequest.getDeployMode() == FlinkDeployMode.YARN_SESSION) {
+        if (shutDownRequest.deployMode() == FlinkDeployMode.YARN_SESSION) {
             return YarnSessionClient.INSTANCE.shutdown(shutDownRequest);
         }
-        if (shutDownRequest.getDeployMode() == FlinkDeployMode.KUBERNETES_NATIVE_SESSION) {
+        if (shutDownRequest.deployMode() == FlinkDeployMode.KUBERNETES_NATIVE_SESSION) {
             return KubernetesNativeSessionClient.INSTANCE.shutdown(shutDownRequest);
         }
         throw new UnsupportedOperationException(
-            "Unsupported " + shutDownRequest.getDeployMode() + " shutdown cluster ");
+            "Unsupported " + shutDownRequest.deployMode() + " shutdown cluster ");
     }
 }

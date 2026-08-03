@@ -19,40 +19,99 @@ package org.apache.streampark.flink.packer.pipeline;
 
 import org.apache.streampark.common.util.Utils;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
-
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
+/**
+ * Snapshot for a BuildPipeline instance.
+ *
+ * @param emitTime snapshot interception time
+ * @param stepStatus StepSeq -> (PipeStepStatus -> status update timestamp)
+ */
 public class PipelineSnapshot {
 
-    private String appName;
-    private PipelineTypeEnum pipeType;
-    private PipelineStatusEnum pipeStatus;
-    private int curStep;
-    private int allSteps;
-    private Map<Integer, Map.Entry<PipelineStepStatusEnum, Long>> stepStatus;
-    private PipeError error;
-    private long emitTime;
+    private final String appName;
+    private final PipelineTypeEnum pipeType;
+    private final PipelineStatusEnum pipeStatus;
+    private final int curStep;
+    private final int allSteps;
+    private final Map<Integer, Map.Entry<PipelineStepStatusEnum, Long>> stepStatus;
+    private final PipeError error;
+    private final long emitTime;
+
+    public PipelineSnapshot(
+                            String appName,
+                            PipelineTypeEnum pipeType,
+                            PipelineStatusEnum pipeStatus,
+                            int curStep,
+                            int allSteps,
+                            Map<Integer, Map.Entry<PipelineStepStatusEnum, Long>> stepStatus,
+                            PipeError error,
+                            long emitTime) {
+        this.appName = appName;
+        this.pipeType = pipeType;
+        this.pipeStatus = pipeStatus;
+        this.curStep = curStep;
+        this.allSteps = allSteps;
+        this.stepStatus = stepStatus;
+        this.error = error;
+        this.emitTime = emitTime;
+    }
+
+    public String appName() {
+        return appName;
+    }
+
+    public PipelineTypeEnum pipeType() {
+        return pipeType;
+    }
+
+    public PipelineStatusEnum pipeStatus() {
+        return pipeStatus;
+    }
+
+    public int curStep() {
+        return curStep;
+    }
+
+    public int allSteps() {
+        return allSteps;
+    }
+
+    public Map<Integer, Map.Entry<PipelineStepStatusEnum, Long>> stepStatus() {
+        return stepStatus;
+    }
+
+    public PipeError error() {
+        return error;
+    }
+
+    public long emitTime() {
+        return emitTime;
+    }
 
     public double percent() {
         return Utils.calPercent(curStep, allSteps);
     }
 
+    public Map<Integer, Map.Entry<PipelineStepStatusEnum, Long>> stepStatusAsJava() {
+        Map<Integer, Map.Entry<PipelineStepStatusEnum, Long>> result = new HashMap<>();
+        stepStatus.forEach(
+            (key, value) -> result.put(
+                key,
+                new AbstractMap.SimpleEntry<>(value.getKey(), value.getValue())));
+        return result;
+    }
+
     public Map<Integer, PipelineStepStatusEnum> pureStepStatusAsJava() {
-        Map<Integer, PipelineStepStatusEnum> map = new HashMap<>();
-        stepStatus.forEach((k, v) -> map.put(k, v.getKey()));
-        return map;
+        return stepStatus.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getKey()));
     }
 
     public Map<Integer, Long> stepStatusTimestampAsJava() {
-        Map<Integer, Long> map = new HashMap<>();
-        stepStatus.forEach((k, v) -> map.put(k, v.getValue()));
-        return map;
+        return stepStatus.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue()));
     }
 }

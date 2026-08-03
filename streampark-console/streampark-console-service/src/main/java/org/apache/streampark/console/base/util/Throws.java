@@ -28,13 +28,14 @@ import javax.annotation.Nonnull;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
+import scala.Tuple2;
 
 /** The util to throw a sub-exception of {@link RuntimeException} for the specified condition. */
 public class Throws {
 
-    private static final Cache<ConstructorKey, Constructor<?>> CACHE = Caffeine.newBuilder()
+    private static final Cache<Tuple2<Class<?>, Class<?>>, Constructor<?>> CACHE = Caffeine.newBuilder()
         .expireAfterAccess(1, TimeUnit.DAYS).maximumSize(32).build();
 
     private Throws() {
@@ -166,7 +167,7 @@ public class Throws {
                                                                                  @Nonnull Class<T> exceptionClass,
                                                                                  String... errorMsgs) throws InvocationTargetException, InstantiationException, IllegalAccessException {
         AssertUtils.notNull(exceptionClass, "The target exception must be specified.");
-        ConstructorKey key = new ConstructorKey(exceptionClass, hasElements(errorMsgs) ? String.class : null);
+        Tuple2<Class<?>, Class<?>> key = new Tuple2<>(exceptionClass, hasElements(errorMsgs) ? String.class : null);
         Constructor<?> constructor = CACHE.get(
             key,
             classAndParams -> {
@@ -198,34 +199,5 @@ public class Throws {
             return msgFormat;
         }
         return String.format(msgFormat, args);
-    }
-
-    private static final class ConstructorKey {
-
-        private final Class<?> exceptionClass;
-        private final Class<?> paramClass;
-
-        private ConstructorKey(Class<?> exceptionClass, Class<?> paramClass) {
-            this.exceptionClass = exceptionClass;
-            this.paramClass = paramClass;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof ConstructorKey)) {
-                return false;
-            }
-            ConstructorKey other = (ConstructorKey) obj;
-            return Objects.equals(exceptionClass, other.exceptionClass)
-                && Objects.equals(paramClass, other.paramClass);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(exceptionClass, paramClass);
-        }
     }
 }

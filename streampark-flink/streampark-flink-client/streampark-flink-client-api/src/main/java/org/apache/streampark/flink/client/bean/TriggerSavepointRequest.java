@@ -18,35 +18,37 @@
 package org.apache.streampark.flink.client.bean;
 
 import org.apache.streampark.common.conf.FlinkVersion;
-import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.FlinkDeployMode;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.annotation.Nullable;
 
 import java.util.Map;
 
 /** Trigger savepoint request. */
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class TriggerSavepointRequest implements SavepointRequestTrait {
+public class TriggerSavepointRequest extends AbstractSavepointClientRequest {
 
-    private long id;
-    private FlinkVersion flinkVersion;
-    private FlinkDeployMode deployMode;
+    private static final long serialVersionUID = 1L;
 
-    @Nullable
-    private Map<String, Object> properties;
+    private final SavepointTriggerOptions savepointOptions;
 
-    private String clusterId;
-    private String jobId;
-    private String savepointPath;
-    private boolean nativeFormat;
+    public TriggerSavepointRequest(
+                                   long id,
+                                   FlinkVersion flinkVersion,
+                                   FlinkDeployMode deployMode,
+                                   @Nullable Map<String, Object> properties,
+                                   JobClientTarget target,
+                                   SavepointTriggerOptions savepointOptions) {
+        super(id, flinkVersion, deployMode, properties, target);
+        this.savepointOptions = savepointOptions;
+    }
 
-    @Nullable
-    private String kubernetesNamespace = Constants.DEFAULT;
+    @Override
+    public String savepointPath() {
+        return savepointOptions.savepointPath();
+    }
+
+    @Override
+    public boolean nativeFormat() {
+        return savepointOptions.nativeFormat();
+    }
 }

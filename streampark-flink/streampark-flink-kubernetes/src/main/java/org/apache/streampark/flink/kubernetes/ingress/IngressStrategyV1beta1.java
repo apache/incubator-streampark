@@ -29,69 +29,103 @@ import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.client.DefaultKu
 import java.util.HashMap;
 import java.util.Map;
 
-public class IngressStrategyV1beta1 extends IngressStrategy {
+public class IngressStrategyV1beta1 implements IngressStrategy {
 
     @Override
     public String getIngressUrl(String nameSpace, String clusterId, ClusterClient<?> clusterClient) {
-        return AutoCloseUtils.using(new DefaultKubernetesClient(), client -> {
-            try {
-                Ingress ingress =
-                    client.network().v1beta1().ingresses().inNamespace(nameSpace).withName(clusterId).get();
-                if (ingress != null && ingress.getSpec() != null && !ingress.getSpec().getRules().isEmpty()) {
-                    var rule = ingress.getSpec().getRules().get(0);
-                    return "http://" + rule.getHost() + rule.getHttp().getPaths().get(0).getPath();
-                }
-                return AutoCloseUtils.using(clusterClient, ClusterClient::getWebInterfaceURL);
-            } catch (Exception e) {
-                throw new RuntimeException("[StreamPark] get ingressUrlAddress error: " + e.getMessage(), e);
+        return AutoCloseUtils.using(
+            new DefaultKubernetesClient(),
+            client -> resolveIngressUrl(client, nameSpace, clusterId, clusterClient));
+    }
+
+    private String resolveIngressUrl(
+                                     DefaultKubernetesClient client,
+                                     String nameSpace,
+                                     String clusterId,
+                                     ClusterClient<?> clusterClient) {
+        try {
+            Ingress ingress = loadIngress(client, nameSpace, clusterId);
+            String ingressUrl = buildIngressUrl(ingress);
+            if (ingressUrl != null) {
+                return ingressUrl;
             }
-        });
+            return clusterClient.getWebInterfaceURL();
+        } catch (Exception e) {
+            throw new RuntimeException("[StreamPark] get ingressUrlAddress error: " + e, e);
+        }
+    }
+
+    private Ingress loadIngress(DefaultKubernetesClient client, String nameSpace, String clusterId) {
+        try {
+            return client.network().v1beta1().ingresses().inNamespace(nameSpace).withName(clusterId).get();
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private String buildIngressUrl(Ingress ingress) {
+        if (ingress == null
+            || ingress.getSpec() == null
+            || ingress.getSpec().getRules().isEmpty()
+            || ingress.getSpec().getRules().get(0).getHttp() == null
+            || ingress.getSpec().getRules().get(0).getHttp().getPaths().isEmpty()) {
+            return null;
+        }
+        String host = ingress.getSpec().getRules().get(0).getHost();
+        String path = ingress.getSpec().getRules().get(0).getHttp().getPaths().get(0).getPath();
+        if (host == null || path == null) {
+            return null;
+        }
+        return "http://" + host + path;
     }
 
     @Override
-    protected Map<String, String> buildIngressAnnotations(String clusterId, String namespace) {
-        Map<String, String> map = new HashMap<>(super.buildIngressAnnotations(clusterId, namespace));
-        if (StringUtils.isNotBlank(ingressClass)) {
-            map.put("kubernetes.io/ingress.class", ingressClass);
+    public Map<String, String> buildIngressAnnotations(String clusterId, String namespace) {
+        Map<String, String> map = new HashMap<>(IngressStrategy.super.buildIngressAnnotations(clusterId, namespace));
+        if (StringUtils.isNotBlank(ingressClass())) {
+            map.put("kubernetes.io/ingress.class", ingressClass());
         }
         return map;
     }
 
     @Override
     public void configureIngress(String domainName, String clusterId, String nameSpace) {
-        AutoCloseUtils.using(new DefaultKubernetesClient(), client -> {
-            var ownerReference = getOwnerReference(nameSpace, clusterId, client);
-            var ingress = new IngressBuilder()
-                .withNewMetadata()
-                .withName(clusterId)
-                .addToAnnotations(buildIngressAnnotations(clusterId, nameSpace))
-                .addToLabels(buildIngressLabels(clusterId))
-                .addToOwnerReferences(ownerReference)
-                .endMetadata()
-                .withNewSpec()
-                .addNewRule()
-                .withHost(domainName)
-                .withNewHttp()
-                .addNewPath()
-                .withPath("/" + nameSpace + "/" + clusterId + "/")
-                .withNewBackend()
-                .withServiceName(clusterId + "-rest")
-                .withServicePort(new IntOrString("rest"))
-                .endBackend()
-                .endPath()
-                .addNewPath()
-                .withPath("/" + nameSpace + "/" + clusterId + "(/|$)(.*)")
-                .withNewBackend()
-                .withServiceName(clusterId + "-rest")
-                .withServicePort(new IntOrString("rest"))
-                .endBackend()
-                .endPath()
-                .endHttp()
-                .endRule()
-                .endSpec()
-                .build();
-            client.network().ingresses().inNamespace(nameSpace).create(ingress);
-            return null;
-        });
+        AutoCloseUtils.using(
+            new DefaultKubernetesClient(),
+            client -> {
+                var ownerReference = getOwnerReference(nameSpace, clusterId, client);
+                Ingress ingress =
+                    new IngressBuilder()
+                        .withNewMetadata()
+                        .withName(clusterId)
+                        .addToAnnotations(buildIngressAnnotations(clusterId, nameSpace))
+                        .addToLabels(buildIngressLabels(clusterId))
+                        .addToOwnerReferences(ownerReference)
+                        .endMetadata()
+                        .withNewSpec()
+                        .addNewRule()
+                        .withHost(domainName)
+                        .withNewHttp()
+                        .addNewPath()
+                        .withPath("/" + nameSpace + "/" + clusterId + "/")
+                        .withNewBackend()
+                        .withServiceName(clusterId + "-rest")
+                        .withServicePort(new IntOrString("rest"))
+                        .endBackend()
+                        .endPath()
+                        .addNewPath()
+                        .withPath("/" + nameSpace + "/" + clusterId + "(/|$)(.*)")
+                        .withNewBackend()
+                        .withServiceName(clusterId + "-rest")
+                        .withServicePort(new IntOrString("rest"))
+                        .endBackend()
+                        .endPath()
+                        .endHttp()
+                        .endRule()
+                        .endSpec()
+                        .build();
+                client.network().ingress().inNamespace(nameSpace).create(ingress);
+                return null;
+            });
     }
 }

@@ -18,23 +18,30 @@
 package org.apache.streampark.flink.packer.pipeline;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
 
-import java.util.Collections;
 import java.util.List;
 
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
+/** snapshot for building docker image progress. */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DockerBuildSnapshot {
 
-    private List<String> detail;
-    private long emitTime;
+    private final List<String> detail;
+    private final long emitTime;
+
+    public DockerBuildSnapshot(List<String> detail, long emitTime) {
+        this.detail = detail;
+        this.emitTime = emitTime;
+    }
+
+    public List<String> detail() {
+        return detail;
+    }
+
+    public long emitTime() {
+        return emitTime;
+    }
 
     public List<String> detailAsJava() {
-        return detail == null ? Collections.emptyList() : detail;
+        return detail;
     }
 }

@@ -21,34 +21,70 @@ import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import javax.annotation.Nullable;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class KubernetesDeployParam {
+import java.io.Serializable;
 
-    private String clusterId;
+public class KubernetesDeployParam implements Serializable {
 
-    @Builder.Default
-    private String kubernetesNamespace = KubernetesConfigOptions.NAMESPACE.defaultValue();
+    private static final long serialVersionUID = 1L;
 
-    @Builder.Default
-    private String kubeConf = "~/.kube/config";
+    private final String clusterId;
+    private final String kubernetesNamespace;
+    private final String kubeConf;
+    private final String serviceAccount;
+    private final String flinkImage;
+    @Nullable
+    private final FlinkK8sRestExposedType flinkRestExposedType;
 
-    @Builder.Default
-    private String serviceAccount = KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT.defaultValue();
+    public KubernetesDeployParam(String clusterId) {
+        this(
+            clusterId,
+            KubernetesConfigOptions.NAMESPACE.defaultValue(),
+            "~/.kube/config",
+            KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT.defaultValue(),
+            KubernetesConfigOptions.CONTAINER_IMAGE.defaultValue(),
+            FlinkK8sRestExposedType.CLUSTER_IP);
+    }
 
-    @Builder.Default
-    private String flinkImage = KubernetesConfigOptions.CONTAINER_IMAGE.defaultValue();
+    public KubernetesDeployParam(
+                                 String clusterId,
+                                 String kubernetesNamespace,
+                                 String kubeConf,
+                                 String serviceAccount,
+                                 String flinkImage,
+                                 @Nullable FlinkK8sRestExposedType flinkRestExposedType) {
+        this.clusterId = clusterId;
+        this.kubernetesNamespace = kubernetesNamespace;
+        this.kubeConf = kubeConf;
+        this.serviceAccount = serviceAccount;
+        this.flinkImage = flinkImage;
+        this.flinkRestExposedType =
+            flinkRestExposedType != null ? flinkRestExposedType : FlinkK8sRestExposedType.CLUSTER_IP;
+    }
+
+    public String clusterId() {
+        return clusterId;
+    }
+
+    public String kubernetesNamespace() {
+        return kubernetesNamespace;
+    }
+
+    public String kubeConf() {
+        return kubeConf;
+    }
+
+    public String serviceAccount() {
+        return serviceAccount;
+    }
+
+    public String flinkImage() {
+        return flinkImage;
+    }
 
     @Nullable
-    @Builder.Default
-    private FlinkK8sRestExposedType flinkRestExposedType = FlinkK8sRestExposedType.CLUSTER_IP;
+    public FlinkK8sRestExposedType flinkRestExposedType() {
+        return flinkRestExposedType;
+    }
 }

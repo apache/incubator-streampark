@@ -22,10 +22,9 @@ import org.apache.streampark.common.enums.SparkJobType;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.fs.LfsOperator;
+import org.apache.streampark.common.util.AutoCloseUtils;
 import org.apache.streampark.flink.packer.maven.MavenTool;
-import org.apache.streampark.flink.packer.pipeline.BuildParam;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
-import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
 import org.apache.streampark.flink.packer.pipeline.SimpleBuildResponse;
 import org.apache.streampark.flink.packer.pipeline.SparkYarnBuildRequest;
@@ -34,11 +33,12 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
-/** Building pipeline for spark yarn application mode. */
+/** Building pipeline for spark yarn application mode */
 public class SparkYarnBuildPipeline extends BuildPipeline {
 
     private final SparkYarnBuildRequest request;
@@ -47,65 +47,69 @@ public class SparkYarnBuildPipeline extends BuildPipeline {
         this.request = request;
     }
 
-    public static SparkYarnBuildPipeline of(SparkYarnBuildRequest request) {
-        return new SparkYarnBuildPipeline(request);
-    }
-
     @Override
-    public PipelineTypeEnum getPipeType() {
+    public PipelineTypeEnum pipeType() {
         return PipelineTypeEnum.SPARK_CLUSTER;
     }
 
     @Override
-    protected BuildParam offerBuildParam() {
+    public SparkYarnBuildRequest offerBuildParam() {
         return request;
     }
 
     @Override
-    protected BuildResult buildProcess() throws Throwable {
+    public SimpleBuildResponse buildProcess() {
         execStep(
             1,
             () -> {
                 if (request.jobType() == SparkJobType.SPARK_SQL) {
-                    LfsOperator.getInstance().mkCleanDirs(request.localWorkspace());
-                    HdfsOperator.getInstance().mkCleanDirs(request.yarnProvidedPath());
+                    LfsOperator.mkCleanDirs(request.localWorkspace());
+                    HdfsOperator.mkCleanDirs(request.yarnProvidedPath());
                 }
+                logInfo("Recreate building workspace: " + request.yarnProvidedPath());
                 return null;
             })
-                .orElseThrow(() -> getError().exception());
+                .orElseThrow(() -> {
+                    throw pipelineException();
+                });
 
         List<String> mavenJars =
             execStep(
                 2,
                 () -> {
                     if (request.jobType() == SparkJobType.SPARK_SQL) {
-                        List<String> paths = new ArrayList<>();
-                        MavenTool.resolveArtifacts(request.dependencyInfo().mavenArts())
-                            .forEach(f -> paths.add(f.getAbsolutePath()));
+                        List<File> mavenArts =
+                            MavenTool.resolveArtifacts(request.dependencyInfo().mavenArts());
+                        List<String> paths =
+                            mavenArts.stream()
+                                .map(File::getAbsolutePath)
+                                .collect(Collectors.toList());
                         paths.addAll(request.dependencyInfo().extJarLibs());
                         return paths;
                     }
                     return Collections.<String>emptyList();
                 })
-                    .orElseThrow(() -> getError().exception());
+                    .orElseThrow(() -> {
+                        throw pipelineException();
+                    });
 
         execStep(
             3,
             () -> {
                 for (String jar : mavenJars) {
-                    uploadJarToHdfsOrLfs(
-                        FsOperator.lfs(), jar, request.localWorkspace());
-                    uploadJarToHdfsOrLfs(
-                        FsOperator.hdfs(), jar, request.yarnProvidedPath());
+                    uploadJarToHdfsOrLfs(FsOperator.lfs(), jar, request.localWorkspace());
+                    uploadJarToHdfsOrLfs(FsOperator.hdfs(), jar, request.yarnProvidedPath());
                 }
                 return null;
             })
-                .orElseThrow(() -> getError().exception());
+                .orElseThrow(() -> {
+                    throw pipelineException();
+                });
+
         return new SimpleBuildResponse();
     }
 
-    @SuppressWarnings("java:S4790")
-    private void uploadJarToHdfsOrLfs(FsOperator fsOperator, String origin, String target) throws Exception {
+    private void uploadJarToHdfsOrLfs(FsOperator fsOperator, String origin, String target) throws IOException {
         File originFile = new File(origin);
         if (!fsOperator.exists(target)) {
             fsOperator.mkdirs(target);
@@ -114,15 +118,21 @@ public class SparkYarnBuildPipeline extends BuildPipeline {
             if (fsOperator == FsOperator.lfs()) {
                 fsOperator.copy(originFile.getAbsolutePath(), target);
             } else {
-                String uploadFile =
-                    Workspace.remote().getAppUploads() + "/" + originFile.getName();
+                String uploadFile = Workspace.remote().APP_UPLOADS() + "/" + originFile.getName();
                 if (fsOperator.exists(uploadFile)) {
-                    try (FileInputStream in = new FileInputStream(originFile)) {
-                        String localMd5 = DigestUtils.md5Hex(in); // NOSONAR java:S4790 - upload integrity check only
-                        if (!localMd5.equals(fsOperator.fileMd5(uploadFile))) {
-                            fsOperator.upload(originFile.getAbsolutePath(), uploadFile);
-                        }
-                    }
+                    AutoCloseUtils.using(
+                        new FileInputStream(originFile),
+                        inputStream -> {
+                            try {
+                                if (!DigestUtils.md5Hex(inputStream)
+                                    .equals(fsOperator.fileMd5(uploadFile))) {
+                                    fsOperator.upload(originFile.getAbsolutePath(), uploadFile);
+                                }
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                            return null;
+                        });
                 } else {
                     fsOperator.upload(originFile.getAbsolutePath(), uploadFile);
                 }
@@ -131,5 +141,9 @@ public class SparkYarnBuildPipeline extends BuildPipeline {
         } else if (fsOperator == FsOperator.hdfs()) {
             fsOperator.upload(originFile.getAbsolutePath(), target);
         }
+    }
+
+    public static SparkYarnBuildPipeline of(SparkYarnBuildRequest request) {
+        return new SparkYarnBuildPipeline(request);
     }
 }

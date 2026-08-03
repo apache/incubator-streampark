@@ -18,21 +18,71 @@
 package org.apache.streampark.flink.packer.pipeline;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Set;
 
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class K8sAppModeBuildResponse implements FlinkBuildResult {
+public class K8sAppModeBuildResponse extends AbstractFlinkBuildResponse {
 
-    private String workspacePath;
     private String flinkBaseImage;
     private String mainJarPath;
     private Set<String> extraLibJarPaths;
-    private boolean pass = false;
+
+    public K8sAppModeBuildResponse() {
+    }
+
+    public K8sAppModeBuildResponse(
+                                   String workspacePath,
+                                   String flinkBaseImage,
+                                   String mainJarPath,
+                                   Set<String> extraLibJarPaths,
+                                   boolean pass) {
+        super(workspacePath, pass);
+        this.flinkBaseImage = flinkBaseImage;
+        this.mainJarPath = mainJarPath;
+        this.extraLibJarPaths = extraLibJarPaths;
+    }
+
+    public String flinkBaseImage() {
+        return flinkBaseImage;
+    }
+
+    public String mainJarPath() {
+        return mainJarPath;
+    }
+
+    public Set<String> extraLibJarPaths() {
+        return extraLibJarPaths;
+    }
+
+    @JsonProperty("flinkBaseImage")
+    public void setFlinkBaseImage(String flinkBaseImage) {
+        this.flinkBaseImage = flinkBaseImage;
+    }
+
+    @JsonProperty("mainJarPath")
+    public void setMainJarPath(String mainJarPath) {
+        this.mainJarPath = mainJarPath;
+    }
+
+    @JsonProperty("extraLibJarPaths")
+    public void setExtraLibJarPaths(Set<String> extraLibJarPaths) {
+        this.extraLibJarPaths = extraLibJarPaths;
+    }
+
+    @Override
+    public String toString() {
+        return "{ workspacePath: "
+            + workspacePath()
+            + ", flinkBaseImage: "
+            + flinkBaseImage
+            + ", mainJarPath: "
+            + mainJarPath
+            + ", extraLibJarPaths: "
+            + extraLibJarPaths
+            + ", pass: "
+            + pass()
+            + " }";
+    }
 }

@@ -19,31 +19,52 @@ package org.apache.streampark.flink.packer.pipeline;
 
 import org.apache.streampark.common.util.Utils;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
-
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
+/** push/pull progress of per docker layer. */
 public class DockerLayerProgress {
 
-    private String layerId;
-    private String status;
-    private long current;
-    private long total;
+    private final String layerId;
+    private final String status;
+    private final long current;
+    private final long total;
+
+    public DockerLayerProgress(String layerId, String status, long current, long total) {
+        this.layerId = layerId;
+        this.status = status;
+        this.current = current;
+        this.total = total;
+    }
+
+    public String layerId() {
+        return layerId;
+    }
+
+    public String status() {
+        return status;
+    }
+
+    public long current() {
+        return current;
+    }
+
+    public long total() {
+        return total;
+    }
 
     public double percent() {
         return Utils.calPercent(current, total);
     }
 
     public double currentMb() {
-        return current / (1024.0 * 1024.0);
+        if (current == 0) {
+            return 0;
+        }
+        return Double.parseDouble(String.format("%.2f", current / (1024.0 * 1024.0)));
     }
 
     public double totalMb() {
-        return total / (1024.0 * 1024.0);
+        if (total == 0) {
+            return 0;
+        }
+        return Double.parseDouble(String.format("%.2f", total / (1024.0 * 1024.0)));
     }
 }

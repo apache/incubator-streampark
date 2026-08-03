@@ -26,51 +26,42 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 
 /** Local File System (aka LFS) Operator */
-public final class LfsOperator extends FsOperator {
-
-    private static final LfsOperator INSTANCE = new LfsOperator();
+public final class LfsOperator {
 
     private LfsOperator() {
     }
 
-    public static LfsOperator getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public boolean exists(String path) {
+    public static boolean exists(String path) {
         return StringUtils.isNotBlank(path) && new File(path).exists();
     }
 
-    @Override
-    public void mkdirs(String path) {
+    public static void mkdirs(String path) {
         if (!Utils.isAnyBank(path)) {
             try {
                 FileUtils.forceMkdir(new File(path));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new IllegalStateException("[StreamPark] Failed to mkdirs: " + path, e);
             }
         }
     }
 
-    @Override
-    public void delete(String path) {
+    public static void delete(String path) {
         if (Utils.isNotEmpty(path)) {
             File file = new File(path);
             if (file.exists()) {
                 try {
                     FileUtils.forceDelete(file);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new IllegalStateException("[StreamPark] Failed to delete: " + path, e);
                 }
             }
         }
     }
 
-    @Override
-    public void move(String srcPath, String dstPath) {
+    public static void move(String srcPath, String dstPath) {
         if (Utils.isAnyBank(srcPath, dstPath)) {
             return;
         }
@@ -84,13 +75,21 @@ public final class LfsOperator extends FsOperator {
                 return;
             }
             FileUtils.moveToDirectory(srcFile, dstFile, true);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new IllegalStateException(
+                "[StreamPark] Failed to move " + srcPath + " to " + dstPath, e);
         }
     }
 
-    @Override
-    public void upload(String srcPath, String dstPath, boolean delSrc, boolean overwrite) {
+    public static void upload(String srcPath, String dstPath) {
+        upload(srcPath, dstPath, false, true);
+    }
+
+    public static void upload(String srcPath, String dstPath, boolean delSrc) {
+        upload(srcPath, dstPath, delSrc, true);
+    }
+
+    public static void upload(String srcPath, String dstPath, boolean delSrc, boolean overwrite) {
         if (new File(srcPath).isDirectory()) {
             copyDir(srcPath, dstPath, delSrc, overwrite);
         } else {
@@ -98,8 +97,19 @@ public final class LfsOperator extends FsOperator {
         }
     }
 
-    @Override
-    public void copy(String srcPath, String dstPath, boolean delSrc, boolean overwrite) {
+    /**
+     * When the suffixes of srcPath and dstPath are the same, or the file names are the same, copy to
+     * the file, otherwise copy to the directory.
+     */
+    public static void copy(String srcPath, String dstPath) {
+        copy(srcPath, dstPath, false, true);
+    }
+
+    public static void copy(String srcPath, String dstPath, boolean delSrc) {
+        copy(srcPath, dstPath, delSrc, true);
+    }
+
+    public static void copy(String srcPath, String dstPath, boolean delSrc, boolean overwrite) {
         if (Utils.isAnyBank(srcPath, dstPath)) {
             return;
         }
@@ -110,36 +120,39 @@ public final class LfsOperator extends FsOperator {
         if (!srcFile.isFile()) {
             throw new IllegalArgumentException("[StreamPark] " + srcPath + " must be a file.");
         }
-        File dstFile;
-        File dstCandidate = new File(dstPath);
-        if (dstCandidate.exists()) {
-            dstFile = dstCandidate.isDirectory() ? new File(dstCandidate, srcFile.getName()) : dstCandidate;
-        } else {
-            if (!dstCandidate.getParentFile().exists()) {
-                throw new IllegalArgumentException(
-                    "[StreamPark] dstPath is invalid and does not exist. Please check");
-            }
-            dstFile = dstCandidate;
-        }
+        File dstFile = resolveCopyDestination(srcFile, dstPath);
         try {
             if (srcFile.getCanonicalPath().equals(dstFile.getCanonicalPath())) {
-                return;
+                throw new IllegalArgumentException(
+                    "[StreamPark] src and dst must not be the same path: " + srcPath);
             }
-            boolean shouldCopy =
-                overwrite || !dstFile.exists() || !dstFile.getName().equals(srcFile.getName());
-            if (shouldCopy) {
+        } catch (IOException e) {
+            throw new IllegalStateException("[StreamPark] Failed to resolve copy paths", e);
+        }
+        boolean shouldCopy =
+            overwrite || !dstFile.exists() || !dstFile.getName().equals(srcFile.getName());
+        if (shouldCopy) {
+            try {
                 FileUtils.copyFile(srcFile, dstFile);
                 if (delSrc) {
                     FileUtils.forceDelete(srcFile);
                 }
+            } catch (IOException e) {
+                throw new IllegalStateException(
+                    "[StreamPark] Failed to copy " + srcPath + " to " + dstPath, e);
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
-    @Override
-    public void copyDir(String srcPath, String dstPath, boolean delSrc, boolean overwrite) {
+    public static void copyDir(String srcPath, String dstPath) {
+        copyDir(srcPath, dstPath, false, true);
+    }
+
+    public static void copyDir(String srcPath, String dstPath, boolean delSrc) {
+        copyDir(srcPath, dstPath, delSrc, true);
+    }
+
+    public static void copyDir(String srcPath, String dstPath, boolean delSrc, boolean overwrite) {
         if (Utils.isAnyBank(srcPath, dstPath)) {
             return;
         }
@@ -151,24 +164,27 @@ public final class LfsOperator extends FsOperator {
             throw new IllegalArgumentException("[StreamPark] " + srcPath + " must be a directory.");
         }
         File dstFile = new File(dstPath);
+        boolean shouldCopy;
         try {
-            boolean shouldCopy =
-                overwrite
-                    || !dstFile.exists()
-                    || !srcFile.getCanonicalPath().equals(dstFile.getCanonicalPath());
-            if (shouldCopy) {
+            shouldCopy = overwrite || !dstFile.exists()
+                || !srcFile.getCanonicalPath().equals(dstFile.getCanonicalPath());
+        } catch (IOException e) {
+            throw new IllegalStateException("[StreamPark] Failed to resolve copyDir paths", e);
+        }
+        if (shouldCopy) {
+            try {
                 FileUtils.copyDirectory(srcFile, dstFile);
                 if (delSrc) {
                     FileUtils.deleteDirectory(srcFile);
                 }
+            } catch (IOException e) {
+                throw new IllegalStateException(
+                    "[StreamPark] Failed to copyDir " + srcPath + " to " + dstPath, e);
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
-    @Override
-    public String fileMd5(String path) {
+    public static String fileMd5(String path) {
         if (path == null || path.isEmpty()) {
             throw new IllegalArgumentException("[StreamPark] LFsOperator.fileMd5: file must not be null.");
         }
@@ -176,35 +192,47 @@ public final class LfsOperator extends FsOperator {
         if (!file.exists()) {
             throw new IllegalArgumentException("[StreamPark] LFsOperator.fileMd5: file must exists.");
         }
-        try {
-            // MD5 is used for non-cryptographic file integrity checks only.
-            @SuppressWarnings("java:S4790")
-            String digest = DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(path)));
-            return digest;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        try (FileInputStream inputStream = new FileInputStream(path)) {
+            return DigestUtils.md5Hex(IOUtils.toByteArray(inputStream));
+        } catch (IOException e) {
+            throw new IllegalStateException("[StreamPark] Failed to compute md5 for: " + path, e);
         }
     }
 
-    @Override
-    public void mkCleanDirs(String path) {
+    /** Force delete directory and recreate it. */
+    public static void mkCleanDirs(String path) {
         delete(path);
         mkdirs(path);
     }
 
     /** list file under directory, one level of traversal only */
-    public File[] listDir(String path) {
+    public static File[] listDir(String path) {
         if (path == null || path.trim().isEmpty()) {
             return new File[0];
         }
-        File f = new File(path);
-        if (!f.exists()) {
+        File file = new File(path);
+        if (!file.exists()) {
             return new File[0];
         }
-        if (f.isFile()) {
-            return new File[]{f};
+        if (file.isFile()) {
+            return new File[]{file};
         }
-        File[] files = f.listFiles();
+        File[] files = file.listFiles();
         return files != null ? files : new File[0];
+    }
+
+    private static File resolveCopyDestination(File srcFile, String dstPath) {
+        File dstFile = new File(dstPath);
+        if (dstFile.exists()) {
+            if (dstFile.isDirectory()) {
+                return new File(dstFile, srcFile.getName());
+            }
+            return dstFile;
+        }
+        if (!dstFile.getParentFile().exists()) {
+            throw new IllegalArgumentException(
+                "[StreamPark] dstPath is invalid and does not exist. Please check");
+        }
+        return dstFile;
     }
 }

@@ -23,6 +23,7 @@ import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
@@ -34,10 +35,18 @@ public abstract class SparkDockerfileTemplateTrait {
     protected static final String SPARK_LIB_PATH = "lib";
     protected static final String SPARK_HOME = "$SPARK_HOME";
 
+    private Path workspace;
+    private String mainJarName;
+    private String extraLibName;
+
     public abstract String workspacePath();
+
     public abstract String sparkBaseImage();
+
     public abstract String sparkMainJarPath();
+
     public abstract Set<String> sparkExtraLibPaths();
+
     public abstract String offerDockerfileContent();
 
     public String innerMainJarPath() {
@@ -45,52 +54,63 @@ public abstract class SparkDockerfileTemplateTrait {
     }
 
     protected Path workspace() {
-        Path path = Paths.get(workspacePath()).toAbsolutePath();
-        if (!LfsOperator.getInstance().exists(workspacePath())) {
-            LfsOperator.getInstance().mkdirs(workspacePath());
-        }
-        return path;
-    }
-
-    protected String mainJarName() {
-        Path mainJarPath = Paths.get(sparkMainJarPath()).toAbsolutePath();
-        if (!mainJarPath.getParent().equals(workspace())) {
-            LfsOperator.getInstance()
-                .copy(
-                    mainJarPath.toString(),
-                    workspace().toString() + "/" + mainJarPath.getFileName());
-        }
-        return mainJarPath.getFileName().toString();
-    }
-
-    protected String extraLibName() {
-        LfsOperator.getInstance().mkCleanDirs(workspace().toString() + "/" + SPARK_LIB_PATH);
-        for (String libPath : sparkExtraLibPaths()) {
-            File f = new File(libPath);
-            if (!f.exists() || !f.getName().endsWith(Constants.JAR_SUFFIX)) {
-                continue;
+        if (workspace == null) {
+            Path path = Paths.get(workspacePath()).toAbsolutePath();
+            if (!LfsOperator.exists(workspacePath())) {
+                LfsOperator.mkdirs(workspacePath());
             }
-            if (f.isDirectory()) {
-                File[] files = f.listFiles();
-                if (files == null) {
+            workspace = path;
+        }
+        return workspace;
+    }
+
+    public String mainJarName() {
+        if (mainJarName == null) {
+            Path mainJarPath = Paths.get(sparkMainJarPath()).toAbsolutePath();
+            if (!mainJarPath.getParent().equals(workspace())) {
+                LfsOperator.copy(
+                    mainJarPath.toString(),
+                    workspace().toString() + "/" + mainJarPath.getFileName().toString());
+            }
+            mainJarName = mainJarPath.getFileName().toString();
+        }
+        return mainJarName;
+    }
+
+    public String extraLibName() {
+        if (extraLibName == null) {
+            LfsOperator.mkCleanDirs(workspace().toString() + "/" + SPARK_LIB_PATH);
+            for (String libPath : sparkExtraLibPaths()) {
+                File f = new File(libPath);
+                if (!f.exists() || !f.getName().endsWith(Constants.JAR_SUFFIX)) {
                     continue;
                 }
-                for (File jar : files) {
-                    if (jar.isFile() && jar.getName().endsWith(Constants.JAR_SUFFIX)) {
-                        LfsOperator.getInstance()
-                            .copy(jar.getAbsolutePath(), workspace().toString() + "/" + SPARK_LIB_PATH);
+                if (f.isDirectory()) {
+                    File[] files = f.listFiles();
+                    if (files != null) {
+                        for (File file : files) {
+                            if (file.isFile() && file.getName().endsWith(Constants.JAR_SUFFIX)) {
+                                LfsOperator.copy(file.getAbsolutePath(), workspace().toString() + "/" + SPARK_LIB_PATH);
+                            }
+                        }
                     }
+                } else if (f.isFile()) {
+                    LfsOperator.copy(f.getAbsolutePath(), workspace().toString() + "/" + SPARK_LIB_PATH);
                 }
-            } else {
-                LfsOperator.getInstance()
-                    .copy(f.getAbsolutePath(), workspace().toString() + "/" + SPARK_LIB_PATH);
             }
+            extraLibName = SPARK_LIB_PATH;
         }
-        return SPARK_LIB_PATH;
+        return extraLibName;
     }
 
-    public File writeDockerfile() throws Exception {
+    public File writeDockerfile() throws IOException {
         File output = new File(workspacePath() + "/" + DEFAULT_DOCKER_FILE_NAME);
+        FileUtils.write(output, offerDockerfileContent(), "UTF-8");
+        return output;
+    }
+
+    public File writeDockerfile(String dockerfileName) throws IOException {
+        File output = new File(workspacePath() + "/" + dockerfileName);
         FileUtils.write(output, offerDockerfileContent(), "UTF-8");
         return output;
     }

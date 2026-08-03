@@ -17,8 +17,8 @@
 
 package org.apache.streampark.flink.kubernetes;
 
+import org.apache.streampark.common.util.LoggerSupport;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sDeployMode;
 import org.apache.streampark.flink.kubernetes.event.BuildInEvent;
 import org.apache.streampark.flink.kubernetes.event.FlinkJobStateEvent;
 import org.apache.streampark.flink.kubernetes.event.FlinkJobStatusChangeEvent;
@@ -42,34 +42,33 @@ import java.util.Optional;
 import java.util.Set;
 
 /** Default K8sFlinkTrackMonitor implementation. */
-public class DefaultFlinkK8sWatcher implements FlinkK8sWatcher {
+public class DefaultFlinkK8sWatcher extends LoggerSupport implements FlinkK8sWatcher {
 
-    protected final FlinkK8sWatchController watchController;
+    public final FlinkK8sWatchController watchController;
 
-    public FlinkK8sWatchController getWatchController() {
-        return watchController;
-    }
-    protected final ChangeEventBus eventBus;
+    private final ChangeEventBus eventBus;
     private final FlinkK8sEventWatcher k8sEventWatcher;
     private final FlinkJobStatusWatcher jobStatusWatcher;
     private final FlinkMetricWatcher metricsWatcher;
     private final FlinkCheckpointWatcher checkpointWatcher;
     private final FlinkWatcher[] allWatchers;
 
-    public DefaultFlinkK8sWatcher() {
-        this(FlinkTrackConfig.defaultConf());
-    }
-
     public DefaultFlinkK8sWatcher(FlinkTrackConfig conf) {
         this.watchController = new FlinkK8sWatchController(conf.jobStatusWatcherConf());
         this.eventBus = new ChangeEventBus();
         this.eventBus.registerListener(new BuildInEventListener());
         this.k8sEventWatcher = new FlinkK8sEventWatcher(watchController);
-        this.jobStatusWatcher = new FlinkJobStatusWatcher(conf.jobStatusWatcherConf(), watchController, eventBus);
-        this.metricsWatcher = new FlinkMetricWatcher(conf.metricWatcherConf(), watchController, eventBus);
-        this.checkpointWatcher = new FlinkCheckpointWatcher(conf.metricWatcherConf(), watchController, eventBus);
+        this.jobStatusWatcher =
+            new FlinkJobStatusWatcher(
+                conf.jobStatusWatcherConf(), watchController, eventBus);
+        this.metricsWatcher =
+            new FlinkMetricWatcher(conf.metricWatcherConf(), watchController, eventBus);
+        this.checkpointWatcher =
+            new FlinkCheckpointWatcher(conf.metricWatcherConf(), watchController, eventBus);
         this.allWatchers =
-            new FlinkWatcher[]{k8sEventWatcher, jobStatusWatcher, metricsWatcher, checkpointWatcher};
+            new FlinkWatcher[]{
+                    k8sEventWatcher, jobStatusWatcher, metricsWatcher, checkpointWatcher
+            };
     }
 
     @Override
@@ -158,21 +157,22 @@ public class DefaultFlinkK8sWatcher implements FlinkK8sWatcher {
         if (!trackId.isLegal()) {
             return false;
         }
-        if (trackId.executeMode() == FlinkK8sDeployMode.SESSION) {
-            return jobStatusWatcher
-                .touchSessionJob(trackId)
-                .map(JobStatusCV::jobState)
-                .filter(state -> state != FlinkJobState.LOST && state != FlinkJobState.SILENT)
-                .isPresent();
+        java.util.function.Predicate<FlinkJobState> nonLost =
+            state -> state != FlinkJobState.LOST || state != FlinkJobState.SILENT;
+        switch (trackId.executeMode()) {
+            case SESSION:
+                return jobStatusWatcher
+                    .touchSessionJob(trackId)
+                    .map(e -> nonLost.test(e.jobState()))
+                    .orElse(false);
+            case APPLICATION:
+                return jobStatusWatcher
+                    .touchApplicationJob(trackId)
+                    .map(e -> nonLost.test(e.jobState()))
+                    .orElse(false);
+            default:
+                return false;
         }
-        if (trackId.executeMode() == FlinkK8sDeployMode.APPLICATION) {
-            return jobStatusWatcher
-                .touchApplicationJob(trackId)
-                .map(JobStatusCV::jobState)
-                .filter(state -> state != FlinkJobState.LOST && state != FlinkJobState.SILENT)
-                .isPresent();
-        }
-        return false;
     }
 
     @Override
@@ -190,6 +190,7 @@ public class DefaultFlinkK8sWatcher implements FlinkK8sWatcher {
         return watchController.endpoints.get(trackId.toClusterKey());
     }
 
+    /** Build-in Event Listener of K8sFlinkTrackMonitor. */
     private class BuildInEventListener {
 
         @Subscribe
@@ -212,28 +213,15 @@ public class DefaultFlinkK8sWatcher implements FlinkK8sWatcher {
             if (!shouldIgnore) {
                 JobStatusCV newCache;
                 if (latest != null) {
-                    newCache = new JobStatusCV(
-                        event.jobState(),
-                        latest.jobId(),
-                        latest.jobName(),
-                        latest.jobStartTime(),
-                        latest.jobEndTime(),
-                        latest.duration(),
-                        latest.taskTotal(),
-                        latest.pollEmitTime(),
-                        latest.pollAckTime());
+                    newCache = latest.toBuilder().jobState(event.jobState()).build();
                 } else {
                     newCache =
-                        new JobStatusCV(
-                            event.jobState(),
-                            event.trackId().jobId(),
-                            "",
-                            -1,
-                            -1,
-                            0,
-                            0,
-                            event.pollTime(),
-                            System.currentTimeMillis());
+                        JobStatusCV.builder()
+                            .jobState(event.jobState())
+                            .jobId(event.trackId().jobId())
+                            .pollEmitTime(event.pollTime())
+                            .pollAckTime(System.currentTimeMillis())
+                            .build();
                 }
                 watchController.jobStatuses.put(event.trackId(), newCache);
                 eventBus.postAsync(new FlinkJobStatusChangeEvent(event.trackId(), newCache));

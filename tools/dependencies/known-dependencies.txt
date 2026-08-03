@@ -144,6 +144,7 @@ janino-3.1.9.jar
 java-jwt-4.0.0.jar
 javassist-3.24.0-GA.jar
 javax.activation-api-1.2.0.jar
+javax.annotation-api-1.3.2.jar
 javax.mail-1.5.6.jar
 jaxb-api-2.3.1.jar
 jboss-logging-3.4.3.Final.jar

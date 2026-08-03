@@ -20,51 +20,83 @@ package org.apache.streampark.flink.packer.docker;
 import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.HadoopConfigUtils;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
-
 import javax.annotation.Nullable;
 
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.Set;
 
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
+/** flink-hadoop integration docker image template. */
 public class FlinkHadoopDockerfileTemplate extends FlinkDockerfileTemplateTrait {
 
-    private String workspacePath;
-    private String flinkBaseImage;
-    private String flinkMainJarPath;
-    private Set<String> flinkExtraLibPaths;
+    private final String workspacePath;
+    private final String flinkBaseImage;
+    private final String flinkMainJarPath;
+    private final Set<String> flinkExtraLibPaths;
     @Nullable
-    private String hadoopConfDirPath;
+    private final String hadoopConfDirPath;
     @Nullable
-    private String hiveConfDirPath;
+    private final String hiveConfDirPath;
+    private final String hadoopConfDir;
+    private final String hiveConfDir;
+
+    public FlinkHadoopDockerfileTemplate(
+                                         String workspacePath,
+                                         String flinkBaseImage,
+                                         String flinkMainJarPath,
+                                         Set<String> flinkExtraLibPaths,
+                                         @Nullable String hadoopConfDirPath,
+                                         @Nullable String hiveConfDirPath) {
+        this.workspacePath = workspacePath;
+        this.flinkBaseImage = flinkBaseImage;
+        this.flinkMainJarPath = flinkMainJarPath;
+        this.flinkExtraLibPaths = flinkExtraLibPaths;
+        this.hadoopConfDirPath = hadoopConfDirPath;
+        this.hiveConfDirPath = hiveConfDirPath;
+        this.hadoopConfDir =
+            workspace()
+                .relativize(Paths.get(hadoopConfDirPath == null ? "" : hadoopConfDirPath))
+                .toString();
+        this.hiveConfDir =
+            workspace()
+                .relativize(Paths.get(hiveConfDirPath == null ? "" : hiveConfDirPath))
+                .toString();
+    }
+
+    @Override
+    public String workspacePath() {
+        return workspacePath;
+    }
+
+    @Override
+    public String flinkBaseImage() {
+        return flinkBaseImage;
+    }
+
+    @Override
+    public String flinkMainJarPath() {
+        return flinkMainJarPath;
+    }
+
+    @Override
+    public Set<String> flinkExtraLibPaths() {
+        return flinkExtraLibPaths;
+    }
 
     @Override
     public String offerDockerfileContent() {
-        String hadoopConfDir =
-            workspace().relativize(Paths.get(hadoopConfDirPath == null ? "" : hadoopConfDirPath))
-                .toString();
-        String hiveConfDir =
-            workspace().relativize(Paths.get(hiveConfDirPath == null ? "" : hiveConfDirPath))
-                .toString();
         StringBuilder dockerfile =
-            new StringBuilder("FROM ")
-                .append(flinkBaseImage)
-                .append("\nRUN mkdir -p ")
-                .append(FLINK_HOME)
-                .append("/usrlib\n");
-        if (hadoopConfDir != null && !hadoopConfDir.isEmpty()) {
+            new StringBuilder(
+                "FROM " + flinkBaseImage + "\n"
+                    + "RUN mkdir -p " + FLINK_HOME + "/usrlib\n");
+        if (!hadoopConfDir.isEmpty()) {
             dockerfile
                 .append("COPY ")
                 .append(hadoopConfDir)
                 .append(" /opt/hadoop-conf\n")
                 .append("ENV HADOOP_CONF_DIR /opt/hadoop-conf\n");
         }
-        if (hiveConfDir != null && !hiveConfDir.isEmpty()) {
+        if (!hiveConfDir.isEmpty()) {
             dockerfile
                 .append("COPY ")
                 .append(hiveConfDir)
@@ -87,15 +119,26 @@ public class FlinkHadoopDockerfileTemplate extends FlinkDockerfileTemplateTrait 
         return dockerfile.toString();
     }
 
+    /** Use relevant system variables as the value of hadoopConfDirPath, hiveConfDirPath. */
     public static FlinkHadoopDockerfileTemplate fromSystemHadoopConf(
                                                                      String workspacePath,
                                                                      String flinkBaseImage,
                                                                      String flinkMainJarPath,
                                                                      Set<String> flinkExtraLibPaths) {
-        String hadoopConfDir =
-            resolveConfDir(HadoopConfigUtils.getSystemHadoopConfDir().orElse(null), workspacePath, "hadoop-conf");
-        String hiveConfDir =
-            resolveConfDir(HadoopConfigUtils.getSystemHiveConfDir().orElse(null), workspacePath, "hive-conf");
+        String hadoopConfDir = "";
+        Optional<String> systemHadoopConf = HadoopConfigUtils.getSystemHadoopConfDirAsJava();
+        if (systemHadoopConf.isPresent() && LfsOperator.exists(systemHadoopConf.get())) {
+            hadoopConfDir = workspacePath + "/hadoop-conf";
+            LfsOperator.mkCleanDirs(hadoopConfDir);
+            LfsOperator.copyDir(systemHadoopConf.get(), hadoopConfDir);
+        }
+        String hiveConfDir = "";
+        Optional<String> systemHiveConf = HadoopConfigUtils.getSystemHiveConfDirAsJava();
+        if (systemHiveConf.isPresent() && LfsOperator.exists(systemHiveConf.get())) {
+            hiveConfDir = workspacePath + "/hive-conf";
+            LfsOperator.mkCleanDirs(hiveConfDir);
+            LfsOperator.copyDir(systemHiveConf.get(), hiveConfDir);
+        }
         return new FlinkHadoopDockerfileTemplate(
             workspacePath,
             flinkBaseImage,
@@ -103,15 +146,5 @@ public class FlinkHadoopDockerfileTemplate extends FlinkDockerfileTemplateTrait 
             flinkExtraLibPaths,
             hadoopConfDir,
             hiveConfDir);
-    }
-
-    private static String resolveConfDir(String path, String workspacePath, String dirName) {
-        if (path == null || !LfsOperator.getInstance().exists(path)) {
-            return "";
-        }
-        String dstDir = workspacePath + "/" + dirName;
-        LfsOperator.getInstance().mkCleanDirs(dstDir);
-        LfsOperator.getInstance().copyDir(path, dstDir);
-        return dstDir;
     }
 }

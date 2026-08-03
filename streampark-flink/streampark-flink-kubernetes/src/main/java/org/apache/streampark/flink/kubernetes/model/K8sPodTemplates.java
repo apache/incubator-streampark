@@ -20,19 +20,31 @@ package org.apache.streampark.flink.kubernetes.model;
 import org.apache.streampark.common.util.Utils;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
+import lombok.Builder;
 
-@Data
-@Accessors(fluent = true)
-@NoArgsConstructor
+/** Pod template for flink k8s cluster */
+@Builder
 @AllArgsConstructor
 public class K8sPodTemplates {
 
-    private String podTemplate = "";
-    private String jmPodTemplate = "";
-    private String tmPodTemplate = "";
+    @Builder.Default
+    private final String podTemplate = "";
+    @Builder.Default
+    private final String jmPodTemplate = "";
+    @Builder.Default
+    private final String tmPodTemplate = "";
+
+    public String podTemplate() {
+        return podTemplate;
+    }
+
+    public String jmPodTemplate() {
+        return jmPodTemplate;
+    }
+
+    public String tmPodTemplate() {
+        return tmPodTemplate;
+    }
 
     public boolean nonEmpty() {
         return isNotBlank(podTemplate) || isNotBlank(jmPodTemplate) || isNotBlank(tmPodTemplate);
@@ -42,8 +54,34 @@ public class K8sPodTemplates {
         return !nonEmpty();
     }
 
-    private static boolean isNotBlank(String value) {
-        return value != null && !value.trim().isEmpty();
+    public static K8sPodTemplates empty() {
+        return K8sPodTemplates.builder().build();
+    }
+
+    public static K8sPodTemplates of(String podTemplate, String jmPodTemplate, String tmPodTemplate) {
+        return K8sPodTemplates.builder()
+            .podTemplate(safeGet(podTemplate))
+            .jmPodTemplate(safeGet(jmPodTemplate))
+            .tmPodTemplate(safeGet(tmPodTemplate))
+            .build();
+    }
+
+    private static String safeGet(String content) {
+        if (content == null || content.trim().isEmpty()) {
+            return "";
+        }
+        return content;
+    }
+
+    private static boolean isNotBlank(String content) {
+        return content != null && !content.trim().isEmpty();
+    }
+
+    private static String trimSafe(String content) {
+        if (content == null) {
+            return "";
+        }
+        return content.trim();
     }
 
     @Override
@@ -57,30 +95,8 @@ public class K8sPodTemplates {
             return false;
         }
         K8sPodTemplates that = (K8sPodTemplates) obj;
-        return safeTrim(podTemplate).equals(safeTrim(that.podTemplate))
-            && safeTrim(jmPodTemplate).equals(safeTrim(that.jmPodTemplate))
-            && safeTrim(tmPodTemplate).equals(safeTrim(that.tmPodTemplate));
-    }
-
-    private static String safeTrim(String content) {
-        if (content == null) {
-            return "";
-        }
-        return content.trim();
-    }
-
-    public static K8sPodTemplates empty() {
-        return new K8sPodTemplates();
-    }
-
-    public static K8sPodTemplates of(String podTemplate, String jmPodTemplate, String tmPodTemplate) {
-        return new K8sPodTemplates(safeGet(podTemplate), safeGet(jmPodTemplate), safeGet(tmPodTemplate));
-    }
-
-    private static String safeGet(String content) {
-        if (content == null || content.trim().isEmpty()) {
-            return "";
-        }
-        return content;
+        return trimSafe(podTemplate).equals(trimSafe(that.podTemplate))
+            && trimSafe(jmPodTemplate).equals(trimSafe(that.jmPodTemplate))
+            && trimSafe(tmPodTemplate).equals(trimSafe(that.tmPodTemplate));
     }
 }

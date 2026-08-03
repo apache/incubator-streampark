@@ -19,22 +19,33 @@ package org.apache.streampark.flink.kubernetes;
 
 import org.apache.flink.annotation.Public;
 
-/** Factory for {@link FlinkK8sWatcher}. */
 @Public
 public final class FlinkK8sWatcherFactory {
 
     private FlinkK8sWatcherFactory() {
     }
 
-    public static FlinkK8sWatcher createInstance() {
-        return createInstance(FlinkTrackConfig.defaultConf(), false);
-    }
-
+    /**
+     * Create FlinkK8sWatcher instance.
+     *
+     * @param conf configuration
+     * @param lazyStart Whether monitor will performs delayed auto-start when necessary. In this
+     *     case, there is no need to display the call to FlinkK8sWatcher.start(), useless the monitor
+     *     is expected to start immediately.
+     */
     public static FlinkK8sWatcher createInstance(FlinkTrackConfig conf, boolean lazyStart) {
         DefaultFlinkK8sWatcher watcher = new DefaultFlinkK8sWatcher(conf);
         if (lazyStart) {
             return new LazyStartFlinkK8sWatcher(watcher);
         }
         return watcher;
+    }
+
+    public static FlinkK8sWatcher createInstance() {
+        return createInstance(FlinkTrackConfig.defaultConf(), false);
+    }
+
+    public static FlinkK8sWatcher createInstance(FlinkTrackConfig conf) {
+        return createInstance(conf, false);
     }
 }

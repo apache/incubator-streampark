@@ -21,12 +21,17 @@ import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.flink.packer.maven.MavenTool;
+import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
+import org.apache.streampark.flink.packer.pipeline.FlinkRemotePerJobBuildRequest;
+import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
+import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
+/** Building pipeline for flink standalone session mode */
 public class FlinkRemoteBuildPipeline extends BuildPipeline {
 
     private final FlinkRemotePerJobBuildRequest request;
@@ -34,60 +39,94 @@ public class FlinkRemoteBuildPipeline extends BuildPipeline {
     public FlinkRemoteBuildPipeline(FlinkRemotePerJobBuildRequest request) {
         this.request = request;
     }
-    public static FlinkRemoteBuildPipeline of(FlinkRemotePerJobBuildRequest request) {
-        return new FlinkRemoteBuildPipeline(request);
-    }
 
     @Override
-    public PipelineTypeEnum getPipeType() {
+    public PipelineTypeEnum pipeType() {
         return PipelineTypeEnum.FLINK_STANDALONE;
     }
 
     @Override
-    protected BuildParam offerBuildParam() {
+    public FlinkRemotePerJobBuildRequest offerBuildParam() {
         return request;
     }
 
     @Override
-    protected BuildResult buildProcess() throws Throwable {
+    public ShadedBuildResponse buildProcess() {
         if (request.skipBuild()) {
             return new ShadedBuildResponse(request.workspace(), request.customFlinkUserJar());
         }
+
         execStep(1, () -> {
-            LfsOperator.getInstance().mkCleanDirs(request.workspace());
+            LfsOperator.mkCleanDirs(request.workspace());
+            logInfo("Recreate building workspace: " + request.workspace());
             return null;
-        })
-            .orElseThrow(() -> getError().exception());
-        File shadedJar = execStep(2, () -> {
-            if (request.flinkJobType() == FlinkJobType.FLINK_SQL) {
-                return MavenTool.buildFatJar(request.mainClass(), request.providedLibs(),
-                    request.getShadedJarPath(request.workspace()));
-            }
-            return new File(request.customFlinkUserJar());
-        }).orElseThrow(() -> getError().exception());
-        List<String> mavenJars = execStep(3, () -> {
-            if (request.flinkJobType() == FlinkJobType.PYFLINK) {
-                List<String> paths = new ArrayList<>();
-                MavenTool.resolveArtifacts(request.dependencyInfo().mavenArts())
-                    .forEach(f -> paths.add(f.getAbsolutePath()));
-                paths.addAll(request.dependencyInfo().extJarLibs());
-                return paths;
-            }
-            return Collections.<String>emptyList();
-        }).orElseThrow(() -> getError().exception());
-        execStep(4, () -> {
-            if (request.flinkJobType() == FlinkJobType.PYFLINK) {
-                for (String jar : mavenJars) {
+        }).orElseThrow(() -> {
+            throw pipelineException();
+        });
+
+        File shadedJar =
+            execStep(
+                2,
+                () -> {
+                    if (request.flinkJobType() == FlinkJobType.FLINK_SQL) {
+                        File output =
+                            MavenTool.buildFatJar(
+                                request.mainClass(),
+                                request.providedLibs(),
+                                request.getShadedJarPath(request.workspace()));
+                        logInfo("output shaded flink job jar: " + output.getAbsolutePath());
+                        return output;
+                    }
+                    return new File(request.customFlinkUserJar());
+                })
+                    .orElseThrow(() -> {
+                        throw pipelineException();
+                    });
+
+        List<String> mavenJars =
+            execStep(
+                3,
+                () -> {
+                    if (request.flinkJobType() == FlinkJobType.PYFLINK) {
+                        List<File> mavenArts =
+                            MavenTool.resolveArtifacts(request.dependencyInfo().mavenArts());
+                        List<String> paths =
+                            mavenArts.stream()
+                                .map(File::getAbsolutePath)
+                                .collect(Collectors.toList());
+                        paths.addAll(request.dependencyInfo().extJarLibs());
+                        return paths;
+                    }
+                    return Collections.<String>emptyList();
+                })
+                    .orElseThrow(() -> {
+                        throw pipelineException();
+                    });
+
+        execStep(
+            4,
+            () -> {
+                if (request.flinkJobType() == FlinkJobType.PYFLINK) {
                     FsOperator lfs = FsOperator.lfs();
-                    String lib = request.workspace() + "/lib";
+                    String lib = request.workspace().concat("/lib");
                     lfs.mkdirsIfNotExists(lib);
-                    File originFile = new File(jar);
-                    if (originFile.isFile())
-                        lfs.copy(originFile.getAbsolutePath(), lib);
+                    for (String jar : mavenJars) {
+                        File originFile = new File(jar);
+                        if (originFile.isFile()) {
+                            lfs.copy(originFile.getAbsolutePath(), lib);
+                        }
+                    }
                 }
-            }
-            return null;
-        }).orElseThrow(() -> getError().exception());
+                return null;
+            })
+                .orElseThrow(() -> {
+                    throw pipelineException();
+                });
+
         return new ShadedBuildResponse(request.workspace(), shadedJar.getAbsolutePath());
+    }
+
+    public static FlinkRemoteBuildPipeline of(FlinkRemotePerJobBuildRequest request) {
+        return new FlinkRemoteBuildPipeline(request);
     }
 }

@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark-flink-shims</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>streampark-flink-shims-base-v2</artifactId>
@@ -35,7 +35,7 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-common</artifactId>
+            <artifactId>streampark-common_${scala.binary.version}</artifactId>
         </dependency>
 
         <dependency>

@@ -18,24 +18,57 @@
 package org.apache.streampark.flink.kubernetes;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
+import lombok.Builder;
 
-@Data
-@Accessors(fluent = true)
+/**
+ * configuration for FlinkJobStatusWatcher
+ *
+ * @param requestTimeoutSec run timeout of single tracking task
+ * @param requestIntervalSec interval seconds between two single tracking task
+ * @param silentStateJobKeepTrackingSec retained tracking time for SILENT state flink tasks
+ * @param jobStatusCacheTimeOutSec job status cache time out of single tracking task, must bigger
+ *     than silentStateJobKeepTrackingSec
+ */
+@Builder
 @AllArgsConstructor
 public class JobStatusWatcherConfig {
 
-    private long requestTimeoutSec;
-    private long requestIntervalSec;
-    private int silentStateJobKeepTrackingSec;
-    private int jobStatusCacheTimeOutSec;
+    private final long requestTimeoutSec;
+    private final long requestIntervalSec;
+    private final int silentStateJobKeepTrackingSec;
+    private final int jobStatusCacheTimeOutSec;
+
+    public long requestTimeoutSec() {
+        return requestTimeoutSec;
+    }
+
+    public long requestIntervalSec() {
+        return requestIntervalSec;
+    }
+
+    public int silentStateJobKeepTrackingSec() {
+        return silentStateJobKeepTrackingSec;
+    }
+
+    public int jobStatusCacheTimeOutSec() {
+        return jobStatusCacheTimeOutSec;
+    }
 
     public static JobStatusWatcherConfig defaultConf() {
-        return new JobStatusWatcherConfig(120, 5, 60, 300);
+        return JobStatusWatcherConfig.builder()
+            .requestTimeoutSec(120L)
+            .requestIntervalSec(5L)
+            .silentStateJobKeepTrackingSec(60)
+            .jobStatusCacheTimeOutSec(300)
+            .build();
     }
 
     public static JobStatusWatcherConfig debugConf() {
-        return new JobStatusWatcherConfig(120, 2, 5, 30);
+        return JobStatusWatcherConfig.builder()
+            .requestTimeoutSec(120L)
+            .requestIntervalSec(2L)
+            .silentStateJobKeepTrackingSec(5)
+            .jobStatusCacheTimeOutSec(30)
+            .build();
     }
 }

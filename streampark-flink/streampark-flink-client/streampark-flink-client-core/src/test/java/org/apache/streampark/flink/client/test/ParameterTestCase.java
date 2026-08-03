@@ -27,15 +27,14 @@ class ParameterTestCase {
     @Test
     void readArgs() {
         String[] arg = new String[]{"--flink.deployment.option.parallelism", "10"};
-        String[] args =
-            new String[]{
-                    "--flink.home",
-                    "hdfs://nameservice1/streampark/flink/flink-1.11.1",
-                    "--app.name",
-                    "testApp123",
-                    "--flink.deployment.option.parallelism",
-                    "5"
-            };
+        String[] args = new String[]{
+                "--flink.home",
+                "hdfs://nameservice1/streampark/flink/flink-1.11.1",
+                "--app.name",
+                "testApp123",
+                "--flink.deployment.option.parallelism",
+                "5"
+        };
         ParameterTool param = ParameterTool.fromArgs(arg).mergeWith(ParameterTool.fromArgs(args));
 
         Assertions.assertEquals(

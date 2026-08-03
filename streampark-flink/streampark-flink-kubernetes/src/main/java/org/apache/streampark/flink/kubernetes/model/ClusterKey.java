@@ -21,28 +21,36 @@ import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sDeployMode;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
+import lombok.Builder;
 
-@Data
-@Accessors(fluent = true)
-@NoArgsConstructor
+/** flink cluster identifier on kubernetes */
+@Builder
 @AllArgsConstructor
 public class ClusterKey {
 
-    private FlinkK8sDeployMode executeMode;
-    private String namespace = "default";
-    private String clusterId;
+    private final FlinkK8sDeployMode executeMode;
+    @Builder.Default
+    private final String namespace = "default";
+    private final String clusterId;
 
-    public ClusterKey(FlinkK8sDeployMode executeMode, String clusterId) {
-        this.executeMode = executeMode;
-        this.clusterId = clusterId;
-        this.namespace = "default";
+    public FlinkK8sDeployMode executeMode() {
+        return executeMode;
+    }
+
+    public String namespace() {
+        return namespace;
+    }
+
+    public String clusterId() {
+        return clusterId;
     }
 
     public static ClusterKey of(TrackId trackId) {
-        return new ClusterKey(trackId.executeMode(), trackId.namespace(), trackId.clusterId());
+        return ClusterKey.builder()
+            .executeMode(trackId.executeMode())
+            .namespace(trackId.namespace())
+            .clusterId(trackId.clusterId())
+            .build();
     }
 
     @Override

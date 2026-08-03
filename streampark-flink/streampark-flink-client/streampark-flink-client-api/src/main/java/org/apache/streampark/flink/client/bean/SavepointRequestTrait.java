@@ -27,26 +27,26 @@ import java.util.Map;
 
 public interface SavepointRequestTrait {
 
-    FlinkVersion getFlinkVersion();
+    FlinkVersion flinkVersion();
 
-    FlinkDeployMode getDeployMode();
+    FlinkDeployMode deployMode();
 
-    String getClusterId();
+    String clusterId();
 
-    String getJobId();
+    String jobId();
 
-    default boolean isWithSavepoint() {
+    default boolean withSavepoint() {
         return true;
     }
 
-    String getSavepointPath();
+    String savepointPath();
 
-    boolean isNativeFormat();
+    boolean nativeFormat();
 
-    default String getKubernetesNamespace() {
+    default String kubernetesNamespace() {
         return Constants.DEFAULT;
     }
 
     @Nullable
-    Map<String, Object> getProperties();
+    Map<String, Object> properties();
 }

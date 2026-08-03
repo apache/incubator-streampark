@@ -20,13 +20,11 @@ package org.apache.streampark.flink.packer.pipeline;
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.dockerjava.api.model.PullResponseItem;
-import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@Getter
 public class DockerPullProgress {
 
     private final Map<String, DockerLayerProgress> layers = new LinkedHashMap<>();
@@ -35,10 +33,6 @@ public class DockerPullProgress {
 
     public DockerPullProgress(long lastTime) {
         this.lastTime = lastTime;
-    }
-
-    public static DockerPullProgress empty() {
-        return new DockerPullProgress(System.currentTimeMillis());
     }
 
     public void update(PullResponseItem pullRsp) {
@@ -54,27 +48,27 @@ public class DockerPullProgress {
             lastTime = System.currentTimeMillis();
         } else {
             long cur =
-                pullRsp.getProgressDetail() == null
-                    || pullRsp.getProgressDetail().getCurrent() == null
-                        ? 0
-                        : pullRsp.getProgressDetail().getCurrent();
+                pullRsp.getProgressDetail() == null || pullRsp.getProgressDetail().getCurrent() == null
+                    ? 0
+                    : pullRsp.getProgressDetail().getCurrent();
             long total =
-                pullRsp.getProgressDetail() == null
-                    || pullRsp.getProgressDetail().getTotal() == null
-                        ? 0
-                        : pullRsp.getProgressDetail().getTotal();
+                pullRsp.getProgressDetail() == null || pullRsp.getProgressDetail().getTotal() == null
+                    ? 0
+                    : pullRsp.getProgressDetail().getTotal();
             layers.put(
                 pullRsp.getId(),
                 new DockerLayerProgress(pullRsp.getId(), pullRsp.getStatus(), cur, total));
             error =
-                pullRsp.getErrorDetail() != null && pullRsp.getErrorDetail().getMessage() != null
-                    ? pullRsp.getErrorDetail().getMessage()
-                    : "";
+                pullRsp.getErrorDetail() == null ? "" : pullRsp.getErrorDetail().getMessage();
             lastTime = System.currentTimeMillis();
         }
     }
 
     public DockerPullSnapshot snapshot() {
         return DockerPullSnapshot.of(new ArrayList<>(layers.values()), error, lastTime);
+    }
+
+    public static DockerPullProgress empty() {
+        return new DockerPullProgress(System.currentTimeMillis());
     }
 }

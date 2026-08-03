@@ -18,49 +18,55 @@
 package org.apache.streampark.flink.core;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.types.Row;
+import org.apache.flink.streaming.api.scala.DataStream;
+import org.apache.flink.table.api.Table;
 
-/** Table API extensions for Flink 1.17 Java stream-table applications. */
+/**
+ * Table extension utilities for Flink Table API.
+ */
 public final class TableExt {
 
     private TableExt() {
     }
 
-    /** Table alias helper (Scala {@code ->} operator equivalent: {@code as}). */
-    public static final class Table {
+    public static TableWrapper wrap(Table table) {
+        return new TableWrapper(table);
+    }
 
-        private final org.apache.flink.table.api.Table table;
+    public static TableConversions conversions(Table table) {
+        return new TableConversions(table);
+    }
 
-        public Table(org.apache.flink.table.api.Table table) {
+    public static final class TableWrapper {
+
+        private final Table table;
+
+        public TableWrapper(Table table) {
             this.table = table;
         }
 
-        public org.apache.flink.table.api.Table as(String field, String... fields) {
+        public Table alias(String field, String... fields) {
             return table.as(field, fields);
+        }
+
+        public Table $minus$greater(String field, String... fields) {
+            return alias(field, fields);
         }
     }
 
-    /** Table-to-DataStream conversion helpers. */
-    public static class TableConversions {
+    public static final class TableConversions extends org.apache.flink.table.api.bridge.scala.TableConversions {
 
-        private final org.apache.flink.table.api.Table table;
-
-        public TableConversions(org.apache.flink.table.api.Table table) {
-            this.table = table;
+        public DataStream<org.apache.flink.types.Row> toDataStreamRow() {
+            return toDataStream();
         }
 
-        /** Changelog stream conversion (Scala {@code \\} operator equivalent). */
-        public DataStream<Row> toChangelogDataStream(StreamTableContext context) {
+        public <T> DataStream<T> appendStream(StreamTableContext context, TypeInformation<T> typeInfo) {
             context.isConvertedToDataStream = true;
-            return context.toDataStream(table);
+            return super.toAppendStream(typeInfo);
         }
 
-        /** Append stream conversion (Scala {@code >>} operator equivalent). */
-        public <T> DataStream<T> toAppendDataStream(
-                                                    TypeInformation<T> typeInfo, StreamTableContext context) {
-            context.isConvertedToDataStream = true;
-            return context.toAppendStream(table, typeInfo);
+        public TableConversions(Table table) {
+            super(table);
         }
     }
 }

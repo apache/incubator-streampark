@@ -25,7 +25,6 @@ import org.apache.streampark.flink.client.bean.SavepointRequestTrait;
 import org.apache.streampark.flink.client.bean.SavepointResponse;
 import org.apache.streampark.flink.client.bean.SubmitRequest;
 import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
-import org.apache.streampark.flink.client.util.FlinkConfigurationEnhancer;
 
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.client.deployment.ClusterSpecification;
@@ -43,85 +42,51 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import java.lang.reflect.Method;
 import java.security.PrivilegedAction;
 
-/** Yarn application mode submit. */
+import scala.Tuple2;
+
+/** Yarn application mode submit support. */
 public abstract class YarnClientTrait extends FlinkClientTrait {
 
-    private Method deployInternalMethod;
+    private volatile Method deployInternalMethod;
 
     @Override
     public void setConfig(SubmitRequest submitRequest, Configuration flinkConfig) {
-        FlinkConfigurationEnhancer.safeSet(
-            flinkConfig, YarnConfigOptions.APPLICATION_NAME, submitRequest.getEffectiveAppName());
-        FlinkConfigurationEnhancer.safeSet(
+        FlinkClientTrait.safeSet(
+            flinkConfig, YarnConfigOptions.APPLICATION_NAME, submitRequest.effectiveAppName());
+        FlinkClientTrait.safeSet(
             flinkConfig,
             YarnConfigOptions.APPLICATION_TYPE,
-            submitRequest.getApplicationType().getName());
-        FlinkConfigurationEnhancer.safeSet(flinkConfig, YarnConfigOptions.APPLICATION_TAGS, "streampark");
-    }
-
-    private <R extends SavepointRequestTrait, O> O executeClientAction(
-                                                                       R request, Configuration flinkConf,
-                                                                       ClusterClientAction<O, ApplicationId> actionFunc) throws Exception {
-        JobID jobID = getJobID(request.getJobId());
-        FlinkConfigurationEnhancer.safeSet(flinkConf, YarnConfigOptions.APPLICATION_ID, request.getClusterId());
-        YarnClusterDescriptorResult descriptorResult = getYarnClusterDescriptor(flinkConf);
-        ApplicationId applicationId = descriptorResult.applicationId;
-        YarnClusterDescriptor clusterDescriptor = descriptorResult.clusterDescriptor;
-        ClusterClient<ApplicationId> clusterClient =
-            clusterDescriptor.retrieve(applicationId).getClusterClient();
-
-        try {
-            return actionFunc.apply(jobID, clusterClient);
-        } catch (Exception e) {
-            throw new FlinkException(
-                "[StreamPark] Do "
-                    + request.getClass().getSimpleName()
-                    + " for the job "
-                    + request.getJobId()
-                    + " failed. detail: "
-                    + ExceptionUtils.stringifyException(e));
-        }
+            submitRequest.applicationType().getName());
+        FlinkClientTrait.safeSet(flinkConfig, YarnConfigOptions.APPLICATION_TAGS, "streampark");
     }
 
     @Override
     public SavepointResponse doTriggerSavepoint(
                                                 TriggerSavepointRequest savepointRequest,
-                                                Configuration flinkConf) throws Exception {
+                                                Configuration flinkConf) throws FlinkException {
         return executeClientAction(
             savepointRequest,
             flinkConf,
-            (jid, client) -> new SavepointResponse(triggerSavepoint(savepointRequest, jid, client)));
+            (jobId, client) -> toSavepointResponse(savepointRequest, jobId, client));
     }
 
     @Override
-    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConf) throws Exception {
+    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConf) throws FlinkException {
         return executeClientAction(
             cancelRequest,
             flinkConf,
-            (jid, client) -> new CancelResponse(cancelJob(cancelRequest, jid, client)));
+            (jobId, client) -> toCancelResponse(cancelRequest, jobId, client));
     }
 
-    protected ClusterClientProvider<ApplicationId> deployInternal(
-                                                                  YarnClusterDescriptor clusterDescriptor,
-                                                                  ClusterSpecification clusterSpecification,
-                                                                  String applicationName,
-                                                                  String yarnClusterEntrypoint,
-                                                                  JobGraph jobGraph,
-                                                                  Boolean detached) throws Exception {
-        if (deployInternalMethod == null) {
-            Class<?>[] paramClass =
-                new Class<?>[]{
-                        ClusterSpecification.class,
-                        String.class,
-                        String.class,
-                        JobGraph.class,
-                        boolean.class
-                };
-            deployInternalMethod =
-                YarnClusterDescriptor.class.getDeclaredMethod("deployInternal", paramClass);
-            deployInternalMethod.setAccessible(true);
-        }
-        return (ClusterClientProvider<ApplicationId>) deployInternalMethod.invoke(
+    public ClusterClientProvider<ApplicationId> deployInternal(
+                                                               YarnClusterDescriptor clusterDescriptor,
+                                                               ClusterSpecification clusterSpecification,
+                                                               String applicationName,
+                                                               String yarnClusterEntrypoint,
+                                                               JobGraph jobGraph,
+                                                               Boolean detached) throws ReflectiveOperationException {
+        Method method = getDeployInternalMethod();
+        return (ClusterClientProvider<ApplicationId>) method.invoke(
             clusterDescriptor,
             clusterSpecification,
             applicationName,
@@ -130,51 +95,141 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
             detached);
     }
 
-    protected YarnClusterDescriptorResult getYarnClusterDescriptor(Configuration flinkConfig) throws Exception {
+    public Tuple2<ApplicationId, YarnClusterDescriptor> getYarnClusterDescriptor(
+                                                                                 Configuration flinkConfig,
+                                                                                 String user) throws FlinkException {
+        return accessYarnClusterDescriptor(
+            user, () -> createYarnClusterDescriptor(flinkConfig));
+    }
+
+    public Tuple2<ApplicationId, YarnClusterDescriptor> getYarnClusterDescriptor(
+                                                                                 Configuration flinkConfig) throws FlinkException {
         return getYarnClusterDescriptor(flinkConfig, "");
     }
 
-    protected YarnClusterDescriptorResult getYarnClusterDescriptor(
-                                                                   Configuration flinkConfig,
-                                                                   String user) throws Exception {
-        try {
-            return doAsYarnClusterDescriptor(
-                user,
-                () -> {
-                    YarnClusterClientFactory clientFactory = new YarnClusterClientFactory();
-                    ApplicationId yarnClusterId = clientFactory.getClusterId(flinkConfig);
-                    if (yarnClusterId == null) {
-                        throw new IllegalArgumentException("yarnClusterId is null");
-                    }
-                    YarnClusterDescriptor clusterDescriptor =
-                        clientFactory.createClusterDescriptor(flinkConfig);
-                    return new YarnClusterDescriptorResult(yarnClusterId, clusterDescriptor);
-                });
-        } catch (Exception e) {
-            throw new IllegalArgumentException(
-                "[StreamPark] access ClusterDescriptor error: " + e, e);
-        }
+    public Tuple2<ClusterSpecification, YarnClusterDescriptor> getYarnClusterDeployDescriptor(
+                                                                                              Configuration flinkConfig,
+                                                                                              String user) throws FlinkException {
+        return accessYarnClusterDescriptor(
+            user, () -> createYarnClusterDeployDescriptor(flinkConfig));
     }
 
-    protected YarnClusterDeployDescriptorResult getYarnClusterDeployDescriptor(
-                                                                               Configuration flinkConfig) throws Exception {
+    public Tuple2<ClusterSpecification, YarnClusterDescriptor> getYarnClusterDeployDescriptor(
+                                                                                              Configuration flinkConfig) throws FlinkException {
         return getYarnClusterDeployDescriptor(flinkConfig, "");
     }
 
-    protected YarnClusterDeployDescriptorResult getYarnClusterDeployDescriptor(
-                                                                               Configuration flinkConfig,
-                                                                               String user) throws Exception {
+    protected void logClusterSpecification(ClusterSpecification clusterSpecification) {
+        logInfo(
+            String.format(
+                "%n------------------------<<specification>>-------------------------%n"
+                    + "%s%n"
+                    + "------------------------------------------------------------------%n",
+                clusterSpecification));
+    }
+
+    protected void logYarnJobStarted(Object applicationId) {
+        logInfo(
+            String.format(
+                "%n-------------------------<<applicationId>>------------------------%n"
+                    + "Flink Job Started: applicationId: %s%n"
+                    + "__________________________________________________________________%n",
+                applicationId));
+    }
+
+    private Tuple2<ApplicationId, YarnClusterDescriptor> createYarnClusterDescriptor(
+                                                                                     Configuration flinkConfig) throws FlinkException {
+        return callAsFlinkException(
+            () -> {
+                YarnClusterClientFactory clientFactory = new YarnClusterClientFactory();
+                ApplicationId yarnClusterId = clientFactory.getClusterId(flinkConfig);
+                if (yarnClusterId == null) {
+                    throw new FlinkException("Yarn cluster id is null");
+                }
+                YarnClusterDescriptor clusterDescriptor =
+                    clientFactory.createClusterDescriptor(flinkConfig);
+                return new Tuple2<>(yarnClusterId, clusterDescriptor);
+            });
+    }
+
+    private Tuple2<ClusterSpecification, YarnClusterDescriptor> createYarnClusterDeployDescriptor(
+                                                                                                  Configuration flinkConfig) throws FlinkException {
+        return callAsFlinkException(
+            () -> {
+                YarnClusterClientFactory clientFactory = new YarnClusterClientFactory();
+                ClusterSpecification clusterSpecification =
+                    clientFactory.getClusterSpecification(flinkConfig);
+                YarnClusterDescriptor clusterDescriptor =
+                    clientFactory.createClusterDescriptor(flinkConfig);
+                return new Tuple2<>(clusterSpecification, clusterDescriptor);
+            });
+    }
+
+    private <O> O executeClientAction(
+                                      SavepointRequestTrait request, Configuration flinkConf,
+                                      ClientAction<O> actionFunc) throws FlinkException {
+        return callAsFlinkException(
+            () -> {
+                JobID jobID = getJobID(request.jobId());
+                FlinkClientTrait.safeSet(flinkConf, YarnConfigOptions.APPLICATION_ID, request.clusterId());
+                Tuple2<ApplicationId, YarnClusterDescriptor> descriptor =
+                    getYarnClusterDescriptor(flinkConf);
+                ClusterClient<?> clusterClient =
+                    descriptor._2().retrieve(descriptor._1()).getClusterClient();
+                return applyClientAction(request, actionFunc, jobID, clusterClient);
+            });
+    }
+
+    private <O> O applyClientAction(
+                                    SavepointRequestTrait request,
+                                    ClientAction<O> actionFunc,
+                                    JobID jobID,
+                                    ClusterClient<?> clusterClient) throws FlinkException {
+        return callAsFlinkExceptionMapping(
+            () -> actionFunc.apply(jobID, clusterClient),
+            e -> new FlinkException(
+                "[StreamPark] Do "
+                    + request.getClass().getSimpleName()
+                    + " for the job "
+                    + request.jobId()
+                    + " failed. "
+                    + "detail: "
+                    + ExceptionUtils.stringifyException(e),
+                e));
+    }
+
+    private <T> T accessYarnClusterDescriptor(String user, YarnDescriptorSupplier<T> func) throws FlinkException {
         try {
-            return doAsYarnClusterDescriptorDeploy(user, flinkConfig);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(
-                "[StreamPark] access ClusterDescriptor error: " + e, e);
+            return doAsYarnClusterDescriptor(user, func);
+        } catch (FlinkException e) {
+            throw new FlinkException("[StreamPark] access ClusterDescriptor error: " + e.getMessage(), e);
         }
     }
 
-    private YarnClusterDeployDescriptorResult doAsYarnClusterDescriptorDeploy(
-                                                                              String user,
-                                                                              Configuration flinkConfig) throws Exception {
+    private Method getDeployInternalMethod() throws NoSuchMethodException {
+        if (deployInternalMethod == null) {
+            synchronized (this) {
+                if (deployInternalMethod == null) {
+                    Class<?>[] paramClass =
+                        new Class<?>[]{
+                                ClusterSpecification.class,
+                                String.class,
+                                String.class,
+                                JobGraph.class,
+                                boolean.class
+                        };
+                    Method deployInternal =
+                        YarnClusterDescriptor.class.getDeclaredMethod(
+                            "deployInternal", paramClass);
+                    deployInternal.setAccessible(true);
+                    deployInternalMethod = deployInternal;
+                }
+            }
+        }
+        return deployInternalMethod;
+    }
+
+    private <T> T doAsYarnClusterDescriptor(String user, YarnDescriptorSupplier<T> func) throws FlinkException {
         UserGroupInformation ugi = HadoopUtils.getUgi();
         UserGroupInformation finalUgi =
             user != null
@@ -182,78 +237,35 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
                 && !ugi.getShortUserName().equals(user)
                     ? UserGroupInformation.createProxyUser(user, ugi)
                     : ugi;
-        try {
-            return finalUgi.doAs(
-                (PrivilegedAction<YarnClusterDeployDescriptorResult>) () -> {
-                    try {
-                        YarnClusterClientFactory clientFactory = new YarnClusterClientFactory();
-                        ClusterSpecification clusterSpecification =
-                            clientFactory.getClusterSpecification(flinkConfig);
-                        YarnClusterDescriptor clusterDescriptor =
-                            clientFactory.createClusterDescriptor(flinkConfig);
-                        return new YarnClusterDeployDescriptorResult(
-                            clusterSpecification, clusterDescriptor);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-        } catch (Exception e) {
-            throw new RuntimeException(
-                "[StreamPark] Error executing YarnClusterDescriptor operation as user " + user, e);
-        }
-    }
 
-    private <T> T doAsYarnClusterDescriptor(String user, YarnClusterSupplier<T> func) throws Exception {
-        UserGroupInformation ugi = HadoopUtils.getUgi();
-        UserGroupInformation finalUgi =
-            user != null
-                && !user.isEmpty()
-                && !ugi.getShortUserName().equals(user)
-                    ? UserGroupInformation.createProxyUser(user, ugi)
-                    : ugi;
         try {
             return finalUgi.doAs(
                 (PrivilegedAction<T>) () -> {
                     try {
                         return func.get();
+                    } catch (FlinkException e) {
+                        throw new IllegalStateException(e);
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        throw new IllegalStateException("Yarn cluster descriptor operation failed", e);
                     }
                 });
-        } catch (Exception e) {
-            throw new RuntimeException(
-                "[StreamPark] Error executing YarnClusterDescriptor operation as user " + user, e);
-        }
-    }
-
-    protected static final class YarnClusterDescriptorResult {
-
-        public final ApplicationId applicationId;
-        public final YarnClusterDescriptor clusterDescriptor;
-
-        YarnClusterDescriptorResult(
-                                    ApplicationId applicationId, YarnClusterDescriptor clusterDescriptor) {
-            this.applicationId = applicationId;
-            this.clusterDescriptor = clusterDescriptor;
-        }
-    }
-
-    protected static final class YarnClusterDeployDescriptorResult {
-
-        public final ClusterSpecification clusterSpecification;
-        public final YarnClusterDescriptor clusterDescriptor;
-
-        YarnClusterDeployDescriptorResult(
-                                          ClusterSpecification clusterSpecification,
-                                          YarnClusterDescriptor clusterDescriptor) {
-            this.clusterSpecification = clusterSpecification;
-            this.clusterDescriptor = clusterDescriptor;
+        } catch (IllegalStateException e) {
+            Throwable cause = e.getCause() != null ? e.getCause() : e;
+            throw new FlinkException(
+                "[StreamPark] Error executing YarnClusterDescriptor operation as user " + user,
+                cause);
         }
     }
 
     @FunctionalInterface
-    private interface YarnClusterSupplier<T> {
+    private interface ClientAction<O> {
 
-        T get() throws Exception;
+        O apply(JobID jobId, ClusterClient<?> client) throws FlinkException;
+    }
+
+    @FunctionalInterface
+    private interface YarnDescriptorSupplier<T> {
+
+        T get() throws FlinkException;
     }
 }

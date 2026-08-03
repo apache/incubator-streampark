@@ -18,32 +18,15 @@
 package org.apache.streampark.flink.client.bean;
 
 import org.apache.streampark.common.conf.FlinkVersion;
-import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.FlinkDeployMode;
-import org.apache.streampark.flink.util.FlinkUtils;
-
-import org.apache.commons.io.FileUtils;
-
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.annotation.Nullable;
 
-import java.io.File;
 import java.util.Map;
 
-@Data
-@NoArgsConstructor
-public class DeployRequest implements DeployRequestTrait {
+public class DeployRequest extends AbstractDeployClientRequest {
 
-    private FlinkVersion flinkVersion;
-    private FlinkDeployMode deployMode;
-    private Map<String, Object> properties;
-    private String clusterId;
-    private long id;
-
-    @Nullable
-    private KubernetesDeployParam k8sParam;
+    private static final long serialVersionUID = 1L;
 
     private transient HdfsWorkspace hdfsWorkspace;
 
@@ -53,39 +36,13 @@ public class DeployRequest implements DeployRequestTrait {
                          Map<String, Object> properties,
                          String clusterId,
                          long id,
-                         KubernetesDeployParam k8sParam) {
-        this.flinkVersion = flinkVersion;
-        this.deployMode = deployMode;
-        this.properties = properties;
-        this.clusterId = clusterId;
-        this.id = id;
-        this.k8sParam = k8sParam;
+                         @Nullable KubernetesDeployParam k8sParam) {
+        super(flinkVersion, deployMode, properties, clusterId, id, k8sParam);
     }
 
-    public HdfsWorkspace getHdfsWorkspace() {
+    public HdfsWorkspace hdfsWorkspace() {
         if (hdfsWorkspace == null) {
-            Workspace workspace = Workspace.remote();
-            String flinkHome = flinkVersion.flinkHome;
-            File flinkHomeDir = new File(flinkHome);
-            String flinkName;
-            try {
-                flinkName =
-                    FileUtils.isSymlink(flinkHomeDir)
-                        ? flinkHomeDir.getCanonicalFile().getName()
-                        : flinkHomeDir.getName();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            String flinkHdfsHome = workspace.getAppFlink() + "/" + flinkName;
-            hdfsWorkspace =
-                HdfsWorkspace.builder()
-                    .flinkName(flinkName)
-                    .flinkHome(flinkHome)
-                    .flinkLib(flinkHdfsHome + "/lib")
-                    .flinkPlugins(flinkHdfsHome + "/plugins")
-                    .flinkDistJar(FlinkUtils.getFlinkDistJar(flinkHome))
-                    .appJars(workspace.getAppJars())
-                    .build();
+            hdfsWorkspace = ClientBeanUtils.createHdfsWorkspace(flinkVersion());
         }
         return hdfsWorkspace;
     }

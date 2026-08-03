@@ -18,23 +18,19 @@
 package org.apache.streampark.flink.packer.pipeline;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Map;
 
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DockerImageBuildResponse implements FlinkBuildResult {
+public class DockerImageBuildResponse extends AbstractFlinkBuildResponse {
 
-    private String workspacePath;
     private String flinkImageTag;
     private Map<String, String> podTemplatePaths;
     private String dockerInnerMainJarPath;
-    private boolean pass = true;
+
+    public DockerImageBuildResponse() {
+    }
 
     public DockerImageBuildResponse(
                                     String workspacePath,
@@ -42,5 +38,59 @@ public class DockerImageBuildResponse implements FlinkBuildResult {
                                     Map<String, String> podTemplatePaths,
                                     String dockerInnerMainJarPath) {
         this(workspacePath, flinkImageTag, podTemplatePaths, dockerInnerMainJarPath, true);
+    }
+
+    public DockerImageBuildResponse(
+                                    String workspacePath,
+                                    String flinkImageTag,
+                                    Map<String, String> podTemplatePaths,
+                                    String dockerInnerMainJarPath,
+                                    boolean pass) {
+        super(workspacePath, pass);
+        this.flinkImageTag = flinkImageTag;
+        this.podTemplatePaths = podTemplatePaths;
+        this.dockerInnerMainJarPath = dockerInnerMainJarPath;
+    }
+
+    public String flinkImageTag() {
+        return flinkImageTag;
+    }
+
+    public Map<String, String> podTemplatePaths() {
+        return podTemplatePaths;
+    }
+
+    public String dockerInnerMainJarPath() {
+        return dockerInnerMainJarPath;
+    }
+
+    @JsonProperty("flinkImageTag")
+    public void setFlinkImageTag(String flinkImageTag) {
+        this.flinkImageTag = flinkImageTag;
+    }
+
+    @JsonProperty("podTemplatePaths")
+    public void setPodTemplatePaths(Map<String, String> podTemplatePaths) {
+        this.podTemplatePaths = podTemplatePaths;
+    }
+
+    @JsonProperty("dockerInnerMainJarPath")
+    public void setDockerInnerMainJarPath(String dockerInnerMainJarPath) {
+        this.dockerInnerMainJarPath = dockerInnerMainJarPath;
+    }
+
+    @Override
+    public String toString() {
+        return "{ workspacePath: "
+            + workspacePath()
+            + ", flinkImageTag: "
+            + flinkImageTag
+            + ", podTemplatePaths: "
+            + podTemplatePaths
+            + ", dockerInnerMainJarPath: "
+            + dockerInnerMainJarPath
+            + ", pass: "
+            + pass()
+            + " }";
     }
 }

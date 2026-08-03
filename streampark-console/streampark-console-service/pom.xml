@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark-console</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>streampark-console-service</artifactId>
@@ -35,7 +35,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <postgresql.version>42.5.1</postgresql.version>
         <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
-        <streampark.flink.shims.version>1.17</streampark.flink.shims.version>
+        <streampark.flink.shims.version>1.14</streampark.flink.shims.version>
         <frontend.project.name>streampark-console-webapp</frontend.project.name>
         <CodeCacheSize>512m</CodeCacheSize>
 
@@ -72,6 +72,26 @@
     </dependencyManagement>
 
     <dependencies>
+        <!--scala-->
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-compiler</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-reflect</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scala-lang.modules</groupId>
+            <artifactId>scala-xml_${scala.binary.version}</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -337,75 +357,24 @@
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-common</artifactId>
+            <artifactId>streampark-common_${scala.binary.version}</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims-base</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!-- Ensure all Flink shims are built when console-service is built with -am -->
-        <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-1.17</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-1.18</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-1.19</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-1.20</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-2.0</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-2.1</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-2.2</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-client-api</artifactId>
+            <artifactId>streampark-flink-shims-base_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-client-core</artifactId>
+            <artifactId>streampark-flink-client-api_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-spark-client-api</artifactId>
+            <artifactId>streampark-spark-client-api_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -425,14 +394,7 @@
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-spark-client-core</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-kubernetes</artifactId>
+            <artifactId>streampark-flink-kubernetes_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -444,14 +406,19 @@
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-sqlclient</artifactId>
+            <artifactId>streampark-flink-sqlclient_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-spark-sqlclient</artifactId>
+            <artifactId>streampark-spark-sqlclient_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>
         </dependency>
 
         <!--Test dependencies start.-->
@@ -565,28 +532,28 @@
                         <!-- flink 1.17 support-->
                         <dependency>
                             <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-1.17</artifactId>
+                            <artifactId>streampark-flink-shims_flink-1.17_${scala.binary.version}</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                         <!-- flink 1.18 support-->
                         <dependency>
                             <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-1.18</artifactId>
+                            <artifactId>streampark-flink-shims_flink-1.18_${scala.binary.version}</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                         <!-- flink 1.19 support-->
                         <dependency>
                             <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-1.19</artifactId>
+                            <artifactId>streampark-flink-shims_flink-1.19_${scala.binary.version}</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                         <!-- flink 1.20 support-->
                         <dependency>
                             <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-1.20</artifactId>
+                            <artifactId>streampark-flink-shims_flink-1.20_${scala.binary.version}</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
@@ -611,17 +578,24 @@
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
+                        <!-- flink 2.3 support-->
+                        <dependency>
+                            <groupId>org.apache.streampark</groupId>
+                            <artifactId>streampark-flink-shims_flink-2.3</artifactId>
+                            <version>${project.version}</version>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
                         <!-- flink-submit-core -->
                         <dependency>
                             <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-client-core</artifactId>
+                            <artifactId>streampark-flink-client-core_${scala.binary.version}</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/lib</outputDirectory>
                         </dependency>
                         <!-- spark-submit-core -->
                         <dependency>
                             <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-spark-client-core</artifactId>
+                            <artifactId>streampark-spark-client-core_${scala.binary.version}</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/lib</outputDirectory>
                         </dependency>
@@ -658,6 +632,37 @@
                                 <descriptor>${basedir}/src/main/assembly/assembly.xml</descriptor>
                             </descriptors>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+                <configuration>
+                    <compileOrder>JavaThenScala</compileOrder>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${maven-spotless-plugin.version}</version>
+                <configuration>
+                    <scala>
+                        <scalafmt>
+                            <version>${spotless.scalafmt.version}</version>
+                            <file>${maven.multiModuleProjectDirectory}/tools/checkstyle/.scalafmt.conf</file>
+                        </scalafmt>
+                    </scala>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>spotless-check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>validate</phase>
                     </execution>
                 </executions>
             </plugin>

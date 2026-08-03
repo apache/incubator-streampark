@@ -22,99 +22,112 @@ import org.apache.streampark.common.util.HdfsUtils;
 import java.io.IOException;
 
 /** Hadoop File System (aka HDFS) Operator */
-public final class HdfsOperator extends FsOperator {
-
-    private static final HdfsOperator INSTANCE = new HdfsOperator();
+public final class HdfsOperator {
 
     private HdfsOperator() {
     }
 
-    public static HdfsOperator getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public boolean exists(String path) {
+    public static boolean exists(String path) {
         try {
             return HdfsUtils.exists(toHdfsPath(path));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("[StreamPark] Failed to check hdfs path: " + path, e);
         }
     }
 
-    @Override
-    public void mkdirs(String path) {
+    public static void mkdirs(String path) {
         try {
             HdfsUtils.mkdirs(toHdfsPath(path));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("[StreamPark] Failed to mkdirs hdfs path: " + path, e);
         }
     }
 
-    @Override
-    public void delete(String path) {
+    public static void delete(String path) {
         try {
             HdfsUtils.delete(toHdfsPath(path));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("[StreamPark] Failed to delete hdfs path: " + path, e);
         }
     }
 
-    @Override
-    public void move(String srcPath, String dstPath) {
+    public static void move(String srcPath, String dstPath) {
         try {
             HdfsUtils.move(toHdfsPath(srcPath), toHdfsPath(dstPath));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(
+                "[StreamPark] Failed to move " + srcPath + " to " + dstPath, e);
         }
     }
 
-    @Override
-    public void upload(String srcPath, String dstPath, boolean delSrc, boolean overwrite) {
+    public static void upload(String srcPath, String dstPath) {
+        upload(srcPath, dstPath, false, true);
+    }
+
+    public static void upload(String srcPath, String dstPath, boolean delSrc) {
+        upload(srcPath, dstPath, delSrc, true);
+    }
+
+    public static void upload(String srcPath, String dstPath, boolean delSrc, boolean overwrite) {
         try {
             HdfsUtils.upload(srcPath, toHdfsPath(dstPath), delSrc, overwrite);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(
+                "[StreamPark] Failed to upload " + srcPath + " to " + dstPath, e);
         }
     }
 
-    @Override
-    public void copy(String srcPath, String dstPath, boolean delSrc, boolean overwrite) {
+    public static void copy(String srcPath, String dstPath) {
+        copy(srcPath, dstPath, false, true);
+    }
+
+    public static void copy(String srcPath, String dstPath, boolean delSrc) {
+        copy(srcPath, dstPath, delSrc, true);
+    }
+
+    public static void copy(String srcPath, String dstPath, boolean delSrc, boolean overwrite) {
         try {
             HdfsUtils.copyHdfs(toHdfsPath(srcPath), toHdfsPath(dstPath), delSrc, overwrite);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(
+                "[StreamPark] Failed to copy " + srcPath + " to " + dstPath, e);
         }
     }
 
-    @Override
-    public void copyDir(String srcPath, String dstPath, boolean delSrc, boolean overwrite) {
+    public static void copyDir(String srcPath, String dstPath) {
+        copyDir(srcPath, dstPath, false, true);
+    }
+
+    public static void copyDir(String srcPath, String dstPath, boolean delSrc) {
+        copyDir(srcPath, dstPath, delSrc, true);
+    }
+
+    public static void copyDir(String srcPath, String dstPath, boolean delSrc, boolean overwrite) {
         try {
             HdfsUtils.copyHdfsDir(toHdfsPath(srcPath), toHdfsPath(dstPath), delSrc, overwrite);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(
+                "[StreamPark] Failed to copyDir " + srcPath + " to " + dstPath, e);
         }
     }
 
-    @Override
-    public void mkCleanDirs(String path) {
+    public static void mkCleanDirs(String path) {
         delete(path);
         mkdirs(path);
     }
 
-    @Override
-    public String fileMd5(String path) {
+    public static String fileMd5(String path) {
         if (path == null || path.isEmpty()) {
             throw new IllegalArgumentException("[StreamPark] HdfsOperator.fileMd5: file must not be null.");
         }
         try {
             return HdfsUtils.fileMd5(toHdfsPath(path));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("[StreamPark] Failed to compute md5 for: " + path, e);
         }
     }
 
-    private String toHdfsPath(String path) {
+    private static String toHdfsPath(String path) {
         if (path.startsWith("hdfs://")) {
             return path;
         }

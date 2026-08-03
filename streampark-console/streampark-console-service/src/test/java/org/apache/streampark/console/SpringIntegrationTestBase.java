@@ -108,15 +108,15 @@ public abstract class SpringIntegrationTestBase {
         Path localWorkspace = Files.createDirectories(new File(tempAbsPath, DEFAULT_LOCAL_WORKSPACE_DIR_NAME).toPath());
 
         appHome = new File(tempAbsPath, DEFAULT_APP_HOME_DIR_NAME).getAbsolutePath();
-        System.setProperty(ConfigKeys.KEY_APP_HOME, appHome);
+        System.setProperty(ConfigKeys.KEY_APP_HOME(), appHome);
         System.setProperty(
-            CommonConfig.STREAMPARK_WORKSPACE_LOCAL.key(),
+            CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
             localWorkspace.toAbsolutePath().toString());
 
         LOG.info(
             "Complete mock EnvInitializer init, app home: {}, {}: {}",
             appHome,
-            CommonConfig.STREAMPARK_WORKSPACE_LOCAL.key(),
+            CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
             localWorkspace.toAbsolutePath());
     }
 

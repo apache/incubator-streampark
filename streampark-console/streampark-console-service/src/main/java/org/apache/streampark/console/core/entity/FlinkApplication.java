@@ -337,9 +337,9 @@ public class FlinkApplication extends BaseEntity {
 
         Map<String, Object> hotParamsMap = this.getHotParamsMap();
         if (MapUtils.isNotEmpty(hotParamsMap)
-            && hotParamsMap.containsKey(ConfigKeys.KEY_YARN_APP_QUEUE)) {
-            String yarnQueue = hotParamsMap.get(ConfigKeys.KEY_YARN_APP_QUEUE).toString();
-            String labelExpr = Optional.ofNullable(hotParamsMap.get(ConfigKeys.KEY_YARN_APP_NODE_LABEL))
+            && hotParamsMap.containsKey(ConfigKeys.KEY_YARN_APP_QUEUE())) {
+            String yarnQueue = hotParamsMap.get(ConfigKeys.KEY_YARN_APP_QUEUE()).toString();
+            String labelExpr = Optional.ofNullable(hotParamsMap.get(ConfigKeys.KEY_YARN_APP_NODE_LABEL()))
                 .map(Object::toString)
                 .orElse(null);
             this.setYarnQueue(YarnQueueLabelExpression.of(yarnQueue, labelExpr).toString());
@@ -425,21 +425,21 @@ public class FlinkApplication extends BaseEntity {
      */
     @JsonIgnore
     public String getDistHome() {
-        String path = String.format("%s/%s/%s", Workspace.appLocalDist(), projectId.toString(), getModule());
+        String path = String.format("%s/%s/%s", Workspace.APP_LOCAL_DIST(), projectId.toString(), getModule());
         log.info("local distHome:{}", path);
         return path;
     }
 
     @JsonIgnore
     public String getLocalAppHome() {
-        String path = String.format("%s/%s", Workspace.local().getAppWorkspace(), id.toString());
+        String path = String.format("%s/%s", Workspace.local().APP_WORKSPACE(), id.toString());
         log.info("local appHome:{}", path);
         return path;
     }
 
     @JsonIgnore
     public String getRemoteAppHome() {
-        String path = String.format("%s/%s", Workspace.remote().getAppWorkspace(), id.toString());
+        String path = String.format("%s/%s", Workspace.remote().APP_WORKSPACE(), id.toString());
         log.info("remote appHome:{}", path);
         return path;
     }
@@ -623,7 +623,7 @@ public class FlinkApplication extends BaseEntity {
         }
         if (deployModeEnum == FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION) {
             if (StringUtils.isNotBlank(appParam.getServiceAccount())) {
-                hotParams.put(ConfigKeys.KEY_KERBEROS_SERVICE_ACCOUNT, appParam.getServiceAccount());
+                hotParams.put(ConfigKeys.KEY_KERBEROS_SERVICE_ACCOUNT(), appParam.getServiceAccount());
             }
         }
         if (!hotParams.isEmpty()) {

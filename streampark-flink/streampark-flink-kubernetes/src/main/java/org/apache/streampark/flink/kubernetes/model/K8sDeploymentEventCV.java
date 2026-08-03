@@ -18,18 +18,33 @@
 package org.apache.streampark.flink.kubernetes.model;
 
 import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.api.model.apps.Deployment;
-import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.client.Watcher;
+import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.client.Watcher.Action;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
+import lombok.Builder;
 
-@Data
-@Accessors(fluent = true)
+/**
+ * @param action event action
+ * @param event event content
+ * @param pollAckTime polling ack time
+ */
+@Builder
 @AllArgsConstructor
 public class K8sDeploymentEventCV {
 
-    private Watcher.Action action;
-    private Deployment event;
-    private long pollAckTime;
+    private final Action action;
+    private final Deployment event;
+    private final Long pollAckTime;
+
+    public Action action() {
+        return action;
+    }
+
+    public Deployment event() {
+        return event;
+    }
+
+    public Long pollAckTime() {
+        return pollAckTime;
+    }
 }

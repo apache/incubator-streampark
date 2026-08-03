@@ -141,7 +141,7 @@ public class FlinkApplicationBackupServiceImpl
         if (!backUpPages.getRecords().isEmpty()) {
             FlinkApplicationBackup backup = backUpPages.getRecords().get(0);
             String path = backup.getPath();
-            appParam.getFsOperator().move(path, appParam.getWorkspace().getAppWorkspace());
+            appParam.getFsOperator().move(path, appParam.getWorkspace().APP_WORKSPACE());
             super.removeById(backup.getId());
         }
     }
@@ -155,7 +155,7 @@ public class FlinkApplicationBackupServiceImpl
                 .delete(
                     appParam
                         .getWorkspace()
-                        .getAppBackups()
+                        .APP_BACKUPS()
                         .concat("/")
                         .concat(appParam.getId().toString()));
         } catch (Exception e) {

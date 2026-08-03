@@ -21,61 +21,118 @@ import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sDeployMode;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
+import lombok.Builder;
 
 import java.util.Properties;
 
-@Data
-@Accessors(fluent = true)
-@NoArgsConstructor
+/** tracking identifier for flink on kubernetes */
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class TrackId {
 
-    private FlinkK8sDeployMode executeMode;
-    private String namespace = "default";
-    private String clusterId;
-    private Long appId = null;
-    private String jobId;
-    private String groupId;
-    private Properties properties;
+    private final FlinkK8sDeployMode executeMode;
+    @Builder.Default
+    private final String namespace = "default";
+    private final String clusterId;
+    private final Long appId;
+    private final String jobId;
+    private final String groupId;
+    private final Properties properties;
+
+    public FlinkK8sDeployMode executeMode() {
+        return executeMode;
+    }
+
+    public String namespace() {
+        return namespace;
+    }
+
+    public String clusterId() {
+        return clusterId;
+    }
+
+    public Long appId() {
+        return appId;
+    }
+
+    public String jobId() {
+        return jobId;
+    }
+
+    public String groupId() {
+        return groupId;
+    }
+
+    public Properties properties() {
+        return properties;
+    }
 
     public boolean isLegal() {
         switch (executeMode) {
             case APPLICATION:
-                return namespace != null && !namespace.isEmpty()
-                    && clusterId != null && !clusterId.isEmpty();
+                return isNotEmpty(namespace) && isNotEmpty(clusterId);
             case SESSION:
-                return namespace != null && !namespace.isEmpty()
-                    && clusterId != null && !clusterId.isEmpty()
-                    && jobId != null && !jobId.isEmpty();
+                return isNotEmpty(namespace) && isNotEmpty(clusterId) && isNotEmpty(jobId);
             default:
                 return false;
         }
     }
 
     public boolean isActive() {
-        return isLegal() && jobId != null && !jobId.isEmpty();
+        return isLegal() && isNotEmpty(jobId);
     }
 
+    /** covert to ClusterKey */
     public ClusterKey toClusterKey() {
-        return ClusterKey.of(this);
+        return ClusterKey.builder()
+            .executeMode(executeMode)
+            .namespace(namespace)
+            .clusterId(clusterId)
+            .build();
     }
 
-    public TrackId copy() {
-        return new TrackId(
-            executeMode, namespace, clusterId, appId, jobId, groupId, properties);
+    public static TrackId onSession(
+                                    String namespace,
+                                    String clusterId,
+                                    Long appId,
+                                    String jobId,
+                                    String groupId,
+                                    Properties properties) {
+        return TrackId.builder()
+            .executeMode(FlinkK8sDeployMode.SESSION)
+            .namespace(namespace)
+            .clusterId(clusterId)
+            .appId(appId)
+            .jobId(jobId)
+            .groupId(groupId)
+            .properties(properties)
+            .build();
     }
 
-    public TrackId jobId(String jobId) {
-        this.jobId = jobId;
-        return this;
+    public static TrackId onApplication(
+                                        String namespace,
+                                        String clusterId,
+                                        Long appId,
+                                        String jobId,
+                                        String groupId,
+                                        Properties properties) {
+        return TrackId.builder()
+            .executeMode(FlinkK8sDeployMode.APPLICATION)
+            .namespace(namespace)
+            .clusterId(clusterId)
+            .appId(appId)
+            .jobId(jobId)
+            .groupId(groupId)
+            .properties(properties)
+            .build();
     }
 
-    public TrackId appId(Long appId) {
-        this.appId = appId;
-        return this;
+    private static boolean isNotEmpty(String value) {
+        try {
+            return value != null && !value.isEmpty();
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
@@ -90,33 +147,11 @@ public class TrackId {
         }
         TrackId that = (TrackId) obj;
         return executeMode == that.executeMode
-            && clusterId.equals(that.clusterId)
-            && namespace.equals(that.namespace)
+            && java.util.Objects.equals(clusterId, that.clusterId)
+            && java.util.Objects.equals(namespace, that.namespace)
             && java.util.Objects.equals(appId, that.appId)
             && java.util.Objects.equals(jobId, that.jobId)
-            && groupId.equals(that.groupId)
-            && properties.equals(that.properties);
-    }
-
-    public static TrackId onSession(
-                                    String namespace,
-                                    String clusterId,
-                                    Long appId,
-                                    String jobId,
-                                    String groupId,
-                                    Properties properties) {
-        return new TrackId(
-            FlinkK8sDeployMode.SESSION, namespace, clusterId, appId, jobId, groupId, properties);
-    }
-
-    public static TrackId onApplication(
-                                        String namespace,
-                                        String clusterId,
-                                        Long appId,
-                                        String jobId,
-                                        String groupId,
-                                        Properties properties) {
-        return new TrackId(
-            FlinkK8sDeployMode.APPLICATION, namespace, clusterId, appId, jobId, groupId, properties);
+            && java.util.Objects.equals(groupId, that.groupId)
+            && java.util.Objects.equals(properties, that.properties);
     }
 }

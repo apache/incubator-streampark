@@ -17,20 +17,33 @@
 
 package org.apache.streampark.flink.kubernetes.enums;
 
-import java.util.Arrays;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.util.EnumSet;
 import java.util.Set;
 
-/** Flink job status on kubernetes. */
+/** flink job status on kubernetes */
+@SuppressWarnings("AlibabaEnumConstantsMustHaveComment")
 public enum FlinkJobState {
 
+    // flink job has been submit by the streampark.
     STARTING,
+    // flink k8s resources are being initialized.
     K8S_INITIALIZING,
+    // lost track of flink job temporarily.
     SILENT,
+    // flink job has terminated positively (maybe FINISHED or CANCELED)
     POS_TERMINATED,
+    // flink job has terminated (maybe FINISHED, CANCELED or FAILED)
     TERMINATED,
+    // lost track of flink job completely.
     LOST,
+    // other flink state
     OTHER,
+
+    // the following enum have the same meaning as the native flink state enum.
+    // @see org.apache.flink.api.common.JobStatus
     INITIALIZING,
     CREATED,
     RUNNING,
@@ -44,14 +57,26 @@ public enum FlinkJobState {
     private static final Set<FlinkJobState> ENDING_STATES =
         EnumSet.of(FAILED, CANCELED, FINISHED, POS_TERMINATED, TERMINATED, LOST);
 
+    @JsonCreator
     public static FlinkJobState of(String value) {
-        return Arrays.stream(values())
-            .filter(state -> state.name().equals(value))
-            .findFirst()
-            .orElse(OTHER);
+        if (value == null) {
+            return OTHER;
+        }
+        for (FlinkJobState state : FlinkJobState.values()) {
+            if (state.name().equals(value)) {
+                return state;
+            }
+        }
+        return OTHER;
     }
 
+    /** whether flink job state is ending state */
     public static boolean isEndState(FlinkJobState state) {
-        return ENDING_STATES.contains(state);
+        return state != null && ENDING_STATES.contains(state);
+    }
+
+    @JsonValue
+    public String getValue() {
+        return name();
     }
 }

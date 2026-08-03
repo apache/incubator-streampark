@@ -17,14 +17,31 @@
 
 package org.apache.streampark.flink.core;
 
-/** Stream execution environment configuration. */
 public class StreamEnvConfig {
 
-    public final String[] args;
-    public final StreamEnvConfigFunction conf;
+    private final String[] args;
+    private final StreamEnvConfigFunction conf;
 
     public StreamEnvConfig(String[] args, StreamEnvConfigFunction conf) {
         this.args = args;
         this.conf = conf;
+    }
+
+    public String[] getArgs() {
+        return args;
+    }
+
+    public StreamEnvConfigFunction getConf() {
+        return conf;
+    }
+
+    /** Scala API alias for {@link #getArgs()}. */
+    public String[] args() {
+        return args;
+    }
+
+    /** Scala API alias for {@link #getConf()}. */
+    public StreamEnvConfigFunction conf() {
+        return conf;
     }
 }

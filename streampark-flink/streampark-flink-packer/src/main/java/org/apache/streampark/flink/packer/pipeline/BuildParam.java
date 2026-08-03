@@ -17,8 +17,10 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
+/** Params of a BuildPipeline instance. */
 public interface BuildParam {
 
     String appName();
+
     String mainClass();
 }

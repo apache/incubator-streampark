@@ -17,21 +17,46 @@
 
 package org.apache.streampark.flink.packer.docker;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
-
 import java.util.Set;
 
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
+/** Base flink docker file image template. */
 public class FlinkDockerfileTemplate extends FlinkDockerfileTemplateTrait {
 
-    private String workspacePath;
-    private String flinkBaseImage;
-    private String flinkMainJarPath;
-    private Set<String> flinkExtraLibPaths;
+    private final String workspacePath;
+    private final String flinkBaseImage;
+    private final String flinkMainJarPath;
+    private final Set<String> flinkExtraLibPaths;
+
+    public FlinkDockerfileTemplate(
+                                   String workspacePath,
+                                   String flinkBaseImage,
+                                   String flinkMainJarPath,
+                                   Set<String> flinkExtraLibPaths) {
+        this.workspacePath = workspacePath;
+        this.flinkBaseImage = flinkBaseImage;
+        this.flinkMainJarPath = flinkMainJarPath;
+        this.flinkExtraLibPaths = flinkExtraLibPaths;
+    }
+
+    @Override
+    public String workspacePath() {
+        return workspacePath;
+    }
+
+    @Override
+    public String flinkBaseImage() {
+        return flinkBaseImage;
+    }
+
+    @Override
+    public String flinkMainJarPath() {
+        return flinkMainJarPath;
+    }
+
+    @Override
+    public Set<String> flinkExtraLibPaths() {
+        return flinkExtraLibPaths;
+    }
 
     @Override
     public String offerDockerfileContent() {

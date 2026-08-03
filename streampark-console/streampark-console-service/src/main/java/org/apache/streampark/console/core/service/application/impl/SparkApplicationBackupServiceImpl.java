@@ -138,7 +138,7 @@ public class SparkApplicationBackupServiceImpl
         if (!backUpPages.getRecords().isEmpty()) {
             SparkApplicationBackup backup = backUpPages.getRecords().get(0);
             String path = backup.getPath();
-            appParam.getFsOperator().move(path, appParam.getWorkspace().getAppWorkspace());
+            appParam.getFsOperator().move(path, appParam.getWorkspace().APP_WORKSPACE());
             super.removeById(backup.getId());
         }
     }
@@ -152,7 +152,7 @@ public class SparkApplicationBackupServiceImpl
                 .delete(
                     appParam
                         .getWorkspace()
-                        .getAppBackups()
+                        .APP_BACKUPS()
                         .concat("/")
                         .concat(appParam.getId().toString()));
         } catch (Exception e) {

@@ -17,8 +17,22 @@
 
 package org.apache.streampark.common.enums;
 
+import javax.annotation.Nonnull;
+
 /** Flink table execution mode. */
 public enum TableMode {
+
     BATCH,
-    STREAMING
+    STREAMING;
+
+    /**
+     * Resolve enum constant by name (Scala {@code Enumeration.withName} compatibility).
+     *
+     * @param name enum constant name
+     * @return matching {@link TableMode}
+     */
+    @Nonnull
+    public static TableMode withName(@Nonnull String name) {
+        return valueOf(name);
+    }
 }

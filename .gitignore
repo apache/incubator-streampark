@@ -24,6 +24,7 @@
 .project
 out/
 target/
+*.flattened-pom.xml
 *.log*
 tmp/
 *.iml

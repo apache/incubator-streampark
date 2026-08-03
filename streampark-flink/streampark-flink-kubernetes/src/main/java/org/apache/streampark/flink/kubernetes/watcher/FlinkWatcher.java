@@ -17,10 +17,12 @@
 
 package org.apache.streampark.flink.kubernetes.watcher;
 
+import org.apache.streampark.common.util.LoggerSupport;
+
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class FlinkWatcher implements AutoCloseable {
+public abstract class FlinkWatcher extends LoggerSupport implements AutoCloseable {
 
     private final AtomicBoolean started = new AtomicBoolean(false);
 
@@ -28,30 +30,50 @@ public abstract class FlinkWatcher implements AutoCloseable {
 
     protected final ScheduledThreadPoolExecutor watchExecutor = new ScheduledThreadPoolExecutor(CPU_NUM);
 
-    public synchronized void start() {
-        if (!started.getAndSet(true)) {
-            doStart();
+    /**
+     * Start watcher process. This method should be a thread-safe implementation of light locking and
+     * can be called idempotent.
+     */
+    public final void start() {
+        synchronized (this) {
+            if (!started.getAndSet(true)) {
+                doStart();
+            }
         }
     }
 
-    public synchronized void stop() {
-        if (started.getAndSet(false)) {
-            doStop();
+    /**
+     * Stop watcher process. This method should be a thread-safe implementation of light locking and
+     * can be called idempotent.
+     */
+    public final void stop() {
+        synchronized (this) {
+            if (started.getAndSet(false)) {
+                doStop();
+            }
         }
     }
 
     @Override
-    public synchronized void close() {
-        if (started.get()) {
-            doStop();
+    public final void close() {
+        synchronized (this) {
+            if (started.get()) {
+                doStop();
+            }
+            doClose();
+            watchExecutor.shutdownNow();
         }
-        doClose();
-        watchExecutor.shutdownNow();
     }
 
-    public synchronized void restart() {
-        stop();
-        start();
+    /**
+     * This method should be a thread-safe implementation of light locking and can be called
+     * idempotent.
+     */
+    public final void restart() {
+        synchronized (this) {
+            stop();
+            start();
+        }
     }
 
     protected abstract void doStart();
@@ -61,8 +83,4 @@ public abstract class FlinkWatcher implements AutoCloseable {
     protected abstract void doClose();
 
     public abstract void doWatch();
-
-    protected Runnable toRunnable(Runnable fun) {
-        return fun;
-    }
 }

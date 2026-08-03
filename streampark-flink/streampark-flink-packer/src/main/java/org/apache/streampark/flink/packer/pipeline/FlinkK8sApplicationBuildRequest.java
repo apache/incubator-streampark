@@ -24,28 +24,124 @@ import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates;
 import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
+public class FlinkK8sApplicationBuildRequest implements FlinkK8sBuildParam {
 
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
-public class FlinkK8sApplicationBuildRequest extends FlinkK8sBuildParam {
+    private final String appName;
+    private final String workspace;
+    private final String mainClass;
+    private final String customFlinkUserJar;
+    private final FlinkDeployMode deployMode;
+    private final FlinkJobType flinkJobType;
+    private final FlinkVersion flinkVersion;
+    private final DependencyInfo dependencyInfo;
+    private final String clusterId;
+    private final String k8sNamespace;
+    private final String flinkBaseImage;
+    private final K8sPodTemplates flinkPodTemplate;
+    private final boolean integrateWithHadoop;
+    private final DockerConf dockerConfig;
+    private final String ingressTemplate;
 
-    private String appName;
-    private String workspace;
-    private String mainClass;
-    private String customFlinkUserJar;
-    private FlinkDeployMode deployMode;
-    private FlinkJobType flinkJobType;
-    private FlinkVersion flinkVersion;
-    private DependencyInfo dependencyInfo;
-    private String clusterId;
-    private String k8sNamespace;
-    private String flinkBaseImage;
-    private K8sPodTemplates flinkPodTemplate;
-    private boolean integrateWithHadoop;
-    private DockerConf dockerConfig;
-    private String ingressTemplate;
+    public FlinkK8sApplicationBuildRequest(
+                                           String appName,
+                                           String workspace,
+                                           String mainClass,
+                                           String customFlinkUserJar,
+                                           FlinkDeployMode deployMode,
+                                           FlinkJobType flinkJobType,
+                                           FlinkVersion flinkVersion,
+                                           DependencyInfo dependencyInfo,
+                                           String clusterId,
+                                           String k8sNamespace,
+                                           String flinkBaseImage,
+                                           K8sPodTemplates flinkPodTemplate,
+                                           boolean integrateWithHadoop,
+                                           DockerConf dockerConfig,
+                                           String ingressTemplate) {
+        this.appName = appName;
+        this.workspace = workspace;
+        this.mainClass = mainClass;
+        this.customFlinkUserJar = customFlinkUserJar;
+        this.deployMode = deployMode;
+        this.flinkJobType = flinkJobType;
+        this.flinkVersion = flinkVersion;
+        this.dependencyInfo = dependencyInfo;
+        this.clusterId = clusterId;
+        this.k8sNamespace = k8sNamespace;
+        this.flinkBaseImage = flinkBaseImage;
+        this.flinkPodTemplate = flinkPodTemplate;
+        this.integrateWithHadoop = integrateWithHadoop;
+        this.dockerConfig = dockerConfig;
+        this.ingressTemplate = ingressTemplate;
+    }
+
+    @Override
+    public String appName() {
+        return appName;
+    }
+
+    @Override
+    public String workspace() {
+        return workspace;
+    }
+
+    @Override
+    public String mainClass() {
+        return mainClass;
+    }
+
+    @Override
+    public String customFlinkUserJar() {
+        return customFlinkUserJar;
+    }
+
+    @Override
+    public FlinkDeployMode deployMode() {
+        return deployMode;
+    }
+
+    @Override
+    public FlinkJobType flinkJobType() {
+        return flinkJobType;
+    }
+
+    @Override
+    public FlinkVersion flinkVersion() {
+        return flinkVersion;
+    }
+
+    @Override
+    public DependencyInfo dependencyInfo() {
+        return dependencyInfo;
+    }
+
+    @Override
+    public String clusterId() {
+        return clusterId;
+    }
+
+    @Override
+    public String k8sNamespace() {
+        return k8sNamespace;
+    }
+
+    public String flinkBaseImage() {
+        return flinkBaseImage;
+    }
+
+    public K8sPodTemplates flinkPodTemplate() {
+        return flinkPodTemplate;
+    }
+
+    public boolean integrateWithHadoop() {
+        return integrateWithHadoop;
+    }
+
+    public DockerConf dockerConfig() {
+        return dockerConfig;
+    }
+
+    public String ingressTemplate() {
+        return ingressTemplate;
+    }
 }

@@ -17,8 +17,6 @@
 
 package org.apache.streampark.common.util;
 
-import org.apache.streampark.shaded.org.slf4j.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 
 import com.typesafe.config.ConfigFactory;
@@ -27,63 +25,66 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
+/** Properties, YAML and HOCON configuration parsing utilities. */
 public final class PropertiesUtils {
 
-    private static final Logger LOG =
-        StreamParkLoggerFactory.loggerFactory().getLogger(PropertiesUtils.class.getName());
+    private static final Pattern HOCON_KEY_QUOTE_PATTERN = Pattern.compile("\"");
 
     private PropertiesUtils() {
     }
 
-    public static String readFile(String filename) {
+    public static String readFile(String filename) throws IOException {
         Path path = SafePathUtils.resolveConfigPath(filename);
-        try (Scanner scanner = new Scanner(Files.newBufferedReader(path, StandardCharsets.UTF_8))) {
-            StringBuilder buffer = new StringBuilder();
+        if (!Files.exists(path)) {
+            throw new IllegalArgumentException("[StreamPark] readFile: file " + path + " does not exist");
+        }
+        if (!Files.isRegularFile(path)) {
+            throw new IllegalArgumentException("[StreamPark] readFile: file " + path + " is not a normal file");
+        }
+        StringBuilder buffer = new StringBuilder();
+        try (Scanner scanner = new Scanner(path)) {
             while (scanner.hasNextLine()) {
                 buffer.append(scanner.nextLine()).append("\r\n");
             }
-            return buffer.toString();
-        } catch (IOException e) {
-            throw new IllegalArgumentException("[StreamPark] readFile: failed to read " + path, e);
         }
+        return buffer.toString();
     }
 
-    public static Map<String, String> fromYamlText(String text) {
+    public static LinkedHashMap<String, String> fromYamlText(String text) {
         try {
             Map<String, Object> map = new Yaml().load(text);
             return flatten(map);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new IllegalArgumentException("Failed when loading conf error:", e);
         }
     }
 
-    public static Map<String, String> fromHoconText(String conf) {
+    public static LinkedHashMap<String, String> fromHoconText(String conf) {
         if (conf == null) {
             throw new IllegalArgumentException("[StreamPark] fromHoconText: Hocon content must not be null");
         }
-        try {
-            return parseHoconByReader(new StringReader(conf));
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Failed when loading Hocon ", e);
-        }
+        return parseHoconByReader(new StringReader(conf));
     }
 
-    public static Map<String, String> fromPropertiesText(String conf) {
+    public static LinkedHashMap<String, String> fromPropertiesText(String conf) {
         try {
             Properties properties = new Properties();
             properties.load(new StringReader(conf));
-            Map<String, String> result = new HashMap<>();
-            for (String k : properties.stringPropertyNames()) {
-                result.put(k, properties.getProperty(k).trim());
+            LinkedHashMap<String, String> result = new LinkedHashMap<>();
+            for (String key : properties.stringPropertyNames()) {
+                result.put(key, properties.getProperty(key).trim());
             }
             return result;
         } catch (IOException e) {
@@ -91,72 +92,72 @@ public final class PropertiesUtils {
         }
     }
 
-    public static Map<String, String> fromYamlFile(String filename) {
+    /** Load Yaml present in the given file. */
+    public static LinkedHashMap<String, String> fromYamlFile(String filename) {
         try (InputStream inputStream = SafePathUtils.openConfigFile(filename)) {
             return fromYamlFile(inputStream);
         } catch (IOException e) {
-            throw new IllegalArgumentException("Failed when loading yaml from file", e);
+            throw new IllegalArgumentException("Failed when loading yaml from file " + filename, e);
         }
     }
 
-    public static Map<String, String> fromHoconFile(String filename) {
+    public static LinkedHashMap<String, String> fromHoconFile(String filename) {
         try (InputStream inputStream = SafePathUtils.openConfigFile(filename)) {
             return fromHoconFile(inputStream);
         } catch (IOException e) {
-            throw new IllegalArgumentException("Failed when loading Hocon ", e);
+            throw new IllegalArgumentException("Failed when loading Hocon from file " + filename, e);
         }
     }
 
-    public static Map<String, String> fromPropertiesFile(String filename) {
+    /** Load properties present in the given file. */
+    public static LinkedHashMap<String, String> fromPropertiesFile(String filename) {
         try (InputStream inputStream = SafePathUtils.openConfigFile(filename)) {
             return fromPropertiesFile(inputStream);
         } catch (IOException e) {
-            throw new IllegalArgumentException("Failed when loading properties from file", e);
+            throw new IllegalArgumentException(
+                "[StreamPark] Failed when loading properties from file " + filename, e);
         }
     }
 
-    public static Map<String, String> fromYamlFile(InputStream inputStream) {
+    /** Load Yaml present in the given input stream. */
+    public static LinkedHashMap<String, String> fromYamlFile(InputStream inputStream) {
         AssertUtils.required(
             inputStream != null,
             "[StreamPark] fromYamlFile: Properties inputStream  must not be null");
         try {
             Map<String, Object> map = new Yaml().load(inputStream);
             return flatten(map);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new IllegalArgumentException("Failed when loading yaml from inputStream", e);
-        } finally {
-            try {
-                inputStream.close();
-            } catch (IOException ignored) {
-            }
         }
     }
 
-    public static Map<String, String> fromHoconFile(InputStream inputStream) {
+    public static LinkedHashMap<String, String> fromHoconFile(InputStream inputStream) {
         if (inputStream == null) {
             throw new IllegalArgumentException("[StreamPark] fromHoconFile: Hocon inputStream  must not be null");
         }
+        return parseHoconByReader(new InputStreamReader(inputStream));
+    }
+
+    private static LinkedHashMap<String, String> parseHoconByReader(Reader reader) {
         try {
-            return parseHoconByReader(new InputStreamReader(inputStream));
-        } catch (IOException e) {
+            LinkedHashMap<String, String> result = new LinkedHashMap<>();
+            ConfigFactory.parseReader(reader)
+                .entrySet()
+                .forEach(
+                    entry -> {
+                        String key = HOCON_KEY_QUOTE_PATTERN.matcher(entry.getKey().trim()).replaceAll("");
+                        String value = entry.getValue().unwrapped().toString().trim();
+                        result.put(key, value);
+                    });
+            return result;
+        } catch (RuntimeException e) {
             throw new IllegalArgumentException("Failed when loading Hocon ", e);
         }
     }
 
-    private static Map<String, String> parseHoconByReader(java.io.Reader reader) throws IOException {
-        Map<String, String> result = new HashMap<>();
-        ConfigFactory.parseReader(reader)
-            .entrySet()
-            .forEach(
-                x -> {
-                    String k = x.getKey().trim().replaceAll("\"", "");
-                    String v = x.getValue().unwrapped().toString().trim();
-                    result.put(k, v);
-                });
-        return result;
-    }
-
-    public static Map<String, String> fromPropertiesFile(InputStream inputStream) {
+    /** Load properties present in the given input stream. */
+    public static LinkedHashMap<String, String> fromPropertiesFile(InputStream inputStream) {
         if (inputStream == null) {
             throw new IllegalArgumentException(
                 "[StreamPark] fromPropertiesFile: Properties inputStream  must not be null");
@@ -164,9 +165,9 @@ public final class PropertiesUtils {
         try {
             Properties properties = new Properties();
             properties.load(inputStream);
-            Map<String, String> result = new HashMap<>();
-            for (String k : properties.stringPropertyNames()) {
-                result.put(k, properties.getProperty(k).trim());
+            LinkedHashMap<String, String> result = new LinkedHashMap<>();
+            for (String key : properties.stringPropertyNames()) {
+                result.put(key, properties.getProperty(key).trim());
             }
             return result;
         } catch (IOException e) {
@@ -211,32 +212,33 @@ public final class PropertiesUtils {
         return new HashMap<>(fromPropertiesFile(inputStream));
     }
 
-    @SuppressWarnings("unchecked")
-    private static Map<String, String> flatten(Map<String, Object> map) {
+    private static LinkedHashMap<String, String> flatten(Map<String, Object> map) {
         return flatten(map, "");
     }
 
-    @SuppressWarnings("unchecked")
-    private static Map<String, String> flatten(Map<String, Object> map, String prefix) {
-        Map<String, String> result = new HashMap<>();
-        if (map == null) {
-            return result;
+    private static LinkedHashMap<String, String> flatten(Map<String, Object> map, String prefix) {
+        if (map == null || map.isEmpty()) {
+            return new LinkedHashMap<>();
         }
+        LinkedHashMap<String, String> result = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : map.entrySet()) {
-            String key = prefix + entry.getKey();
-            Object v = entry.getValue();
-            if (v instanceof Map) {
-                result.putAll(flatten((Map<String, Object>) v, key + "."));
-            } else if (v instanceof String) {
-                if (StringUtils.isNotBlank((String) v)) {
-                    result.put(key, (String) v);
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (value instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> nested = (Map<String, Object>) value;
+                result.putAll(flatten(nested, prefix + key + "."));
+            } else if (value instanceof String) {
+                if (StringUtils.isNotBlank((String) value)) {
+                    result.put(prefix + key, (String) value);
                 }
-            } else if (v instanceof java.util.Collection) {
-                if (!((java.util.Collection<?>) v).isEmpty()) {
-                    result.put(key, v.toString());
+            } else if (value instanceof Collection) {
+                Collection<?> collection = (Collection<?>) value;
+                if (!collection.isEmpty()) {
+                    result.put(prefix + key, collection.toString());
                 }
-            } else if (v != null) {
-                result.put(key, v.toString());
+            } else if (value != null) {
+                result.put(prefix + key, value.toString());
             }
         }
         return result;

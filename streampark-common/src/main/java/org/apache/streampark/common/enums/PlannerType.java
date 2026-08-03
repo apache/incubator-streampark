@@ -17,6 +17,8 @@
 
 package org.apache.streampark.common.enums;
 
+import javax.annotation.Nonnull;
+
 /** Flink table planner type. */
 public enum PlannerType {
 
@@ -24,8 +26,14 @@ public enum PlannerType {
     OLD,
     ANY;
 
-    /** Scala downstream compatibility: {@code PlannerType.withName(...)}. */
-    public static PlannerType withName(String name) {
+    /**
+     * Resolve enum constant by name (Scala {@code Enumeration.withName} compatibility).
+     *
+     * @param name enum constant name
+     * @return matching {@link PlannerType}
+     */
+    @Nonnull
+    public static PlannerType withName(@Nonnull String name) {
         return valueOf(name);
     }
 }

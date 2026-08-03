@@ -17,19 +17,20 @@
 
 package org.apache.streampark.flink.client.bean;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
+import java.io.Serializable;
 
 /** Result class of trigger savepoint presents savepoint path. */
-@Data
-@Accessors(fluent = true)
-@NoArgsConstructor
-public class SavepointResponse {
+public class SavepointResponse implements Serializable {
 
-    private String savepointDir;
+    private static final long serialVersionUID = 1L;
+
+    private final String savepointDir;
 
     public SavepointResponse(String savepointDir) {
         this.savepointDir = savepointDir;
+    }
+
+    public String savepointDir() {
+        return savepointDir;
     }
 }

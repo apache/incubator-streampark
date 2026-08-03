@@ -28,15 +28,17 @@ import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.api.model.apps.D
 import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.client.KubernetesClient;
 import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.client.Watcher;
 
-import lombok.extern.slf4j.Slf4j;
-
 import javax.annotation.concurrent.ThreadSafe;
 
-@Slf4j
+/**
+ * K8s Event Watcher for Flink Native-K8s Mode. Currently only flink-native-application mode events
+ * would be tracked. The results of traced events would written into cachePool.
+ */
 @ThreadSafe
 public class FlinkK8sEventWatcher extends FlinkWatcher {
 
     private final FlinkK8sWatchController watchController;
+
     private KubernetesClient k8sClient;
 
     public FlinkK8sEventWatcher(FlinkK8sWatchController watchController) {
@@ -48,11 +50,11 @@ public class FlinkK8sEventWatcher extends FlinkWatcher {
         try {
             k8sClient = KubernetesRetriever.newK8sClient();
         } catch (Exception e) {
-            log.error("[flink-k8s] FlinkK8sEventWatcher fails to start.");
+            logError("[flink-k8s] FlinkK8sEventWatcher fails to start.");
             return;
         }
         doWatch();
-        log.info("[flink-k8s] FlinkK8sEventWatcher started.");
+        logInfo("[flink-k8s] FlinkK8sEventWatcher started.");
     }
 
     @Override
@@ -61,30 +63,31 @@ public class FlinkK8sEventWatcher extends FlinkWatcher {
             k8sClient.close();
             k8sClient = null;
         }
-        log.info("[flink-k8s] FlinkK8sEventWatcher stopped.");
+        logInfo("[flink-k8s] FlinkK8sEventWatcher stopped.");
     }
 
     @Override
     protected void doClose() {
-        log.info("[flink-k8s] FlinkK8sEventWatcher closed.");
+        logInfo("[flink-k8s] FlinkK8sEventWatcher closed.");
     }
 
     @Override
     public void doWatch() {
-        if (k8sClient == null) {
-            return;
-        }
         try {
-            k8sClient.apps().deployments().withLabel("type", "flink-native-kubernetes")
-                .watch(new CompatibleKubernetesWatcher<Deployment, CompKubernetesDeployment>() {
+            k8sClient
+                .apps()
+                .deployments()
+                .withLabel("type", "flink-native-kubernetes")
+                .watch(
+                    new CompatibleKubernetesWatcher<Deployment, CompKubernetesDeployment>() {
 
-                    @Override
-                    public void eventReceived(Watcher.Action action, Deployment event) {
-                        handleDeploymentEvent(action, event);
-                    }
-                });
+                        @Override
+                        public void eventReceived(Watcher.Action action, Deployment event) {
+                            handleDeploymentEvent(action, event);
+                        }
+                    });
         } catch (Exception e) {
-            log.error("k8sClient error: {}", e.getMessage(), e);
+            logError("k8sClient error: " + e);
         }
     }
 
@@ -92,7 +95,11 @@ public class FlinkK8sEventWatcher extends FlinkWatcher {
         String clusterId = event.getMetadata().getName();
         String namespace = event.getMetadata().getNamespace();
         watchController.k8sDeploymentEvents.put(
-            new K8sEventKey(namespace, clusterId),
-            new K8sDeploymentEventCV(action, event, System.currentTimeMillis()));
+            K8sEventKey.builder().namespace(namespace).clusterId(clusterId).build(),
+            K8sDeploymentEventCV.builder()
+                .action(action)
+                .event(event)
+                .pollAckTime(System.currentTimeMillis())
+                .build());
     }
 }

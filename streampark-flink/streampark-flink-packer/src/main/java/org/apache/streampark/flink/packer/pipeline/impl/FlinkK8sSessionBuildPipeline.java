@@ -19,37 +19,72 @@ package org.apache.streampark.flink.packer.pipeline.impl;
 
 import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.flink.packer.maven.MavenTool;
+import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
+import org.apache.streampark.flink.packer.pipeline.FlinkK8sSessionBuildRequest;
+import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
+import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 
 import java.io.File;
 
+/** Building pipeline for flink kubernetes-native session mode */
 public class FlinkK8sSessionBuildPipeline extends BuildPipeline {
 
     private final FlinkK8sSessionBuildRequest request;
+
     public FlinkK8sSessionBuildPipeline(FlinkK8sSessionBuildRequest request) {
         this.request = request;
     }
-    public static FlinkK8sSessionBuildPipeline of(FlinkK8sSessionBuildRequest request) {
-        return new FlinkK8sSessionBuildPipeline(request);
-    }
+
     @Override
-    public PipelineTypeEnum getPipeType() {
+    public PipelineTypeEnum pipeType() {
         return PipelineTypeEnum.FLINK_NATIVE_K8S_SESSION;
     }
+
     @Override
-    protected BuildParam offerBuildParam() {
+    public FlinkK8sSessionBuildRequest offerBuildParam() {
         return request;
     }
+
     @Override
-    protected BuildResult buildProcess() throws Throwable {
-        String buildWorkspace = execStep(1, () -> {
-            String ws = request.workspace() + "/" + request.clusterId() + "@" + request.k8sNamespace();
-            LfsOperator.getInstance().mkCleanDirs(ws);
-            return ws;
-        }).orElseThrow(() -> getError().exception());
-        File shadedJar = execStep(2,
-            () -> MavenTool.buildFatJar(request.mainClass(), request.providedLibs(),
-                request.getShadedJarPath(buildWorkspace)))
-                    .orElseThrow(() -> getError().exception());
+    public ShadedBuildResponse buildProcess() {
+        String buildWorkspace =
+            execStep(
+                1,
+                () -> {
+                    String workspace =
+                        request.workspace()
+                            + "/"
+                            + request.clusterId()
+                            + "@"
+                            + request.k8sNamespace();
+                    LfsOperator.mkCleanDirs(workspace);
+                    logInfo("Recreate building workspace: " + workspace);
+                    return workspace;
+                })
+                    .orElseThrow(() -> {
+                        throw pipelineException();
+                    });
+
+        File shadedJar =
+            execStep(
+                2,
+                () -> {
+                    File output =
+                        MavenTool.buildFatJar(
+                            request.mainClass(),
+                            request.providedLibs(),
+                            request.getShadedJarPath(buildWorkspace));
+                    logInfo("Output shaded flink job jar: " + output.getAbsolutePath());
+                    return output;
+                })
+                    .orElseThrow(() -> {
+                        throw pipelineException();
+                    });
+
         return new ShadedBuildResponse(buildWorkspace, shadedJar.getAbsolutePath());
+    }
+
+    public static FlinkK8sSessionBuildPipeline of(FlinkK8sSessionBuildRequest request) {
+        return new FlinkK8sSessionBuildPipeline(request);
     }
 }

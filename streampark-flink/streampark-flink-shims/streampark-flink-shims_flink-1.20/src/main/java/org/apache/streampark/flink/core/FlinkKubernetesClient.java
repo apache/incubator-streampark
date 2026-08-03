@@ -22,7 +22,6 @@ import org.apache.flink.kubernetes.kubeclient.resources.KubernetesService;
 
 import java.util.Optional;
 
-/** Flink 1.20 Kubernetes client. */
 public class FlinkKubernetesClient extends FlinkKubernetesClientTrait {
 
     public FlinkKubernetesClient(FlinkKubeClient kubeClient) {

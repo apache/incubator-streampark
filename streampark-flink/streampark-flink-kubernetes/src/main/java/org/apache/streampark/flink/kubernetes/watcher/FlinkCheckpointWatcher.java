@@ -25,11 +25,10 @@ import org.apache.streampark.flink.kubernetes.event.FlinkJobCheckpointChangeEven
 import org.apache.streampark.flink.kubernetes.model.CheckpointCV;
 import org.apache.streampark.flink.kubernetes.model.ClusterKey;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
-import org.apache.streampark.flink.kubernetes.watcher.FlinkRestModels.CheckpointResponse;
+import org.apache.streampark.flink.kubernetes.rest.CheckpointInfo;
+import org.apache.streampark.flink.kubernetes.rest.FlinkCheckpointResponse;
 
 import org.apache.hc.client5.http.fluent.Request;
-
-import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -37,17 +36,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-@Slf4j
 @ThreadSafe
 public class FlinkCheckpointWatcher extends FlinkWatcher {
 
     private final MetricWatcherConfig conf;
     private final FlinkK8sWatchController watchController;
     private final ChangeEventBus eventBus;
+
     private ScheduledFuture<?> timerSchedule;
 
     public FlinkCheckpointWatcher(
@@ -64,7 +65,7 @@ public class FlinkCheckpointWatcher extends FlinkWatcher {
         timerSchedule =
             watchExecutor.scheduleAtFixedRate(
                 this::doWatch, 0, conf.requestIntervalSec(), TimeUnit.SECONDS);
-        log.info("[flink-k8s] FlinkCheckpointWatcher started.");
+        logInfo("[flink-k8s] FlinkCheckpointWatcher started.");
     }
 
     @Override
@@ -72,7 +73,7 @@ public class FlinkCheckpointWatcher extends FlinkWatcher {
         if (timerSchedule != null && !timerSchedule.isCancelled()) {
             timerSchedule.cancel(true);
         }
-        log.info("[flink-k8s] FlinkCheckpointWatcher stopped.");
+        logInfo("[flink-k8s] FlinkCheckpointWatcher stopped.");
     }
 
     @Override
@@ -80,7 +81,7 @@ public class FlinkCheckpointWatcher extends FlinkWatcher {
         if (timerSchedule != null && !timerSchedule.isCancelled()) {
             timerSchedule.cancel(true);
         }
-        log.info("[flink-k8s] FlinkCheckpointWatcher closed.");
+        logInfo("[flink-k8s] FlinkCheckpointWatcher closed.");
     }
 
     @Override
@@ -96,29 +97,39 @@ public class FlinkCheckpointWatcher extends FlinkWatcher {
         }
 
         Set<CompletableFuture<Optional<CheckpointCV>>> futures =
-            trackIds.stream().map(this::watchCheckpointAsync).collect(Collectors.toSet());
+            trackIds.stream()
+                .map(
+                    id -> CompletableFuture
+                        .supplyAsync(() -> collect(id), watchExecutor)
+                        .whenComplete(
+                            (cpOpt, error) -> {
+                                if (error == null) {
+                                    cpOpt.ifPresent(
+                                        cp -> eventBus.postAsync(
+                                            new FlinkJobCheckpointChangeEvent(id, cp)));
+                                }
+                            }))
+                .collect(Collectors.toSet());
 
         try {
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
                 .get(conf.requestTimeoutSec(), TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            log.warn("[FlinkCheckpointWatcher] interrupted while waiting for checkpoint collection");
-        } catch (Exception e) {
-            log.error(
-                "[FlinkCheckpointWatcher] tracking flink-job checkpoint on kubernetes mode timeout, limitSeconds={}, trackingClusterKeys={}",
-                conf.requestTimeoutSec(),
-                trackIds);
+            logError(
+                "[FlinkCheckpointWatcher] tracking flink-job checkpoint on kubernetes mode interrupted,"
+                    + " limitSeconds="
+                    + conf.requestTimeoutSec()
+                    + ", trackingClusterKeys="
+                    + trackIds.stream().map(Object::toString).collect(Collectors.joining(",")));
+        } catch (ExecutionException | TimeoutException e) {
+            logError(
+                "[FlinkCheckpointWatcher] tracking flink-job checkpoint on kubernetes mode timeout,"
+                    + " limitSeconds="
+                    + conf.requestTimeoutSec()
+                    + ", trackingClusterKeys="
+                    + trackIds.stream().map(Object::toString).collect(Collectors.joining(",")));
         }
-    }
-
-    private CompletableFuture<Optional<CheckpointCV>> watchCheckpointAsync(TrackId id) {
-        return CompletableFuture.supplyAsync(() -> collect(id), watchExecutor)
-            .whenComplete(
-                (cp, error) -> cp.ifPresent(
-                    checkpoint -> eventBus.postAsync(
-                        new FlinkJobCheckpointChangeEvent(
-                            id, checkpoint))));
     }
 
     public Optional<CheckpointCV> collect(TrackId trackId) {
@@ -140,19 +151,20 @@ public class FlinkCheckpointWatcher extends FlinkWatcher {
                     .execute()
                     .returnContent()
                     .asString(StandardCharsets.UTF_8);
-            Optional<CheckpointResponse> checkpoint = FlinkRestModels.parseCheckpoint(json);
+            Optional<CheckpointInfo> checkpoint = FlinkCheckpointResponse.parseCompleted(json);
             if (!checkpoint.isPresent()) {
                 return Optional.empty();
             }
-            CheckpointResponse cp = checkpoint.get();
+            CheckpointInfo cp = checkpoint.get();
             return Optional.of(
-                new CheckpointCV(
-                    cp.id(),
-                    cp.status(),
-                    cp.externalPath(),
-                    cp.isSavepoint(),
-                    cp.checkpointType(),
-                    cp.triggerTimestamp()));
+                CheckpointCV.builder()
+                    .id(cp.id())
+                    .externalPath(cp.externalPath())
+                    .isSavepoint(cp.isSavepoint())
+                    .checkpointType(cp.checkpointType())
+                    .status(cp.status())
+                    .triggerTimestamp(cp.triggerTimestamp())
+                    .build());
         } catch (Exception e) {
             return Optional.empty();
         }

@@ -18,23 +18,47 @@
 package org.apache.streampark.flink.packer.docker;
 
 import com.github.dockerjava.api.model.AuthConfig;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
 
 import javax.annotation.Nullable;
 
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
-public class DockerConf {
+/** Authentication Configuration of Remote Docker Register */
+public final class DockerConf {
 
     @Nullable
-    private String registerAddress;
-    private String imageNamespace;
-    private String registerUsername;
-    private String registerPassword;
+    private final String registerAddress;
+    private final String imageNamespace;
+    private final String registerUsername;
+    private final String registerPassword;
 
+    public DockerConf(
+                      @Nullable String registerAddress,
+                      String imageNamespace,
+                      String registerUsername,
+                      String registerPassword) {
+        this.registerAddress = registerAddress;
+        this.imageNamespace = imageNamespace;
+        this.registerUsername = registerUsername;
+        this.registerPassword = registerPassword;
+    }
+
+    @Nullable
+    public String registerAddress() {
+        return registerAddress;
+    }
+
+    public String imageNamespace() {
+        return imageNamespace;
+    }
+
+    public String registerUsername() {
+        return registerUsername;
+    }
+
+    public String registerPassword() {
+        return registerPassword;
+    }
+
+    /** covert to com.github.docker.java.api.model.AuthConfig */
     public AuthConfig toAuthConf() {
         return new AuthConfig()
             .withRegistryAddress(registerAddress)
@@ -42,7 +66,10 @@ public class DockerConf {
             .withPassword(registerPassword);
     }
 
-    public static DockerConf of(@Nullable String registerAddress, String imageNameSpace, String registerUsername,
+    public static DockerConf of(
+                                @Nullable String registerAddress,
+                                String imageNameSpace,
+                                String registerUsername,
                                 String registerPassword) {
         return new DockerConf(registerAddress, imageNameSpace, registerUsername, registerPassword);
     }

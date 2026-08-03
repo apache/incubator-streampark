@@ -31,6 +31,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import scala.collection.JavaConverters;
+
 /** @param flinkHome actual flink home that must be a readable local path */
 public class FlinkVersion implements Serializable {
 
@@ -48,8 +50,8 @@ public class FlinkVersion implements Serializable {
     private static final Pattern FLINK_DIST_DASH_PATTERN =
         Pattern.compile("^flink-dist-(\\d+\\.\\d+(?:\\.\\d+)?(?:-SNAPSHOT)?)\\.jar$");
     private static final Pattern APACHE_FLINK_VERSION_PATTERN =
-        Pattern.compile("(^\\d+\\.\\d+\\.\\d+)");
-    private static final Pattern OTHER_FLINK_VERSION_PATTERN = Pattern.compile("(\\d+\\.\\d+)-?");
+        Pattern.compile("^(\\d+\\.\\d+\\.\\d+)");
+    private static final Pattern OTHER_FLINK_VERSION_PATTERN = Pattern.compile("^(\\d+\\.\\d+)-?$");
 
     /** Flink installation directory (Scala {@code flinkHome} accessor). */
     public final String flinkHome;
@@ -87,8 +89,8 @@ public class FlinkVersion implements Serializable {
     }
 
     /** Scala API alias for {@link #getFlinkLibs()}. */
-    public java.util.List<java.net.URL> flinkLibs() throws Exception {
-        return getFlinkLibs();
+    public scala.collection.immutable.List<URL> flinkLibs() throws Exception {
+        return JavaConverters.asScalaIteratorConverter(getFlinkLibs().iterator()).asScala().toList();
     }
 
     public String getScalaVersion() {
@@ -156,7 +158,11 @@ public class FlinkVersion implements Serializable {
     public File getFlinkDistJar() {
         if (flinkDistJar == null) {
             File[] distJar =
-                getFlinkLib().listFiles(f -> f.getName().matches("flink-dist.*\\.jar"));
+                getFlinkLib().listFiles(
+                    f -> {
+                        String name = f.getName();
+                        return name.startsWith("flink-dist") && name.endsWith(".jar");
+                    });
             if (distJar == null || distJar.length == 0) {
                 throw new IllegalArgumentException(
                     "[StreamPark] can no found flink-dist jar in " + getFlinkLib());
@@ -183,7 +189,7 @@ public class FlinkVersion implements Serializable {
                 if (major == 1 && minor >= 17 && minor <= 20) {
                     return true;
                 }
-                if (major == 2 && minor >= 0 && minor <= 2) {
+                if (major == 2 && minor >= 0 && minor <= 3) {
                     return true;
                 }
             } catch (NumberFormatException ignored) {

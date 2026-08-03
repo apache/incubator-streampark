@@ -17,10 +17,7 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
-import lombok.Getter;
-
-/** Cache storage for docker resolved progress. */
-@Getter
+/** cache storage for docker resolved progress */
 public class DockerResolveProgress {
 
     private final DockerPullProgress pull;
@@ -28,14 +25,23 @@ public class DockerResolveProgress {
     private final DockerPushProgress push;
 
     public DockerResolveProgress(
-                                 DockerPullProgress pull, DockerBuildProgress build, DockerPushProgress push) {
+                                 DockerPullProgress pull,
+                                 DockerBuildProgress build,
+                                 DockerPushProgress push) {
         this.pull = pull;
         this.build = build;
         this.push = push;
     }
 
-    public static DockerResolveProgress createEmpty() {
-        return new DockerResolveProgress(
-            DockerPullProgress.empty(), DockerBuildProgress.empty(), DockerPushProgress.empty());
+    public DockerPullProgress getPull() {
+        return pull;
+    }
+
+    public DockerBuildProgress getBuild() {
+        return build;
+    }
+
+    public DockerPushProgress getPush() {
+        return push;
     }
 }

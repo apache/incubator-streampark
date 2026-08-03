@@ -19,21 +19,20 @@ package org.apache.streampark.flink.kubernetes;
 
 import org.apache.streampark.common.util.Utils;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
-
 import java.io.Serializable;
 import java.util.Objects;
 
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
-public class CacheKey implements Serializable {
+public final class CacheKey implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private final Long key;
 
-    private Long key;
+    public CacheKey(Long key) {
+        this.key = key;
+    }
+
+    public Long key() {
+        return key;
+    }
 
     @Override
     public int hashCode() {
@@ -45,6 +44,7 @@ public class CacheKey implements Serializable {
         if (!(obj instanceof CacheKey)) {
             return false;
         }
-        return Objects.equals(key, ((CacheKey) obj).key);
+        CacheKey that = (CacheKey) obj;
+        return Objects.equals(key, that.key);
     }
 }

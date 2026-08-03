@@ -19,12 +19,9 @@ package org.apache.streampark.flink.packer.pipeline;
 
 import org.apache.commons.lang3.StringUtils;
 
-import lombok.Getter;
-
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
 public class DockerBuildProgress {
 
     private final List<String> steps = new ArrayList<>();
@@ -32,10 +29,6 @@ public class DockerBuildProgress {
 
     public DockerBuildProgress(long lastTime) {
         this.lastTime = lastTime;
-    }
-
-    public static DockerBuildProgress empty() {
-        return new DockerBuildProgress(System.currentTimeMillis());
     }
 
     public void update(String buildStep) {
@@ -47,5 +40,9 @@ public class DockerBuildProgress {
 
     public DockerBuildSnapshot snapshot() {
         return new DockerBuildSnapshot(new ArrayList<>(steps), lastTime);
+    }
+
+    public static DockerBuildProgress empty() {
+        return new DockerBuildProgress(System.currentTimeMillis());
     }
 }

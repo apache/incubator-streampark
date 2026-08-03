@@ -18,18 +18,40 @@
 package org.apache.streampark.flink.kubernetes.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
+import lombok.Builder;
 
-@Data
-@Accessors(fluent = true)
+@Builder
 @AllArgsConstructor
 public class CheckpointCV {
 
-    private long id;
-    private String status;
-    private String externalPath;
-    private boolean isSavepoint;
-    private String checkpointType;
-    private long triggerTimestamp;
+    private final long id;
+    private final String status;
+    private final String externalPath;
+    private final boolean isSavepoint;
+    private final String checkpointType;
+    private final long triggerTimestamp;
+
+    public long id() {
+        return id;
+    }
+
+    public String status() {
+        return status;
+    }
+
+    public String externalPath() {
+        return externalPath;
+    }
+
+    public boolean isSavepoint() {
+        return isSavepoint;
+    }
+
+    public String checkpointType() {
+        return checkpointType;
+    }
+
+    public long triggerTimestamp() {
+        return triggerTimestamp;
+    }
 }

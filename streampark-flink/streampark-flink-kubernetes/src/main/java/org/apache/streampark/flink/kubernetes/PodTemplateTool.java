@@ -24,6 +24,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,51 +33,76 @@ public final class PodTemplateTool {
 
     public static final PodTemplateType KUBERNETES_POD_TEMPLATE =
         new PodTemplateType("kubernetes.pod-template-file", "pod-template.yaml");
+
     public static final PodTemplateType KUBERNETES_JM_POD_TEMPLATE =
         new PodTemplateType("kubernetes.pod-template-file.jobmanager", "jm-pod-template.yaml");
+
     public static final PodTemplateType KUBERNETES_TM_POD_TEMPLATE =
         new PodTemplateType("kubernetes.pod-template-file.taskmanager", "tm-pod-template.yaml");
+
     public static final PodTemplateType KUBERNETES_DRIVER_POD_TEMPLATE =
         new PodTemplateType("spark.kubernetes.driver.podTemplateFile", "driver-pod-template.yaml");
+
     public static final PodTemplateType KUBERNETES_EXECUTOR_POD_TEMPLATE =
         new PodTemplateType("spark.kubernetes.executor.podTemplateFile", "executor-pod-template.yaml");
 
     private PodTemplateTool() {
     }
 
-    public static K8sPodTemplateFiles preparePodTemplateFiles(String buildWorkspace, K8sPodTemplates podTemplates) {
+    /**
+     * Prepare kubernetes pod template file to buildWorkspace direactory.
+     *
+     * @param buildWorkspace project workspace dir of flink job
+     * @param podTemplates flink kubernetes pod templates
+     * @return Map[k8s pod template option, template file output path]
+     */
+    public static K8sPodTemplateFiles preparePodTemplateFiles(
+                                                              String buildWorkspace,
+                                                              K8sPodTemplates podTemplates) throws IOException {
         File workspaceDir = new File(buildWorkspace);
-        if (!workspaceDir.exists())
+        if (!workspaceDir.exists()) {
             workspaceDir.mkdir();
+        }
+
         Map<String, String> podTempleMap = new HashMap<>();
-        outputTmplContent(buildWorkspace, podTemplates.podTemplate(), KUBERNETES_POD_TEMPLATE, podTempleMap);
-        outputTmplContent(buildWorkspace, podTemplates.jmPodTemplate(), KUBERNETES_JM_POD_TEMPLATE, podTempleMap);
-        outputTmplContent(buildWorkspace, podTemplates.tmPodTemplate(), KUBERNETES_TM_POD_TEMPLATE, podTempleMap);
-        return new K8sPodTemplateFiles(podTempleMap);
+        writeTemplate(buildWorkspace, podTemplates.podTemplate(), KUBERNETES_POD_TEMPLATE, podTempleMap);
+        writeTemplate(buildWorkspace, podTemplates.jmPodTemplate(), KUBERNETES_JM_POD_TEMPLATE, podTempleMap);
+        writeTemplate(buildWorkspace, podTemplates.tmPodTemplate(), KUBERNETES_TM_POD_TEMPLATE, podTempleMap);
+        return new K8sPodTemplateFiles(Collections.unmodifiableMap(podTempleMap));
     }
 
-    public static K8sPodTemplateFiles preparePodTemplateFiles(String buildWorkspace,
-                                                              SparkK8sPodTemplates podTemplates) {
+    /**
+     * Prepare kubernetes pod template file to buildWorkspace direactory.
+     *
+     * @param buildWorkspace project workspace dir of spark job
+     * @param podTemplates spark kubernetes pod templates
+     * @return Map[k8s pod template option, template file output path]
+     */
+    public static K8sPodTemplateFiles preparePodTemplateFiles(
+                                                              String buildWorkspace,
+                                                              SparkK8sPodTemplates podTemplates) throws IOException {
         File workspaceDir = new File(buildWorkspace);
-        if (!workspaceDir.exists())
+        if (!workspaceDir.exists()) {
             workspaceDir.mkdir();
+        }
+
         Map<String, String> podTempleMap = new HashMap<>();
-        outputTmplContent(buildWorkspace, podTemplates.driverPodTemplate(), KUBERNETES_DRIVER_POD_TEMPLATE,
-            podTempleMap);
-        outputTmplContent(buildWorkspace, podTemplates.executorPodTemplate(), KUBERNETES_EXECUTOR_POD_TEMPLATE,
-            podTempleMap);
-        return new K8sPodTemplateFiles(podTempleMap);
+        writeTemplate(buildWorkspace, podTemplates.driverPodTemplate(), KUBERNETES_DRIVER_POD_TEMPLATE, podTempleMap);
+        writeTemplate(
+            buildWorkspace, podTemplates.executorPodTemplate(), KUBERNETES_EXECUTOR_POD_TEMPLATE, podTempleMap);
+        return new K8sPodTemplateFiles(Collections.unmodifiableMap(podTempleMap));
     }
 
-    private static void outputTmplContent(String buildWorkspace, String tmplContent, PodTemplateType podTmpl,
-                                          Map<String, String> podTempleMap) {
+    private static void writeTemplate(
+                                      String buildWorkspace,
+                                      String tmplContent,
+                                      PodTemplateType podTmpl,
+                                      Map<String, String> podTempleMap) throws IOException {
         if (StringUtils.isNotBlank(tmplContent)) {
-            String outputPath = buildWorkspace + "/" + podTmpl.fileName();
-            try {
-                FileUtils.write(new File(outputPath), tmplContent, "UTF-8");
-                podTempleMap.put(podTmpl.key(), outputPath);
-            } catch (Exception ignored) {
-            }
+            String outputPath = new File(buildWorkspace, podTmpl.fileName()).getPath();
+            File outputFile = new File(outputPath);
+            FileUtils.write(outputFile, tmplContent, "UTF-8");
+            podTempleMap.put(podTmpl.key(), outputPath);
         }
     }
 }

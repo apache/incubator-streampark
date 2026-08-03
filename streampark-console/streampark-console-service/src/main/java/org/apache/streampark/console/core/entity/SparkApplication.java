@@ -251,8 +251,8 @@ public class SparkApplication extends BaseEntity {
             this.yarnQueue = "default";
         }
         Map<String, String> queueLabelMap = YarnQueueLabelExpression.getQueueLabelMap(this.yarnQueue);
-        this.setYarnQueueName(queueLabelMap.getOrDefault(ConfigKeys.KEY_YARN_APP_QUEUE, "default"));
-        this.setYarnQueueLabel(queueLabelMap.getOrDefault(ConfigKeys.KEY_YARN_APP_NODE_LABEL, null));
+        this.setYarnQueueName(queueLabelMap.getOrDefault(ConfigKeys.KEY_YARN_APP_QUEUE(), "default"));
+        this.setYarnQueueLabel(queueLabelMap.getOrDefault(ConfigKeys.KEY_YARN_APP_NODE_LABEL(), null));
     }
 
     /**
@@ -267,16 +267,16 @@ public class SparkApplication extends BaseEntity {
      *            configuration template and custom configurations.
      */
     public void resolveScheduleConf(Map<String, String> map) {
-        this.setDriverCores(map.get(ConfigKeys.KEY_SPARK_DRIVER_CORES));
-        this.setDriverMemory(map.get(ConfigKeys.KEY_SPARK_DRIVER_MEMORY));
-        this.setExecutorCores(map.get(ConfigKeys.KEY_SPARK_EXECUTOR_CORES));
-        this.setExecutorMemory(map.get(ConfigKeys.KEY_SPARK_EXECUTOR_MEMORY));
+        this.setDriverCores(map.get(ConfigKeys.KEY_SPARK_DRIVER_CORES()));
+        this.setDriverMemory(map.get(ConfigKeys.KEY_SPARK_DRIVER_MEMORY()));
+        this.setExecutorCores(map.get(ConfigKeys.KEY_SPARK_EXECUTOR_CORES()));
+        this.setExecutorMemory(map.get(ConfigKeys.KEY_SPARK_EXECUTOR_MEMORY()));
         boolean isDynamicAllocationEnabled =
-            Boolean.parseBoolean(map.get(ConfigKeys.KEY_SPARK_DYNAMIC_ALLOCATION_ENABLED));
+            Boolean.parseBoolean(map.get(ConfigKeys.KEY_SPARK_DYNAMIC_ALLOCATION_ENABLED()));
         if (isDynamicAllocationEnabled) {
-            this.setExecutorMaxNums(map.getOrDefault(ConfigKeys.KEY_SPARK_DYNAMIC_ALLOCATION_MAX_EXECUTORS, "inf"));
+            this.setExecutorMaxNums(map.getOrDefault(ConfigKeys.KEY_SPARK_DYNAMIC_ALLOCATION_MAX_EXECUTORS(), "inf"));
         } else {
-            this.setExecutorMaxNums(map.get(ConfigKeys.KEY_SPARK_EXECUTOR_INSTANCES));
+            this.setExecutorMaxNums(map.get(ConfigKeys.KEY_SPARK_EXECUTOR_INSTANCES()));
         }
     }
 
@@ -339,21 +339,21 @@ public class SparkApplication extends BaseEntity {
     /** Local compilation and packaging working directory */
     @JsonIgnore
     public String getDistHome() {
-        String path = String.format("%s/%s/%s", Workspace.appLocalDist(), projectId.toString(), getModule());
+        String path = String.format("%s/%s/%s", Workspace.APP_LOCAL_DIST(), projectId.toString(), getModule());
         log.info("local distHome:{}", path);
         return path;
     }
 
     @JsonIgnore
     public String getLocalAppHome() {
-        String path = String.format("%s/%s", Workspace.local().getAppWorkspace(), id.toString());
+        String path = String.format("%s/%s", Workspace.local().APP_WORKSPACE(), id.toString());
         log.info("local appHome:{}", path);
         return path;
     }
 
     @JsonIgnore
     public String getRemoteAppHome() {
-        String path = String.format("%s/%s", Workspace.remote().getAppWorkspace(), id.toString());
+        String path = String.format("%s/%s", Workspace.remote().APP_WORKSPACE(), id.toString());
         log.info("remote appHome:{}", path);
         return path;
     }

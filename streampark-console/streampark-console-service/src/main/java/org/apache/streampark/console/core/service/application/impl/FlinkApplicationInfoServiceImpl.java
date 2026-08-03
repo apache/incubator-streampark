@@ -370,10 +370,16 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
             "Job deployMode must be kubernetes-session|kubernetes-application.");
 
         CompletableFuture<String> future = CompletableFuture.supplyAsync(
-            () -> KubernetesDeploymentHelper.watchDeploymentLog(
-                application.getK8sNamespace(),
-                application.getJobName(),
-                application.getJobId()));
+            () -> {
+                try {
+                    return KubernetesDeploymentHelper.watchDeploymentLog(
+                        application.getK8sNamespace(),
+                        application.getJobName(),
+                        application.getJobId());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
 
         return future
             .exceptionally(
@@ -394,12 +400,8 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
                         future.cancel(true);
                     }
                     if (org.apache.streampark.common.util.FileUtils.exists(path)) {
-                        try {
-                            return org.apache.streampark.common.util.FileUtils.tailOf(path, offset,
-                                limit);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
+                        return org.apache.streampark.common.util.FileUtils.tailOf(path, offset,
+                            limit);
                     }
                     return null;
                 })
@@ -472,11 +474,7 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
             String modulePath = project.getDistHome().getAbsolutePath().concat("/").concat(appParam.getModule());
             jarFile = new File(modulePath, appParam.getJar());
         }
-        try {
-            return Utils.getJarManClass(jarFile);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return Utils.getJarManClass(jarFile);
     }
 
     @Override

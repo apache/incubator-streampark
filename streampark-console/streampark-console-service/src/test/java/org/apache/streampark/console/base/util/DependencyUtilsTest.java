@@ -56,7 +56,7 @@ class DependencyUtilsTest {
 
         Artifact artifact = new Artifact("com.ververica", "flink-connector-mysql-cdc", "2.4.1", null);
 
-        InternalConfigHolder.set(CommonConfig.STREAMPARK_WORKSPACE_LOCAL, "~/tmp");
+        InternalConfigHolder.set(CommonConfig.STREAMPARK_WORKSPACE_LOCAL(), "~/tmp");
 
         List<File> files = MavenTool.resolveArtifacts(artifact);
         if (files.isEmpty()) {

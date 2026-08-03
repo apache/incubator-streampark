@@ -20,15 +20,22 @@ package org.apache.streampark.flink.kubernetes.event;
 import org.apache.streampark.flink.kubernetes.model.JobStatusCV;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
-
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
+/** Notification of flink job state changes from k8s clusters. */
 public class FlinkJobStatusChangeEvent implements BuildInEvent {
 
-    private TrackId trackId;
-    private JobStatusCV jobStatus;
+    private final TrackId trackId;
+    private final JobStatusCV jobStatus;
+
+    public FlinkJobStatusChangeEvent(TrackId trackId, JobStatusCV jobStatus) {
+        this.trackId = trackId;
+        this.jobStatus = jobStatus;
+    }
+
+    public TrackId trackId() {
+        return trackId;
+    }
+
+    public JobStatusCV jobStatus() {
+        return jobStatus;
+    }
 }

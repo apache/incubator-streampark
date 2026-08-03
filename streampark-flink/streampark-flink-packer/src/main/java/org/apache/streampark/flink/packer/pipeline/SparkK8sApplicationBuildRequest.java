@@ -24,26 +24,102 @@ import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 import org.apache.streampark.spark.kubernetes.model.SparkK8sPodTemplates;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
-
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
 public class SparkK8sApplicationBuildRequest implements BuildParam {
 
-    private String appName;
-    private String workspace;
-    private String mainClass;
-    private String mainJar;
-    private SparkDeployMode deployMode;
-    private SparkJobType jobType;
-    private SparkVersion sparkVersion;
-    private DependencyInfo dependencyInfo;
-    private String k8sNamespace;
-    private String sparkBaseImage;
-    private SparkK8sPodTemplates sparkPodTemplate;
-    private boolean integrateWithHadoop;
-    private DockerConf dockerConfig;
+    private final String appName;
+    private final String workspace;
+    private final String mainClass;
+    private final String mainJar;
+    private final SparkDeployMode deployMode;
+    private final SparkJobType jobType;
+    private final SparkVersion sparkVersion;
+    private final DependencyInfo dependencyInfo;
+    private final String k8sNamespace;
+    private final String sparkBaseImage;
+    private final SparkK8sPodTemplates sparkPodTemplate;
+    private final boolean integrateWithHadoop;
+    private final DockerConf dockerConfig;
+
+    public SparkK8sApplicationBuildRequest(
+                                           String appName,
+                                           String workspace,
+                                           String mainClass,
+                                           String mainJar,
+                                           SparkDeployMode deployMode,
+                                           SparkJobType jobType,
+                                           SparkVersion sparkVersion,
+                                           DependencyInfo dependencyInfo,
+                                           String k8sNamespace,
+                                           String sparkBaseImage,
+                                           SparkK8sPodTemplates sparkPodTemplate,
+                                           boolean integrateWithHadoop,
+                                           DockerConf dockerConfig) {
+        this.appName = appName;
+        this.workspace = workspace;
+        this.mainClass = mainClass;
+        this.mainJar = mainJar;
+        this.deployMode = deployMode;
+        this.jobType = jobType;
+        this.sparkVersion = sparkVersion;
+        this.dependencyInfo = dependencyInfo;
+        this.k8sNamespace = k8sNamespace;
+        this.sparkBaseImage = sparkBaseImage;
+        this.sparkPodTemplate = sparkPodTemplate;
+        this.integrateWithHadoop = integrateWithHadoop;
+        this.dockerConfig = dockerConfig;
+    }
+
+    @Override
+    public String appName() {
+        return appName;
+    }
+
+    @Override
+    public String mainClass() {
+        return mainClass;
+    }
+
+    public String workspace() {
+        return workspace;
+    }
+
+    public String mainJar() {
+        return mainJar;
+    }
+
+    public SparkDeployMode deployMode() {
+        return deployMode;
+    }
+
+    public SparkJobType jobType() {
+        return jobType;
+    }
+
+    public SparkVersion sparkVersion() {
+        return sparkVersion;
+    }
+
+    public DependencyInfo dependencyInfo() {
+        return dependencyInfo;
+    }
+
+    public String k8sNamespace() {
+        return k8sNamespace;
+    }
+
+    public String sparkBaseImage() {
+        return sparkBaseImage;
+    }
+
+    public SparkK8sPodTemplates sparkPodTemplate() {
+        return sparkPodTemplate;
+    }
+
+    public boolean integrateWithHadoop() {
+        return integrateWithHadoop;
+    }
+
+    public DockerConf dockerConfig() {
+        return dockerConfig;
+    }
 }

@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark-flink</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>streampark-flink-shims</artifactId>
@@ -50,6 +50,7 @@
                 <module>streampark-flink-shims_flink-2.0</module>
                 <module>streampark-flink-shims_flink-2.1</module>
                 <module>streampark-flink-shims_flink-2.2</module>
+                <module>streampark-flink-shims_flink-2.3</module>
             </modules>
         </profile>
     </profiles>

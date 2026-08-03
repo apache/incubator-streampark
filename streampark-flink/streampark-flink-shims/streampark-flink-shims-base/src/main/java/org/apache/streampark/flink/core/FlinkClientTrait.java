@@ -23,7 +23,6 @@ import org.apache.flink.core.execution.SavepointFormatType;
 
 import java.util.concurrent.CompletableFuture;
 
-/** Flink cluster client savepoint operations. */
 public abstract class FlinkClientTrait<T> {
 
     protected final ClusterClient<T> clusterClient;

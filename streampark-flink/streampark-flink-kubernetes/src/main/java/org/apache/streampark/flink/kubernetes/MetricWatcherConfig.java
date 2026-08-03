@@ -18,22 +18,40 @@
 package org.apache.streampark.flink.kubernetes;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
+import lombok.Builder;
 
-@Data
-@Accessors(fluent = true)
+/**
+ * configuration for FlinkMetricWatcher
+ *
+ * @param requestTimeoutSec run timeout of single tracking task
+ * @param requestIntervalSec interval seconds between two single tracking task
+ */
+@Builder
 @AllArgsConstructor
 public class MetricWatcherConfig {
 
-    private long requestTimeoutSec;
-    private long requestIntervalSec;
+    private final long requestTimeoutSec;
+    private final long requestIntervalSec;
+
+    public long requestTimeoutSec() {
+        return requestTimeoutSec;
+    }
+
+    public long requestIntervalSec() {
+        return requestIntervalSec;
+    }
 
     public static MetricWatcherConfig defaultConf() {
-        return new MetricWatcherConfig(120, 10);
+        return MetricWatcherConfig.builder()
+            .requestTimeoutSec(120L)
+            .requestIntervalSec(10L)
+            .build();
     }
 
     public static MetricWatcherConfig debugConf() {
-        return new MetricWatcherConfig(120, 2);
+        return MetricWatcherConfig.builder()
+            .requestTimeoutSec(120L)
+            .requestIntervalSec(2L)
+            .build();
     }
 }

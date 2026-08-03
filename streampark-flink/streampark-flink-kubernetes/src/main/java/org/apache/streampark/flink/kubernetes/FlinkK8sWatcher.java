@@ -31,40 +31,81 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-/** Tracking monitor for flink-k8s-native mode. */
+/**
+ * Tracking monitor for flink-k8s-native mode, including trace of flink jobs status information,
+ * flink metrics information. This is the entry point for external calls to the
+ * streampark.flink.kubernetes package.
+ */
 @Public
 public interface FlinkK8sWatcher extends AutoCloseable {
 
+    /**
+     * Register listener to EventBus.
+     *
+     * <p>At present, the implementation of listener is in the same form as Guava EvenBus Listener.
+     * The events that can be subscribed are included in org.apache.streampark.flink.kubernetes.event
+     */
     void registerListener(Object listener);
 
+    /** start monitor tracking activities immediately. */
     void start();
 
+    /** stop monitor tracking activities immediately. */
     void stop();
 
+    /** restart monitor tracking activities immediately. */
     void restart();
 
+    /**
+     * add tracking for the specified flink job which on k8s cluster.
+     *
+     * @param trackId identifier of flink job
+     */
     void doWatching(TrackId trackId);
 
+    /**
+     * remove tracking for the specified flink job which on k8s cluster.
+     *
+     * @param trackId identifier of flink job
+     */
     void unWatching(TrackId trackId);
 
+    /**
+     * check whether the specified flink job is in tracking.
+     *
+     * @param trackId identifier of flink job
+     */
     boolean isInWatching(TrackId trackId);
 
+    /** collect all TrackId which in tracking */
     Set<TrackId> getAllWatchingIds();
 
+    /** get flink status */
     Optional<JobStatusCV> getJobStatus(TrackId trackId);
 
+    /** get flink status */
     Map<CacheKey, JobStatusCV> getJobStatus(Set<TrackId> trackIds);
 
+    /** get all flink status in tracking result pool */
     Map<CacheKey, JobStatusCV> getAllJobStatus();
 
+    /** get flink cluster metrics aggregation */
     FlinkMetricCV getAccGroupMetrics(@Nullable String groupId);
 
+    /** get flink cluster metrics */
     Optional<FlinkMetricCV> getClusterMetrics(ClusterKey clusterKey);
 
+    /** check whether flink job is in remote kubernetes cluster */
     boolean checkIsInRemoteCluster(TrackId trackId);
 
+    /**
+     * post event to build-in EventBus of K8sFlinkTrackMonitor
+     *
+     * @param sync should this event be consumed sync or async
+     */
     void postEvent(BuildInEvent event, boolean sync);
 
+    /** get flink web rest url of k8s cluster */
     @Nullable
     String getRemoteRestUrl(TrackId trackId);
 }

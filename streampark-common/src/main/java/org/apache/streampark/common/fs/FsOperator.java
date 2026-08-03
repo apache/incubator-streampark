@@ -19,39 +19,124 @@ package org.apache.streampark.common.fs;
 
 import org.apache.streampark.common.enums.StorageType;
 
+/** File system operator factory and shared operations. */
 public abstract class FsOperator {
 
-    private static volatile FsOperator lfsInstance;
-    private static volatile FsOperator hdfsInstance;
+    /** Scala-friendly local file system operator singleton. */
+    public static final FsOperator lfs = new FsOperator() {
+
+        @Override
+        public boolean exists(String path) {
+            return LfsOperator.exists(path);
+        }
+
+        @Override
+        public void mkdirs(String path) {
+            LfsOperator.mkdirs(path);
+        }
+
+        @Override
+        public void delete(String path) {
+            LfsOperator.delete(path);
+        }
+
+        @Override
+        public void mkCleanDirs(String path) {
+            LfsOperator.mkCleanDirs(path);
+        }
+
+        @Override
+        public void upload(String srcPath, String dstPath, boolean delSrc, boolean overwrite) {
+            LfsOperator.upload(srcPath, dstPath, delSrc, overwrite);
+        }
+
+        @Override
+        public void copy(String srcPath, String dstPath, boolean delSrc, boolean overwrite) {
+            LfsOperator.copy(srcPath, dstPath, delSrc, overwrite);
+        }
+
+        @Override
+        public void copyDir(String srcPath, String dstPath, boolean delSrc, boolean overwrite) {
+            LfsOperator.copyDir(srcPath, dstPath, delSrc, overwrite);
+        }
+
+        @Override
+        public void move(String srcPath, String dstPath) {
+            LfsOperator.move(srcPath, dstPath);
+        }
+
+        @Override
+        public String fileMd5(String path) {
+            return LfsOperator.fileMd5(path);
+        }
+    };
+
+    /** Scala-friendly HDFS operator singleton. */
+    public static final FsOperator hdfs = new FsOperator() {
+
+        @Override
+        public boolean exists(String path) {
+            return HdfsOperator.exists(path);
+        }
+
+        @Override
+        public void mkdirs(String path) {
+            HdfsOperator.mkdirs(path);
+        }
+
+        @Override
+        public void delete(String path) {
+            HdfsOperator.delete(path);
+        }
+
+        @Override
+        public void mkCleanDirs(String path) {
+            HdfsOperator.mkCleanDirs(path);
+        }
+
+        @Override
+        public void upload(String srcPath, String dstPath, boolean delSrc, boolean overwrite) {
+            HdfsOperator.upload(srcPath, dstPath, delSrc, overwrite);
+        }
+
+        @Override
+        public void copy(String srcPath, String dstPath, boolean delSrc, boolean overwrite) {
+            HdfsOperator.copy(srcPath, dstPath, delSrc, overwrite);
+        }
+
+        @Override
+        public void copyDir(String srcPath, String dstPath, boolean delSrc, boolean overwrite) {
+            HdfsOperator.copyDir(srcPath, dstPath, delSrc, overwrite);
+        }
+
+        @Override
+        public void move(String srcPath, String dstPath) {
+            HdfsOperator.move(srcPath, dstPath);
+        }
+
+        @Override
+        public String fileMd5(String path) {
+            return HdfsOperator.fileMd5(path);
+        }
+    };
+
+    protected FsOperator() {
+    }
 
     public static FsOperator lfs() {
-        if (lfsInstance == null) {
-            synchronized (FsOperator.class) {
-                if (lfsInstance == null) {
-                    lfsInstance = of(StorageType.LFS);
-                }
-            }
-        }
-        return lfsInstance;
+        return lfs;
     }
 
     public static FsOperator hdfs() {
-        if (hdfsInstance == null) {
-            synchronized (FsOperator.class) {
-                if (hdfsInstance == null) {
-                    hdfsInstance = of(StorageType.HDFS);
-                }
-            }
-        }
-        return hdfsInstance;
+        return hdfs;
     }
 
     public static FsOperator of(StorageType storageType) {
         switch (storageType) {
             case HDFS:
-                return HdfsOperator.getInstance();
+                return hdfs;
             case LFS:
-                return LfsOperator.getInstance();
+                return lfs;
             default:
                 throw new UnsupportedOperationException("Unsupported storageType:" + storageType);
         }

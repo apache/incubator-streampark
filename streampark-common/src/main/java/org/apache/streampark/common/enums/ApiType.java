@@ -17,8 +17,22 @@
 
 package org.apache.streampark.common.enums;
 
-/** API language type. */
+import javax.annotation.Nonnull;
+
+/** Flink application API type. */
 public enum ApiType {
+
     JAVA,
-    SCALA
+    SCALA;
+
+    /**
+     * Resolve enum constant by name (Scala {@code Enumeration.withName} compatibility).
+     *
+     * @param name enum constant name
+     * @return matching {@link ApiType}
+     */
+    @Nonnull
+    public static ApiType withName(@Nonnull String name) {
+        return valueOf(name);
+    }
 }

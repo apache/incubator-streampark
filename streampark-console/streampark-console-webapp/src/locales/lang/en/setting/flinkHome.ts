@@ -29,7 +29,7 @@ export default {
   flinkVersion: 'Flink Version',
   searchByName: 'Search by flink name',
   operateMessage: {
-    flinkNameTips: 'The flink name, e.g: flink-1.17',
+    flinkNameTips: 'The flink name, e.g: flink-1.12',
     flinkNameIsRepeated: 'Flink name already exists',
     flinkNameIsRequired: 'Flink name is required',
     flinkHomeTips: 'The absolute path of the FLINK_HOME',

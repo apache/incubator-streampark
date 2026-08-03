@@ -29,7 +29,7 @@ export default {
   flinkVersion: 'Flink 版本',
   searchByName: '根据 Flink 名称搜索',
   operateMessage: {
-    flinkNameTips: 'Flink别名,举例: Flink-1.17',
+    flinkNameTips: 'Flink别名,举例: Flink-1.12',
     flinkNameIsRepeated: 'Flink名称已存在',
     flinkNameIsRequired: 'Flink名称必填',
     flinkHomeTips: 'Flink所在服务器的绝对路径,举例: /usr/local/flink',

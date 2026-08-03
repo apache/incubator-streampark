@@ -17,29 +17,50 @@
 
 package org.apache.streampark.flink.client.bean;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
+import javax.annotation.Nullable;
 
-@Data
-@Accessors(fluent = true)
-@Builder
-@NoArgsConstructor
-public class DeployResponse {
+import java.io.Serializable;
 
-    @Builder.Default
-    private String address = null;
+public class DeployResponse implements Serializable {
 
-    @Builder.Default
-    private String clusterId = null;
+    private static final long serialVersionUID = 1L;
 
-    @Builder.Default
-    private Throwable error = null;
+    @Nullable
+    private final String address;
+    @Nullable
+    private final String clusterId;
+    @Nullable
+    private final Throwable error;
 
-    public DeployResponse(String address, String clusterId, Throwable error) {
+    public DeployResponse(@Nullable String address, @Nullable String clusterId) {
+        this(address, clusterId, null);
+    }
+
+    public DeployResponse(@Nullable Throwable error) {
+        this(null, null, error);
+    }
+
+    public DeployResponse(
+                          @Nullable String address,
+                          @Nullable String clusterId,
+                          @Nullable Throwable error) {
         this.address = address;
         this.clusterId = clusterId;
         this.error = error;
+    }
+
+    @Nullable
+    public String address() {
+        return address;
+    }
+
+    @Nullable
+    public String clusterId() {
+        return clusterId;
+    }
+
+    @Nullable
+    public Throwable error() {
+        return error;
     }
 }

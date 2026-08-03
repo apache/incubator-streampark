@@ -21,36 +21,57 @@ import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
+import lombok.Builder;
 
-@Data
-@Accessors(fluent = true)
+/**
+ * @param jobStatusWatcherConf configuration for flink job status tracking process
+ * @param metricWatcherConf configuration for flink metric tracking process
+ */
+@Builder
 @AllArgsConstructor
 public class FlinkTrackConfig {
 
-    private JobStatusWatcherConfig jobStatusWatcherConf;
-    private MetricWatcherConfig metricWatcherConf;
+    private final JobStatusWatcherConfig jobStatusWatcherConf;
+    private final MetricWatcherConfig metricWatcherConf;
+
+    public JobStatusWatcherConfig jobStatusWatcherConf() {
+        return jobStatusWatcherConf;
+    }
+
+    public MetricWatcherConfig metricWatcherConf() {
+        return metricWatcherConf;
+    }
 
     public static FlinkTrackConfig defaultConf() {
-        return new FlinkTrackConfig(
-            JobStatusWatcherConfig.defaultConf(), MetricWatcherConfig.defaultConf());
+        return FlinkTrackConfig.builder()
+            .jobStatusWatcherConf(JobStatusWatcherConfig.defaultConf())
+            .metricWatcherConf(MetricWatcherConfig.defaultConf())
+            .build();
     }
 
     public static FlinkTrackConfig debugConf() {
-        return new FlinkTrackConfig(
-            JobStatusWatcherConfig.debugConf(), MetricWatcherConfig.debugConf());
+        return FlinkTrackConfig.builder()
+            .jobStatusWatcherConf(JobStatusWatcherConfig.debugConf())
+            .metricWatcherConf(MetricWatcherConfig.debugConf())
+            .build();
     }
 
+    /** create from ConfigHub */
     public static FlinkTrackConfig fromConfigHub() {
-        return new FlinkTrackConfig(
-            new JobStatusWatcherConfig(
-                InternalConfigHolder.get(K8sFlinkConfig.jobStatusTrackTaskTimeoutSec),
-                InternalConfigHolder.get(K8sFlinkConfig.jobStatueTrackTaskIntervalSec),
-                InternalConfigHolder.get(K8sFlinkConfig.silentStateJobKeepTrackingSec),
-                InternalConfigHolder.get(K8sFlinkConfig.jobStatusTrackCacheTimeoutSec)),
-            new MetricWatcherConfig(
-                InternalConfigHolder.get(K8sFlinkConfig.metricTrackTaskTimeoutSec),
-                InternalConfigHolder.get(K8sFlinkConfig.metricTrackTaskIntervalSec)));
+        return FlinkTrackConfig.builder()
+            .jobStatusWatcherConf(
+                JobStatusWatcherConfig.builder()
+                    .requestTimeoutSec(InternalConfigHolder.get(K8sFlinkConfig.jobStatusTrackTaskTimeoutSec))
+                    .requestIntervalSec(InternalConfigHolder.get(K8sFlinkConfig.jobStatueTrackTaskIntervalSec))
+                    .silentStateJobKeepTrackingSec(
+                        InternalConfigHolder.get(K8sFlinkConfig.silentStateJobKeepTrackingSec))
+                    .jobStatusCacheTimeOutSec(InternalConfigHolder.get(K8sFlinkConfig.jobStatusTrackCacheTimeoutSec))
+                    .build())
+            .metricWatcherConf(
+                MetricWatcherConfig.builder()
+                    .requestTimeoutSec(InternalConfigHolder.get(K8sFlinkConfig.metricTrackTaskTimeoutSec))
+                    .requestIntervalSec(InternalConfigHolder.get(K8sFlinkConfig.metricTrackTaskIntervalSec))
+                    .build())
+            .build();
     }
 }

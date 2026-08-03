@@ -91,8 +91,12 @@ public final class HadoopUtils {
             try {
                 hadoopConfDir = FileUtils.getPathFromEnv(HADOOP_CONF_DIR);
             } catch (Exception e) {
-                hadoopConfDir =
-                    FileUtils.resolvePath(FileUtils.getPathFromEnv(HADOOP_HOME), CONF_SUFFIX);
+                try {
+                    hadoopConfDir =
+                        FileUtils.resolvePath(FileUtils.getPathFromEnv(HADOOP_HOME), CONF_SUFFIX);
+                } catch (Exception ignored) {
+                    hadoopConfDir = "";
+                }
             }
         }
         return hadoopConfDir;
@@ -112,7 +116,7 @@ public final class HadoopUtils {
                 } else {
                     LOG.warn("[StreamPark] get kerberos tgtRefreshTime failed, try get kerberos.ttl.");
                     DateUtils.TimeUnitPair timeUnit =
-                        DateUtils.getTimeUnit(InternalConfigHolder.get(CommonConfig.KERBEROS_TTL));
+                        DateUtils.getTimeUnit(InternalConfigHolder.get(CommonConfig.KERBEROS_TTL()));
                     switch (timeUnit.unit) {
                         case SECONDS:
                             tgtRefreshTime = (long) timeUnit.num * 1000;
@@ -129,7 +133,7 @@ public final class HadoopUtils {
                         default:
                             throw new IllegalArgumentException(
                                 "[StreamPark] parameter:"
-                                    + CommonConfig.KERBEROS_TTL.getKey()
+                                    + CommonConfig.KERBEROS_TTL().getKey()
                                     + " invalided, unit options are [s|m|h|d]");
                     }
                 }
@@ -227,9 +231,9 @@ public final class HadoopUtils {
         if (HadoopConfigUtils.KERBEROS_PRINCIPAL.isEmpty()
             || HadoopConfigUtils.KERBEROS_KEYTAB.isEmpty()) {
             throw new IllegalArgumentException(
-                ConfigKeys.KEY_SECURITY_KERBEROS_PRINCIPAL
+                ConfigKeys.KEY_SECURITY_KERBEROS_PRINCIPAL()
                     + " and "
-                    + ConfigKeys.KEY_SECURITY_KERBEROS_KEYTAB
+                    + ConfigKeys.KEY_SECURITY_KERBEROS_KEYTAB()
                     + " must not be empty");
         }
 
@@ -244,8 +248,8 @@ public final class HadoopUtils {
         System.setProperty("sun.security.krb5.debug", HadoopConfigUtils.KERBEROS_DEBUG);
         hadoopConf()
             .set(
-                ConfigKeys.KEY_HADOOP_SECURITY_AUTHENTICATION,
-                ConfigKeys.KEY_KERBEROS);
+                ConfigKeys.KEY_HADOOP_SECURITY_AUTHENTICATION(),
+                ConfigKeys.KEY_KERBEROS());
 
         try {
             UserGroupInformation.setConfiguration(hadoopConf());

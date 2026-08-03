@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
+import scala.Option;
+
 /** Hadoop client configuration tools mainly for flink use. */
 public final class HadoopConfigUtils {
 
@@ -46,27 +48,27 @@ public final class HadoopConfigUtils {
     private static final Map<String, String> KERBEROS_CONF = loadKerberosConf();
 
     public static final String HADOOP_USER_NAME =
-        InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME);
+        InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME());
 
     public static String hadoopUserName() {
         return HADOOP_USER_NAME;
     }
 
     public static final String KERBEROS_DEBUG =
-        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_DEBUG, "false");
+        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_DEBUG(), "false");
 
     public static final boolean KERBEROS_ENABLE =
         Boolean.parseBoolean(
-            KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_ENABLE, "false"));
+            KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_ENABLE(), "false"));
 
     public static final String KERBEROS_PRINCIPAL =
-        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_PRINCIPAL, "").trim();
+        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_PRINCIPAL(), "").trim();
 
     public static final String KERBEROS_KEYTAB =
-        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_KEYTAB, "").trim();
+        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_KEYTAB(), "").trim();
 
     public static final String KERBEROS_KRB5 =
-        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_KRB5_CONF, "");
+        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_KRB5_CONF(), "");
 
     private HadoopConfigUtils() {
     }
@@ -82,21 +84,32 @@ public final class HadoopConfigUtils {
         return map;
     }
 
-    public static Optional<String> getSystemHadoopConfDir() {
+    public static Option<String> getSystemHadoopConfDir() {
+        return Option.apply(getSystemHadoopConfDirOptional().orElse(null));
+    }
+
+    private static Optional<String> getSystemHadoopConfDirOptional() {
         try {
             return Optional.of(FileUtils.getPathFromEnv("HADOOP_CONF_DIR"));
         } catch (Exception e) {
-            String path =
-                FileUtils.resolvePath(FileUtils.getPathFromEnv("HADOOP_HOME"), "/etc/hadoop");
-            return Optional.of(path);
+            try {
+                return Optional.of(
+                    FileUtils.resolvePath(FileUtils.getPathFromEnv("HADOOP_HOME"), "/etc/hadoop"));
+            } catch (Exception ignored) {
+                return Optional.empty();
+            }
         }
     }
 
     public static Optional<String> getSystemHadoopConfDirAsJava() {
-        return getSystemHadoopConfDir();
+        return getSystemHadoopConfDirOptional();
     }
 
-    public static Optional<String> getSystemHiveConfDir() {
+    public static Option<String> getSystemHiveConfDir() {
+        return Option.apply(getSystemHiveConfDirOptional().orElse(null));
+    }
+
+    private static Optional<String> getSystemHiveConfDirOptional() {
         try {
             return Optional.of(FileUtils.getPathFromEnv("HIVE_CONF_DIR"));
         } catch (Exception e) {
@@ -105,7 +118,7 @@ public final class HadoopConfigUtils {
     }
 
     public static Optional<String> getSystemHiveConfDirAsJava() {
-        return getSystemHiveConfDir();
+        return getSystemHiveConfDirOptional();
     }
 
     public static void replaceHostWithIP(File configFile) {
@@ -180,11 +193,11 @@ public final class HadoopConfigUtils {
     }
 
     public static Map<String, String> readSystemHadoopConf() {
-        return getSystemHadoopConfDir()
+        return getSystemHadoopConfDirOptional()
             .map(
                 confDir -> {
                     Map<String, String> map = new LinkedHashMap<>();
-                    File[] files = LfsOperator.getInstance().listDir(confDir);
+                    File[] files = LfsOperator.listDir(confDir);
                     if (files != null) {
                         for (File f : files) {
                             boolean matched = false;
@@ -213,11 +226,11 @@ public final class HadoopConfigUtils {
     }
 
     public static Map<String, String> readSystemHiveConf() {
-        return getSystemHiveConfDir()
+        return getSystemHiveConfDirOptional()
             .map(
                 confDir -> {
                     Map<String, String> map = new LinkedHashMap<>();
-                    File[] files = LfsOperator.getInstance().listDir(confDir);
+                    File[] files = LfsOperator.listDir(confDir);
                     if (files != null) {
                         for (File f : files) {
                             boolean matched = false;

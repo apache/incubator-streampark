@@ -17,15 +17,21 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
+/** Silent pipeline watcher. */
 public class SilentPipeWatcher implements PipeWatcher {
 
     @Override
     public void onStart(PipelineSnapshot snapshot) {
+        // intentionally empty — silent watcher
     }
+
     @Override
     public void onStepStateChange(PipelineSnapshot snapshot) {
+        // intentionally empty — silent watcher
     }
+
     @Override
     public void onFinish(PipelineSnapshot snapshot, BuildResult result) {
+        // intentionally empty — silent watcher
     }
 }

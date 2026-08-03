@@ -28,9 +28,12 @@ import com.mongodb.ServerAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 /** MongoDB client configuration helper. */
 public final class MongoConfig {
+
+    private static final Pattern LEADING_DOT_PATTERN = Pattern.compile("^\\.");
 
     public static final String CLIENT_URI = "client-uri";
     public static final String ADDRESS = "address";
@@ -77,14 +80,15 @@ public final class MongoConfig {
     public static Properties getProperties(Properties properties, String alias) {
         Properties prop = new Properties();
         for (String key : properties.stringPropertyNames()) {
-            if (!key.startsWith(ConfigKeys.MONGO_PREFIX)) {
+            if (!key.startsWith(ConfigKeys.MONGO_PREFIX())) {
                 continue;
             }
             String value = properties.getProperty(key);
             if (value == null || value.isEmpty()) {
                 continue;
             }
-            String k = key.replaceAll(ConfigKeys.MONGO_PREFIX + alias, "").replaceFirst("^\\.", "");
+            String stripped = key.replace(ConfigKeys.MONGO_PREFIX() + alias, "");
+            String k = LEADING_DOT_PATTERN.matcher(stripped).replaceFirst("");
             prop.put(k, value.trim());
         }
         return prop;

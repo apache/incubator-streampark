@@ -24,8 +24,11 @@ import java.io.File;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public final class SystemPropertyUtils {
+
+    private static final Pattern CLASSES_SUFFIX_PATTERN = Pattern.compile("classes/$");
 
     private static final Logger LOG =
         LoggerFactory.getLogger(SystemPropertyUtils.class);
@@ -148,7 +151,7 @@ public final class SystemPropertyUtils {
             if (jarOrClassPath.endsWith("jar")) {
                 appHome = file.getParentFile().getParentFile().getPath();
             } else {
-                appHome = file.getPath().replaceAll("classes/$", "");
+                appHome = CLASSES_SUFFIX_PATTERN.matcher(file.getPath()).replaceAll("");
             }
             SystemPropertyUtils.set(key, appHome);
         }

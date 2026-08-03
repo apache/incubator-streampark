@@ -19,11 +19,10 @@ package org.apache.streampark.flink.client.tool;
 
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.JsonUtils;
-import org.apache.streampark.common.util.StreamParkLoggerFactory;
+import org.apache.streampark.common.util.LoggerSupport;
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
 
 import org.apache.streampark.shaded.com.fasterxml.jackson.databind.JsonNode;
-import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import org.apache.flink.client.deployment.application.ApplicationConfiguration;
 import org.apache.flink.configuration.Configuration;
@@ -38,11 +37,10 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-/** Helper for submitting Flink session jobs via REST API. */
-public final class FlinkSessionSubmitHelper {
+/** Submit Flink jobs to session clusters via the REST API. */
+public final class FlinkSessionSubmitHelper extends LoggerSupport {
 
-    private static final Logger LOG =
-        StreamParkLoggerFactory.loggerFactory().getLogger(FlinkSessionSubmitHelper.class.getName());
+    private static final FlinkSessionSubmitHelper INSTANCE = new FlinkSessionSubmitHelper();
 
     private FlinkSessionSubmitHelper() {
     }
@@ -55,8 +53,13 @@ public final class FlinkSessionSubmitHelper {
      * @param flinkConfig flink configuration
      * @return jobID of submitted flink job
      */
-    public static String submitViaRestApi(String jmRestUrl, File flinkJobJar,
+    public static String submitViaRestApi(
+                                          String jmRestUrl, File flinkJobJar,
                                           Configuration flinkConfig) throws Exception {
+        return INSTANCE.doSubmitViaRestApi(jmRestUrl, flinkJobJar, flinkConfig);
+    }
+
+    private String doSubmitViaRestApi(String jmRestUrl, File flinkJobJar, Configuration flinkConfig) throws Exception {
         String uploadResult =
             Request.post(jmRestUrl + "/jars/upload")
                 .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
@@ -83,7 +86,7 @@ public final class FlinkSessionSubmitHelper {
                 + jarUploadResponse);
 
         String resp =
-            Request.post(jmRestUrl + "/jars/" + jarUploadResponse.getJarId() + "/run")
+            Request.post(jmRestUrl + "/jars/" + jarUploadResponse.jarId() + "/run")
                 .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
                 .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
                 .body(new StringEntity(JsonUtils.write(new JarRunRequest(flinkConfig))))
@@ -94,72 +97,92 @@ public final class FlinkSessionSubmitHelper {
         return parseJobId(resp);
     }
 
-    private static JarUploadResponse parseJarUploadResponse(String uploadResult) {
+    private JarUploadResponse parseJarUploadResponse(String uploadResult) {
         try {
-            JsonNode ok = JsonUtils.read(uploadResult, JsonNode.class);
+            JsonNode node = JsonUtils.read(uploadResult, JsonNode.class);
             return new JarUploadResponse(
-                ok.has("filename") && !ok.get("filename").isNull()
-                    ? ok.get("filename").asText()
-                    : null,
-                ok.has("status") && !ok.get("status").isNull() ? ok.get("status").asText() : null);
+                node.has("filename") ? node.get("filename").asText(null) : null,
+                node.has("status") ? node.get("status").asText(null) : null);
         } catch (Exception e) {
-            LOG.warn("Failed to parse jar upload response: {}", uploadResult, e);
             return null;
         }
     }
 
-    private static String parseJobId(String resp) {
+    private String parseJobId(String resp) {
         try {
-            JsonNode ok = JsonUtils.read(resp, JsonNode.class);
-            return ok.has("jobid") && !ok.get("jobid").isNull() ? ok.get("jobid").asText() : null;
+            JsonNode node = JsonUtils.read(resp, JsonNode.class);
+            return node.has("jobid") ? node.get("jobid").asText(null) : null;
         } catch (Exception e) {
-            LOG.warn("Failed to parse job id from response: {}", resp, e);
             return null;
         }
     }
+}
 
-    /** refer to https://ci.apache.org/projects/flink/flink-docs-stable/docs/ops/rest_api/#jars-upload */
-    static class JarUploadResponse {
+/**
+ * refer to https://ci.apache.org/projects/flink/flink-docs-stable/docs/ops/rest_api/#jars-upload
+ */
+class JarUploadResponse {
 
-        private final String filename;
-        private final String status;
+    private final String filename;
+    private final String status;
 
-        JarUploadResponse(String filename, String status) {
-            this.filename = filename;
-            this.status = status;
-        }
-
-        boolean isSuccessful() {
-            return "success".equalsIgnoreCase(status);
-        }
-
-        String getJarId() {
-            return filename.substring(filename.lastIndexOf('/') + 1);
-        }
-
-        @Override
-        public String toString() {
-            return "JarUploadResponse{filename='" + filename + "', status='" + status + "'}";
-        }
+    JarUploadResponse(String filename, String status) {
+        this.filename = filename;
+        this.status = status;
     }
 
-    /** refer to https://ci.apache.org/projects/flink/flink-docs-stable/docs/ops/rest_api/#jars-upload */
-    static class JarRunRequest {
+    boolean isSuccessful() {
+        return "success".equalsIgnoreCase(status);
+    }
 
-        private final String entryClass;
-        private final String programArgs;
-        private final String parallelism;
-        private final String savepointPath;
-        private final boolean allowNonRestoredState;
+    String jarId() {
+        return filename.substring(filename.lastIndexOf('/') + 1);
+    }
 
-        JarRunRequest(Configuration flinkConf) {
-            this.entryClass = flinkConf.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS);
-            List<String> args = flinkConf.get(ApplicationConfiguration.APPLICATION_ARGS);
-            this.programArgs = args == null ? null : String.join(" ", args);
-            this.parallelism = String.valueOf(flinkConf.get(CoreOptions.DEFAULT_PARALLELISM));
-            this.savepointPath = flinkConf.get(SavepointConfigOptions.SAVEPOINT_PATH);
-            this.allowNonRestoredState =
-                flinkConf.getBoolean(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE);
-        }
+    @Override
+    public String toString() {
+        return "JarUploadResponse{filename='" + filename + "', status='" + status + "'}";
+    }
+}
+
+/**
+ * refer to https://ci.apache.org/projects/flink/flink-docs-stable/docs/ops/rest_api/#jars-upload
+ */
+class JarRunRequest {
+
+    private final String entryClass;
+    private final String programArgs;
+    private final String parallelism;
+    private final String savepointPath;
+    private final boolean allowNonRestoredState;
+
+    JarRunRequest(Configuration flinkConf) {
+        this.entryClass = flinkConf.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS);
+        List<String> args = flinkConf.get(ApplicationConfiguration.APPLICATION_ARGS);
+        this.programArgs = args == null ? null : String.join(" ", args);
+        this.parallelism = String.valueOf(flinkConf.get(CoreOptions.DEFAULT_PARALLELISM));
+        this.savepointPath = flinkConf.get(SavepointConfigOptions.SAVEPOINT_PATH);
+        this.allowNonRestoredState =
+            flinkConf.getBoolean(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE);
+    }
+
+    public String getEntryClass() {
+        return entryClass;
+    }
+
+    public String getProgramArgs() {
+        return programArgs;
+    }
+
+    public String getParallelism() {
+        return parallelism;
+    }
+
+    public String getSavepointPath() {
+        return savepointPath;
+    }
+
+    public boolean isAllowNonRestoredState() {
+        return allowNonRestoredState;
     }
 }

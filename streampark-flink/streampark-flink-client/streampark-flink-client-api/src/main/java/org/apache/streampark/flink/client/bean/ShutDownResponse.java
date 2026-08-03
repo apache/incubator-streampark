@@ -17,18 +17,19 @@
 
 package org.apache.streampark.flink.client.bean;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
+import java.io.Serializable;
 
-@Data
-@Accessors(fluent = true)
-@NoArgsConstructor
-public class ShutDownResponse {
+public class ShutDownResponse implements Serializable {
 
-    private String clusterId;
+    private static final long serialVersionUID = 1L;
+
+    private final String clusterId;
 
     public ShutDownResponse(String clusterId) {
         this.clusterId = clusterId;
+    }
+
+    public String clusterId() {
+        return clusterId;
     }
 }

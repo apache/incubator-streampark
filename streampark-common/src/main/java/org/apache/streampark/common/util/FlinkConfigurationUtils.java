@@ -45,10 +45,10 @@ public final class FlinkConfigurationUtils {
         StreamParkLoggerFactory.loggerFactory()
             .getLogger(FlinkConfigurationUtils.class.getName());
 
-    private static final Pattern PROPERTY_PATTERN = Pattern.compile("([^=]+)=(.*)");
+    private static final Pattern PROPERTY_PATTERN = Pattern.compile("(.*?)=(.*?)");
 
     private static final Pattern MULTI_PROPERTY_PATTERN =
-        Pattern.compile("-D([^=]+)\\s*=\\s*[\"']([^\"']*)[\"']");
+        Pattern.compile("-D(.*?)\\s*=\\s*([\"'])(.*)\\2");
 
     private FlinkConfigurationUtils() {
     }
@@ -68,7 +68,7 @@ public final class FlinkConfigurationUtils {
     public static Map<String, String> loadFlinkConf(String yaml) {
         AssertUtils.required(
             yaml != null && !yaml.isEmpty(), "[StreamPark] loadFlinkConfYaml: yaml must not be null");
-        return PropertiesUtils.fromYamlText(yaml);
+        return new HashMap<>(PropertiesUtils.fromYamlText(yaml));
     }
 
     public static Map<String, String> loadLegacyFlinkConf(File file) {
@@ -139,11 +139,7 @@ public final class FlinkConfigurationUtils {
         }
         Matcher matcher = MULTI_PROPERTY_PATTERN.matcher(properties);
         while (matcher.find()) {
-            String opts = matcher.group();
-            int index = opts.indexOf('=');
-            String key = opts.substring(2, index).trim();
-            String value = stripOuterQuotes(opts.substring(index + 1).trim());
-            map.put(key, value);
+            map.put(matcher.group(1).trim(), matcher.group(3));
         }
         return map;
     }
@@ -199,11 +195,11 @@ public final class FlinkConfigurationUtils {
             String v = iter.next();
             if (v.length() >= 2 && v.startsWith("--")) {
                 String kv = iter.next();
-                String regexp = "(.*)=(.*)";
-                if (kv.matches(regexp)) {
-                    String[] values = kv.split("=", 2);
+                int eqIndex = kv.indexOf('=');
+                if (eqIndex > 0) {
+                    String[] values = new String[]{kv.substring(0, eqIndex), kv.substring(eqIndex + 1)};
                     String k1 = values[0].trim();
-                    String v1 = stripOuterQuotes(values[1]);
+                    String v1 = stripOuterQuotes(values[1].trim());
                     String k = v.substring(2);
                     map.computeIfAbsent(k, key -> new LinkedHashMap<>()).put(k1, v1);
                 }

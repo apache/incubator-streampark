@@ -20,19 +20,53 @@ package org.apache.streampark.flink.packer.pipeline;
 import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
-
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
 public class FlinkYarnApplicationBuildRequest implements BuildParam {
 
-    private String appName;
-    private String mainClass;
-    private String localWorkspace;
-    private String yarnProvidedPath;
-    private FlinkJobType flinkJobType;
-    private DependencyInfo dependencyInfo;
+    private final String appName;
+    private final String mainClass;
+    private final String localWorkspace;
+    private final String yarnProvidedPath;
+    private final FlinkJobType flinkJobType;
+    private final DependencyInfo dependencyInfo;
+
+    public FlinkYarnApplicationBuildRequest(
+                                            String appName,
+                                            String mainClass,
+                                            String localWorkspace,
+                                            String yarnProvidedPath,
+                                            FlinkJobType flinkJobType,
+                                            DependencyInfo dependencyInfo) {
+        this.appName = appName;
+        this.mainClass = mainClass;
+        this.localWorkspace = localWorkspace;
+        this.yarnProvidedPath = yarnProvidedPath;
+        this.flinkJobType = flinkJobType;
+        this.dependencyInfo = dependencyInfo;
+    }
+
+    @Override
+    public String appName() {
+        return appName;
+    }
+
+    @Override
+    public String mainClass() {
+        return mainClass;
+    }
+
+    public String localWorkspace() {
+        return localWorkspace;
+    }
+
+    public String yarnProvidedPath() {
+        return yarnProvidedPath;
+    }
+
+    public FlinkJobType flinkJobType() {
+        return flinkJobType;
+    }
+
+    public DependencyInfo dependencyInfo() {
+        return dependencyInfo;
+    }
 }

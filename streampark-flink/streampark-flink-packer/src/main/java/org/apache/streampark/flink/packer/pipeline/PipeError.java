@@ -17,24 +17,45 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.annotation.Nullable;
 
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true, value = {"exception"})
+/** Error details of building pipeline. */
+@JsonIgnoreProperties(ignoreUnknown = true, value = "exception")
 public class PipeError {
 
     private String summary;
+    @JsonIgnore
     @Nullable
     private transient Throwable exception;
     @Nullable
     private String exceptionStack;
+
+    public PipeError() {
+    }
+
+    public PipeError(String summary, @Nullable Throwable exception, @Nullable String exceptionStack) {
+        this.summary = summary;
+        this.exception = exception;
+        this.exceptionStack = exceptionStack;
+    }
+
+    public String summary() {
+        return summary;
+    }
+
+    @Nullable
+    public Throwable exception() {
+        return exception;
+    }
+
+    @Nullable
+    public String exceptionStack() {
+        return exceptionStack;
+    }
 
     public boolean nonEmpty() {
         return (summary != null && !summary.isEmpty()) || exception != null;
@@ -42,6 +63,10 @@ public class PipeError {
 
     public boolean isEmpty() {
         return !nonEmpty();
+    }
+
+    public PipeError copy() {
+        return new PipeError(summary, exception, exceptionStack);
     }
 
     public static PipeError empty() {
@@ -56,12 +81,21 @@ public class PipeError {
     private static String stackTraceToString(Throwable exception) {
         StringBuilder sb = new StringBuilder();
         for (StackTraceElement element : exception.getStackTrace()) {
-            sb.append(element).append('\n');
+            if (sb.length() > 0) {
+                sb.append('\n');
+            }
+            sb.append(element.toString());
         }
         return sb.toString();
     }
 
-    public PipeError copy() {
-        return new PipeError(summary, exception, exceptionStack);
+    @JsonProperty("summary")
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
+    @JsonProperty("exceptionStack")
+    public void setExceptionStack(String exceptionStack) {
+        this.exceptionStack = exceptionStack;
     }
 }

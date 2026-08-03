@@ -27,26 +27,34 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class FlinkBuildParam implements BuildParam {
+public interface FlinkBuildParam extends BuildParam {
 
-    protected final Workspace localWorkspace = Workspace.local();
+    String workspace();
 
-    public abstract String workspace();
-    public abstract FlinkDeployMode deployMode();
-    public abstract FlinkJobType flinkJobType();
-    public abstract FlinkVersion flinkVersion();
-    public abstract DependencyInfo dependencyInfo();
-    public abstract String customFlinkUserJar();
+    FlinkDeployMode deployMode();
 
-    public DependencyInfo providedLibs() {
-        Set<String> provided = new HashSet<>(Arrays.asList(localWorkspace.getAppJars(), customFlinkUserJar()));
+    FlinkJobType flinkJobType();
+
+    FlinkVersion flinkVersion();
+
+    DependencyInfo dependencyInfo();
+
+    String customFlinkUserJar();
+
+    default DependencyInfo providedLibs() {
+        Set<String> libs = new HashSet<>(Arrays.asList(
+            Workspace.local().APP_JARS(),
+            customFlinkUserJar()));
         if (flinkJobType() == FlinkJobType.FLINK_SQL) {
-            provided.add(localWorkspace.getAppShims() + "/flink-" + flinkVersion().majorVersion());
+            libs.add(
+                Workspace.local().APP_SHIMS()
+                    + "/flink-"
+                    + flinkVersion().majorVersion());
         }
-        return dependencyInfo().merge(provided);
+        return dependencyInfo().merge(libs);
     }
 
-    public String getShadedJarPath(String rootWorkspace) {
+    default String getShadedJarPath(String rootWorkspace) {
         String safeAppName = appName().replaceAll("\\s+", "_");
         return rootWorkspace + "/streampark-flinkjob_" + safeAppName + ".jar";
     }

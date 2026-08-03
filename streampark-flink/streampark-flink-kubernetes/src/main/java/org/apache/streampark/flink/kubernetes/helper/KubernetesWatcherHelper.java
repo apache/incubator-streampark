@@ -17,83 +17,94 @@
 
 package org.apache.streampark.flink.kubernetes.helper;
 
+import org.apache.streampark.common.util.LoggerSupport;
 import org.apache.streampark.flink.kubernetes.DefaultFlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
-
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
-/** Debug helper for FlinkTrackMonitor, only for streampark development and debugging scenarios. */
-@Slf4j
-public final class KubernetesWatcherHelper {
+/** Debug helper for FlinkTrackMonitor, only for streampark development, debugging scenarios. */
+public final class KubernetesWatcherHelper extends LoggerSupport {
+
+    private static final String CACHE_COUNT_SUFFIX = " => count=";
+
+    private static final KubernetesWatcherHelper INSTANCE = new KubernetesWatcherHelper();
 
     private KubernetesWatcherHelper() {
     }
 
+    // print job status cache size info
     public static void watchJobStatusCacheSize(FlinkK8sWatcher k8sWatcher) {
         new Timer()
             .scheduleAtFixedRate(
                 timerTask(
-                    () -> log.info(
-                        "[flink-k8s][status-size]-{} => {}",
-                        System.currentTimeMillis(),
-                        k8sWatcher.getAllJobStatus().size())),
+                    () -> INSTANCE.logInfo(
+                        "[flink-k8s][status-size]-"
+                            + System.currentTimeMillis()
+                            + " => "
+                            + k8sWatcher.getAllJobStatus().size())),
                 0,
                 1500);
     }
 
+    // print agg flink cluster metrics cache detail
     public static void watchAggClusterMetricsCache(FlinkK8sWatcher k8sWatcher) {
         new Timer()
             .scheduleAtFixedRate(
                 timerTask(
-                    () -> log.info(
-                        "[flink-k8s][agg-metric]-{} => {}",
-                        System.currentTimeMillis(),
-                        k8sWatcher.getAccGroupMetrics(null))),
+                    () -> INSTANCE.logInfo(
+                        "[flink-k8s][agg-metric]-"
+                            + System.currentTimeMillis()
+                            + " => "
+                            + k8sWatcher.getAccGroupMetrics(null))),
                 0,
                 1500);
     }
 
+    // print all cluster metrics for each flink cluster
     public static void watchClusterMetricsCache(FlinkK8sWatcher k8sWatcher) {
         DefaultFlinkK8sWatcher watcher = (DefaultFlinkK8sWatcher) k8sWatcher;
         new Timer()
             .scheduleAtFixedRate(
                 timerTask(
-                    () -> log.info(
-                        "[flink-k8s][metric]-{} => count={} | {}",
-                        System.currentTimeMillis(),
-                        watcher.getWatchController().flinkMetrics
-                            .asMap()
-                            .size(),
-                        watcher.getWatchController().flinkMetrics
-                            .asMap())),
+                    () -> INSTANCE.logInfo(
+                        "[flink-k8s][metric]-"
+                            + System.currentTimeMillis()
+                            + CACHE_COUNT_SUFFIX
+                            + watcher.watchController.flinkMetrics.asMap().size()
+                            + " | "
+                            + watcher.watchController.flinkMetrics.asMap())),
                 0,
                 1500);
     }
 
+    // print job cache detail
     public static void watchJobStatusCache(FlinkK8sWatcher k8sWatcher) {
         new Timer()
             .scheduleAtFixedRate(
                 timerTask(
-                    () -> log.info(
-                        "[flink-k8s][status]-{} => count={} | {}",
-                        System.currentTimeMillis(),
-                        k8sWatcher.getAllJobStatus().size(),
-                        k8sWatcher.getAllJobStatus())),
+                    () -> INSTANCE.logInfo(
+                        "[flink-k8s][status]-"
+                            + System.currentTimeMillis()
+                            + CACHE_COUNT_SUFFIX
+                            + k8sWatcher.getAllJobStatus().size()
+                            + " | "
+                            + k8sWatcher.getAllJobStatus())),
                 0,
                 1500);
     }
 
+    // print trackId cache detail
     public static void watchTrackIdsCache(FlinkK8sWatcher k8sWatcher) {
         new Timer()
             .scheduleAtFixedRate(
                 timerTask(
-                    () -> log.info(
-                        "[flink-k8s][trackIds]-{} => {}",
-                        System.currentTimeMillis(),
-                        k8sWatcher.getAllWatchingIds())),
+                    () -> INSTANCE.logInfo(
+                        "[flink-k8s][trackIds]-"
+                            + System.currentTimeMillis()
+                            + " => "
+                            + k8sWatcher.getAllWatchingIds())),
                 0,
                 1500);
     }
@@ -102,10 +113,11 @@ public final class KubernetesWatcherHelper {
         new Timer()
             .scheduleAtFixedRate(
                 timerTask(
-                    () -> log.info(
-                        "[flink-k8s][trackIds-size]-{} => {}",
-                        System.currentTimeMillis(),
-                        k8sWatcher.getAllWatchingIds().size())),
+                    () -> INSTANCE.logInfo(
+                        "[flink-k8s][trackIds-size]-"
+                            + System.currentTimeMillis()
+                            + " => "
+                            + k8sWatcher.getAllWatchingIds().size())),
                 0,
                 1500);
     }
@@ -115,14 +127,13 @@ public final class KubernetesWatcherHelper {
         new Timer()
             .scheduleAtFixedRate(
                 timerTask(
-                    () -> log.info(
-                        "[flink-k8s][k8s-event]-{} => count={} | {}",
-                        System.currentTimeMillis(),
-                        watcher.getWatchController().k8sDeploymentEvents
-                            .asMap()
-                            .size(),
-                        watcher.getWatchController().k8sDeploymentEvents
-                            .asMap())),
+                    () -> INSTANCE.logInfo(
+                        "[flink-k8s][k8s-event]-"
+                            + System.currentTimeMillis()
+                            + CACHE_COUNT_SUFFIX
+                            + watcher.watchController.k8sDeploymentEvents.asMap().size()
+                            + " | "
+                            + watcher.watchController.k8sDeploymentEvents.asMap())),
                 0,
                 1500);
     }

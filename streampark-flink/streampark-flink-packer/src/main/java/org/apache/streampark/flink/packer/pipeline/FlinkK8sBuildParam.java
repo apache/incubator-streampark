@@ -17,8 +17,9 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
-public abstract class FlinkK8sBuildParam extends FlinkBuildParam {
+public interface FlinkK8sBuildParam extends FlinkBuildParam {
 
-    public abstract String clusterId();
-    public abstract String k8sNamespace();
+    String clusterId();
+
+    String k8sNamespace();
 }

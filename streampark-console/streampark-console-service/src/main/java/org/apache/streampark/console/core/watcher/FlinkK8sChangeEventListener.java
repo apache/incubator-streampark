@@ -159,9 +159,9 @@ public class FlinkK8sChangeEventListener {
     }
 
     private void setByJobStatusCV(FlinkApplication app, JobStatusCV jobStatus) {
-        // infer the final flink job state
-        FlinkJobState state = FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(
-            jobStatus.jobState(), toK8sFlinkJobState(app.getStateEnum()));
+        FlinkJobState state =
+            FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(
+                jobStatus.jobState(), toK8sFlinkJobState(app.getStateEnum()));
 
         // corrective start-time / end-time / duration
         long preStartTime = app.getStartTime() != null ? app.getStartTime().getTime() : 0;

@@ -17,15 +17,21 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
+/** silent watcher */
 public class SilentDockerProgressWatcher implements DockerProgressWatcher {
 
     @Override
     public void onDockerPullProgressChange(DockerPullSnapshot snapshot) {
+        // intentionally empty — silent watcher
     }
+
     @Override
     public void onDockerBuildProgressChange(DockerBuildSnapshot snapshot) {
+        // intentionally empty — silent watcher
     }
+
     @Override
     public void onDockerPushProgressChange(DockerPushSnapshot snapshot) {
+        // intentionally empty — silent watcher
     }
 }

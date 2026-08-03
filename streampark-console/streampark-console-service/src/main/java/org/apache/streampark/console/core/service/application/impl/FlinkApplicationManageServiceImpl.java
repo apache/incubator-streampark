@@ -24,7 +24,6 @@ import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -239,11 +238,11 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         try {
             application
                 .getFsOperator()
-                .delete(application.getWorkspace().getAppWorkspace().concat("/").concat(appId.toString()));
+                .delete(application.getWorkspace().APP_WORKSPACE().concat("/").concat(appId.toString()));
             // try to delete yarn-application, and leave no trouble.
-            String path = Workspace.of(StorageType.HDFS).getAppWorkspace().concat("/").concat(appId.toString());
-            if (HdfsOperator.getInstance().exists(path)) {
-                HdfsOperator.getInstance().delete(path);
+            String path = Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString());
+            if (HdfsOperator.exists(path)) {
+                HdfsOperator.delete(path);
             }
         } catch (Exception e) {
             // skip
@@ -348,27 +347,15 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
 
         appParam.doSetHotParams();
         if (appParam.isUploadResource()) {
-            File jarFile;
-            try {
-                jarFile =
-                    FileUtils.resolveChildFile(
-                        new File(Workspace.local().getAppUploads()),
-                        String.valueOf(appParam.getTeamId()),
-                        org.apache.commons.io.FilenameUtils.getName(appParam.getJar()));
-            } catch (IOException e) {
-                throw new ApiAlertException("Invalid jar path: " + appParam.getJar(), e);
-            }
-            if (!jarFile.exists()) {
+            String jarPath = String.format(
+                "%s/%d/%s", Workspace.local().APP_UPLOADS(), appParam.getTeamId(), appParam.getJar());
+            if (!new File(jarPath).exists()) {
                 Resource resource = resourceService.findByResourceName(appParam.getTeamId(), appParam.getJar());
                 if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
-                    try {
-                        jarFile = FileUtils.toCanonicalFile(resource.getFilePath());
-                    } catch (IOException e) {
-                        throw new ApiAlertException("Invalid resource path: " + resource.getFilePath(), e);
-                    }
+                    jarPath = resource.getFilePath();
                 }
             }
-            appParam.setJarCheckSum(org.apache.commons.io.FileUtils.checksumCRC32(jarFile));
+            appParam.setJarCheckSum(org.apache.commons.io.FileUtils.checksumCRC32(new File(jarPath)));
         }
 
         boolean saveSuccess = save(appParam);
@@ -510,12 +497,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
             if (!Objects.equals(application.getJar(), appParam.getJar())) {
                 application.setBuild(true);
             } else {
-                File jarFile;
-                try {
-                    jarFile = WebUtils.resolveTempFile(appParam.getJar());
-                } catch (IOException e) {
-                    throw new RuntimeException("Invalid jar path: " + appParam.getJar(), e);
-                }
+                File jarFile = new File(WebUtils.getAppTempDir(), appParam.getJar());
                 if (jarFile.exists()) {
                     try {
                         long checkSum = org.apache.commons.io.FileUtils.checksumCRC32(jarFile);

@@ -18,88 +18,125 @@
 package org.apache.streampark.flink.kubernetes.helper;
 
 import org.apache.streampark.common.util.AutoCloseUtils;
+import org.apache.streampark.common.util.LoggerSupport;
 import org.apache.streampark.common.util.SystemPropertyUtils;
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.api.model.Pod;
 import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.client.DefaultKubernetesClient;
 
-import lombok.extern.slf4j.Slf4j;
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
-@Slf4j
-public final class KubernetesDeploymentHelper {
+public final class KubernetesDeploymentHelper extends LoggerSupport {
+
+    private static final KubernetesDeploymentHelper INSTANCE = new KubernetesDeploymentHelper();
 
     private KubernetesDeploymentHelper() {
     }
 
     private static List<Pod> getPods(String nameSpace, String deploymentName) {
-        try {
-            return AutoCloseUtils.using(
-                KubernetesRetriever.newK8sClient(),
-                client -> {
-                    try {
-                        return client.pods()
+        return AutoCloseUtils.using(
+            KubernetesRetriever.newK8sClient(),
+            client -> {
+                try {
+                    Map<String, String> matchLabels =
+                        client.apps()
+                            .deployments()
                             .inNamespace(nameSpace)
-                            .withLabels(client.apps().deployments().inNamespace(nameSpace)
-                                .withName(deploymentName).get().getSpec().getSelector().getMatchLabels())
-                            .list().getItems();
-                    } catch (Exception e) {
-                        return Collections.<Pod>emptyList();
-                    }
-                });
-        } catch (Exception e) {
-            return Collections.emptyList();
-        }
+                            .withName(deploymentName)
+                            .get()
+                            .getSpec()
+                            .getSelector()
+                            .getMatchLabels();
+                    return client.pods()
+                        .inNamespace(nameSpace)
+                        .withLabels(matchLabels)
+                        .list()
+                        .getItems();
+                } catch (Exception e) {
+                    return Collections.<Pod>emptyList();
+                }
+            });
     }
 
     public static boolean isDeploymentError(String nameSpace, String deploymentName) {
         try {
             List<Pod> pods = getPods(nameSpace, deploymentName);
-            if (pods.isEmpty())
+            if (pods.isEmpty()) {
                 return true;
-            var podStatus = pods.get(0).getStatus();
-            switch (podStatus.getPhase()) {
+            }
+            String phase = pods.get(0).getStatus().getPhase();
+            switch (phase) {
                 case "Unknown":
                 case "Failed":
                     return true;
                 case "Pending":
                     return false;
                 default:
-                    return podStatus.getContainerStatuses().get(0).getLastState().getTerminated() != null;
+                    return pods.get(0).getStatus().getContainerStatuses().get(0).getLastState().getTerminated() != null;
             }
         } catch (Exception e) {
             return true;
         }
     }
 
+    private static void deleteDeployment(String nameSpace, String deploymentName) {
+        AutoCloseUtils.using(
+            KubernetesRetriever.newK8sClient(),
+            client -> {
+                client.apps().deployments().inNamespace(nameSpace).withLabel("app", deploymentName).delete();
+                client.apps().deployments().inNamespace(nameSpace).withName(deploymentName).delete();
+                return null;
+            });
+    }
+
+    private static void deleteConfigMap(String nameSpace, String deploymentName) {
+        AutoCloseUtils.using(
+            KubernetesRetriever.newK8sClient(),
+            client -> {
+                client.configMaps().inNamespace(nameSpace).withLabel("app", deploymentName).delete();
+                client.configMaps().inNamespace(nameSpace).withName(deploymentName).delete();
+                return null;
+            });
+    }
+
     public static void delete(String nameSpace, String deploymentName) {
-        AutoCloseUtils.using(KubernetesRetriever.newK8sClient(), client -> {
-            var map = client.apps().deployments().inNamespace(nameSpace);
-            map.withLabel("app", deploymentName).delete();
-            map.withName(deploymentName).delete();
-            var cm = client.configMaps().inNamespace(nameSpace);
-            cm.withLabel("app", deploymentName).delete();
-            cm.withName(deploymentName).delete();
-            return null;
-        });
+        deleteDeployment(nameSpace, deploymentName);
+        deleteConfigMap(nameSpace, deploymentName);
     }
 
     public static boolean checkConnection() {
-        try (DefaultKubernetesClient client = new DefaultKubernetesClient()) {
+        try {
+            DefaultKubernetesClient client = new DefaultKubernetesClient();
+            client.close();
             return true;
         } catch (Exception e) {
             return false;
         }
     }
 
-    public static String watchDeploymentLog(String nameSpace, String jobName, String jobId) {
-        return watchPodTerminatedLog(nameSpace, jobName, jobId);
+    public static String watchDeploymentLog(String nameSpace, String jobName, String jobId) throws IOException {
+        return AutoCloseUtils.using(
+            KubernetesRetriever.newK8sClient(),
+            client -> {
+                try {
+                    String path = getJobLog(jobId);
+                    File file = new File(path);
+                    String log =
+                        client.apps().deployments().inNamespace(nameSpace).withName(jobName).getLog();
+                    Files.asCharSink(file, Charsets.UTF_8).write(log);
+                    return path;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
     }
 
     public static String watchPodTerminatedLog(String nameSpace, String jobName, String jobId) {
@@ -109,9 +146,15 @@ public final class KubernetesDeploymentHelper {
                 try {
                     String podName = getPods(nameSpace, jobName).get(0).getMetadata().getName();
                     String path = getJobErrorLog(jobId);
-                    String logContent = client.pods().inNamespace(nameSpace).withName(podName)
-                        .terminated().withPrettyOutput().getLog();
-                    FileUtils.writeStringToFile(new File(path), logContent, StandardCharsets.UTF_8);
+                    File file = new File(path);
+                    String log =
+                        client.pods()
+                            .inNamespace(nameSpace)
+                            .withName(podName)
+                            .terminated()
+                            .withPrettyOutput()
+                            .getLog();
+                    Files.asCharSink(file, Charsets.UTF_8).write(log);
                     return path;
                 } catch (Exception e) {
                     return null;
@@ -123,10 +166,12 @@ public final class KubernetesDeploymentHelper {
     }
 
     public static String getJobLog(String jobId) {
-        return SystemPropertyUtils.getTmpdir() + "/" + jobId + ".log";
+        String tmpPath = SystemPropertyUtils.getTmpdir();
+        return tmpPath + "/" + jobId + ".log";
     }
 
     public static String getJobErrorLog(String jobId) {
-        return SystemPropertyUtils.getTmpdir() + "/" + jobId + "_err.log";
+        String tmpPath = SystemPropertyUtils.getTmpdir();
+        return tmpPath + "/" + jobId + "_err.log";
     }
 }

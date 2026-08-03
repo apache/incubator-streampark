@@ -19,17 +19,44 @@ package org.apache.streampark.flink.core;
 
 import java.util.Optional;
 
-/** SQL command operand converters. */
-public final class SqlCommandConverters {
+/** Operand converters for {@link SqlCommand}. */
+final class SqlCommandConverters {
 
     private SqlCommandConverters() {
     }
 
-    /** Converter that produces no operands. */
-    public static final SqlCommandConverter NO_OPERANDS =
-        groups -> Optional.of(new String[0]);
+    static Optional<String[]> noOperands(String[] groups) {
+        return Optional.of(new String[0]);
+    }
 
-    /** Default converter that uses the first capture group as the sole operand. */
-    public static final SqlCommandConverter DEFAULT =
-        groups -> Optional.of(new String[]{groups[0]});
+    static Optional<String[]> firstGroup(String[] groups) {
+        return Optional.of(new String[]{groups[0]});
+    }
+
+    static Optional<String[]> setOperands(String[] groups) {
+        if (groups.length < 3) {
+            return Optional.empty();
+        }
+        if (groups[0] == null) {
+            return Optional.of(new String[]{cleanUp(groups[0])});
+        }
+        return Optional.of(new String[]{cleanUp(groups[1]), cleanUp(groups[2])});
+    }
+
+    static Optional<String[]> resetAll(String[] groups) {
+        return Optional.of(new String[]{"ALL"});
+    }
+
+    private static String cleanUp(String sql) {
+        if (sql == null) {
+            return null;
+        }
+        String trimmed = sql.trim();
+        if (trimmed.length() >= 2
+            && ((trimmed.startsWith("'") && trimmed.endsWith("'"))
+                || (trimmed.startsWith("\"") && trimmed.endsWith("\"")))) {
+            return trimmed.substring(1, trimmed.length() - 1);
+        }
+        return trimmed;
+    }
 }

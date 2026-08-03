@@ -17,6 +17,7 @@
 
 FROM apache/streampark:ci as base-image
 FROM flink:1.20.1-scala_2.12-java8 as flink-image
+FROM eclipse-temurin:11-jdk-jammy as jdk11-image
 
 # Install streampark
 FROM sbloodys/hadoop:3.3.6
@@ -28,18 +29,7 @@ RUN sudo chown -R hadoop.hadoop /streampark \
 COPY --from=flink-image /opt/flink /flink-1.20.1
 RUN sudo chown -R hadoop.hadoop /flink-1.20.1
 
-# Install javac
-ARG TARGETPLATFORM
-RUN echo "TARGETPLATFORM: $TARGETPLATFORM"
-RUN \
-    if [ "$TARGETPLATFORM" = "linux/arm64" ];then \
-        sudo rm -f /etc/yum.repos.d/*.repo; \
-        sudo wget http://mirrors.aliyun.com/repo/Centos-altarch-7.repo -O /etc/yum.repos.d/CentOS-Base.repo; \
-        sudo sed -i "s/http:\/\//https:\/\//g" /etc/yum.repos.d/CentOS-Base.repo; \
-        sudo yum install -y java-1.8.0-openjdk-devel; \
-    elif [ "$TARGETPLATFORM" = "linux/amd64" ];then \
-        sudo yum install -y java-1.8.0-openjdk-devel; \
-    else \
-        echo "unknown TARGETPLATFORM: $TARGETPLATFORM"; \
-        exit 2;  \
-    fi
+# Bundled JDK 11 from Eclipse Temurin for StreamPark Console (avoid CentOS 7 yum mirror retirement)
+COPY --from=jdk11-image /opt/java/openjdk /usr/lib/jvm/jdk11
+ENV JAVA_HOME=/usr/lib/jvm/jdk11
+ENV PATH="${JAVA_HOME}/bin:${PATH}"

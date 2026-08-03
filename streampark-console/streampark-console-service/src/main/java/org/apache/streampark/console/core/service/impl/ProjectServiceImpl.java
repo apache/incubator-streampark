@@ -380,7 +380,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             startOffset = 0L;
         }
         try {
-            long maxSize = MemorySize.parse(InternalConfigHolder.get(CommonConfig.READ_LOG_MAX_SIZE)).getBytes();
+            long maxSize = MemorySize.parse(InternalConfigHolder.get(CommonConfig.READ_LOG_MAX_SIZE())).getBytes();
             if (startOffset == null) {
                 fileContent = FileUtils.readEndOfFile(logFile, maxSize);
             } else {
@@ -400,7 +400,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     private String getBuildLogPath(Long projectId) {
-        return String.format("%s/%s/build.log", Workspace.projectBuildLogPath(), projectId);
+        return String.format("%s/%s/build.log", Workspace.PROJECT_BUILD_LOG_PATH(), projectId);
     }
 
     @Override

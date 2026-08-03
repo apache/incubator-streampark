@@ -28,38 +28,41 @@ import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.api.model.OwnerR
 import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.client.DefaultKubernetesClient;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class IngressStrategy {
+public interface IngressStrategy {
 
-    protected static final String REST_SERVICE_IDENTIFICATION = "rest";
+    String REST_SERVICE_IDENTIFICATION = "rest";
 
-    protected final String ingressClass =
-        InternalConfigHolder.get(K8sFlinkConfig.ingressClass);
+    default String ingressClass() {
+        return InternalConfigHolder.get(K8sFlinkConfig.ingressClass);
+    }
 
-    public abstract String getIngressUrl(String nameSpace, String clusterId, ClusterClient<?> clusterClient);
+    String getIngressUrl(String nameSpace, String clusterId, ClusterClient<?> clusterClient);
 
-    public abstract void configureIngress(String domainName, String clusterId, String nameSpace);
+    void configureIngress(String domainName, String clusterId, String nameSpace);
 
-    public String prepareIngressTemplateFiles(String buildWorkspace, String ingressTemplates) throws Exception {
+    default String prepareIngressTemplateFiles(String buildWorkspace, String ingressTemplates) throws IOException {
         File workspaceDir = new File(buildWorkspace);
         if (!workspaceDir.exists()) {
             workspaceDir.mkdir();
         }
-        if (ingressTemplates == null || ingressTemplates.isEmpty()) {
+        if (ingressTemplates.isEmpty()) {
             return null;
         }
         String outputPath = buildWorkspace + "/ingress.yaml";
-        FileUtils.writeFile(ingressTemplates, new File(outputPath));
+        File outputFile = new File(outputPath);
+        FileUtils.writeFile(ingressTemplates, outputFile);
         return outputPath;
     }
 
-    protected Map<String, String> buildIngressAnnotations(String clusterId, String namespace) {
-        Map<String, String> map = new HashMap<>();
-        map.put("nginx.ingress.kubernetes.io/rewrite-target", "/$2");
-        map.put("nginx.ingress.kubernetes.io/proxy-body-size", "1024m");
-        map.put(
+    default Map<String, String> buildIngressAnnotations(String clusterId, String namespace) {
+        Map<String, String> annotations = new HashMap<>();
+        annotations.put("nginx.ingress.kubernetes.io/rewrite-target", "/$2");
+        annotations.put("nginx.ingress.kubernetes.io/proxy-body-size", "1024m");
+        annotations.put(
             "nginx.ingress.kubernetes.io/configuration-snippet",
             "rewrite ^(/"
                 + clusterId
@@ -68,23 +71,27 @@ public abstract class IngressStrategy {
                 + "/"
                 + clusterId
                 + "/\">'; sub_filter_once off;");
-        return map;
+        return annotations;
     }
 
-    protected Map<String, String> buildIngressLabels(String clusterId) {
-        Map<String, String> map = new HashMap<>();
-        map.put("app", clusterId);
-        map.put("type", ConfigKeys.FLINK_NATIVE_KUBERNETES_LABEL);
-        map.put("component", "ingress");
-        return map;
+    default Map<String, String> buildIngressLabels(String clusterId) {
+        Map<String, String> labels = new HashMap<>();
+        labels.put("app", clusterId);
+        labels.put("type", ConfigKeys.FLINK_NATIVE_KUBERNETES_LABEL());
+        labels.put("component", "ingress");
+        return labels;
     }
 
-    protected OwnerReference getOwnerReference(String nameSpace, String clusterId, DefaultKubernetesClient client) {
-        var deployment = client.apps().deployments().inNamespace(nameSpace).withName(clusterId).get();
+    default OwnerReference getOwnerReference(
+                                             String nameSpace, String clusterId, DefaultKubernetesClient client) {
+        var deployment =
+            client.apps().deployments().inNamespace(nameSpace).withName(clusterId).get();
+
         if (deployment == null) {
-            throw new IllegalStateException(
+            throw new IllegalArgumentException(
                 "Deployment with name " + clusterId + " not found in namespace " + nameSpace);
         }
+
         return new OwnerReferenceBuilder()
             .withUid(deployment.getMetadata().getUid())
             .withApiVersion("apps/v1")

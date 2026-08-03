@@ -98,9 +98,9 @@ public class FlinkApplicationConfig {
                         entry -> {
                             String key = entry.getKey();
                             if (key.startsWith(
-                                ConfigKeys.KEY_FLINK_OPTION_PREFIX)) {
+                                ConfigKeys.KEY_FLINK_OPTION_PREFIX())) {
                                 key = key.substring(
-                                    ConfigKeys.KEY_FLINK_OPTION_PREFIX
+                                    ConfigKeys.KEY_FLINK_OPTION_PREFIX()
                                         .length());
                             } else if (key.startsWith(ConfigKeys
                                 .KEY_FLINK_PROPERTY_PREFIX())) {
@@ -108,16 +108,16 @@ public class FlinkApplicationConfig {
                                     .KEY_FLINK_PROPERTY_PREFIX()
                                     .length());
                             } else if (key.startsWith(
-                                ConfigKeys.KEY_FLINK_TABLE_PREFIX)) {
+                                ConfigKeys.KEY_FLINK_TABLE_PREFIX())) {
                                 key = key.substring(ConfigKeys
                                     .KEY_FLINK_TABLE_PREFIX().length());
                             } else if (key.startsWith(
-                                ConfigKeys.KEY_APP_PREFIX)) {
-                                key = key.substring(ConfigKeys.KEY_APP_PREFIX
+                                ConfigKeys.KEY_APP_PREFIX())) {
+                                key = key.substring(ConfigKeys.KEY_APP_PREFIX()
                                     .length());
                             } else if (key.startsWith(
-                                ConfigKeys.KEY_SQL_PREFIX)) {
-                                key = key.substring(ConfigKeys.KEY_SQL_PREFIX
+                                ConfigKeys.KEY_SQL_PREFIX())) {
+                                key = key.substring(ConfigKeys.KEY_SQL_PREFIX()
                                     .length());
                             }
                             return key;

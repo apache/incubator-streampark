@@ -18,17 +18,33 @@
 package org.apache.streampark.flink.packer.pipeline;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
 
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
+/** Snapshot for docker resolved progress */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DockerResolvedSnapshot {
 
-    private DockerPullSnapshot pull;
-    private DockerBuildSnapshot build;
-    private DockerPushSnapshot push;
+    private final DockerPullSnapshot pull;
+    private final DockerBuildSnapshot build;
+    private final DockerPushSnapshot push;
+
+    public DockerResolvedSnapshot(
+                                  DockerPullSnapshot pull,
+                                  DockerBuildSnapshot build,
+                                  DockerPushSnapshot push) {
+        this.pull = pull;
+        this.build = build;
+        this.push = push;
+    }
+
+    public DockerPullSnapshot pull() {
+        return pull;
+    }
+
+    public DockerBuildSnapshot build() {
+        return build;
+    }
+
+    public DockerPushSnapshot push() {
+        return push;
+    }
 }

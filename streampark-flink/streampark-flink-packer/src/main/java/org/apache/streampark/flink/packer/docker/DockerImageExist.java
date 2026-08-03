@@ -19,10 +19,11 @@ package org.apache.streampark.flink.packer.docker;
 
 import com.github.dockerjava.api.exception.NotFoundException;
 
+/** Check docker image existence. */
 public class DockerImageExist {
 
     public boolean doesDockerImageExist(String imageName) {
-        return DockerClients.usingDockerClient(
+        return DockerUtils.usingDockerClient(
             dockerClient -> {
                 try {
                     dockerClient.inspectImageCmd(imageName).exec();
@@ -32,7 +33,8 @@ public class DockerImageExist {
                 }
             },
             err -> {
-                throw new RuntimeException("Check docker image failed, imageName=" + imageName, err);
+                throw new RuntimeException(
+                    "Check docker image failed, imageName=" + imageName, err);
             });
     }
 }

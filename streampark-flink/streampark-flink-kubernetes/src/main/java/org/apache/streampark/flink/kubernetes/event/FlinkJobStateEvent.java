@@ -20,16 +20,30 @@ package org.apache.streampark.flink.kubernetes.event;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
-
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
+/**
+ * Notification of expecting changes to flink job state cache held internally by K8sFlinkMonitor.
+ */
 public class FlinkJobStateEvent implements BuildInEvent {
 
-    private TrackId trackId;
-    private FlinkJobState jobState;
-    private long pollTime;
+    private final TrackId trackId;
+    private final FlinkJobState jobState;
+    private final long pollTime;
+
+    public FlinkJobStateEvent(TrackId trackId, FlinkJobState jobState, long pollTime) {
+        this.trackId = trackId;
+        this.jobState = jobState;
+        this.pollTime = pollTime;
+    }
+
+    public TrackId trackId() {
+        return trackId;
+    }
+
+    public FlinkJobState jobState() {
+        return jobState;
+    }
+
+    public long pollTime() {
+        return pollTime;
+    }
 }

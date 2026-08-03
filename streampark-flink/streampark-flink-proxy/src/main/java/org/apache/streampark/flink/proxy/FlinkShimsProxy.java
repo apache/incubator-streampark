@@ -23,46 +23,43 @@ import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.util.ChildFirstClassLoader;
 import org.apache.streampark.common.util.ClassLoaderObjectInputStream;
 import org.apache.streampark.common.util.ClassLoaderUtils;
-import org.apache.streampark.common.util.StreamParkLoggerFactory;
-
-import org.apache.streampark.shaded.org.slf4j.Logger;
+import org.apache.streampark.common.util.LoggerSupport;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-/** Multi-version Flink shims classloader proxy. */
-public final class FlinkShimsProxy {
+/** Proxy for loading Flink version-specific shims behind an isolated classloader. */
+public final class FlinkShimsProxy extends LoggerSupport {
 
-    private static final Logger LOG =
-        StreamParkLoggerFactory.loggerFactory().getLogger(FlinkShimsProxy.class.getName());
+    private static final FlinkShimsProxy LOG = new FlinkShimsProxy();
 
-    private static final ConcurrentHashMap<String, ClassLoader> SHIMS_CLASS_LOADER_CACHE =
-        new ConcurrentHashMap<>();
+    private static final Map<String, ClassLoader> SHIMS_CLASS_LOADER_CACHE = new ConcurrentHashMap<>();
 
-    private static final ConcurrentHashMap<String, ClassLoader> VERIFY_SQL_CLASS_LOADER_CACHE =
-        new ConcurrentHashMap<>();
+    private static final Map<String, ClassLoader> VERIFY_SQL_CLASS_LOADER_CACHE = new ConcurrentHashMap<>();
 
     private static final Pattern FLINK_JAR_PATTERN =
         Pattern.compile("flink-(.*).jar", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final Pattern INCLUDE_PATTERN =
-        Pattern.compile(
-            "(streampark-shaded-jackson-)(.*).jar",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        Pattern.compile("(streampark-shaded-jackson-)(.*).jar", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final String FLINK_SHIMS_PREFIX = "streampark-flink-shims_flink";
 
-    private static final List<String> PARENT_FIRST_PATTERNS =
+    private static final List<String> PARENT_FIRST_PATTERNS = Collections.unmodifiableList(
         Arrays.asList(
             "java.",
             "javax.xml",
@@ -74,7 +71,7 @@ public final class FlinkShimsProxy {
             "ch.qos.logback",
             "org.xml",
             "org.w3c",
-            "org.apache.hadoop");
+            "org.apache.hadoop"));
 
     private FlinkShimsProxy() {
     }
@@ -85,46 +82,57 @@ public final class FlinkShimsProxy {
             Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     }
 
+    /**
+     * Get shimsClassLoader to execute for java/scala API (SAM {@link Function}).
+     *
+     * @param flinkVersion flinkVersion
+     * @param func execute function
+     * @param <T> return type
+     * @return result of func
+     */
     public static <T> T proxy(FlinkVersion flinkVersion, Function<ClassLoader, T> func) {
         ClassLoader shimsClassLoader = getFlinkShimsClassLoader(flinkVersion);
-        return ClassLoaderUtils.runAsClassLoader(
-            shimsClassLoader, () -> func.apply(shimsClassLoader));
+        return ClassLoaderUtils.runAsClassLoader(shimsClassLoader, () -> func.apply(shimsClassLoader));
     }
 
-    public static <T> T proxyVerifySql(
-                                       FlinkVersion flinkVersion, Function<ClassLoader, T> func) {
+    /**
+     * Get ClassLoader to verify sql.
+     *
+     * @param flinkVersion flinkVersion
+     * @param func execute function
+     * @param <T> return type
+     * @return result of func
+     */
+    public static <T> T proxyVerifySql(FlinkVersion flinkVersion, Function<ClassLoader, T> func) {
         ClassLoader shimsClassLoader = getVerifySqlLibClassLoader(flinkVersion);
-        return ClassLoaderUtils.runAsClassLoader(
-            shimsClassLoader, () -> func.apply(shimsClassLoader));
+        return ClassLoaderUtils.runAsClassLoader(shimsClassLoader, () -> func.apply(shimsClassLoader));
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T getObject(ClassLoader loader, Object obj) {
+    public static <T> T getObject(ClassLoader loader, Object obj) throws IOException, ClassNotFoundException {
         try (
             ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
             ObjectOutputStream out = new ObjectOutputStream(arrayOutputStream)) {
             out.writeObject(obj);
             try (
+                ByteArrayInputStream byteArrayInputStream =
+                    new ByteArrayInputStream(arrayOutputStream.toByteArray());
                 ClassLoaderObjectInputStream in =
-                    new ClassLoaderObjectInputStream(
-                        loader, new ByteArrayInputStream(arrayOutputStream.toByteArray()))) {
+                    new ClassLoaderObjectInputStream(loader, byteArrayInputStream)) {
                 return (T) in.readObject();
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
+    // need to load all flink-table dependencies compatible with different versions
     private static ClassLoader getVerifySqlLibClassLoader(FlinkVersion flinkVersion) {
-        LOG.info("Add verify sql lib,flink version: {}", flinkVersion);
+        LOG.logInfo("Add verify sql lib,flink version: " + flinkVersion);
         return VERIFY_SQL_CLASS_LOADER_CACHE.computeIfAbsent(
             flinkVersion.fullVersion(),
             key -> {
-                Predicate<File> getFlinkTable = file -> file.getName().startsWith("flink-table");
-                List<URL> libTableURL =
-                    getFlinkHomeLib(flinkVersion.flinkHome, "lib", getFlinkTable);
-                List<URL> optTableURL =
-                    getFlinkHomeLib(flinkVersion.flinkHome, "opt", getFlinkTable);
+                Predicate<File> getFlinkTable = f -> f.getName().startsWith("flink-table");
+                List<URL> libTableURL = getFlinkHomeLib(flinkVersion.flinkHome, "lib", getFlinkTable);
+                List<URL> optTableURL = getFlinkHomeLib(flinkVersion.flinkHome, "opt", getFlinkTable);
                 List<URL> shimsUrls = new ArrayList<>(libTableURL);
                 shimsUrls.addAll(optTableURL);
 
@@ -154,11 +162,11 @@ public final class FlinkShimsProxy {
             && !childFirstPattern.matcher(jarName).matches();
     }
 
-    private static void addShimsUrls(FlinkVersion flinkVersion, java.util.function.Consumer<File> addShimUrl) {
-        String appHome = System.getProperty(ConfigKeys.KEY_APP_HOME);
+    private static void addShimsUrls(FlinkVersion flinkVersion, Consumer<File> addShimUrl) {
+        String appHome = System.getProperty(ConfigKeys.KEY_APP_HOME());
         if (appHome == null) {
             throw new IllegalArgumentException(
-                String.format("%s is not found on System env.", ConfigKeys.KEY_APP_HOME));
+                String.format("%s is not found on System env.", ConfigKeys.KEY_APP_HOME()));
         }
 
         File libPath = new File(appHome + "/lib");
@@ -167,45 +175,48 @@ public final class FlinkShimsProxy {
         }
 
         String majorVersion = flinkVersion.majorVersion();
-        File[] files = libPath.listFiles();
-        if (files == null) {
+        String scalaVersion = flinkVersion.scalaVersion();
+        File[] jars = libPath.listFiles();
+        if (jars == null) {
             return;
         }
 
-        for (File jar : files) {
+        for (File jar : jars) {
             String jarName = jar.getName();
             if (!jarName.endsWith(Constants.JAR_SUFFIX)) {
                 continue;
             }
-            if (jarName.startsWith(FLINK_SHIMS_PREFIX)) {
-                String prefixVer = FLINK_SHIMS_PREFIX + "-" + majorVersion + "-";
-                if (jarName.startsWith(prefixVer)) {
-                    addShimUrl.accept(jar);
-                    LOG.info("Include flink shims jar lib: {}", jarName);
-                }
-            } else {
-                if (INCLUDE_PATTERN.matcher(jarName).matches()) {
-                    addShimUrl.accept(jar);
-                    LOG.info("Include jar lib: {}", jarName);
-                } else if (jarName.matches("^streampark-.*\\.jar$")) {
-                    addShimUrl.accept(jar);
-                    LOG.info("Include streampark lib: {}", jarName);
-                }
+            String includeReason = matchShimIncludeReason(jarName, majorVersion, scalaVersion);
+            if (includeReason != null) {
+                addShimUrl.accept(jar);
+                LOG.logInfo(includeReason + jarName);
             }
         }
     }
 
+    private static String matchShimIncludeReason(
+                                                 String jarName, String majorVersion, String scalaVersion) {
+        if (jarName.startsWith(FLINK_SHIMS_PREFIX)) {
+            String prefixVer = FLINK_SHIMS_PREFIX + "-" + majorVersion + "_" + scalaVersion;
+            return jarName.startsWith(prefixVer) ? "Include flink shims jar lib: " : null;
+        }
+        if (INCLUDE_PATTERN.matcher(jarName).matches()) {
+            return "Include jar lib: ";
+        }
+        if (jarName.matches("^streampark-.*_" + scalaVersion + ".*$")) {
+            return "Include streampark lib: ";
+        }
+        return null;
+    }
+
     private static ClassLoader getFlinkShimsClassLoader(FlinkVersion flinkVersion) {
-        LOG.info("add flink shims urls classloader,flink version: {}", flinkVersion);
+        LOG.logInfo("add flink shims urls classloader,flink version: " + flinkVersion);
         return SHIMS_CLASS_LOADER_CACHE.computeIfAbsent(
             flinkVersion.fullVersion(),
             key -> {
-                List<URL> libURL =
-                    getFlinkHomeLib(
-                        flinkVersion.flinkHome,
-                        "lib",
-                        file -> !file.getName().startsWith("log4j")
-                            && file.getName().endsWith(".jar"));
+                Predicate<File> filter =
+                    file -> !file.getName().startsWith("log4j") && file.getName().endsWith(".jar");
+                List<URL> libURL = getFlinkHomeLib(flinkVersion.flinkHome, "lib", filter);
                 List<URL> shimsUrls = new ArrayList<>(libURL);
 
                 addShimsUrls(
@@ -229,14 +240,16 @@ public final class FlinkShimsProxy {
     }
 
     private static List<URL> getFlinkHomeLib(
-                                             String flinkHome, String childDir, Predicate<File> filterFun) {
+                                             String flinkHome,
+                                             String childDir,
+                                             Predicate<File> filterFun) {
         File file = new File(flinkHome, childDir);
         if (!file.isDirectory()) {
             throw new IllegalArgumentException("FLINK_HOME " + file + " does not exist");
         }
         File[] files = file.listFiles();
         if (files == null) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
         List<URL> urls = new ArrayList<>();
         for (File f : files) {

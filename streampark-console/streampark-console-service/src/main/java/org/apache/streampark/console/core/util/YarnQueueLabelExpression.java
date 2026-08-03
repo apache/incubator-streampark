@@ -109,8 +109,8 @@ public class YarnQueueLabelExpression {
         Map<String, String> queueLabelMap = new HashMap<>(2);
         yarnQueueLabelExpression
             .getLabelExpression()
-            .ifPresent(labelExp -> queueLabelMap.put(ConfigKeys.KEY_YARN_APP_NODE_LABEL, labelExp));
-        queueLabelMap.put(ConfigKeys.KEY_YARN_APP_QUEUE, yarnQueueLabelExpression.queue);
+            .ifPresent(labelExp -> queueLabelMap.put(ConfigKeys.KEY_YARN_APP_NODE_LABEL(), labelExp));
+        queueLabelMap.put(ConfigKeys.KEY_YARN_APP_QUEUE(), yarnQueueLabelExpression.queue);
         return queueLabelMap;
     }
 }

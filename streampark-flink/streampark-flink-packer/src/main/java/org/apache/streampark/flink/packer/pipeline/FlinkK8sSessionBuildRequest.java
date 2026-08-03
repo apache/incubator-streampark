@@ -22,23 +22,89 @@ import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
+public class FlinkK8sSessionBuildRequest implements FlinkK8sBuildParam {
 
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
-public class FlinkK8sSessionBuildRequest extends FlinkK8sBuildParam {
+    private final String appName;
+    private final String workspace;
+    private final String mainClass;
+    private final String customFlinkUserJar;
+    private final FlinkDeployMode deployMode;
+    private final FlinkJobType flinkJobType;
+    private final FlinkVersion flinkVersion;
+    private final DependencyInfo dependencyInfo;
+    private final String clusterId;
+    private final String k8sNamespace;
 
-    private String appName;
-    private String workspace;
-    private String mainClass;
-    private String customFlinkUserJar;
-    private FlinkDeployMode deployMode;
-    private FlinkJobType flinkJobType;
-    private FlinkVersion flinkVersion;
-    private DependencyInfo dependencyInfo;
-    private String clusterId;
-    private String k8sNamespace;
+    public FlinkK8sSessionBuildRequest(
+                                       String appName,
+                                       String workspace,
+                                       String mainClass,
+                                       String customFlinkUserJar,
+                                       FlinkDeployMode deployMode,
+                                       FlinkJobType flinkJobType,
+                                       FlinkVersion flinkVersion,
+                                       DependencyInfo dependencyInfo,
+                                       String clusterId,
+                                       String k8sNamespace) {
+        this.appName = appName;
+        this.workspace = workspace;
+        this.mainClass = mainClass;
+        this.customFlinkUserJar = customFlinkUserJar;
+        this.deployMode = deployMode;
+        this.flinkJobType = flinkJobType;
+        this.flinkVersion = flinkVersion;
+        this.dependencyInfo = dependencyInfo;
+        this.clusterId = clusterId;
+        this.k8sNamespace = k8sNamespace;
+    }
+
+    @Override
+    public String appName() {
+        return appName;
+    }
+
+    @Override
+    public String workspace() {
+        return workspace;
+    }
+
+    @Override
+    public String mainClass() {
+        return mainClass;
+    }
+
+    @Override
+    public String customFlinkUserJar() {
+        return customFlinkUserJar;
+    }
+
+    @Override
+    public FlinkDeployMode deployMode() {
+        return deployMode;
+    }
+
+    @Override
+    public FlinkJobType flinkJobType() {
+        return flinkJobType;
+    }
+
+    @Override
+    public FlinkVersion flinkVersion() {
+        return flinkVersion;
+    }
+
+    @Override
+    public DependencyInfo dependencyInfo() {
+        return dependencyInfo;
+    }
+
+    @Override
+    public String clusterId() {
+        return clusterId;
+    }
+
+    @Override
+    public String k8sNamespace() {
+        return k8sNamespace;
+    }
 }

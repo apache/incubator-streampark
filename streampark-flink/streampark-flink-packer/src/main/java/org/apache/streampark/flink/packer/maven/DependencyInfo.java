@@ -22,7 +22,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class DependencyInfo {
+/**
+ * Maven artifacts and external jar libraries for building a fat-jar.
+ *
+ * @param mavenArts collection of maven artifacts
+ * @param extJarLibs collection of jar lib paths, which elements can be a directory or file path.
+ */
+public final class DependencyInfo {
 
     private final Set<Artifact> mavenArts;
     private final Set<String> extJarLibs;
@@ -32,37 +38,43 @@ public class DependencyInfo {
     }
 
     public DependencyInfo(Set<Artifact> mavenArts, Set<String> extJarLibs) {
-        this.mavenArts = mavenArts == null ? Collections.emptySet() : mavenArts;
-        this.extJarLibs = extJarLibs == null ? Collections.emptySet() : extJarLibs;
+        this.mavenArts = mavenArts == null ? Collections.emptySet() : new HashSet<>(mavenArts);
+        this.extJarLibs = extJarLibs == null ? Collections.emptySet() : new HashSet<>(extJarLibs);
     }
 
     public DependencyInfo(List<Artifact> mavenArts, List<String> extJarLibs) {
-        this(new HashSet<>(mavenArts), new HashSet<>(extJarLibs));
+        this(
+            mavenArts == null ? Collections.emptySet() : new HashSet<>(mavenArts),
+            extJarLibs == null ? Collections.emptySet() : new HashSet<>(extJarLibs));
     }
 
     public Set<Artifact> mavenArts() {
         return mavenArts;
     }
+
     public Set<String> extJarLibs() {
         return extJarLibs;
     }
 
     public DependencyInfo merge(Set<String> jarLibs) {
-        if (jarLibs == null)
-            return this;
-        Set<String> merged = new HashSet<>(extJarLibs);
-        merged.addAll(jarLibs);
-        return new DependencyInfo(mavenArts, merged);
+        if (jarLibs != null) {
+            Set<String> merged = new HashSet<>(extJarLibs);
+            merged.addAll(jarLibs);
+            return new DependencyInfo(mavenArts, merged);
+        }
+        return new DependencyInfo(mavenArts, extJarLibs);
     }
 
     public DependencyInfo merge(List<Artifact> mvnPoms, List<String> jarLibs) {
-        Set<Artifact> arts = new HashSet<>(mavenArts);
-        Set<String> libs = new HashSet<>(extJarLibs);
-        if (mvnPoms != null)
-            arts.addAll(mvnPoms);
-        if (jarLibs != null)
-            libs.addAll(jarLibs);
-        return new DependencyInfo(arts, libs);
+        Set<Artifact> mergedArts = new HashSet<>(mavenArts);
+        Set<String> mergedJars = new HashSet<>(extJarLibs);
+        if (mvnPoms != null) {
+            mergedArts.addAll(mvnPoms);
+        }
+        if (jarLibs != null) {
+            mergedJars.addAll(jarLibs);
+        }
+        return new DependencyInfo(mergedArts, mergedJars);
     }
 
     public static DependencyInfo empty() {

@@ -17,23 +17,27 @@
 
 package org.apache.streampark.flink.packer.maven;
 
+import javax.annotation.Nullable;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Artifact {
+/** Maven artifact coordinates. */
+public final class Artifact {
 
     private static final Pattern PATTERN = Pattern.compile("([^: ]+):([^: ]+):([^: ]+)");
 
     private final String groupId;
     private final String artifactId;
     private final String version;
+    @Nullable
     private final String classifier;
 
     public Artifact(String groupId, String artifactId, String version) {
         this(groupId, artifactId, version, null);
     }
 
-    public Artifact(String groupId, String artifactId, String version, String classifier) {
+    public Artifact(String groupId, String artifactId, String version, @Nullable String classifier) {
         this.groupId = groupId;
         this.artifactId = artifactId;
         this.version = version;
@@ -43,12 +47,16 @@ public class Artifact {
     public String groupId() {
         return groupId;
     }
+
     public String artifactId() {
         return artifactId;
     }
+
     public String version() {
         return version;
     }
+
+    @Nullable
     public String classifier() {
         return classifier;
     }
@@ -57,19 +65,22 @@ public class Artifact {
         if (!groupId.equals(artifact.getGroupId())) {
             return false;
         }
-        if ("*".equals(artifact.getArtifactId())) {
+        String a = artifact.getArtifactId();
+        if ("*".equals(a)) {
             return true;
         }
-        return artifactId.equals(artifact.getArtifactId());
+        return artifactId.equals(a);
     }
 
+    /** build from coords */
     public static Artifact of(String coords) {
         Matcher matcher = PATTERN.matcher(coords);
         if (matcher.matches()) {
             return new Artifact(matcher.group(1), matcher.group(2), matcher.group(3));
         }
         throw new IllegalArgumentException(
-            "Bad artifact coordinates " + coords
+            "Bad artifact coordinates "
+                + coords
                 + ", expected format is <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>");
     }
 }

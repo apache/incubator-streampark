@@ -20,16 +20,22 @@ package org.apache.streampark.flink.kubernetes.model;
 import org.apache.streampark.common.util.Utils;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
+import lombok.Builder;
 
-@Data
-@Accessors(fluent = true)
+@Builder
 @AllArgsConstructor
 public class K8sEventKey {
 
-    private String namespace;
-    private String clusterId;
+    private final String namespace;
+    private final String clusterId;
+
+    public String namespace() {
+        return namespace;
+    }
+
+    public String clusterId() {
+        return clusterId;
+    }
 
     @Override
     public int hashCode() {

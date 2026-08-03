@@ -20,19 +20,25 @@ package org.apache.streampark.spark.kubernetes.model;
 import org.apache.streampark.common.util.Utils;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
+import lombok.Builder;
 
-/** Pod template for Spark k8s cluster. */
-@Data
-@Accessors(fluent = true)
-@NoArgsConstructor
+/** Pod template for Spark k8s cluster */
+@Builder
 @AllArgsConstructor
 public class SparkK8sPodTemplates {
 
-    private String driverPodTemplate = "";
-    private String executorPodTemplate = "";
+    @Builder.Default
+    private final String driverPodTemplate = "";
+    @Builder.Default
+    private final String executorPodTemplate = "";
+
+    public String driverPodTemplate() {
+        return driverPodTemplate;
+    }
+
+    public String executorPodTemplate() {
+        return executorPodTemplate;
+    }
 
     public boolean nonEmpty() {
         return isNotBlank(driverPodTemplate) || isNotBlank(executorPodTemplate);
@@ -42,8 +48,33 @@ public class SparkK8sPodTemplates {
         return !nonEmpty();
     }
 
-    private static boolean isNotBlank(String value) {
-        return value != null && !value.trim().isEmpty();
+    public static SparkK8sPodTemplates empty() {
+        return SparkK8sPodTemplates.builder().build();
+    }
+
+    public static SparkK8sPodTemplates of(String driverPodTemplate, String executorPodTemplate) {
+        return SparkK8sPodTemplates.builder()
+            .driverPodTemplate(safeGet(driverPodTemplate))
+            .executorPodTemplate(safeGet(executorPodTemplate))
+            .build();
+    }
+
+    private static String safeGet(String content) {
+        if (content == null || content.trim().isEmpty()) {
+            return "";
+        }
+        return content;
+    }
+
+    private static boolean isNotBlank(String content) {
+        return content != null && !content.trim().isEmpty();
+    }
+
+    private static String trimSafe(String content) {
+        if (content == null) {
+            return "";
+        }
+        return content.trim();
     }
 
     @Override
@@ -57,26 +88,7 @@ public class SparkK8sPodTemplates {
             return false;
         }
         SparkK8sPodTemplates that = (SparkK8sPodTemplates) obj;
-        return safeTrim(driverPodTemplate).equals(safeTrim(that.driverPodTemplate))
-            && safeTrim(executorPodTemplate).equals(safeTrim(that.executorPodTemplate));
-    }
-
-    private static String safeTrim(String content) {
-        return content == null ? "" : content.trim();
-    }
-
-    public static SparkK8sPodTemplates empty() {
-        return new SparkK8sPodTemplates();
-    }
-
-    public static SparkK8sPodTemplates of(String driverPodTemplate, String executorPodTemplate) {
-        return new SparkK8sPodTemplates(safeGet(driverPodTemplate), safeGet(executorPodTemplate));
-    }
-
-    private static String safeGet(String content) {
-        if (content == null || content.trim().isEmpty()) {
-            return "";
-        }
-        return content;
+        return trimSafe(driverPodTemplate).equals(trimSafe(that.driverPodTemplate))
+            && trimSafe(executorPodTemplate).equals(trimSafe(that.executorPodTemplate));
     }
 }

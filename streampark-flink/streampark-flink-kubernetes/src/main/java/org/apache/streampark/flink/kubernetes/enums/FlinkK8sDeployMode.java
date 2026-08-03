@@ -19,7 +19,10 @@ package org.apache.streampark.flink.kubernetes.enums;
 
 import org.apache.streampark.common.enums.FlinkDeployMode;
 
-/** Execution mode of flink on kubernetes. */
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+/** execution mode of flink on kubernetes */
 public enum FlinkK8sDeployMode {
 
     SESSION("kubernetes-session"),
@@ -31,9 +34,14 @@ public enum FlinkK8sDeployMode {
         this.value = value;
     }
 
-    @Override
-    public String toString() {
-        return value;
+    @JsonCreator
+    public static FlinkK8sDeployMode of(String value) {
+        for (FlinkK8sDeployMode mode : FlinkK8sDeployMode.values()) {
+            if (mode.value.equals(value)) {
+                return mode;
+            }
+        }
+        throw new IllegalArgumentException("Illegal FlinkK8sDeployMode value: " + value);
     }
 
     public static FlinkK8sDeployMode of(FlinkDeployMode mode) {
@@ -56,5 +64,15 @@ public enum FlinkK8sDeployMode {
             default:
                 throw new IllegalStateException("Illegal K8sExecuteMode, " + mode);
         }
+    }
+
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return value;
     }
 }

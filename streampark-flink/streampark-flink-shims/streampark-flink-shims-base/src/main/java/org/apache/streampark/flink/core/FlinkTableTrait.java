@@ -21,35 +21,24 @@ import org.apache.streampark.common.util.Utils;
 
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.table.api.CompiledPlan;
 import org.apache.flink.table.api.ExplainDetail;
-import org.apache.flink.table.api.ExplainFormat;
-import org.apache.flink.table.api.PlanReference;
 import org.apache.flink.table.api.StatementSet;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableConfig;
-import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.TableEnvironment;
-import org.apache.flink.table.api.TableException;
 import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.catalog.Catalog;
-import org.apache.flink.table.catalog.CatalogDescriptor;
 import org.apache.flink.table.expressions.Expression;
 import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.flink.table.functions.UserDefinedFunction;
 import org.apache.flink.table.module.Module;
-import org.apache.flink.table.module.ModuleEntry;
-import org.apache.flink.table.resource.ResourceUri;
 import org.apache.flink.table.types.AbstractDataType;
 
-import java.util.List;
 import java.util.Optional;
 
-/** Base table environment trait with SQL execution helpers. */
 public abstract class FlinkTableTrait implements TableEnvironment {
 
     public final ParameterTool parameter;
-
     private final TableEnvironment tableEnv;
 
     protected FlinkTableTrait(ParameterTool parameter, TableEnvironment tableEnv) {
@@ -57,12 +46,12 @@ public abstract class FlinkTableTrait implements TableEnvironment {
         this.tableEnv = tableEnv;
     }
 
-    protected TableEnvironment getTableEnv() {
+    protected TableEnvironment delegate() {
         return tableEnv;
     }
 
     public JobExecutionResult start() {
-        String appName = FlinkParameterUtils.getAppName(parameter, true);
+        String appName = FlinkEnvironmentUtils.getAppName(parameter, null, true);
         return execute(appName);
     }
 
@@ -71,148 +60,73 @@ public abstract class FlinkTableTrait implements TableEnvironment {
         return null;
     }
 
+    public void sql() {
+        sql(null);
+    }
+
     public void sql(String sql) {
         FlinkSqlExecutor.executeSql(sql, parameter, this);
     }
 
     @Override
     public Table fromValues(Expression... values) {
-        return tableEnv.fromValues(values);
+        return delegate().fromValues(values);
     }
 
     @Override
     public Table fromValues(AbstractDataType<?> rowType, Expression... values) {
-        return tableEnv.fromValues(rowType, values);
+        return delegate().fromValues(rowType, values);
     }
 
     @Override
     public Table fromValues(Iterable<?> values) {
-        return tableEnv.fromValues(values);
+        return delegate().fromValues(values);
     }
 
     @Override
     public Table fromValues(AbstractDataType<?> rowType, Iterable<?> values) {
-        return tableEnv.fromValues(rowType, values);
-    }
-
-    @Override
-    public void createCatalog(String catalogName, CatalogDescriptor catalogDescriptor) {
-        tableEnv.createCatalog(catalogName, catalogDescriptor);
-    }
-
-    @Override
-    public void useModules(String... moduleNames) {
-        tableEnv.useModules(moduleNames);
-    }
-
-    @Override
-    public void createFunction(
-                               String path, String className, List<ResourceUri> resourceUris) {
-        tableEnv.createFunction(path, className, resourceUris);
-    }
-
-    @Override
-    public void createFunction(
-                               String path,
-                               String className,
-                               List<ResourceUri> resourceUris,
-                               boolean ignoreIfExists) {
-        tableEnv.createFunction(path, className, resourceUris, ignoreIfExists);
-    }
-
-    @Override
-    public void createTemporaryFunction(
-                                        String path, String className, List<ResourceUri> resourceUris) {
-        tableEnv.createTemporaryFunction(path, className, resourceUris);
-    }
-
-    @Override
-    public void createTemporarySystemFunction(
-                                              String name, String className, List<ResourceUri> resourceUris) {
-        tableEnv.createTemporarySystemFunction(name, className, resourceUris);
-    }
-
-    @Override
-    public void createTemporaryTable(String path, TableDescriptor descriptor) {
-        tableEnv.createTemporaryTable(path, descriptor);
-    }
-
-    @Override
-    public void createTable(String path, TableDescriptor descriptor) {
-        tableEnv.createTable(path, descriptor);
-    }
-
-    @Override
-    public Table from(TableDescriptor descriptor) {
-        return tableEnv.from(descriptor);
-    }
-
-    @Override
-    public ModuleEntry[] listFullModules() {
-        return tableEnv.listFullModules();
-    }
-
-    @Override
-    public String[] listTables(String catalogName, String databaseName) {
-        return tableEnv.listTables(catalogName, databaseName);
-    }
-
-    @Override
-    public String explainSql(
-                             String statement, ExplainFormat format, ExplainDetail... extraDetails) {
-        return tableEnv.explainSql(statement, format, extraDetails);
-    }
-
-    @Override
-    public CompiledPlan loadPlan(PlanReference planReference) throws TableException {
-        return tableEnv.loadPlan(planReference);
-    }
-
-    @Override
-    public CompiledPlan compilePlanSql(String statement) throws TableException {
-        return tableEnv.compilePlanSql(statement);
+        return delegate().fromValues(rowType, values);
     }
 
     @Override
     public void registerCatalog(String catalogName, Catalog catalog) {
-        tableEnv.registerCatalog(catalogName, catalog);
+        delegate().registerCatalog(catalogName, catalog);
     }
 
     @Override
     public Optional<Catalog> getCatalog(String catalogName) {
-        return tableEnv.getCatalog(catalogName);
+        return delegate().getCatalog(catalogName);
     }
 
     @Override
     public void loadModule(String moduleName, Module module) {
-        tableEnv.loadModule(moduleName, module);
+        delegate().loadModule(moduleName, module);
     }
 
     @Override
     public void unloadModule(String moduleName) {
-        tableEnv.unloadModule(moduleName);
+        delegate().unloadModule(moduleName);
     }
 
     @Override
     public void createTemporarySystemFunction(
                                               String name, Class<? extends UserDefinedFunction> functionClass) {
-        tableEnv.createTemporarySystemFunction(name, functionClass);
+        delegate().createTemporarySystemFunction(name, functionClass);
     }
 
     @Override
-    public void createTemporarySystemFunction(
-                                              String name, UserDefinedFunction functionInstance) {
-        tableEnv.createTemporarySystemFunction(name, functionInstance);
+    public void createTemporarySystemFunction(String name, UserDefinedFunction functionInstance) {
+        delegate().createTemporarySystemFunction(name, functionInstance);
     }
 
     @Override
     public boolean dropTemporarySystemFunction(String name) {
-        return tableEnv.dropTemporarySystemFunction(name);
+        return delegate().dropTemporarySystemFunction(name);
     }
 
     @Override
     public void createFunction(String path, Class<? extends UserDefinedFunction> functionClass) {
-        tableEnv.createFunction(path, functionClass);
+        delegate().createFunction(path, functionClass);
     }
 
     @Override
@@ -220,161 +134,160 @@ public abstract class FlinkTableTrait implements TableEnvironment {
                                String path,
                                Class<? extends UserDefinedFunction> functionClass,
                                boolean ignoreIfExists) {
-        tableEnv.createFunction(path, functionClass, ignoreIfExists);
+        delegate().createFunction(path, functionClass, ignoreIfExists);
     }
 
     @Override
     public boolean dropFunction(String path) {
-        return tableEnv.dropFunction(path);
+        return delegate().dropFunction(path);
     }
 
     @Override
-    public void createTemporaryFunction(
-                                        String path, Class<? extends UserDefinedFunction> functionClass) {
-        tableEnv.createTemporaryFunction(path, functionClass);
+    public void createTemporaryFunction(String path, Class<? extends UserDefinedFunction> functionClass) {
+        delegate().createTemporaryFunction(path, functionClass);
     }
 
     @Override
     public void createTemporaryFunction(String path, UserDefinedFunction functionInstance) {
-        tableEnv.createTemporaryFunction(path, functionInstance);
+        delegate().createTemporaryFunction(path, functionInstance);
     }
 
     @Override
     public boolean dropTemporaryFunction(String path) {
-        return tableEnv.dropTemporaryFunction(path);
+        return delegate().dropTemporaryFunction(path);
     }
 
     @Override
     public void createTemporaryView(String path, Table view) {
-        tableEnv.createTemporaryView(path, view);
+        delegate().createTemporaryView(path, view);
     }
 
     @Override
     public Table from(String path) {
-        return tableEnv.from(path);
+        return delegate().from(path);
     }
 
     @Override
     public String[] listCatalogs() {
-        return tableEnv.listCatalogs();
+        return delegate().listCatalogs();
     }
 
     @Override
     public String[] listModules() {
-        return tableEnv.listModules();
+        return delegate().listModules();
     }
 
     @Override
     public String[] listDatabases() {
-        return tableEnv.listDatabases();
+        return delegate().listDatabases();
     }
 
     @Override
     public String[] listTables() {
-        return tableEnv.listTables();
+        return delegate().listTables();
     }
 
     @Override
     public String[] listViews() {
-        return tableEnv.listViews();
+        return delegate().listViews();
     }
 
     @Override
     public String[] listTemporaryTables() {
-        return tableEnv.listTemporaryTables();
+        return delegate().listTemporaryTables();
     }
 
     @Override
     public String[] listTemporaryViews() {
-        return tableEnv.listTemporaryViews();
+        return delegate().listTemporaryViews();
     }
 
     @Override
     public String[] listUserDefinedFunctions() {
-        return tableEnv.listUserDefinedFunctions();
+        return delegate().listUserDefinedFunctions();
     }
 
     @Override
     public String[] listFunctions() {
-        return tableEnv.listFunctions();
+        return delegate().listFunctions();
     }
 
     @Override
     public boolean dropTemporaryTable(String path) {
-        return tableEnv.dropTemporaryTable(path);
+        return delegate().dropTemporaryTable(path);
     }
 
     @Override
     public boolean dropTemporaryView(String path) {
-        return tableEnv.dropTemporaryView(path);
+        return delegate().dropTemporaryView(path);
     }
 
     @Override
     public String explainSql(String statement, ExplainDetail... extraDetails) {
-        return tableEnv.explainSql(statement, extraDetails);
+        return delegate().explainSql(statement, extraDetails);
     }
 
     @Override
     public Table sqlQuery(String query) {
-        return tableEnv.sqlQuery(query);
+        return delegate().sqlQuery(query);
     }
 
     @Override
     public TableResult executeSql(String statement) {
-        return tableEnv.executeSql(statement);
+        return delegate().executeSql(statement);
     }
 
     @Override
     public String getCurrentCatalog() {
-        return tableEnv.getCurrentCatalog();
+        return delegate().getCurrentCatalog();
     }
 
     @Override
     public void useCatalog(String catalogName) {
-        tableEnv.useCatalog(catalogName);
+        delegate().useCatalog(catalogName);
     }
 
     @Override
     public String getCurrentDatabase() {
-        return tableEnv.getCurrentDatabase();
+        return delegate().getCurrentDatabase();
     }
 
     @Override
     public void useDatabase(String databaseName) {
-        tableEnv.useDatabase(databaseName);
+        delegate().useDatabase(databaseName);
     }
 
     @Override
     public TableConfig getConfig() {
-        return tableEnv.getConfig();
+        return delegate().getConfig();
     }
 
     @Override
     public StatementSet createStatementSet() {
-        return tableEnv.createStatementSet();
+        return delegate().createStatementSet();
     }
 
     @Deprecated
     @Override
     public void registerFunction(String name, ScalarFunction function) {
-        tableEnv.registerFunction(name, function);
+        delegate().registerFunction(name, function);
     }
 
     @Deprecated
     @Override
     public void registerTable(String name, Table table) {
-        tableEnv.registerTable(name, table);
+        delegate().registerTable(name, table);
     }
 
     @Deprecated
     @Override
     public Table scan(String... tablePath) {
-        return tableEnv.scan(tablePath);
+        return delegate().scan(tablePath);
     }
 
     @Deprecated
     @Override
     public String[] getCompletionHints(String statement, int position) {
-        return tableEnv.getCompletionHints(statement, position);
+        return delegate().getCompletionHints(statement, position);
     }
 }

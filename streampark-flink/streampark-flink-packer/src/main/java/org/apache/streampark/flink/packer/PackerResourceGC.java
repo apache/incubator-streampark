@@ -19,60 +19,108 @@ package org.apache.streampark.flink.packer;
 
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.util.LoggerSupport;
 
 import org.apache.commons.io.FileUtils;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-@Slf4j
-public final class PackerResourceGC {
+/** Garbage resource collector during packing. */
+public final class PackerResourceGC extends LoggerSupport {
 
-    private static final String APP_WORKSPACE_PATH = Workspace.local().getAppWorkspace();
+    private static final PackerResourceGC INSTANCE = new PackerResourceGC();
+
+    private static final String APP_WORKSPACE_PATH = Workspace.local().APP_WORKSPACE();
+
     private PackerResourceGC() {
     }
 
+    /** Start a building legacy resources collection process. */
     public static void startGc(Integer expiredHours) {
+        INSTANCE.doStartGc(expiredHours);
+    }
+
+    private void doStartGc(Integer expiredHours) {
         File appWorkspace = new File(APP_WORKSPACE_PATH);
-        if (!appWorkspace.exists())
+        if (!appWorkspace.exists()) {
             return;
+        }
         long evictedBarrier = System.currentTimeMillis() - expiredHours * 3600L * 1000L;
-        File[] evictedFiles = java.util.Arrays.stream(appWorkspace.listFiles())
-            .filter(File::isDirectory)
-            .filter(f -> f.getName().contains("@"))
-            .flatMap(f -> findLastModifiedOfSubFile(f).stream())
-            .filter(e -> e.getValue() < evictedBarrier)
-            .map(java.util.Map.Entry::getKey)
-            .toArray(File[]::new);
-        if (evictedFiles.length == 0)
+
+        File[] dirs = appWorkspace.listFiles(File::isDirectory);
+        if (dirs == null) {
             return;
+        }
+        List<File> evictedFiles = new ArrayList<>();
+        for (File dir : dirs) {
+            if (!dir.getName().contains("@")) {
+                continue;
+            }
+            for (FileWithTime entry : findLastModifiedOfSubFile(dir)) {
+                if (entry.lastModified < evictedBarrier) {
+                    evictedFiles.add(entry.file);
+                }
+            }
+        }
+
+        if (evictedFiles.isEmpty()) {
+            return;
+        }
         StringBuilder sb = new StringBuilder();
-        for (File f : evictedFiles)
-            sb.append(f.getAbsolutePath()).append(", ");
-        log.info("Delete expired building resources, {}", sb);
+        for (File path : evictedFiles) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(path.getAbsolutePath());
+        }
+        logInfo("Delete expired building resources, " + sb);
         for (File path : evictedFiles) {
             try {
                 FileUtils.deleteDirectory(path);
             } catch (Exception ignored) {
+                // ignore delete failures
             }
         }
     }
 
-    private static java.util.List<java.util.Map.Entry<File, Long>> findLastModifiedOfSubFile(File file) {
-        boolean isApplicationMode = java.util.Arrays.stream(file.listFiles())
-            .anyMatch(f -> f.getName().contains(Constants.JAR_SUFFIX));
-        if (isApplicationMode) {
-            long max = java.util.Arrays.stream(file.listFiles()).mapToLong(File::lastModified).max().orElse(0L);
-            return java.util.Collections.singletonList(java.util.Map.entry(file, max));
+    private static List<FileWithTime> findLastModifiedOfSubFile(File file) {
+        File[] children = file.listFiles();
+        if (children == null) {
+            return new ArrayList<>();
         }
-        java.util.List<java.util.Map.Entry<File, Long>> result = new java.util.ArrayList<>();
-        for (File subFile : file.listFiles()) {
-            if (subFile.isDirectory()) {
-                long max = java.util.Arrays.stream(subFile.listFiles()).mapToLong(File::lastModified).max().orElse(0L);
-                result.add(java.util.Map.entry(subFile, max));
+        boolean isApplicationMode =
+            Arrays.stream(children).anyMatch(f -> f.getName().contains(Constants.JAR_SUFFIX));
+        List<FileWithTime> result = new ArrayList<>();
+        if (isApplicationMode) {
+            long max = Arrays.stream(children).mapToLong(File::lastModified).max().orElse(0L);
+            result.add(new FileWithTime(file, max));
+        } else {
+            for (File subFile : children) {
+                if (!subFile.isDirectory()) {
+                    continue;
+                }
+                File[] subChildren = subFile.listFiles();
+                if (subChildren == null) {
+                    continue;
+                }
+                long max = Arrays.stream(subChildren).mapToLong(File::lastModified).max().orElse(0L);
+                result.add(new FileWithTime(subFile, max));
             }
         }
         return result;
+    }
+
+    private static final class FileWithTime {
+
+        private final File file;
+        private final long lastModified;
+
+        private FileWithTime(File file, long lastModified) {
+            this.file = file;
+            this.lastModified = lastModified;
+        }
     }
 }

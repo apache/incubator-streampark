@@ -26,16 +26,16 @@ import java.util.Map;
 
 public interface DeployRequestTrait {
 
-    FlinkVersion getFlinkVersion();
+    FlinkVersion flinkVersion();
 
-    FlinkDeployMode getDeployMode();
+    FlinkDeployMode deployMode();
 
-    Map<String, Object> getProperties();
+    Map<String, Object> properties();
 
-    String getClusterId();
+    String clusterId();
 
-    long getId();
+    long id();
 
     @Nullable
-    KubernetesDeployParam getK8sParam();
+    KubernetesDeployParam k8sParam();
 }

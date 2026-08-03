@@ -29,7 +29,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-/** Decorator that lazily starts the delegate watcher on access. */
+/**
+ * Decorator for FlinkK8sWatcher used to trigger the run behavior. What more, this decorator has
+ * the ability to automatically recover the FlinkK8sWatcher's internal FlinkWatcher.
+ */
 public class LazyStartFlinkK8sWatcher implements FlinkK8sWatcher {
 
     private final DefaultFlinkK8sWatcher delegate;
@@ -130,7 +133,6 @@ public class LazyStartFlinkK8sWatcher implements FlinkK8sWatcher {
     @Override
     @Nullable
     public String getRemoteRestUrl(TrackId trackId) {
-        start();
         return delegate.getRemoteRestUrl(trackId);
     }
 }

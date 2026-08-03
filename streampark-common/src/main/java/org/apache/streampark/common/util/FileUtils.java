@@ -202,7 +202,15 @@ public final class FileUtils {
         return f.isDirectory() && list != null && list.length > 0;
     }
 
-    public static boolean equals(File file1, File file2) throws IOException {
+    public static boolean equals(File file1, File file2) {
+        try {
+            return equalsInternal(file1, file2);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static boolean equalsInternal(File file1, File file2) throws IOException {
         if (file1 == null || file2 == null) {
             return false;
         }
@@ -294,12 +302,16 @@ public final class FileUtils {
         }
     }
 
-    public static String tailOf(String path, int offset, int limit) throws IOException {
-        File file = new File(path);
-        if (file.exists() && file.isFile()) {
-            return Files.lines(Paths.get(path)).skip(offset).limit(limit).collect(Collectors.joining("\r\n"));
+    public static String tailOf(String path, int offset, int limit) {
+        try {
+            File file = new File(path);
+            if (file.exists() && file.isFile()) {
+                return Files.lines(Paths.get(path)).skip(offset).limit(limit).collect(Collectors.joining("\r\n"));
+            }
+            return null;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     public static String readString(File file) throws IOException {

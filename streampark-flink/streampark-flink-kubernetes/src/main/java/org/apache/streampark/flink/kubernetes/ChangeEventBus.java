@@ -39,10 +39,10 @@ public class ChangeEventBus {
             new LinkedBlockingQueue<>(),
             ThreadUtils.threadFactory("streampark-k8s-watching-thread"));
 
-    private final AsyncEventBus asyncEventBus =
+    final AsyncEventBus asyncEventBus =
         new AsyncEventBus("[StreamPark][flink-k8s]AsyncEventBus", execPool);
 
-    private final EventBus syncEventBus = new EventBus("[StreamPark][flink-k8s]SyncEventBus");
+    final EventBus syncEventBus = new EventBus("[StreamPark][flink-k8s]SyncEventBus");
 
     public void postAsync(Object event) {
         asyncEventBus.post(event);

@@ -17,38 +17,53 @@
 
 package org.apache.streampark.flink.packer.docker;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
-
 import java.util.Set;
 
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
+/** Base spark docker file image template. */
 public class SparkDockerfileTemplate extends SparkDockerfileTemplateTrait {
 
-    private String workspacePath;
-    private String sparkBaseImage;
-    private String sparkMainJarPath;
-    private Set<String> sparkExtraLibPaths;
+    private final String workspacePath;
+    private final String sparkBaseImage;
+    private final String sparkMainJarPath;
+    private final Set<String> sparkExtraLibPaths;
+
+    public SparkDockerfileTemplate(
+                                   String workspacePath,
+                                   String sparkBaseImage,
+                                   String sparkMainJarPath,
+                                   Set<String> sparkExtraLibPaths) {
+        this.workspacePath = workspacePath;
+        this.sparkBaseImage = sparkBaseImage;
+        this.sparkMainJarPath = sparkMainJarPath;
+        this.sparkExtraLibPaths = sparkExtraLibPaths;
+    }
+
+    @Override
+    public String workspacePath() {
+        return workspacePath;
+    }
+
+    @Override
+    public String sparkBaseImage() {
+        return sparkBaseImage;
+    }
+
+    @Override
+    public String sparkMainJarPath() {
+        return sparkMainJarPath;
+    }
+
+    @Override
+    public Set<String> sparkExtraLibPaths() {
+        return sparkExtraLibPaths;
+    }
 
     @Override
     public String offerDockerfileContent() {
-        return "FROM "
-            + sparkBaseImage
-            + "\nUSER root\nRUN mkdir -p "
-            + SPARK_HOME
-            + "/usrlib\nCOPY "
-            + mainJarName()
-            + " "
-            + SPARK_HOME
-            + "/usrlib/"
-            + mainJarName()
-            + "\nCOPY "
-            + extraLibName()
-            + " "
-            + SPARK_HOME
-            + "/lib/\n";
+        return "FROM " + sparkBaseImage + "\n"
+            + "USER root\n"
+            + "RUN mkdir -p " + SPARK_HOME + "/usrlib\n"
+            + "COPY " + mainJarName() + " " + SPARK_HOME + "/usrlib/" + mainJarName() + "\n"
+            + "COPY " + extraLibName() + " " + SPARK_HOME + "/lib/\n";
     }
 }

@@ -17,15 +17,21 @@
 
 package org.apache.streampark.flink.kubernetes;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
-
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
 public class PodTemplateType {
 
-    private String key;
-    private String fileName;
+    private final String key;
+    private final String fileName;
+
+    public PodTemplateType(String key, String fileName) {
+        this.key = key;
+        this.fileName = fileName;
+    }
+
+    public String key() {
+        return key;
+    }
+
+    public String fileName() {
+        return fileName;
+    }
 }

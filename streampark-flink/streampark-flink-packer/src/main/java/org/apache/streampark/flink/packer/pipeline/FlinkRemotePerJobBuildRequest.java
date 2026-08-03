@@ -22,22 +22,80 @@ import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
+public class FlinkRemotePerJobBuildRequest implements FlinkBuildParam {
 
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
-public class FlinkRemotePerJobBuildRequest extends FlinkBuildParam {
+    private final String appName;
+    private final String workspace;
+    private final String mainClass;
+    private final String customFlinkUserJar;
+    private final boolean skipBuild;
+    private final FlinkDeployMode deployMode;
+    private final FlinkJobType flinkJobType;
+    private final FlinkVersion flinkVersion;
+    private final DependencyInfo dependencyInfo;
 
-    private String appName;
-    private String workspace;
-    private String mainClass;
-    private String customFlinkUserJar;
-    private boolean skipBuild;
-    private FlinkDeployMode deployMode;
-    private FlinkJobType flinkJobType;
-    private FlinkVersion flinkVersion;
-    private DependencyInfo dependencyInfo;
+    public FlinkRemotePerJobBuildRequest(
+                                         String appName,
+                                         String workspace,
+                                         String mainClass,
+                                         String customFlinkUserJar,
+                                         boolean skipBuild,
+                                         FlinkDeployMode deployMode,
+                                         FlinkJobType flinkJobType,
+                                         FlinkVersion flinkVersion,
+                                         DependencyInfo dependencyInfo) {
+        this.appName = appName;
+        this.workspace = workspace;
+        this.mainClass = mainClass;
+        this.customFlinkUserJar = customFlinkUserJar;
+        this.skipBuild = skipBuild;
+        this.deployMode = deployMode;
+        this.flinkJobType = flinkJobType;
+        this.flinkVersion = flinkVersion;
+        this.dependencyInfo = dependencyInfo;
+    }
+
+    @Override
+    public String appName() {
+        return appName;
+    }
+
+    @Override
+    public String workspace() {
+        return workspace;
+    }
+
+    @Override
+    public String mainClass() {
+        return mainClass;
+    }
+
+    @Override
+    public String customFlinkUserJar() {
+        return customFlinkUserJar;
+    }
+
+    public boolean skipBuild() {
+        return skipBuild;
+    }
+
+    @Override
+    public FlinkDeployMode deployMode() {
+        return deployMode;
+    }
+
+    @Override
+    public FlinkJobType flinkJobType() {
+        return flinkJobType;
+    }
+
+    @Override
+    public FlinkVersion flinkVersion() {
+        return flinkVersion;
+    }
+
+    @Override
+    public DependencyInfo dependencyInfo() {
+        return dependencyInfo;
+    }
 }

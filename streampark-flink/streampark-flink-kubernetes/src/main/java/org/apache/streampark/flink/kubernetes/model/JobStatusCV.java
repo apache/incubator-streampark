@@ -20,27 +20,74 @@ package org.apache.streampark.flink.kubernetes.model;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
+import lombok.Builder;
 
-@Data
-@Accessors(fluent = true)
-@NoArgsConstructor
+/**
+ * @param jobState state of flink job
+ * @param jobId flink jobId hex string
+ * @param jobName flink job name
+ * @param jobStartTime flink job starting timestamp
+ * @param pollEmitTime tracking polling emit timestamp
+ * @param pollAckTime tracking polling result receive timestamp
+ */
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class JobStatusCV {
 
-    private FlinkJobState jobState;
-    private String jobId;
-    private String jobName = "";
-    private long jobStartTime = -1;
-    private long jobEndTime = -1;
-    private long duration = 0;
-    private int taskTotal = 0;
-    private long pollEmitTime;
-    private long pollAckTime;
+    private final FlinkJobState jobState;
+    private final String jobId;
+    @Builder.Default
+    private final String jobName = "";
+    @Builder.Default
+    private final Long jobStartTime = -1L;
+    @Builder.Default
+    private final Long jobEndTime = -1L;
+    @Builder.Default
+    private final Long duration = 0L;
+    @Builder.Default
+    private final Integer taskTotal = 0;
+    private final Long pollEmitTime;
+    private final Long pollAckTime;
+
+    public FlinkJobState jobState() {
+        return jobState;
+    }
+
+    public String jobId() {
+        return jobId;
+    }
+
+    public String jobName() {
+        return jobName;
+    }
+
+    public Long jobStartTime() {
+        return jobStartTime;
+    }
+
+    public Long jobEndTime() {
+        return jobEndTime;
+    }
+
+    public Long duration() {
+        return duration;
+    }
+
+    public Integer taskTotal() {
+        return taskTotal;
+    }
+
+    public Long pollEmitTime() {
+        return pollEmitTime;
+    }
+
+    public Long pollAckTime() {
+        return pollAckTime;
+    }
 
     public boolean diff(JobStatusCV that) {
-        return that == null || that.jobState != this.jobState || !that.jobId.equals(this.jobId);
+        return that == null
+            || that.jobState() != jobState
+            || !jobId.equals(that.jobId());
     }
 }

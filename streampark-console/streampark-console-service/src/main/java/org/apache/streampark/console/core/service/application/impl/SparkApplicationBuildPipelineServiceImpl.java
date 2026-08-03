@@ -85,7 +85,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nonnull;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -208,7 +207,7 @@ public class SparkApplicationBuildPipelineServiceImpl
                     applicationInfoService.checkEnv(app);
 
                     // 2) some preparatory work
-                    String appUploads = app.getWorkspace().getAppUploads();
+                    String appUploads = app.getWorkspace().APP_UPLOADS();
 
                     if (app.isSparkJarOrPySparkJob()) {
                         // spark jar and pyspark upload resource to appHome...
@@ -220,7 +219,7 @@ public class SparkApplicationBuildPipelineServiceImpl
                             File localJar = new File(
                                 String.format(
                                     "%s/%d/%s",
-                                    Workspace.local().getAppUploads(),
+                                    Workspace.local().APP_UPLOADS(),
                                     app.getTeamId(),
                                     app.getJar()));
                             if (!localJar.exists()) {
@@ -253,7 +252,7 @@ public class SparkApplicationBuildPipelineServiceImpl
                         }
                     } else {
                         if (!app.getDependencyObject().getJar().isEmpty()) {
-                            String localUploads = Workspace.local().getAppUploads();
+                            String localUploads = Workspace.local().APP_UPLOADS();
                             // copy jar to local upload dir
                             for (String jar : app.getDependencyObject().getJar()) {
                                 File localJar = new File(WebUtils.getAppTempDir(), jar);
@@ -462,10 +461,10 @@ public class SparkApplicationBuildPipelineServiceImpl
             case SPARK_SQL:
                 String sqlDistJar = ServiceHelper.getSparkSqlClientJar(sparkEnv);
                 if (app.getDeployModeEnum() == SparkDeployMode.YARN_CLUSTER) {
-                    String clientPath = Workspace.remote().getAppClient();
+                    String clientPath = Workspace.remote().APP_CLIENT();
                     return String.format("%s/%s", clientPath, sqlDistJar);
                 }
-                return Workspace.local().getAppClient().concat("/").concat(sqlDistJar);
+                return Workspace.local().APP_CLIENT().concat("/").concat(sqlDistJar);
             default:
                 throw new UnsupportedOperationException(
                     "[StreamPark] unsupported JobType: " + app.getJobTypeEnum());
@@ -530,12 +529,9 @@ public class SparkApplicationBuildPipelineServiceImpl
         if (!fsOperator.exists(targetJar)) {
             fsOperator.upload(localJar.getAbsolutePath(), targetDir, false, true);
         } else {
-            try {
-                if (!FileUtils.equals(localJar, new File(targetJar))) {
-                    fsOperator.upload(localJar.getAbsolutePath(), targetDir, false, true);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            // The file exists to check whether it is consistent, and if it is inconsistent, re-upload it
+            if (!FileUtils.equals(localJar, new File(targetJar))) {
+                fsOperator.upload(localJar.getAbsolutePath(), targetDir, false, true);
             }
         }
     }
@@ -611,7 +607,7 @@ public class SparkApplicationBuildPipelineServiceImpl
                 jar -> jarLibs.add(
                     String.format(
                         "%s/%d/%s",
-                        Workspace.local().getAppUploads(),
+                        Workspace.local().APP_UPLOADS(),
                         application.getTeamId(), jar)));
     }
 }

@@ -17,9 +17,18 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
+/**
+ * Trait for watching the change events of the Docker resolved progress for a BuildPipeline
+ * instance.
+ */
 public interface DockerProgressWatcher {
 
+    /** async call when pulling docker image progress is changed. */
     void onDockerPullProgressChange(DockerPullSnapshot snapshot);
+
+    /** async call when building docker image progress is changed. */
     void onDockerBuildProgressChange(DockerBuildSnapshot snapshot);
+
+    /** async call when pushing docker image progress is changed. */
     void onDockerPushProgressChange(DockerPushSnapshot snapshot);
 }
