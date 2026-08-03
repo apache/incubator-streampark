@@ -43,28 +43,7 @@ final class FlinkRestModels {
             }
             List<JobDetail> details = new ArrayList<>();
             for (JsonNode node : jobsNode) {
-                JsonNode task = node.get("tasks");
-                details.add(
-                    new JobDetail(
-                        text(node, "jid"),
-                        text(node, "name"),
-                        text(node, "state"),
-                        longVal(node, "start-time"),
-                        longVal(node, "end-time"),
-                        longVal(node, "duration"),
-                        longVal(node, "last-modification"),
-                        new JobTask(
-                            intVal(task, "total"),
-                            intVal(task, "created"),
-                            intVal(task, "scheduled"),
-                            intVal(task, "deploying"),
-                            intVal(task, "running"),
-                            intVal(task, "finished"),
-                            intVal(task, "canceling"),
-                            intVal(task, "canceled"),
-                            intVal(task, "failed"),
-                            intVal(task, "reconciling"),
-                            intVal(task, "initializing"))));
+                details.add(new JobDetail(node));
             }
             return Optional.of(new JobDetails(details.toArray(new JobDetail[0])));
         } catch (Exception e) {
@@ -75,16 +54,7 @@ final class FlinkRestModels {
     static Optional<FlinkRestOverview> parseOverview(String json) {
         try {
             JsonNode root = JsonUtils.read(json, JsonNode.class);
-            return Optional.of(
-                new FlinkRestOverview(
-                    intVal(root, "taskmanagers"),
-                    intVal(root, "slots-total"),
-                    intVal(root, "slots-available"),
-                    intVal(root, "jobs-running"),
-                    intVal(root, "jobs-finished"),
-                    intVal(root, "jobs-cancelled"),
-                    intVal(root, "jobs-failed"),
-                    text(root, "flink-version")));
+            return Optional.of(new FlinkRestOverview(root));
         } catch (Exception e) {
             return Optional.empty();
         }
@@ -113,14 +83,7 @@ final class FlinkRestModels {
             if (completed.isMissingNode() || completed.isNull()) {
                 return Optional.empty();
             }
-            return Optional.of(
-                new CheckpointResponse(
-                    longVal(completed, "id"),
-                    text(completed, "status"),
-                    text(completed, "external_path"),
-                    completed.path("is_savepoint").asBoolean(false),
-                    text(completed, "checkpoint_type"),
-                    longVal(completed, "trigger_timestamp")));
+            return Optional.of(new CheckpointResponse(completed));
         } catch (Exception e) {
             return Optional.empty();
         }
@@ -165,24 +128,15 @@ final class FlinkRestModels {
         private final long lastModification;
         private final JobTask tasks;
 
-        @SuppressWarnings("java:S107")
-        JobDetail(
-                  String jid,
-                  String name,
-                  String state,
-                  long startTime,
-                  long endTime,
-                  long duration,
-                  long lastModification,
-                  JobTask tasks) {
-            this.jid = jid;
-            this.name = name;
-            this.state = state;
-            this.startTime = startTime;
-            this.endTime = endTime;
-            this.duration = duration;
-            this.lastModification = lastModification;
-            this.tasks = tasks;
+        JobDetail(JsonNode node) {
+            this.jid = text(node, "jid");
+            this.name = text(node, "name");
+            this.state = text(node, "state");
+            this.startTime = longVal(node, "start-time");
+            this.endTime = longVal(node, "end-time");
+            this.duration = longVal(node, "duration");
+            this.lastModification = longVal(node, "last-modification");
+            this.tasks = new JobTask(node.get("tasks"));
         }
 
         JobStatusCV toJobStatusCV(long pollEmitTime, long pollAckTime) {
@@ -217,30 +171,18 @@ final class FlinkRestModels {
         private final int reconciling;
         private final int initializing;
 
-        @SuppressWarnings("java:S107")
-        JobTask(
-                int total,
-                int created,
-                int scheduled,
-                int deploying,
-                int running,
-                int finished,
-                int canceling,
-                int canceled,
-                int failed,
-                int reconciling,
-                int initializing) {
-            this.total = total;
-            this.created = created;
-            this.scheduled = scheduled;
-            this.deploying = deploying;
-            this.running = running;
-            this.finished = finished;
-            this.canceling = canceling;
-            this.canceled = canceled;
-            this.failed = failed;
-            this.reconciling = reconciling;
-            this.initializing = initializing;
+        JobTask(JsonNode task) {
+            this.total = intVal(task, "total");
+            this.created = intVal(task, "created");
+            this.scheduled = intVal(task, "scheduled");
+            this.deploying = intVal(task, "deploying");
+            this.running = intVal(task, "running");
+            this.finished = intVal(task, "finished");
+            this.canceling = intVal(task, "canceling");
+            this.canceled = intVal(task, "canceled");
+            this.failed = intVal(task, "failed");
+            this.reconciling = intVal(task, "reconciling");
+            this.initializing = intVal(task, "initializing");
         }
     }
 
@@ -255,24 +197,15 @@ final class FlinkRestModels {
         private final Integer jobsFailed;
         private final String flinkVersion;
 
-        @SuppressWarnings("java:S107")
-        FlinkRestOverview(
-                          Integer taskManagers,
-                          Integer slotsTotal,
-                          Integer slotsAvailable,
-                          Integer jobsRunning,
-                          Integer jobsFinished,
-                          Integer jobsCancelled,
-                          Integer jobsFailed,
-                          String flinkVersion) {
-            this.taskManagers = taskManagers;
-            this.slotsTotal = slotsTotal;
-            this.slotsAvailable = slotsAvailable;
-            this.jobsRunning = jobsRunning;
-            this.jobsFinished = jobsFinished;
-            this.jobsCancelled = jobsCancelled;
-            this.jobsFailed = jobsFailed;
-            this.flinkVersion = flinkVersion;
+        FlinkRestOverview(JsonNode root) {
+            this.taskManagers = intVal(root, "taskmanagers");
+            this.slotsTotal = intVal(root, "slots-total");
+            this.slotsAvailable = intVal(root, "slots-available");
+            this.jobsRunning = intVal(root, "jobs-running");
+            this.jobsFinished = intVal(root, "jobs-finished");
+            this.jobsCancelled = intVal(root, "jobs-cancelled");
+            this.jobsFailed = intVal(root, "jobs-failed");
+            this.flinkVersion = text(root, "flink-version");
         }
 
         Integer taskManagers() {
@@ -326,19 +259,13 @@ final class FlinkRestModels {
         private final String checkpointType;
         private final long triggerTimestamp;
 
-        CheckpointResponse(
-                           long id,
-                           String status,
-                           String externalPath,
-                           boolean isSavepoint,
-                           String checkpointType,
-                           long triggerTimestamp) {
-            this.id = id;
-            this.status = status;
-            this.externalPath = externalPath;
-            this.isSavepoint = isSavepoint;
-            this.checkpointType = checkpointType;
-            this.triggerTimestamp = triggerTimestamp;
+        CheckpointResponse(JsonNode completed) {
+            this.id = longVal(completed, "id");
+            this.status = text(completed, "status");
+            this.externalPath = text(completed, "external_path");
+            this.isSavepoint = completed.path("is_savepoint").asBoolean(false);
+            this.checkpointType = text(completed, "checkpoint_type");
+            this.triggerTimestamp = longVal(completed, "trigger_timestamp");
         }
 
         long id() {

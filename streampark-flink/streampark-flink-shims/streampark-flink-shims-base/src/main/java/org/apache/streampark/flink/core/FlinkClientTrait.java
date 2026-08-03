@@ -24,7 +24,6 @@ import org.apache.flink.core.execution.SavepointFormatType;
 import java.util.concurrent.CompletableFuture;
 
 /** Flink cluster client savepoint operations. */
-@SuppressWarnings("java:S1172")
 public abstract class FlinkClientTrait<T> {
 
     protected final ClusterClient<T> clusterClient;
@@ -39,7 +38,10 @@ public abstract class FlinkClientTrait<T> {
 
     public CompletableFuture<String> triggerSavepoint(
                                                       JobID jobID, String savepointDir, boolean nativeFormat) {
-        return clusterClient.triggerSavepoint(jobID, savepointDir, SavepointFormatType.DEFAULT);
+        return clusterClient.triggerSavepoint(
+            jobID,
+            savepointDir,
+            nativeFormat ? SavepointFormatType.NATIVE : SavepointFormatType.DEFAULT);
     }
 
     public CompletableFuture<String> cancelWithSavepoint(JobID jobID, String savepointDir) {
@@ -48,7 +50,10 @@ public abstract class FlinkClientTrait<T> {
 
     public CompletableFuture<String> cancelWithSavepoint(
                                                          JobID jobID, String savepointDir, boolean nativeFormat) {
-        return clusterClient.cancelWithSavepoint(jobID, savepointDir, SavepointFormatType.DEFAULT);
+        return clusterClient.cancelWithSavepoint(
+            jobID,
+            savepointDir,
+            nativeFormat ? SavepointFormatType.NATIVE : SavepointFormatType.DEFAULT);
     }
 
     public CompletableFuture<String> stopWithSavepoint(
@@ -63,6 +68,9 @@ public abstract class FlinkClientTrait<T> {
                                                        String savepointDir,
                                                        boolean nativeFormat) {
         return clusterClient.stopWithSavepoint(
-            jobID, advanceToEndOfEventTime, savepointDir, SavepointFormatType.DEFAULT);
+            jobID,
+            advanceToEndOfEventTime,
+            savepointDir,
+            nativeFormat ? SavepointFormatType.NATIVE : SavepointFormatType.DEFAULT);
     }
 }

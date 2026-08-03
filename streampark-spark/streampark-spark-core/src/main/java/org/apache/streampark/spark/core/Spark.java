@@ -53,7 +53,6 @@ public abstract class Spark implements Serializable {
     protected boolean createOnError = true;
     private final ReentrantReadWriteLock.WriteLock lock = new ReentrantReadWriteLock().writeLock();
 
-    @SuppressWarnings("java:S3051")
     public final void main(String[] args) {
         init(args);
         config(sparkConf);
@@ -130,41 +129,52 @@ public abstract class Spark implements Serializable {
         }
     }
 
-    @SuppressWarnings("java:S3776")
     private void init(String[] args) {
-        List<String> argv = new ArrayList<>(Arrays.asList(args));
-        String conf = null;
-        List<Map.Entry<String, String>> userArgs = new ArrayList<>();
+        CliArguments cliArguments = parseCliArguments(args);
+        if (cliArguments.confPath != null) {
+            loadConfigFile(cliArguments.confPath).forEach((k, v) -> sparkConf.set(k, v));
+        }
+        cliArguments.userArgs.forEach(e -> sparkConf.set(e.getKey(), e.getValue()));
+        applySparkDefaults(cliArguments);
+    }
 
+    private CliArguments parseCliArguments(String[] args) {
+        List<String> argv = new ArrayList<>(Arrays.asList(args));
+        CliArguments cliArguments = new CliArguments();
         int idx = 0;
         while (idx < argv.size()) {
-            String current = argv.get(idx);
-            if ("--conf".equals(current) && idx + 1 < argv.size()) {
-                conf = argv.get(idx + 1);
-                idx += 2;
-            } else if ("--checkpoint".equals(current) && idx + 1 < argv.size()) {
-                checkpoint = argv.get(idx + 1);
-                idx += 2;
-            } else if ("--createOnError".equals(current) && idx + 1 < argv.size()) {
-                createOnError = Boolean.parseBoolean(argv.get(idx + 1));
-                idx += 2;
-            } else if (current.startsWith(ConfigKeys.PARAM_PREFIX) && idx + 1 < argv.size()) {
-                userArgs.add(
-                    Map.entry(current.substring(ConfigKeys.PARAM_PREFIX.length()), argv.get(idx + 1)));
-                idx += 2;
-            } else if (current.startsWith(ConfigKeys.PARAM_PREFIX)) {
-                LOG.error("Unrecognized options: {}", String.join(" ", argv.subList(idx, argv.size())));
-                printUsageAndExit();
-            } else {
-                idx++;
-            }
+            idx = consumeArgument(argv, idx, cliArguments);
         }
+        return cliArguments;
+    }
 
-        if (conf != null) {
-            loadConfigFile(conf).forEach((k, v) -> sparkConf.set(k, v));
+    private int consumeArgument(List<String> argv, int idx, CliArguments cliArguments) {
+        String current = argv.get(idx);
+        if ("--conf".equals(current) && idx + 1 < argv.size()) {
+            cliArguments.confPath = argv.get(idx + 1);
+            return idx + 2;
         }
-        userArgs.forEach(e -> sparkConf.set(e.getKey(), e.getValue()));
+        if ("--checkpoint".equals(current) && idx + 1 < argv.size()) {
+            checkpoint = argv.get(idx + 1);
+            return idx + 2;
+        }
+        if ("--createOnError".equals(current) && idx + 1 < argv.size()) {
+            createOnError = Boolean.parseBoolean(argv.get(idx + 1));
+            return idx + 2;
+        }
+        if (current.startsWith(ConfigKeys.PARAM_PREFIX) && idx + 1 < argv.size()) {
+            cliArguments.userArgs.add(
+                Map.entry(current.substring(ConfigKeys.PARAM_PREFIX.length()), argv.get(idx + 1)));
+            return idx + 2;
+        }
+        if (current.startsWith(ConfigKeys.PARAM_PREFIX)) {
+            LOG.error("Unrecognized options: {}", String.join(" ", argv.subList(idx, argv.size())));
+            printUsageAndExit();
+        }
+        return idx + 1;
+    }
 
+    private void applySparkDefaults(CliArguments cliArguments) {
         String appMain =
             sparkConf.get(
                 ConfigKeys.KEY_SPARK_MAIN_CLASS,
@@ -194,6 +204,12 @@ public abstract class Spark implements Serializable {
         if (!extraListeners.equals(",")) {
             sparkConf.set("spark.extraListeners", extraListeners);
         }
+    }
+
+    private static final class CliArguments {
+
+        private String confPath;
+        private final List<Map.Entry<String, String>> userArgs = new ArrayList<>();
     }
 
     private static Map<String, String> loadConfigFile(String conf) {

@@ -142,7 +142,6 @@ public class SubmitRequest {
         return extraParameter.get(key);
     }
 
-    @SuppressWarnings("java:S3776")
     private Map<String, String> getParameterMap(String prefix) {
         if (appConf == null) {
             return Collections.emptyMap();
@@ -150,38 +149,44 @@ public class SubmitRequest {
         if (!appConf.startsWith("json://") && appConf.length() < 7) {
             throw new IllegalArgumentException("[StreamPark] application config format error.");
         }
-        String format = appConf.substring(0, 7);
-        Map<String, String> map;
-        if ("json://".equals(format)) {
-            String json = appConf.substring(7);
-            try {
-                map = JsonUtils.read(json, Map.class);
-            } catch (Exception e) {
-                throw new IllegalArgumentException("[StreamPark] application config format error.", e);
-            }
-        } else {
-            String content = DeflaterUtils.unzipString(appConf.trim().substring(7));
-            switch (format) {
-                case "yaml://":
-                    map = PropertiesUtils.fromYamlText(content);
-                    break;
-                case "conf://":
-                    map = PropertiesUtils.fromHoconText(content);
-                    break;
-                case "prop://":
-                    map = PropertiesUtils.fromPropertiesText(content);
-                    break;
-                case "hdfs://":
-                    map = readHdfsConfig(appConf);
-                    break;
-                default:
-                    throw new IllegalArgumentException("[StreamPark] application config format error.");
-            }
-        }
+        Map<String, String> map = loadApplicationConfig(appConf);
         return map.entrySet().stream()
             .filter(e -> e.getKey().startsWith(prefix))
             .filter(e -> StringUtils.isNotEmpty(e.getValue()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private static Map<String, String> loadApplicationConfig(String appConf) {
+        String format = appConf.substring(0, 7);
+        if ("json://".equals(format)) {
+            return parseJsonConfig(appConf.substring(7));
+        }
+        String content = DeflaterUtils.unzipString(appConf.trim().substring(7));
+        switch (format) {
+            case "yaml://":
+                return PropertiesUtils.fromYamlText(content);
+            case "conf://":
+                return PropertiesUtils.fromHoconText(content);
+            case "prop://":
+                return PropertiesUtils.fromPropertiesText(content);
+            case "hdfs://":
+                try {
+                    return readHdfsConfig(appConf);
+                } catch (IOException e) {
+                    throw new IllegalArgumentException(
+                        "[StreamPark] failed to read hdfs application config: " + appConf, e);
+                }
+            default:
+                throw new IllegalArgumentException("[StreamPark] application config format error.");
+        }
+    }
+
+    private static Map<String, String> parseJsonConfig(String json) {
+        try {
+            return JsonUtils.read(json, Map.class);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("[StreamPark] application config format error.", e);
+        }
     }
 
     private static Map<String, String> readHdfsConfig(String appConf) throws IOException {
