@@ -176,8 +176,9 @@ public class SparkApplicationBuildPipelineServiceImpl
                     applicationInfoService.checkEnv(app);
 
                     String appUploads = app.getWorkspace().APP_UPLOADS();
-                    if (app.isSparkJarOrPySparkJob()) {
-                        ApplicationBuildPipelineUtils.prepareJarJobHome(
+                    ApplicationBuildPipelineUtils.prepareBuildResources(
+                        app.isSparkJarOrPySparkJob(),
+                        () -> ApplicationBuildPipelineUtils.prepareJarJobHome(
                             app.getTeamId(),
                             app.getJar(),
                             app.getAppHome(),
@@ -188,11 +189,9 @@ public class SparkApplicationBuildPipelineServiceImpl
                             app.isFromUploadJob(),
                             app.getApplicationType(),
                             resourceService,
-                            false);
-                    } else {
-                        ApplicationBuildPipelineUtils.uploadSqlJobDependencies(
-                            app.getDependencyObject(), resourceService);
-                    }
+                            false),
+                        app.getDependencyObject(),
+                        resourceService);
                 }
 
                 @Override
@@ -202,37 +201,24 @@ public class SparkApplicationBuildPipelineServiceImpl
 
                 @Override
                 public void onFinish(PipelineSnapshot snapshot, BuildResult result) {
-                    ApplicationBuildPipeline buildPipeline = ApplicationBuildPipeline.fromPipeSnapshot(snapshot)
-                        .setAppId(app.getId())
-                        .setBuildResult(result);
-                    saveEntity(buildPipeline);
+                    saveEntity(ApplicationBuildPipelineUtils.finishedSnapshot(snapshot, result, app.getId()));
                     if (result.pass()) {
-                        // running job ...
-                        if (app.isRunning()) {
-                            app.setRelease(ReleaseStateEnum.NEED_RESTART.get());
-                        } else {
-                            app.setOptionState(OptionStateEnum.NONE.getValue());
-                            app.setRelease(ReleaseStateEnum.DONE.get());
-                            // If the current task is not running, or the task has just been added, directly
-                            // set
-                            // the candidate version to the official version
-                            if (app.isSparkOnYarnJob()) {
-                                applicationManageService.toEffective(app);
-                            } else {
-                                if (app.isStreamParkJob()) {
+                        ApplicationBuildPipelineUtils.applySuccessfulRelease(
+                            app,
+                            () -> {
+                                if (app.isSparkOnYarnJob()) {
+                                    applicationManageService.toEffective(app);
+                                } else if (app.isStreamParkJob()) {
                                     SparkApplicationConfig config =
                                         applicationConfigService.getLatest(app.getId());
                                     if (config != null) {
                                         config.setToApplication(app);
-                                        applicationConfigService.toEffective(app.getId(),
-                                            app.getConfigId());
+                                        applicationConfigService.toEffective(
+                                            app.getId(), app.getConfigId());
                                     }
                                 }
-                            }
-                        }
+                            });
                         applicationLog.setSuccess(true);
-                        app.setBuild(false);
-
                     } else {
                         ApplicationBuildPipelineUtils.recordReleaseFailure(
                             app.getId(), app.getAppName(), snapshot, applicationLog, messageService);
@@ -240,11 +226,15 @@ public class SparkApplicationBuildPipelineServiceImpl
                         app.setOptionState(OptionStateEnum.NONE.getValue());
                         app.setBuild(true);
                     }
-                    applicationManageService.updateRelease(app);
-                    applicationLogService.save(applicationLog);
-                    if (sparkAppHttpWatcher.isWatchingApp(app.getId())) {
-                        sparkAppHttpWatcher.init();
-                    }
+                    ApplicationBuildPipelineUtils.finalizeRelease(
+                        () -> applicationManageService.updateRelease(app),
+                        applicationLog,
+                        applicationLogService,
+                        () -> {
+                            if (sparkAppHttpWatcher.isWatchingApp(app.getId())) {
+                                sparkAppHttpWatcher.init();
+                            }
+                        });
                 }
             });
         // save pipeline instance snapshot to db before release it.

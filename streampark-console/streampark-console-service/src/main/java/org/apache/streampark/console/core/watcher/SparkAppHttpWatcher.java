@@ -33,6 +33,7 @@ import org.apache.streampark.console.core.service.application.SparkApplicationAc
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
 import org.apache.streampark.console.core.util.AlertTemplateUtils;
+import org.apache.streampark.console.core.util.ApplicationWatcherUtils;
 
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -57,7 +58,6 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -125,17 +125,15 @@ public class SparkAppHttpWatcher {
 
     @PostConstruct
     public void init() {
-        WATCHING_APPS.clear();
-        List<SparkApplication> applications = applicationManageService.list(
-            new LambdaQueryWrapper<SparkApplication>()
-                .eq(SparkApplication::getTracking, 1)
-                .ne(SparkApplication::getState, SparkAppStateEnum.LOST.getValue()));
-
-        applications.forEach(app -> {
-            Long appId = app.getId();
-            WATCHING_APPS.put(appId, app);
-            STARTING_CACHE.put(appId, DEFAULT_FLAG_BYTE);
-        });
+        ApplicationWatcherUtils.initWatchingApps(
+            WATCHING_APPS,
+            STARTING_CACHE,
+            applicationManageService.list(
+                new LambdaQueryWrapper<SparkApplication>()
+                    .eq(SparkApplication::getTracking, 1)
+                    .ne(SparkApplication::getState, SparkAppStateEnum.LOST.getValue())),
+            SparkApplication::getId,
+            DEFAULT_FLAG_BYTE);
     }
 
     @PreDestroy

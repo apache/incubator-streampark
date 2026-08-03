@@ -208,8 +208,9 @@ public class FlinkApplicationBuildPipelineServiceImpl
                     applicationInfoService.checkEnv(app);
 
                     String appUploads = app.getWorkspace().APP_UPLOADS();
-                    if (app.isFlinkJarOrPyFlink()) {
-                        ApplicationBuildPipelineUtils.prepareJarJobHome(
+                    ApplicationBuildPipelineUtils.prepareBuildResources(
+                        app.isFlinkJarOrPyFlink(),
+                        () -> ApplicationBuildPipelineUtils.prepareJarJobHome(
                             app.getTeamId(),
                             app.getJar(),
                             app.getAppHome(),
@@ -220,11 +221,9 @@ public class FlinkApplicationBuildPipelineServiceImpl
                             app.isUploadResource(),
                             app.getApplicationType(),
                             resourceService,
-                            true);
-                    } else {
-                        ApplicationBuildPipelineUtils.uploadSqlJobDependencies(
-                            app.getDependencyObject(), resourceService);
-                    }
+                            true),
+                        app.getDependencyObject(),
+                        resourceService);
                 }
 
                 @Override
@@ -234,35 +233,23 @@ public class FlinkApplicationBuildPipelineServiceImpl
 
                 @Override
                 public void onFinish(PipelineSnapshot snapshot, BuildResult result) {
-                    ApplicationBuildPipeline buildPipeline = ApplicationBuildPipeline.fromPipeSnapshot(snapshot)
-                        .setAppId(app.getId())
-                        .setBuildResult(result);
-                    saveEntity(buildPipeline);
+                    saveEntity(ApplicationBuildPipelineUtils.finishedSnapshot(snapshot, result, app.getId()));
                     if (result.pass()) {
-                        // running job ...
-                        if (app.isRunning()) {
-                            app.setRelease(ReleaseStateEnum.NEED_RESTART.get());
-                        } else {
-                            app.setOptionState(OptionStateEnum.NONE.getValue());
-                            app.setRelease(ReleaseStateEnum.DONE.get());
-                            // If the current task is not running, or the task has just been added, directly
-                            // set
-                            // the candidate version to the official version
-                            if (app.isFlinkSql()) {
-                                applicationManageService.toEffective(app);
-                            } else {
-                                if (app.isStreamParkType()) {
+                        ApplicationBuildPipelineUtils.applySuccessfulRelease(
+                            app,
+                            () -> {
+                                if (app.isFlinkSql()) {
+                                    applicationManageService.toEffective(app);
+                                } else if (app.isStreamParkType()) {
                                     FlinkApplicationConfig config =
                                         applicationConfigService.getLatest(app.getId());
                                     if (config != null) {
                                         config.setToApplication(app);
-                                        applicationConfigService.toEffective(app.getId(),
-                                            app.getConfigId());
+                                        applicationConfigService.toEffective(
+                                            app.getId(), app.getConfigId());
                                     }
                                 }
-                            }
-                        }
-                        // backup.
+                            });
                         if (!app.isNeedRollback()) {
                             if (app.isFlinkSql() && newFlinkSql != null) {
                                 backUpService.backup(app, newFlinkSql);
@@ -271,8 +258,6 @@ public class FlinkApplicationBuildPipelineServiceImpl
                             }
                         }
                         applicationLog.setSuccess(true);
-                        app.setBuild(false);
-
                     } else {
                         ApplicationBuildPipelineUtils.recordReleaseFailure(
                             app.getId(), app.getJobName(), snapshot, applicationLog, messageService);
@@ -280,11 +265,15 @@ public class FlinkApplicationBuildPipelineServiceImpl
                         app.setOptionState(OptionStateEnum.NONE.getValue());
                         app.setBuild(true);
                     }
-                    applicationManageService.updateRelease(app);
-                    applicationLogService.save(applicationLog);
-                    if (flinkAppHttpWatcher.isWatchingApp(app.getId())) {
-                        flinkAppHttpWatcher.init();
-                    }
+                    ApplicationBuildPipelineUtils.finalizeRelease(
+                        () -> applicationManageService.updateRelease(app),
+                        applicationLog,
+                        applicationLogService,
+                        () -> {
+                            if (flinkAppHttpWatcher.isWatchingApp(app.getId())) {
+                                flinkAppHttpWatcher.init();
+                            }
+                        });
                 }
             });
         // save docker resolve progress detail to cache, only for flink-k8s application mode.

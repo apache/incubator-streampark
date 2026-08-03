@@ -42,6 +42,7 @@ import org.apache.streampark.console.core.service.application.FlinkApplicationAc
 import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.core.util.AlertTemplateUtils;
+import org.apache.streampark.console.core.util.ApplicationWatcherUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.config.RequestConfig;
@@ -175,16 +176,15 @@ public class FlinkAppHttpWatcher {
 
     @PostConstruct
     public void init() {
-        WATCHING_APPS.clear();
-        List<FlinkApplication> applications = applicationManageService.list(
-            new LambdaQueryWrapper<FlinkApplication>()
-                .eq(FlinkApplication::getTracking, 1)
-                .notIn(FlinkApplication::getDeployMode, FlinkDeployMode.getKubernetesMode()));
-        applications.forEach(app -> {
-            Long appId = app.getId();
-            WATCHING_APPS.put(appId, app);
-            STARTING_CACHE.put(appId, DEFAULT_FLAG_BYTE);
-        });
+        ApplicationWatcherUtils.initWatchingApps(
+            WATCHING_APPS,
+            STARTING_CACHE,
+            applicationManageService.list(
+                new LambdaQueryWrapper<FlinkApplication>()
+                    .eq(FlinkApplication::getTracking, 1)
+                    .notIn(FlinkApplication::getDeployMode, FlinkDeployMode.getKubernetesMode())),
+            FlinkApplication::getId,
+            DEFAULT_FLAG_BYTE);
     }
 
     @PreDestroy

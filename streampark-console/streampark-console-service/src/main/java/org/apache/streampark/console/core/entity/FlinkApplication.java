@@ -18,14 +18,12 @@
 package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.common.conf.ConfigKeys;
-import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 import org.apache.streampark.common.enums.StorageType;
-import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.bean.AppControl;
@@ -34,10 +32,8 @@ import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.ResourceFromEnum;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
-import org.apache.streampark.console.core.util.ApplicationEntityUtils;
 import org.apache.streampark.console.core.util.YarnQueueLabelExpression;
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates;
-import org.apache.streampark.flink.packer.maven.DependencyInfo;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -65,7 +61,7 @@ import java.util.Optional;
 @Setter
 @TableName("t_flink_app")
 @Slf4j
-public class FlinkApplication extends BaseEntity {
+public class FlinkApplication extends BaseEntity implements ApplicationEntitySupport, ReleaseOutcomeTarget {
 
     private static final TypeReference<Map<String, Object>> STRING_OBJECT_MAP =
         new TypeReference<Map<String, Object>>() {
@@ -427,24 +423,6 @@ public class FlinkApplication extends BaseEntity {
     }
 
     /**
-     * Local compilation and packaging working directory
-     */
-    @JsonIgnore
-    public String getDistHome() {
-        return ApplicationEntityUtils.distHome(projectId, getModule());
-    }
-
-    @JsonIgnore
-    public String getLocalAppHome() {
-        return ApplicationEntityUtils.localAppHome(id);
-    }
-
-    @JsonIgnore
-    public String getRemoteAppHome() {
-        return ApplicationEntityUtils.remoteAppHome(id);
-    }
-
-    /**
      * Automatically identify remoteAppHome or localAppHome based on app FlinkDeployMode
      */
     @JsonIgnore
@@ -540,23 +518,8 @@ public class FlinkApplication extends BaseEntity {
     }
 
     @JsonIgnore
-    public DependencyInfo getDependencyInfo() {
-        return ApplicationEntityUtils.dependencyInfo(getDependency());
-    }
-
-    @JsonIgnore
     public boolean isRunning() {
         return FlinkAppStateEnum.RUNNING.getValue() == this.getState();
-    }
-
-    @JsonIgnore
-    public boolean isNeedRollback() {
-        return ApplicationEntityUtils.needRollback(getRelease());
-    }
-
-    @JsonIgnore
-    public boolean isNeedRestartOnFailed() {
-        return ApplicationEntityUtils.needRestartOnFailed(restartSize, restartCount);
     }
 
     @JsonIgnore
@@ -578,16 +541,6 @@ public class FlinkApplication extends BaseEntity {
             default:
                 throw new UnsupportedOperationException("Unsupported ".concat(deployModeEnum.getName()));
         }
-    }
-
-    @JsonIgnore
-    public FsOperator getFsOperator() {
-        return ApplicationEntityUtils.fsOperator(getStorageType());
-    }
-
-    @JsonIgnore
-    public Workspace getWorkspace() {
-        return ApplicationEntityUtils.workspace(getStorageType());
     }
 
     @JsonIgnore

@@ -29,13 +29,18 @@ import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.entity.ApplicationBuildPipeline;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.Message;
+import org.apache.streampark.console.core.entity.ReleaseOutcomeTarget;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.NoticeTypeEnum;
+import org.apache.streampark.console.core.enums.OptionStateEnum;
+import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.ResourceTypeEnum;
 import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.ResourceService;
+import org.apache.streampark.console.core.service.application.ApplicationLogService;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
+import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.PipelineSnapshot;
 
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +57,46 @@ import java.util.List;
 public final class ApplicationBuildPipelineUtils {
 
     private ApplicationBuildPipelineUtils() {
+    }
+
+    public static ApplicationBuildPipeline finishedSnapshot(
+                                                            PipelineSnapshot snapshot,
+                                                            BuildResult result,
+                                                            Long appId) {
+        return ApplicationBuildPipeline.fromPipeSnapshot(snapshot).setAppId(appId).setBuildResult(result);
+    }
+
+    public static void applySuccessfulRelease(ReleaseOutcomeTarget app, Runnable promoteEffectiveVersion) {
+        if (app.isRunning()) {
+            app.setRelease(ReleaseStateEnum.NEED_RESTART.get());
+        } else {
+            app.setOptionState(OptionStateEnum.NONE.getValue());
+            app.setRelease(ReleaseStateEnum.DONE.get());
+            promoteEffectiveVersion.run();
+        }
+        app.setBuild(false);
+    }
+
+    public static void finalizeRelease(
+                                       Runnable updateRelease,
+                                       ApplicationLog applicationLog,
+                                       ApplicationLogService applicationLogService,
+                                       Runnable refreshWatcherIfWatching) {
+        updateRelease.run();
+        applicationLogService.save(applicationLog);
+        refreshWatcherIfWatching.run();
+    }
+
+    public static void prepareBuildResources(
+                                             boolean jarJob,
+                                             Runnable jarJobPreparer,
+                                             Dependency dependencyObject,
+                                             ResourceService resourceService) {
+        if (jarJob) {
+            jarJobPreparer.run();
+        } else {
+            uploadSqlJobDependencies(dependencyObject, resourceService);
+        }
     }
 
     public static ApplicationLog createReleaseLog(Long appId, Integer jobTypeCode) {
