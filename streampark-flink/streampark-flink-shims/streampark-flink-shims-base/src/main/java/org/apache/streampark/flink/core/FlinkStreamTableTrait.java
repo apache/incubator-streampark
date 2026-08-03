@@ -117,7 +117,6 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
         return execute(appName);
     }
 
-    @Override
     public JobExecutionResult execute(String jobName) {
         Utils.printLogo("FlinkStreamTable " + jobName + " Starting...");
         if (isConvertedToDataStream) {
