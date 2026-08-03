@@ -289,7 +289,8 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
                     if (pipeStates.containsKey(record.getId())) {
                         record.setBuildStatus(pipeStates.get(record.getId()).getCode());
                     }
-                    AppControl appControl = getAppControl(record);
+                    AppControl appControl = AppControl.fromPipelineBuildStatus(
+                        record.getBuildStatus(), record.shouldTracking(), record.isRunning());
                     record.setAppControl(appControl);
                 })
             .collect(Collectors.toList());
@@ -303,11 +304,6 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
             && record.getStartTime().getTime() > 0) {
             record.setDuration(now - record.getStartTime().getTime());
         }
-    }
-
-    private AppControl getAppControl(FlinkApplication record) {
-        return AppControl.fromPipelineBuildStatus(
-            record.getBuildStatus(), record.shouldTracking(), record.isRunning());
     }
 
     @Override

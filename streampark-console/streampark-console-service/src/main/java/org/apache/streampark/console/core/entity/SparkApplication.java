@@ -33,6 +33,7 @@ import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.ResourceFromEnum;
 import org.apache.streampark.console.core.enums.SparkAppStateEnum;
 import org.apache.streampark.console.core.metrics.spark.SparkApplicationSummary;
+import org.apache.streampark.console.core.util.ApplicationEntityUtils;
 import org.apache.streampark.console.core.util.YarnQueueLabelExpression;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 import org.apache.streampark.spark.kubernetes.model.SparkK8sPodTemplates;
@@ -339,23 +340,17 @@ public class SparkApplication extends BaseEntity {
     /** Local compilation and packaging working directory */
     @JsonIgnore
     public String getDistHome() {
-        String path = String.format("%s/%s/%s", Workspace.APP_LOCAL_DIST(), projectId.toString(), getModule());
-        log.info("local distHome:{}", path);
-        return path;
+        return ApplicationEntityUtils.distHome(projectId, getModule());
     }
 
     @JsonIgnore
     public String getLocalAppHome() {
-        String path = String.format("%s/%s", Workspace.local().APP_WORKSPACE(), id.toString());
-        log.info("local appHome:{}", path);
-        return path;
+        return ApplicationEntityUtils.localAppHome(id);
     }
 
     @JsonIgnore
     public String getRemoteAppHome() {
-        String path = String.format("%s/%s", Workspace.remote().APP_WORKSPACE(), id.toString());
-        log.info("remote appHome:{}", path);
-        return path;
+        return ApplicationEntityUtils.remoteAppHome(id);
     }
 
     /** Automatically identify remoteAppHome or localAppHome based on app SparkDeployMode */
@@ -448,7 +443,7 @@ public class SparkApplication extends BaseEntity {
 
     @JsonIgnore
     public DependencyInfo getDependencyInfo() {
-        return Dependency.toDependency(getDependency()).toJarPackDeps();
+        return ApplicationEntityUtils.dependencyInfo(getDependency());
     }
 
     @JsonIgnore
@@ -458,15 +453,12 @@ public class SparkApplication extends BaseEntity {
 
     @JsonIgnore
     public boolean isNeedRollback() {
-        return ReleaseStateEnum.NEED_ROLLBACK.get() == this.getRelease();
+        return ApplicationEntityUtils.needRollback(getRelease());
     }
 
     @JsonIgnore
     public boolean isNeedRestartOnFailed() {
-        if (this.restartSize != null && this.restartCount != null) {
-            return this.restartSize > 0 && this.restartCount <= this.restartSize;
-        }
-        return false;
+        return ApplicationEntityUtils.needRestartOnFailed(restartSize, restartCount);
     }
 
     @JsonIgnore
@@ -491,12 +483,12 @@ public class SparkApplication extends BaseEntity {
 
     @JsonIgnore
     public FsOperator getFsOperator() {
-        return FsOperator.of(getStorageType());
+        return ApplicationEntityUtils.fsOperator(getStorageType());
     }
 
     @JsonIgnore
     public Workspace getWorkspace() {
-        return Workspace.of(getStorageType());
+        return ApplicationEntityUtils.workspace(getStorageType());
     }
 
     public void fillRunningMetrics(SparkApplicationSummary summary) {

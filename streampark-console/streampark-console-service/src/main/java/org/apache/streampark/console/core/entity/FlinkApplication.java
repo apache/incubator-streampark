@@ -34,6 +34,7 @@ import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.ResourceFromEnum;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
+import org.apache.streampark.console.core.util.ApplicationEntityUtils;
 import org.apache.streampark.console.core.util.YarnQueueLabelExpression;
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
@@ -430,23 +431,17 @@ public class FlinkApplication extends BaseEntity {
      */
     @JsonIgnore
     public String getDistHome() {
-        String path = String.format("%s/%s/%s", Workspace.APP_LOCAL_DIST(), projectId.toString(), getModule());
-        log.info("local distHome:{}", path);
-        return path;
+        return ApplicationEntityUtils.distHome(projectId, getModule());
     }
 
     @JsonIgnore
     public String getLocalAppHome() {
-        String path = String.format("%s/%s", Workspace.local().APP_WORKSPACE(), id.toString());
-        log.info("local appHome:{}", path);
-        return path;
+        return ApplicationEntityUtils.localAppHome(id);
     }
 
     @JsonIgnore
     public String getRemoteAppHome() {
-        String path = String.format("%s/%s", Workspace.remote().APP_WORKSPACE(), id.toString());
-        log.info("remote appHome:{}", path);
-        return path;
+        return ApplicationEntityUtils.remoteAppHome(id);
     }
 
     /**
@@ -546,7 +541,7 @@ public class FlinkApplication extends BaseEntity {
 
     @JsonIgnore
     public DependencyInfo getDependencyInfo() {
-        return Dependency.toDependency(getDependency()).toJarPackDeps();
+        return ApplicationEntityUtils.dependencyInfo(getDependency());
     }
 
     @JsonIgnore
@@ -556,15 +551,12 @@ public class FlinkApplication extends BaseEntity {
 
     @JsonIgnore
     public boolean isNeedRollback() {
-        return ReleaseStateEnum.NEED_ROLLBACK.get() == this.getRelease();
+        return ApplicationEntityUtils.needRollback(getRelease());
     }
 
     @JsonIgnore
     public boolean isNeedRestartOnFailed() {
-        if (this.restartSize != null && this.restartCount != null) {
-            return this.restartSize > 0 && this.restartCount <= this.restartSize;
-        }
-        return false;
+        return ApplicationEntityUtils.needRestartOnFailed(restartSize, restartCount);
     }
 
     @JsonIgnore
@@ -590,12 +582,12 @@ public class FlinkApplication extends BaseEntity {
 
     @JsonIgnore
     public FsOperator getFsOperator() {
-        return FsOperator.of(getStorageType());
+        return ApplicationEntityUtils.fsOperator(getStorageType());
     }
 
     @JsonIgnore
     public Workspace getWorkspace() {
-        return Workspace.of(getStorageType());
+        return ApplicationEntityUtils.workspace(getStorageType());
     }
 
     @JsonIgnore
