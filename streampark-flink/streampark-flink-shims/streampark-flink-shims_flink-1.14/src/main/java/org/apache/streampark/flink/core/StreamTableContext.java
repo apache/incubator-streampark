@@ -20,13 +20,14 @@ package org.apache.streampark.flink.core;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.graph.StreamGraph;
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment;
+import org.apache.flink.table.api.Table;
+import org.apache.flink.table.api.bridge.scala.StreamStatementSet;
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment;
+import org.apache.flink.table.sources.TableSource;
 
 import scala.Tuple3;
 
-/**
- * Integration api of stream and table
- */
+/** Integration api of stream and table */
 public class StreamTableContext extends FlinkStreamTableTrait {
 
     public StreamTableContext(
@@ -45,124 +46,47 @@ public class StreamTableContext extends FlinkStreamTableTrait {
         this(FlinkTableInitializer.initialize(args));
     }
 
-    @Override
-    public <T> org.apache.flink.table.api.Table fromDataStream(
-                                                               org.apache.flink.streaming.api.scala.DataStream<T> dataStream,
-                                                               org.apache.flink.table.api.Schema schema) {
-        return tableEnv().fromDataStream(dataStream, schema);
-    }
-
-    @Override
-    public org.apache.flink.table.api.Table fromChangelogStream(
-                                                                org.apache.flink.streaming.api.scala.DataStream<org.apache.flink.types.Row> dataStream) {
-        return tableEnv().fromChangelogStream(dataStream);
-    }
-
-    @Override
-    public org.apache.flink.table.api.Table fromChangelogStream(
-                                                                org.apache.flink.streaming.api.scala.DataStream<org.apache.flink.types.Row> dataStream,
-                                                                org.apache.flink.table.api.Schema schema) {
-        return tableEnv().fromChangelogStream(dataStream, schema);
-    }
-
-    @Override
-    public org.apache.flink.table.api.Table fromChangelogStream(
-                                                                org.apache.flink.streaming.api.scala.DataStream<org.apache.flink.types.Row> dataStream,
-                                                                org.apache.flink.table.api.Schema schema,
-                                                                org.apache.flink.table.connector.ChangelogMode changelogMode) {
-        return tableEnv().fromChangelogStream(dataStream, schema, changelogMode);
-    }
-
-    @Override
-    public <T> void createTemporaryView(
-                                        String path,
-                                        org.apache.flink.streaming.api.scala.DataStream<T> dataStream,
-                                        org.apache.flink.table.api.Schema schema) {
-        tableEnv().createTemporaryView(path, dataStream, schema);
-    }
-
-    @Override
-    public org.apache.flink.streaming.api.scala.DataStream<org.apache.flink.types.Row> toDataStream(
-                                                                                                    org.apache.flink.table.api.Table table) {
-        isConvertedToDataStream = true;
-        return tableEnv().toDataStream(table);
-    }
-
-    @Override
-    public <T> org.apache.flink.streaming.api.scala.DataStream<T> toDataStream(
-                                                                               org.apache.flink.table.api.Table table,
-                                                                               Class<T> targetClass) {
-        isConvertedToDataStream = true;
-        return tableEnv().toDataStream(table, targetClass);
-    }
-
-    @Override
-    public <T> org.apache.flink.streaming.api.scala.DataStream<T> toDataStream(
-                                                                               org.apache.flink.table.api.Table table,
-                                                                               org.apache.flink.table.types.AbstractDataType<?> targetDataType) {
-        isConvertedToDataStream = true;
-        return tableEnv().toDataStream(table, targetDataType);
-    }
-
-    @Override
-    public org.apache.flink.streaming.api.scala.DataStream<org.apache.flink.types.Row> toChangelogStream(
-                                                                                                         org.apache.flink.table.api.Table table) {
-        isConvertedToDataStream = true;
-        return tableEnv().toChangelogStream(table);
-    }
-
-    @Override
-    public org.apache.flink.streaming.api.scala.DataStream<org.apache.flink.types.Row> toChangelogStream(
-                                                                                                         org.apache.flink.table.api.Table table,
-                                                                                                         org.apache.flink.table.api.Schema targetSchema) {
-        isConvertedToDataStream = true;
-        return tableEnv().toChangelogStream(table, targetSchema);
-    }
-
-    @Override
-    public org.apache.flink.streaming.api.scala.DataStream<org.apache.flink.types.Row> toChangelogStream(
-                                                                                                         org.apache.flink.table.api.Table table,
-                                                                                                         org.apache.flink.table.api.Schema targetSchema,
-                                                                                                         org.apache.flink.table.connector.ChangelogMode changelogMode) {
-        isConvertedToDataStream = true;
-        return tableEnv().toChangelogStream(table, targetSchema, changelogMode);
-    }
-
     public StreamGraph $getStreamGraph(boolean clearTransformations) {
         return streamEnv().getStreamGraph(clearTransformations);
     }
 
     @Override
-    public org.apache.flink.table.api.bridge.scala.StreamStatementSet createStatementSet() {
+    public StreamStatementSet createStatementSet() {
         return tableEnv().createStatementSet();
     }
 
-    public org.apache.flink.table.api.Table fromTableSource(org.apache.flink.table.sources.TableSource<?> source) {
+    @Override
+    public Table fromTableSource(TableSource<?> source) {
         return tableEnv().fromTableSource(source);
     }
 
-    public void insertInto(org.apache.flink.table.api.Table table, String sinkPath, String... sinkPathContinued) {
+    @Override
+    public void insertInto(Table table, String sinkPath, String... sinkPathContinued) {
         tableEnv().insertInto(table, sinkPath, sinkPathContinued);
     }
 
-    public void insertInto(String targetPath, org.apache.flink.table.api.Table table) {
+    @Override
+    public void insertInto(String targetPath, Table table) {
         tableEnv().insertInto(targetPath, table);
     }
 
-    public String explain(org.apache.flink.table.api.Table table) {
+    @Override
+    public String explain(Table table) {
         return tableEnv().explain(table);
     }
 
-    public String explain(org.apache.flink.table.api.Table table, boolean extended) {
+    @Override
+    public String explain(Table table, boolean extended) {
         return tableEnv().explain(table, extended);
     }
 
+    @Override
     public String explain(boolean extended) {
         return tableEnv().explain(extended);
     }
 
+    @Override
     public void sqlUpdate(String stmt) {
         tableEnv().sqlUpdate(stmt);
     }
-
 }

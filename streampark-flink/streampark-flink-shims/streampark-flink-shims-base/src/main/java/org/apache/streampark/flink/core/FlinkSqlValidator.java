@@ -91,7 +91,7 @@ public final class FlinkSqlValidator {
                 }
                 try {
                     validateSqlCommand(call, state.sqlDialect);
-                } catch (RuntimeException e) {
+                } catch (IllegalStateException | UnsupportedOperationException e) {
                     return syntaxErrorResult(call, e);
                 }
                 return null;

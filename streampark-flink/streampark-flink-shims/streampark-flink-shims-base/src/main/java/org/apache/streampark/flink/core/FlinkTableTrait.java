@@ -21,7 +21,10 @@ import org.apache.streampark.common.util.Utils;
 
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.table.api.CompiledPlan;
 import org.apache.flink.table.api.ExplainDetail;
+import org.apache.flink.table.api.ExplainFormat;
+import org.apache.flink.table.api.PlanReference;
 import org.apache.flink.table.api.StatementSet;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableConfig;
@@ -29,13 +32,16 @@ import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.catalog.Catalog;
+import org.apache.flink.table.catalog.CatalogDescriptor;
 import org.apache.flink.table.expressions.Expression;
 import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.flink.table.functions.UserDefinedFunction;
 import org.apache.flink.table.module.Module;
 import org.apache.flink.table.module.ModuleEntry;
+import org.apache.flink.table.resource.ResourceUri;
 import org.apache.flink.table.types.AbstractDataType;
 
+import java.util.List;
 import java.util.Optional;
 
 public abstract class FlinkTableTrait implements TableEnvironment {
@@ -312,5 +318,51 @@ public abstract class FlinkTableTrait implements TableEnvironment {
     @Override
     public String[] getCompletionHints(String statement, int position) {
         return delegate().getCompletionHints(statement, position);
+    }
+
+    @Override
+    public String[] listTables(String catalogName, String databaseName) {
+        return delegate().listTables(catalogName, databaseName);
+    }
+
+    @Override
+    public CompiledPlan loadPlan(PlanReference planReference) {
+        return delegate().loadPlan(planReference);
+    }
+
+    @Override
+    public CompiledPlan compilePlanSql(String stmt) {
+        return delegate().compilePlanSql(stmt);
+    }
+
+    @Override
+    public void createFunction(String path, String className, List<ResourceUri> resourceUris) {
+        delegate().createFunction(path, className, resourceUris);
+    }
+
+    @Override
+    public void createFunction(
+                               String path, String className, List<ResourceUri> resourceUris, boolean ignoreIfExists) {
+        delegate().createFunction(path, className, resourceUris, ignoreIfExists);
+    }
+
+    @Override
+    public void createTemporaryFunction(String path, String className, List<ResourceUri> resourceUris) {
+        delegate().createTemporaryFunction(path, className, resourceUris);
+    }
+
+    @Override
+    public void createTemporarySystemFunction(String name, String className, List<ResourceUri> resourceUris) {
+        delegate().createTemporarySystemFunction(name, className, resourceUris);
+    }
+
+    @Override
+    public String explainSql(String statement, ExplainFormat format, ExplainDetail... extraDetails) {
+        return delegate().explainSql(statement, format, extraDetails);
+    }
+
+    @Override
+    public void createCatalog(String catalog, CatalogDescriptor catalogDescriptor) {
+        delegate().createCatalog(catalog, catalogDescriptor);
     }
 }

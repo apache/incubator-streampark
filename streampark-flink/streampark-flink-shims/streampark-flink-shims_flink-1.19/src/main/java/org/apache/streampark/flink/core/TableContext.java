@@ -18,13 +18,7 @@
 package org.apache.streampark.flink.core;
 
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.table.api.CompiledPlan;
-import org.apache.flink.table.api.ExplainDetail;
-import org.apache.flink.table.api.ExplainFormat;
-import org.apache.flink.table.api.PlanReference;
 import org.apache.flink.table.api.TableEnvironment;
-import org.apache.flink.table.catalog.CatalogDescriptor;
-import org.apache.flink.table.resource.ResourceUri;
 
 import scala.Tuple2;
 
@@ -40,63 +34,5 @@ public class TableContext extends FlinkTableTrait {
 
     public TableContext(TableEnvConfig args) {
         this(FlinkTableInitializer.initialize(args));
-    }
-
-    /** @since 1.15 */
-    @Override
-    public String[] listTables(String catalogName, String databaseName) {
-        return delegate().listTables(catalogName, databaseName);
-    }
-
-    /** @since 1.15 */
-    @Override
-    public CompiledPlan loadPlan(PlanReference planReference) {
-        return delegate().loadPlan(planReference);
-    }
-
-    /** @since 1.15 */
-    @Override
-    public CompiledPlan compilePlanSql(String stmt) {
-        return delegate().compilePlanSql(stmt);
-    }
-
-    /** @since 1.17 */
-    @Override
-    public void createFunction(String path, String className, java.util.List<ResourceUri> resourceUris) {
-        delegate().createFunction(path, className, resourceUris);
-    }
-
-    /** @since 1.17 */
-    @Override
-    public void createFunction(
-                               String path, String className, java.util.List<ResourceUri> resourceUris,
-                               boolean ignoreIfExists) {
-        delegate().createFunction(path, className, resourceUris, ignoreIfExists);
-    }
-
-    /** @since 1.17 */
-    @Override
-    public void createTemporaryFunction(
-                                        String path, String className, java.util.List<ResourceUri> resourceUris) {
-        delegate().createTemporaryFunction(path, className, resourceUris);
-    }
-
-    /** @since 1.17 */
-    @Override
-    public void createTemporarySystemFunction(
-                                              String name, String className, java.util.List<ResourceUri> resourceUris) {
-        delegate().createTemporarySystemFunction(name, className, resourceUris);
-    }
-
-    /** @since 1.17 */
-    @Override
-    public String explainSql(String statement, ExplainFormat format, ExplainDetail... extraDetails) {
-        return delegate().explainSql(statement, format, extraDetails);
-    }
-
-    /** @since 1.18 */
-    @Override
-    public void createCatalog(String catalog, CatalogDescriptor catalogDescriptor) {
-        delegate().createCatalog(catalog, catalogDescriptor);
     }
 }

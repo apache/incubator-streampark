@@ -18,8 +18,6 @@
 package org.apache.streampark.flink.core;
 
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.table.api.CompiledPlan;
-import org.apache.flink.table.api.PlanReference;
 import org.apache.flink.table.api.TableEnvironment;
 
 import scala.Tuple2;
@@ -36,23 +34,5 @@ public class TableContext extends FlinkTableTrait {
 
     public TableContext(TableEnvConfig args) {
         this(FlinkTableInitializer.initialize(args));
-    }
-
-    /** @since 1.15 */
-    @Override
-    public String[] listTables(String catalogName, String databaseName) {
-        return delegate().listTables(catalogName, databaseName);
-    }
-
-    /** @since 1.15 */
-    @Override
-    public CompiledPlan loadPlan(PlanReference planReference) {
-        return delegate().loadPlan(planReference);
-    }
-
-    /** @since 1.15 */
-    @Override
-    public CompiledPlan compilePlanSql(String stmt) {
-        return delegate().compilePlanSql(stmt);
     }
 }

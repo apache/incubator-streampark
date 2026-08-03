@@ -45,13 +45,19 @@ import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.api.graph.StreamGraph;
 import org.apache.flink.streaming.api.scala.DataStream;
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment;
+import org.apache.flink.table.api.CompiledPlan;
 import org.apache.flink.table.api.ExplainDetail;
+import org.apache.flink.table.api.ExplainFormat;
+import org.apache.flink.table.api.PlanReference;
+import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableConfig;
 import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
+import org.apache.flink.table.catalog.CatalogDescriptor;
+import org.apache.flink.table.connector.ChangelogMode;
 import org.apache.flink.table.expressions.Expression;
 import org.apache.flink.table.functions.AggregateFunction;
 import org.apache.flink.table.functions.ScalarFunction;
@@ -60,7 +66,9 @@ import org.apache.flink.table.functions.TableFunction;
 import org.apache.flink.table.functions.UserDefinedFunction;
 import org.apache.flink.table.module.Module;
 import org.apache.flink.table.module.ModuleEntry;
+import org.apache.flink.table.resource.ResourceUri;
 import org.apache.flink.table.types.AbstractDataType;
+import org.apache.flink.types.Row;
 import org.apache.flink.util.SplittableIterator;
 
 import com.esotericsoftware.kryo.Serializer;
@@ -413,6 +421,26 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
     }
 
     @Override
+    public <T> Table fromDataStream(DataStream<T> dataStream, Schema schema) {
+        return tableEnv.fromDataStream(dataStream, schema);
+    }
+
+    @Override
+    public Table fromChangelogStream(DataStream<Row> dataStream) {
+        return tableEnv.fromChangelogStream(dataStream);
+    }
+
+    @Override
+    public Table fromChangelogStream(DataStream<Row> dataStream, Schema schema) {
+        return tableEnv.fromChangelogStream(dataStream, schema);
+    }
+
+    @Override
+    public Table fromChangelogStream(DataStream<Row> dataStream, Schema schema, ChangelogMode changelogMode) {
+        return tableEnv.fromChangelogStream(dataStream, schema, changelogMode);
+    }
+
+    @Override
     public <T> void createTemporaryView(String path, DataStream<T> dataStream) {
         tableEnv.createTemporaryView(path, dataStream);
     }
@@ -420,6 +448,47 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
     @Override
     public <T> void createTemporaryView(String path, DataStream<T> dataStream, Seq<Expression> fields) {
         tableEnv.createTemporaryView(path, dataStream, fields);
+    }
+
+    @Override
+    public <T> void createTemporaryView(String path, DataStream<T> dataStream, Schema schema) {
+        tableEnv.createTemporaryView(path, dataStream, schema);
+    }
+
+    @Override
+    public DataStream<Row> toDataStream(Table table) {
+        isConvertedToDataStream = true;
+        return tableEnv.toDataStream(table);
+    }
+
+    @Override
+    public <T> DataStream<T> toDataStream(Table table, Class<T> targetClass) {
+        isConvertedToDataStream = true;
+        return tableEnv.toDataStream(table, targetClass);
+    }
+
+    @Override
+    public <T> DataStream<T> toDataStream(Table table, AbstractDataType<?> targetDataType) {
+        isConvertedToDataStream = true;
+        return tableEnv.toDataStream(table, targetDataType);
+    }
+
+    @Override
+    public DataStream<Row> toChangelogStream(Table table) {
+        isConvertedToDataStream = true;
+        return tableEnv.toChangelogStream(table);
+    }
+
+    @Override
+    public DataStream<Row> toChangelogStream(Table table, Schema targetSchema) {
+        isConvertedToDataStream = true;
+        return tableEnv.toChangelogStream(table, targetSchema);
+    }
+
+    @Override
+    public DataStream<Row> toChangelogStream(Table table, Schema targetSchema, ChangelogMode changelogMode) {
+        isConvertedToDataStream = true;
+        return tableEnv.toChangelogStream(table, targetSchema, changelogMode);
     }
 
     @Override
@@ -705,5 +774,51 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
     @Override
     public Table from(TableDescriptor descriptor) {
         return tableEnv.from(descriptor);
+    }
+
+    @Override
+    public String[] listTables(String catalogName, String databaseName) {
+        return tableEnv.listTables(catalogName, databaseName);
+    }
+
+    @Override
+    public CompiledPlan loadPlan(PlanReference planReference) {
+        return tableEnv.loadPlan(planReference);
+    }
+
+    @Override
+    public CompiledPlan compilePlanSql(String stmt) {
+        return tableEnv.compilePlanSql(stmt);
+    }
+
+    @Override
+    public void createFunction(String path, String className, List<ResourceUri> resourceUris) {
+        tableEnv.createFunction(path, className, resourceUris);
+    }
+
+    @Override
+    public void createFunction(
+                               String path, String className, List<ResourceUri> resourceUris, boolean ignoreIfExists) {
+        tableEnv.createFunction(path, className, resourceUris, ignoreIfExists);
+    }
+
+    @Override
+    public void createTemporaryFunction(String path, String className, List<ResourceUri> resourceUris) {
+        tableEnv.createTemporaryFunction(path, className, resourceUris);
+    }
+
+    @Override
+    public void createTemporarySystemFunction(String name, String className, List<ResourceUri> resourceUris) {
+        tableEnv.createTemporarySystemFunction(name, className, resourceUris);
+    }
+
+    @Override
+    public String explainSql(String statement, ExplainFormat format, ExplainDetail... extraDetails) {
+        return tableEnv.explainSql(statement, format, extraDetails);
+    }
+
+    @Override
+    public void createCatalog(String catalog, CatalogDescriptor catalogDescriptor) {
+        tableEnv.createCatalog(catalog, catalogDescriptor);
     }
 }
