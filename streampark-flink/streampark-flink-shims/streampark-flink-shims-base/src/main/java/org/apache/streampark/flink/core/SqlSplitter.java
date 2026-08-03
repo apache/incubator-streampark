@@ -58,7 +58,7 @@ final class SqlSplitter {
             if (isSingleLineComment(currStatement) || isMultipleLineComment(currStatement)) {
                 mergeCommentIntoPrevious(refinedQueries, currStatement);
             } else {
-                appendStatement(refinedQueries, queries, i, currStatement);
+                appendStatement(refinedQueries, i, currStatement);
             }
         }
         return refinedQueries;
@@ -73,7 +73,6 @@ final class SqlSplitter {
 
     private static void appendStatement(
                                         Map<Integer, String> refinedQueries,
-                                        List<String> queries,
                                         int index,
                                         String statement) {
         String linesPlaceholder = "";
@@ -81,6 +80,16 @@ final class SqlSplitter {
             linesPlaceholder = extractLineBreaks(refinedQueries.get(index - 1));
         }
         refinedQueries.put(refinedQueries.size(), linesPlaceholder + statement);
+    }
+
+    private static String extractLineBreaks(String text) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == '\n') {
+                builder.append('\n');
+            }
+        }
+        return builder.toString();
     }
 
     private static List<SqlSegment> buildSegments(
@@ -95,73 +104,12 @@ final class SqlSplitter {
         return segments;
     }
 
-    private static Map<Integer, Boolean> buildLineDescriptor(String sql) {
-        Map<Integer, Boolean> descriptor = new HashMap<>();
-        Scanner scanner = new Scanner(sql);
-        int lineNumber = 0;
-        boolean startComment = false;
-        boolean hasComment = false;
-
-        while (scanner.hasNextLine()) {
-            lineNumber++;
-            String line = scanner.nextLine().trim();
-            boolean nonEmpty =
-                StringUtils.isNotBlank(line) && !line.startsWith(ConfigKeys.PARAM_PREFIX());
-            if (line.startsWith("/*")) {
-                startComment = true;
-                hasComment = true;
-            }
-            descriptor.put(lineNumber, nonEmpty && !hasComment);
-            if (startComment && line.endsWith("*/")) {
-                startComment = false;
-                hasComment = false;
-            }
-        }
-        scanner.close();
-        return descriptor;
-    }
-
-    private static int findStartLine(int num, Map<Integer, Boolean> lineDescriptor) {
-        if (num >= lineDescriptor.size() || Boolean.TRUE.equals(lineDescriptor.get(num))) {
-            return num;
-        }
-        return findStartLine(num + 1, lineDescriptor);
-    }
-
-    private static void markLineNumber(
-                                       int lineNum,
-                                       Map<Integer, int[]> lineNumMap,
-                                       Map<Integer, Boolean> lineDescriptor) {
-        int line = lineNum + 1;
-        if (lineNumMap.isEmpty()) {
-            lineNumMap.put(0, new int[]{findStartLine(1, lineDescriptor), line});
-        } else {
-            int index = lineNumMap.size();
-            int start = lineNumMap.get(lineNumMap.size() - 1)[1] + 1;
-            lineNumMap.put(index, new int[]{findStartLine(start, lineDescriptor), line});
-        }
-    }
-
-    private static String extractLineBreaks(String text) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < text.length(); i++) {
-            if (text.charAt(i) == '\n') {
-                builder.append('\n');
-            }
-        }
-        return builder.toString();
-    }
-
     private static boolean isSingleLineComment(String text) {
         return text.trim().startsWith(ConfigKeys.PARAM_PREFIX());
     }
 
     private static boolean isMultipleLineComment(String text) {
         return text.trim().startsWith("/*") && text.trim().endsWith("*/");
-    }
-
-    private static boolean hasNonBlankQuery(StringBuilder query) {
-        return !query.toString().trim().isEmpty();
     }
 
     private static boolean isSingleLineComment(char curChar, char nextChar) {
@@ -208,6 +156,57 @@ final class SqlSplitter {
 
         private Map<Integer, int[]> lineNumMap() {
             return lineNumMap;
+        }
+
+        private static Map<Integer, Boolean> buildLineDescriptor(String sql) {
+            Map<Integer, Boolean> descriptor = new HashMap<>();
+            Scanner scanner = new Scanner(sql);
+            int lineNumber = 0;
+            boolean startComment = false;
+            boolean hasComment = false;
+
+            while (scanner.hasNextLine()) {
+                lineNumber++;
+                String line = scanner.nextLine().trim();
+                boolean nonEmpty =
+                    StringUtils.isNotBlank(line) && !line.startsWith(ConfigKeys.PARAM_PREFIX());
+                if (line.startsWith("/*")) {
+                    startComment = true;
+                    hasComment = true;
+                }
+                descriptor.put(lineNumber, nonEmpty && !hasComment);
+                if (startComment && line.endsWith("*/")) {
+                    startComment = false;
+                    hasComment = false;
+                }
+            }
+            scanner.close();
+            return descriptor;
+        }
+
+        private static int findStartLine(int num, Map<Integer, Boolean> lineDescriptor) {
+            if (num >= lineDescriptor.size() || Boolean.TRUE.equals(lineDescriptor.get(num))) {
+                return num;
+            }
+            return findStartLine(num + 1, lineDescriptor);
+        }
+
+        private static void markLineNumber(
+                                           int lineNum,
+                                           Map<Integer, int[]> lineNumMap,
+                                           Map<Integer, Boolean> lineDescriptor) {
+            int line = lineNum + 1;
+            if (lineNumMap.isEmpty()) {
+                lineNumMap.put(0, new int[]{findStartLine(1, lineDescriptor), line});
+            } else {
+                int index = lineNumMap.size();
+                int start = lineNumMap.get(lineNumMap.size() - 1)[1] + 1;
+                lineNumMap.put(index, new int[]{findStartLine(start, lineDescriptor), line});
+            }
+        }
+
+        private static boolean hasNonBlankQuery(StringBuilder query) {
+            return !query.toString().trim().isEmpty();
         }
 
         private void processCharacter(int idx) {
@@ -303,9 +302,7 @@ final class SqlSplitter {
         }
 
         private void appendNonCommentCharacter(char ch) {
-            if (!singleLineComment && !multiLineComment) {
-                query.append(ch);
-            } else if (ch == '\n') {
+            if (!singleLineComment && !multiLineComment || ch == '\n') {
                 query.append(ch);
             }
         }

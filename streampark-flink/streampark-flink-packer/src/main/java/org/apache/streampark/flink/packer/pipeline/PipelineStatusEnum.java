@@ -36,15 +36,15 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum PipelineStatusEnum {
 
     /** Unknown pipeline status. */
-    unknown(0),
+    UNKNOWN(0),
     /** Pipeline is pending execution. */
-    pending(1),
+    PENDING(1),
     /** Pipeline is running. */
-    running(2),
+    RUNNING(2),
     /** Pipeline finished successfully. */
-    success(3),
+    SUCCESS(3),
     /** Pipeline finished with failure. */
-    failure(4);
+    FAILURE(4);
 
     private final Integer code;
 
@@ -59,7 +59,7 @@ public enum PipelineStatusEnum {
                 return status;
             }
         }
-        return unknown;
+        return UNKNOWN;
     }
 
     @JsonValue
@@ -68,6 +68,6 @@ public enum PipelineStatusEnum {
     }
 
     public boolean isUnknown() {
-        return this == unknown;
+        return this == UNKNOWN;
     }
 }

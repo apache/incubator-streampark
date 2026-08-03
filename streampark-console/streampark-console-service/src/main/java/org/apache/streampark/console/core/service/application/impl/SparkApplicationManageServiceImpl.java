@@ -226,12 +226,12 @@ public class SparkApplicationManageServiceImpl
                     AppControl appControl = new AppControl()
                         .setAllowBuild(
                             record.getBuildStatus() == null
-                                || !PipelineStatusEnum.running
+                                || !PipelineStatusEnum.RUNNING
                                     .getCode()
                                     .equals(record.getBuildStatus()))
                         .setAllowStart(
                             !record.shouldTracking()
-                                && PipelineStatusEnum.success
+                                && PipelineStatusEnum.SUCCESS
                                     .getCode()
                                     .equals(record.getBuildStatus()))
                         .setAllowStop(record.isRunning())

@@ -17,23 +17,18 @@
 
 package org.apache.streampark.flink.packer.pipeline.impl;
 
-import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.fs.LfsOperator;
-import org.apache.streampark.common.util.AutoCloseUtils;
 import org.apache.streampark.flink.packer.maven.MavenTool;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.FlinkYarnApplicationBuildRequest;
 import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
 import org.apache.streampark.flink.packer.pipeline.SimpleBuildResponse;
-
-import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.streampark.flink.packer.pipeline.YarnJarUploader;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -99,8 +94,8 @@ public class FlinkYarnApplicationBuildPipeline extends BuildPipeline {
             3,
             () -> {
                 for (String jar : mavenJars) {
-                    uploadJarToHdfsOrLfs(FsOperator.lfs(), jar, request.localWorkspace());
-                    uploadJarToHdfsOrLfs(FsOperator.hdfs(), jar, request.yarnProvidedPath());
+                    YarnJarUploader.uploadJarToHdfsOrLfs(FsOperator.lfs(), jar, request.localWorkspace());
+                    YarnJarUploader.uploadJarToHdfsOrLfs(FsOperator.hdfs(), jar, request.yarnProvidedPath());
                 }
                 return null;
             })
@@ -109,40 +104,6 @@ public class FlinkYarnApplicationBuildPipeline extends BuildPipeline {
                 });
 
         return new SimpleBuildResponse();
-    }
-
-    private void uploadJarToHdfsOrLfs(FsOperator fsOperator, String origin, String target) throws IOException {
-        File originFile = new File(origin);
-        if (!fsOperator.exists(target)) {
-            fsOperator.mkdirs(target);
-        }
-        if (originFile.isFile()) {
-            if (fsOperator == FsOperator.lfs()) {
-                fsOperator.copy(originFile.getAbsolutePath(), target);
-            } else {
-                String uploadFile = Workspace.remote().APP_UPLOADS() + "/" + originFile.getName();
-                if (fsOperator.exists(uploadFile)) {
-                    AutoCloseUtils.using(
-                        new FileInputStream(originFile),
-                        inputStream -> {
-                            try {
-                                if (!DigestUtils.md5Hex(inputStream)
-                                    .equals(fsOperator.fileMd5(uploadFile))) {
-                                    fsOperator.upload(originFile.getAbsolutePath(), uploadFile);
-                                }
-                            } catch (IOException e) {
-                                throw new IllegalStateException(e);
-                            }
-                            return null;
-                        });
-                } else {
-                    fsOperator.upload(originFile.getAbsolutePath(), uploadFile);
-                }
-                fsOperator.copy(uploadFile, target);
-            }
-        } else if (fsOperator == FsOperator.hdfs()) {
-            fsOperator.upload(originFile.getAbsolutePath(), target);
-        }
     }
 
     public static FlinkYarnApplicationBuildPipeline of(FlinkYarnApplicationBuildRequest request) {

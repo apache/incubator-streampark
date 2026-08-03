@@ -24,26 +24,34 @@ public final class StringCastUtils {
     }
 
     public static <T> T cast(String v, Class<T> classType) {
-        Object result;
+        return classType.cast(parseValue(v, classType));
+    }
+
+    private static Object parseValue(String v, Class<?> classType) {
         if (classType == String.class) {
-            result = v;
-        } else if (classType == Byte.class || classType == byte.class) {
-            result = Byte.parseByte(v);
-        } else if (classType == Integer.class || classType == int.class) {
-            result = Integer.parseInt(v);
-        } else if (classType == Long.class || classType == long.class) {
-            result = Long.parseLong(v);
-        } else if (classType == Float.class || classType == float.class) {
-            result = Float.parseFloat(v);
-        } else if (classType == Double.class || classType == double.class) {
-            result = Double.parseDouble(v);
-        } else if (classType == Short.class || classType == short.class) {
-            result = Short.parseShort(v);
-        } else if (classType == Boolean.class || classType == boolean.class) {
-            result = Boolean.parseBoolean(v);
-        } else {
-            throw new IllegalArgumentException("Unsupported type: " + classType);
+            return v;
         }
-        return classType.cast(result);
+        if (classType == Byte.class || classType == byte.class) {
+            return Byte.parseByte(v);
+        }
+        if (classType == Integer.class || classType == int.class) {
+            return Integer.parseInt(v);
+        }
+        if (classType == Long.class || classType == long.class) {
+            return Long.parseLong(v);
+        }
+        if (classType == Float.class || classType == float.class) {
+            return Float.parseFloat(v);
+        }
+        if (classType == Double.class || classType == double.class) {
+            return Double.parseDouble(v);
+        }
+        if (classType == Short.class || classType == short.class) {
+            return Short.parseShort(v);
+        }
+        if (classType == Boolean.class || classType == boolean.class) {
+            return Boolean.parseBoolean(v);
+        }
+        throw new IllegalArgumentException("Unsupported type: " + classType);
     }
 }

@@ -18,12 +18,10 @@
 package org.apache.streampark.flink.packer.pipeline.impl;
 
 import org.apache.streampark.common.fs.LfsOperator;
-import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.flink.kubernetes.PodTemplateTool;
 import org.apache.streampark.flink.kubernetes.ingress.IngressController;
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates;
 import org.apache.streampark.flink.packer.docker.DockerConf;
-import org.apache.streampark.flink.packer.docker.DockerUtils;
 import org.apache.streampark.flink.packer.docker.FlinkDockerfileTemplate;
 import org.apache.streampark.flink.packer.docker.FlinkDockerfileTemplateTrait;
 import org.apache.streampark.flink.packer.docker.FlinkHadoopDockerfileTemplate;
@@ -36,38 +34,19 @@ import org.apache.streampark.flink.packer.pipeline.DockerPullProgress;
 import org.apache.streampark.flink.packer.pipeline.DockerPushProgress;
 import org.apache.streampark.flink.packer.pipeline.DockerResolveProgress;
 import org.apache.streampark.flink.packer.pipeline.FlinkK8sApplicationBuildRequest;
+import org.apache.streampark.flink.packer.pipeline.K8sDockerBuildSupport;
 import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
 import org.apache.streampark.flink.packer.pipeline.SilentDockerProgressWatcher;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.github.dockerjava.api.command.PushImageCmd;
-import com.github.dockerjava.core.command.HackBuildImageCmd;
-import com.github.dockerjava.core.command.HackPullImageCmd;
-import com.github.dockerjava.core.command.HackPushImageCmd;
-import com.google.common.collect.Sets;
-
 import java.io.File;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /** Building pipeline for flink kubernetes-native application mode */
 public class FlinkK8sApplicationBuildPipeline extends BuildPipeline {
-
-    private static final ExecutorService DOCKER_EXECUTOR =
-        new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 5,
-            Runtime.getRuntime().availableProcessors() * 10,
-            60L,
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(2048),
-            ThreadUtils.threadFactory("streampark-docker-progress-watcher-executor"),
-            new ThreadPoolExecutor.DiscardOldestPolicy());
 
     private final FlinkK8sApplicationBuildRequest request;
 
@@ -203,63 +182,19 @@ public class FlinkK8sApplicationBuildPipeline extends BuildPipeline {
         String expectedImageTag =
             "streampark-flinkjob-" + request.k8sNamespace() + "-" + request.clusterId();
         String pushImageTag =
-            compileTag(
+            K8sDockerBuildSupport.compileTag(
                 expectedImageTag, dockerConf.registerAddress(), dockerConf.imageNamespace());
 
         execStep(
             5,
             () -> {
-                DockerUtils.usingDockerClient(
-                    dockerClient -> {
-                        boolean imgExists =
-                            dockerClient.listImagesCmd().exec().stream()
-                                .anyMatch(
-                                    image -> image.getRepoTags() != null
-                                        && java.util.Arrays.stream(image.getRepoTags())
-                                            .anyMatch(tag -> tag.contains(baseImageTag)));
-                        if (imgExists) {
-                            logInfo(
-                                "found local docker image "
-                                    + baseImageTag
-                                    + ", no need to pull from remote.");
-                        } else {
-                            HackPullImageCmd pullImageCmd;
-                            if (dockerConf.registerAddress() != null
-                                && !baseImageTag.startsWith(dockerConf.registerAddress())) {
-                                pullImageCmd =
-                                    (HackPullImageCmd) dockerClient.pullImageCmd(baseImageTag);
-                            } else {
-                                pullImageCmd =
-                                    (HackPullImageCmd) dockerClient
-                                        .pullImageCmd(baseImageTag)
-                                        .withAuthConfig(dockerConf.toAuthConf());
-                            }
-                            try {
-                                pullImageCmd
-                                    .start(
-                                        DockerUtils.watchDockerPullProcess(
-                                            pullRsp -> {
-                                                dockerProcess.getPull().update(pullRsp);
-                                                DOCKER_EXECUTOR.submit(
-                                                    () -> dockerProcessWatcher
-                                                        .onDockerPullProgressChange(
-                                                            dockerProcess.getPull().snapshot()));
-                                            }))
-                                    .awaitCompletion();
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                                throw new IllegalStateException(e);
-                            }
-                            logInfo(
-                                "Already pulled docker image from remote register, imageTag="
-                                    + baseImageTag);
-                        }
-                        return null;
-                    },
-                    err -> {
-                        throw new IllegalStateException(
-                            "Pull docker image failed, imageTag=" + baseImageTag, err);
-                    });
+                K8sDockerBuildSupport.pullImage(
+                    dockerConf,
+                    baseImageTag,
+                    dockerProcess,
+                    dockerProcessWatcher,
+                    this::logInfo,
+                    true);
                 return null;
             })
                 .orElseThrow(() -> {
@@ -269,37 +204,13 @@ public class FlinkK8sApplicationBuildPipeline extends BuildPipeline {
         execStep(
             6,
             () -> {
-                DockerUtils.usingDockerClient(
-                    dockerClient -> {
-                        HackBuildImageCmd buildImageCmd =
-                            (HackBuildImageCmd) dockerClient
-                                .buildImageCmd()
-                                .withBaseDirectory(new File(buildWorkspace))
-                                .withDockerfile(dockerfile)
-                                .withTags(Sets.newHashSet(pushImageTag));
-                        String imageId =
-                            buildImageCmd
-                                .start(
-                                    DockerUtils.watchDockerBuildStep(
-                                        buildStep -> {
-                                            dockerProcess.getBuild().update(buildStep);
-                                            DOCKER_EXECUTOR.submit(
-                                                () -> dockerProcessWatcher
-                                                    .onDockerBuildProgressChange(
-                                                        dockerProcess.getBuild().snapshot()));
-                                        }))
-                                .awaitImageId();
-                        logInfo(
-                            "Built docker image, imageId="
-                                + imageId
-                                + ", imageTag="
-                                + pushImageTag);
-                        return null;
-                    },
-                    err -> {
-                        throw new IllegalStateException(
-                            "Build docker image failed. tag=" + pushImageTag, err);
-                    });
+                K8sDockerBuildSupport.buildImage(
+                    buildWorkspace,
+                    dockerfile,
+                    pushImageTag,
+                    dockerProcess,
+                    dockerProcessWatcher,
+                    this::logInfo);
                 return null;
             })
                 .orElseThrow(() -> {
@@ -309,34 +220,8 @@ public class FlinkK8sApplicationBuildPipeline extends BuildPipeline {
         execStep(
             7,
             () -> {
-                DockerUtils.usingDockerClient(
-                    dockerClient -> {
-                        PushImageCmd pushCmd =
-                            dockerClient
-                                .pushImageCmd(pushImageTag)
-                                .withAuthConfig(dockerConf.toAuthConf());
-                        try {
-                            ((HackPushImageCmd) pushCmd)
-                                .start(
-                                    DockerUtils.watchDockerPushProcess(
-                                        pushRsp -> {
-                                            dockerProcess.getPush().update(pushRsp);
-                                            DOCKER_EXECUTOR.submit(
-                                                () -> dockerProcessWatcher.onDockerPushProgressChange(
-                                                    dockerProcess.getPush().snapshot()));
-                                        }))
-                                .awaitCompletion();
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            throw new IllegalStateException(e);
-                        }
-                        logInfo("Already pushed docker image, imageTag=" + pushImageTag);
-                        return null;
-                    },
-                    err -> {
-                        throw new IllegalStateException(
-                            "Push docker image failed. tag=" + pushImageTag, err);
-                    });
+                K8sDockerBuildSupport.pushImage(
+                    dockerConf, pushImageTag, dockerProcess, dockerProcessWatcher, this::logInfo);
                 return null;
             })
                 .orElseThrow(() -> {
@@ -365,14 +250,6 @@ public class FlinkK8sApplicationBuildPipeline extends BuildPipeline {
             pushImageTag,
             podTemplatePaths,
             dockerFileTemplate.innerMainJarPath());
-    }
-
-    private String compileTag(String tag, String registerAddress, String imageNamespace) {
-        String tagName = tag.contains("/") ? tag : imageNamespace + "/" + tag;
-        if (StringUtils.isNotBlank(registerAddress) && !tagName.startsWith(registerAddress)) {
-            tagName = registerAddress + "/" + tagName;
-        }
-        return tagName.toLowerCase();
     }
 
     public static FlinkK8sApplicationBuildPipeline of(FlinkK8sApplicationBuildRequest request) {

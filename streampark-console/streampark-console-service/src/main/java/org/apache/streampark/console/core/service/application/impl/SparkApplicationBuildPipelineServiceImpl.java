@@ -479,7 +479,7 @@ public class SparkApplicationBuildPipelineServiceImpl
     @Override
     public boolean allowToBuildNow(@Nonnull Long appId) {
         return getCurrentBuildPipeline(appId)
-            .map(pipeline -> PipelineStatusEnum.running != pipeline.getPipelineStatus())
+            .map(pipeline -> PipelineStatusEnum.RUNNING != pipeline.getPipelineStatus())
             .orElse(true);
     }
 

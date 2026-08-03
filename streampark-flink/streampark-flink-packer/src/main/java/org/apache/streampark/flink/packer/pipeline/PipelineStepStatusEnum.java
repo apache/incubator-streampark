@@ -39,17 +39,17 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum PipelineStepStatusEnum {
 
     /** Unknown step status. */
-    unknown(0),
+    UNKNOWN(0),
     /** Step is waiting to run. */
-    waiting(1),
+    WAITING(1),
     /** Step is running. */
-    running(2),
+    RUNNING(2),
     /** Step finished successfully. */
-    success(3),
+    SUCCESS(3),
     /** Step finished with failure. */
-    failure(4),
+    FAILURE(4),
     /** Step was skipped. */
-    skipped(5);
+    SKIPPED(5);
 
     private final Integer code;
 
@@ -64,7 +64,7 @@ public enum PipelineStepStatusEnum {
                 return status;
             }
         }
-        return unknown;
+        return UNKNOWN;
     }
 
     @JsonValue
@@ -73,6 +73,6 @@ public enum PipelineStepStatusEnum {
     }
 
     public boolean isUnknown() {
-        return this == unknown;
+        return this == UNKNOWN;
     }
 }
