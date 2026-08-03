@@ -124,8 +124,7 @@ public abstract class FlinkClientTrait extends LoggerSupport {
 
     protected static <T> T callAsFlinkException(
                                                 FlinkCallable<T> callable,
-                                                java.util.function.Consumer<Exception> onFailure)
-        throws FlinkException {
+                                                java.util.function.Consumer<Exception> onFailure) throws FlinkException {
         try {
             return callable.call();
         } catch (FlinkException e) {
@@ -138,9 +137,8 @@ public abstract class FlinkClientTrait extends LoggerSupport {
     }
 
     protected static <T> T callAsFlinkExceptionMapping(
-                                                           FlinkCallable<T> callable,
-                                                           java.util.function.Function<Exception, FlinkException> exceptionMapper)
-        throws FlinkException {
+                                                       FlinkCallable<T> callable,
+                                                       java.util.function.Function<Exception, FlinkException> exceptionMapper) throws FlinkException {
         try {
             return callable.call();
         } catch (FlinkException e) {
@@ -151,15 +149,15 @@ public abstract class FlinkClientTrait extends LoggerSupport {
     }
 
     protected CancelResponse toCancelResponse(
-                                              CancelRequest request, JobID jobId, ClusterClient<?> client)
-        throws FlinkException {
+                                              CancelRequest request, JobID jobId,
+                                              ClusterClient<?> client) throws FlinkException {
         return callAsFlinkException(() -> new CancelResponse(cancelJob(request, jobId, client)));
     }
 
     protected SavepointResponse toSavepointResponse(
-                                                      TriggerSavepointRequest request,
-                                                      JobID jobId,
-                                                      ClusterClient<?> client) throws FlinkException {
+                                                    TriggerSavepointRequest request,
+                                                    JobID jobId,
+                                                    ClusterClient<?> client) throws FlinkException {
         return callAsFlinkException(
             () -> new SavepointResponse(triggerSavepoint(request, jobId, client)));
     }
@@ -353,8 +351,7 @@ public abstract class FlinkClientTrait extends LoggerSupport {
         }
     }
 
-    private void applyPyFlinkConfig(SubmitRequest submitRequest, Configuration flinkConfig)
-        throws Exception {
+    private void applyPyFlinkConfig(SubmitRequest submitRequest, Configuration flinkConfig) throws Exception {
         String pythonVenv = Workspace.local().APP_PYTHON_VENV();
         AssertUtils.required(
             FsOperator.lfs().exists(pythonVenv),
@@ -403,8 +400,7 @@ public abstract class FlinkClientTrait extends LoggerSupport {
             submitRequest.jobId());
     }
 
-    private void applyCheckpointDefaults(SubmitRequest submitRequest, Configuration flinkConfig)
-        throws Exception {
+    private void applyCheckpointDefaults(SubmitRequest submitRequest, Configuration flinkConfig) throws Exception {
         if (!submitRequest.hasProp(CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.key())) {
             Configuration flinkDefaultConfiguration =
                 getFlinkDefaultConfiguration(submitRequest.flinkVersion().getFlinkHome());
@@ -473,15 +469,13 @@ public abstract class FlinkClientTrait extends LoggerSupport {
         return callAsFlinkException(() -> doCancel(cancelRequest, flinkConf));
     }
 
-    public abstract SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConf)
-        throws FlinkException;
+    public abstract SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConf) throws FlinkException;
 
     public abstract SavepointResponse doTriggerSavepoint(
                                                          TriggerSavepointRequest request,
                                                          Configuration flinkConf) throws FlinkException;
 
-    public abstract CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConf)
-        throws FlinkException;
+    public abstract CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConf) throws FlinkException;
 
     protected SubmitResponse trySubmit(
                                        SubmitRequest submitRequest,

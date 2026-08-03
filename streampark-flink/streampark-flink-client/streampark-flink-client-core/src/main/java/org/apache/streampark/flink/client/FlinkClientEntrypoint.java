@@ -90,8 +90,7 @@ public final class FlinkClientEntrypoint {
             cancelRequest.deployMode(), client -> client.cancel(cancelRequest), "cancel");
     }
 
-    public static SavepointResponse triggerSavepoint(TriggerSavepointRequest savepointRequest)
-        throws FlinkException {
+    public static SavepointResponse triggerSavepoint(TriggerSavepointRequest savepointRequest) throws FlinkException {
         return invokeClient(
             savepointRequest.deployMode(),
             client -> client.triggerSavepoint(savepointRequest),

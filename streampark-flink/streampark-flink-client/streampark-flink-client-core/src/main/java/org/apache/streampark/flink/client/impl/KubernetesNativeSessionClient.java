@@ -38,10 +38,8 @@ import org.apache.streampark.flink.kubernetes.enums.FlinkK8sDeployMode;
 import org.apache.streampark.flink.kubernetes.model.ClusterKey;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.util.FlinkException;
 import org.apache.flink.client.deployment.ClusterSpecification;
 import org.apache.flink.client.program.ClusterClient;
-import org.apache.flink.client.program.PackagedProgram;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.DeploymentOptions;
 import org.apache.flink.configuration.DeploymentOptionsInternal;
@@ -51,7 +49,7 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.Service
 import org.apache.flink.kubernetes.configuration.KubernetesDeploymentTarget;
 import org.apache.flink.kubernetes.kubeclient.FlinkKubeClient;
 import org.apache.flink.kubernetes.kubeclient.FlinkKubeClientFactory;
-import org.apache.flink.runtime.jobgraph.JobGraph;
+import org.apache.flink.util.FlinkException;
 
 import java.io.File;
 
@@ -98,10 +96,9 @@ public final class KubernetesNativeSessionClient extends KubernetesNativeClientT
                 String jmRestUrl =
                     KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
                         .orElseThrow(
-                            () ->
-                                new FlinkException(
-                                    "[flink-submit] retrieve flink session rest url failed, clusterKey="
-                                        + clusterKey));
+                            () -> new FlinkException(
+                                "[flink-submit] retrieve flink session rest url failed, clusterKey="
+                                    + clusterKey));
                 String jobId =
                     FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl, fatJar, flinkConfig);
                 return new SubmitResponse(
@@ -121,10 +118,9 @@ public final class KubernetesNativeSessionClient extends KubernetesNativeClientT
                         submitRequest,
                         flinkConfig,
                         jarFile,
-                        () ->
-                            getK8sClusterDescriptor(flinkConfig)
-                                .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
-                                .getClusterClient(),
+                        () -> getK8sClusterDescriptor(flinkConfig)
+                            .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
+                            .getClusterClient(),
                         () -> flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID));
                 logInfo(
                     "[flink-submit] flink job has been submitted. "

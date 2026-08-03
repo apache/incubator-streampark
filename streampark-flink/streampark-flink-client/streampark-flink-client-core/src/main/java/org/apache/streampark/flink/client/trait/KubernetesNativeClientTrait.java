@@ -111,8 +111,7 @@ public abstract class KubernetesNativeClientTrait extends FlinkClientTrait {
     }
 
     @Override
-    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig)
-        throws FlinkException {
+    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig) throws FlinkException {
         return executeClientAction(
             cancelRequest,
             flinkConfig,

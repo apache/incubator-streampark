@@ -24,13 +24,13 @@ import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.client.trait.YarnClientTrait;
 import org.apache.streampark.flink.util.FlinkUtils;
 
-import org.apache.flink.util.FlinkException;
 import org.apache.flink.client.deployment.ClusterSpecification;
 import org.apache.flink.client.program.ClusterClient;
 import org.apache.flink.client.program.PackagedProgram;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.DeploymentOptions;
 import org.apache.flink.runtime.jobgraph.JobGraph;
+import org.apache.flink.util.FlinkException;
 import org.apache.flink.yarn.YarnClusterDescriptor;
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget;
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint;
@@ -59,8 +59,7 @@ public final class YarnPerJobClient extends YarnClientTrait {
     }
 
     @Override
-    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig)
-        throws FlinkException {
+    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws FlinkException {
         return callAsFlinkException(
             () -> {
                 String flinkHome = submitRequest.flinkVersion().getFlinkHome();
@@ -112,8 +111,7 @@ public final class YarnPerJobClient extends YarnClientTrait {
     }
 
     @Override
-    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig)
-        throws FlinkException {
+    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig) throws FlinkException {
         return callAsFlinkException(
             () -> {
                 CancelResponse response = super.doCancel(cancelRequest, flinkConfig);

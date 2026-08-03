@@ -28,7 +28,6 @@ import org.apache.streampark.flink.client.trait.KubernetesNativeClientTrait;
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.util.FlinkException;
 import org.apache.flink.client.deployment.ClusterSpecification;
 import org.apache.flink.client.deployment.application.ApplicationConfiguration;
 import org.apache.flink.client.program.ClusterClient;
@@ -37,6 +36,7 @@ import org.apache.flink.configuration.DeploymentOptions;
 import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor;
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions;
+import org.apache.flink.util.FlinkException;
 
 import com.google.common.collect.Lists;
 
@@ -52,8 +52,7 @@ public final class KubernetesNativeApplicationClient extends KubernetesNativeCli
     }
 
     @Override
-    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig)
-        throws FlinkException {
+    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws FlinkException {
         if (StringUtils.isBlank(submitRequest.clusterId())) {
             throw new IllegalArgumentException(
                 String.format(

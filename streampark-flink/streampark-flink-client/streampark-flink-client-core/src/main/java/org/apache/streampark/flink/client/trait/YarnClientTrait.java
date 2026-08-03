@@ -71,8 +71,7 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
     }
 
     @Override
-    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConf)
-        throws FlinkException {
+    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConf) throws FlinkException {
         return executeClientAction(
             cancelRequest,
             flinkConf,
@@ -85,8 +84,7 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
                                                                String applicationName,
                                                                String yarnClusterEntrypoint,
                                                                JobGraph jobGraph,
-                                                               Boolean detached)
-        throws ReflectiveOperationException {
+                                                               Boolean detached) throws ReflectiveOperationException {
         Method method = getDeployInternalMethod();
         return (ClusterClientProvider<ApplicationId>) method.invoke(
             clusterDescriptor,
@@ -105,8 +103,7 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
     }
 
     public Tuple2<ApplicationId, YarnClusterDescriptor> getYarnClusterDescriptor(
-                                                                                 Configuration flinkConfig)
-        throws FlinkException {
+                                                                                 Configuration flinkConfig) throws FlinkException {
         return getYarnClusterDescriptor(flinkConfig, "");
     }
 
@@ -118,8 +115,7 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
     }
 
     public Tuple2<ClusterSpecification, YarnClusterDescriptor> getYarnClusterDeployDescriptor(
-                                                                                              Configuration flinkConfig)
-        throws FlinkException {
+                                                                                              Configuration flinkConfig) throws FlinkException {
         return getYarnClusterDeployDescriptor(flinkConfig, "");
     }
 
@@ -142,8 +138,7 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
     }
 
     private Tuple2<ApplicationId, YarnClusterDescriptor> createYarnClusterDescriptor(
-                                                                                       Configuration flinkConfig)
-        throws FlinkException {
+                                                                                     Configuration flinkConfig) throws FlinkException {
         return callAsFlinkException(
             () -> {
                 YarnClusterClientFactory clientFactory = new YarnClusterClientFactory();
@@ -158,8 +153,7 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
     }
 
     private Tuple2<ClusterSpecification, YarnClusterDescriptor> createYarnClusterDeployDescriptor(
-                                                                                                    Configuration flinkConfig)
-        throws FlinkException {
+                                                                                                  Configuration flinkConfig) throws FlinkException {
         return callAsFlinkException(
             () -> {
                 YarnClusterClientFactory clientFactory = new YarnClusterClientFactory();
@@ -187,10 +181,10 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
     }
 
     private <O> O applyClientAction(
-                                      SavepointRequestTrait request,
-                                      ClientAction<O> actionFunc,
-                                      JobID jobID,
-                                      ClusterClient<?> clusterClient) throws FlinkException {
+                                    SavepointRequestTrait request,
+                                    ClientAction<O> actionFunc,
+                                    JobID jobID,
+                                    ClusterClient<?> clusterClient) throws FlinkException {
         return callAsFlinkExceptionMapping(
             () -> actionFunc.apply(jobID, clusterClient),
             e -> new FlinkException(
@@ -204,8 +198,7 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
                 e));
     }
 
-    private <T> T accessYarnClusterDescriptor(String user, YarnDescriptorSupplier<T> func)
-        throws FlinkException {
+    private <T> T accessYarnClusterDescriptor(String user, YarnDescriptorSupplier<T> func) throws FlinkException {
         try {
             return doAsYarnClusterDescriptor(user, func);
         } catch (FlinkException e) {
@@ -236,8 +229,7 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
         return deployInternalMethod;
     }
 
-    private <T> T doAsYarnClusterDescriptor(String user, YarnDescriptorSupplier<T> func)
-        throws FlinkException {
+    private <T> T doAsYarnClusterDescriptor(String user, YarnDescriptorSupplier<T> func) throws FlinkException {
         UserGroupInformation ugi = HadoopUtils.getUgi();
         UserGroupInformation finalUgi =
             user != null

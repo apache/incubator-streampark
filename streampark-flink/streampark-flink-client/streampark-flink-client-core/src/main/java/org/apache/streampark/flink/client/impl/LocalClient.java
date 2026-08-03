@@ -25,7 +25,6 @@ import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
 import org.apache.streampark.flink.client.trait.FlinkClientTrait;
 
-import org.apache.flink.util.FlinkException;
 import org.apache.flink.client.deployment.executors.RemoteExecutor;
 import org.apache.flink.client.program.MiniClusterClient;
 import org.apache.flink.client.program.PackagedProgram;
@@ -39,6 +38,7 @@ import org.apache.flink.configuration.TaskManagerOptions;
 import org.apache.flink.runtime.jobgraph.JobGraph;
 import org.apache.flink.runtime.minicluster.MiniCluster;
 import org.apache.flink.runtime.minicluster.MiniClusterConfiguration;
+import org.apache.flink.util.FlinkException;
 
 import scala.Tuple2;
 
@@ -57,8 +57,7 @@ public final class LocalClient extends FlinkClientTrait {
     }
 
     @Override
-    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig)
-        throws FlinkException {
+    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws FlinkException {
         return callAsFlinkException(
             () -> {
                 Tuple2<PackagedProgram, JobGraph> programJobGraph =

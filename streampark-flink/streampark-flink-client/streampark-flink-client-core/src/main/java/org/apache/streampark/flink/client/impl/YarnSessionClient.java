@@ -32,7 +32,6 @@ import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
 import org.apache.streampark.flink.client.trait.YarnClientTrait;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.util.FlinkException;
 import org.apache.flink.client.deployment.ClusterSpecification;
 import org.apache.flink.client.program.ClusterClient;
 import org.apache.flink.client.program.PackagedProgram;
@@ -40,6 +39,7 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.DeploymentOptions;
 import org.apache.flink.configuration.DeploymentOptionsInternal;
 import org.apache.flink.runtime.jobgraph.JobGraph;
+import org.apache.flink.util.FlinkException;
 import org.apache.flink.yarn.YarnClusterDescriptor;
 import org.apache.flink.yarn.configuration.YarnConfigOptions;
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget;
@@ -195,8 +195,8 @@ public final class YarnSessionClient extends YarnClientTrait {
     }
 
     private DeployResponse tryReuseExistingYarnSession(
-                                                         DeployRequest deployRequest,
-                                                         YarnClusterDescriptor clusterDescriptor) throws Exception {
+                                                       DeployRequest deployRequest,
+                                                       YarnClusterDescriptor clusterDescriptor) throws Exception {
         try {
             FinalApplicationStatus applicationStatus =
                 clusterDescriptor
