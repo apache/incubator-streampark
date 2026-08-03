@@ -48,6 +48,7 @@ import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment;
 import org.apache.flink.table.api.ExplainDetail;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableConfig;
+import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
@@ -58,6 +59,7 @@ import org.apache.flink.table.functions.TableAggregateFunction;
 import org.apache.flink.table.functions.TableFunction;
 import org.apache.flink.table.functions.UserDefinedFunction;
 import org.apache.flink.table.module.Module;
+import org.apache.flink.table.module.ModuleEntry;
 import org.apache.flink.table.types.AbstractDataType;
 import org.apache.flink.util.SplittableIterator;
 
@@ -678,5 +680,30 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
     @Override
     public String[] getCompletionHints(String statement, int position) {
         return tableEnv.getCompletionHints(statement, position);
+    }
+
+    @Override
+    public void useModules(String... modules) {
+        tableEnv.useModules(modules);
+    }
+
+    @Override
+    public ModuleEntry[] listFullModules() {
+        return tableEnv.listFullModules();
+    }
+
+    @Override
+    public void createTemporaryTable(String path, TableDescriptor descriptor) {
+        tableEnv.createTemporaryTable(path, descriptor);
+    }
+
+    @Override
+    public void createTable(String path, TableDescriptor descriptor) {
+        tableEnv.createTable(path, descriptor);
+    }
+
+    @Override
+    public Table from(TableDescriptor descriptor) {
+        return tableEnv.from(descriptor);
     }
 }

@@ -22,10 +22,7 @@ import org.apache.flink.table.api.CompiledPlan;
 import org.apache.flink.table.api.ExplainDetail;
 import org.apache.flink.table.api.ExplainFormat;
 import org.apache.flink.table.api.PlanReference;
-import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.TableEnvironment;
-import org.apache.flink.table.module.ModuleEntry;
 import org.apache.flink.table.resource.ResourceUri;
 
 import scala.Tuple2;
@@ -42,31 +39,6 @@ public class TableContext extends FlinkTableTrait {
 
     public TableContext(TableEnvConfig args) {
         this(FlinkTableInitializer.initialize(args));
-    }
-
-    @Override
-    public void useModules(String... strings) {
-        delegate().useModules(strings);
-    }
-
-    @Override
-    public void createTemporaryTable(String path, TableDescriptor descriptor) {
-        delegate().createTemporaryTable(path, descriptor);
-    }
-
-    @Override
-    public void createTable(String path, TableDescriptor descriptor) {
-        delegate().createTable(path, descriptor);
-    }
-
-    @Override
-    public Table from(TableDescriptor tableDescriptor) {
-        return delegate().from(tableDescriptor);
-    }
-
-    @Override
-    public ModuleEntry[] listFullModules() {
-        return delegate().listFullModules();
     }
 
     /** @since 1.15 */
@@ -120,5 +92,4 @@ public class TableContext extends FlinkTableTrait {
     public String explainSql(String statement, ExplainFormat format, ExplainDetail... extraDetails) {
         return delegate().explainSql(statement, format, extraDetails);
     }
-
 }

@@ -85,5 +85,4 @@ public class TableContext extends FlinkTableTrait {
     public void sqlUpdate(String stmt) {
         delegate().sqlUpdate(stmt);
     }
-
 }

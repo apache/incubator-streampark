@@ -23,7 +23,6 @@ import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.descriptors.ConnectTableDescriptor;
 import org.apache.flink.table.descriptors.ConnectorDescriptor;
-import org.apache.flink.table.module.ModuleEntry;
 import org.apache.flink.table.sources.TableSource;
 
 import scala.Tuple2;
@@ -40,16 +39,6 @@ public class TableContext extends FlinkTableTrait {
 
     public TableContext(TableEnvConfig args) {
         this(FlinkTableInitializer.initialize(args));
-    }
-
-    @Override
-    public void useModules(String... strings) {
-        delegate().useModules(strings);
-    }
-
-    @Override
-    public ModuleEntry[] listFullModules() {
-        return delegate().listFullModules();
     }
 
     @Override
@@ -96,5 +85,4 @@ public class TableContext extends FlinkTableTrait {
     public void sqlUpdate(String stmt) {
         delegate().sqlUpdate(stmt);
     }
-
 }

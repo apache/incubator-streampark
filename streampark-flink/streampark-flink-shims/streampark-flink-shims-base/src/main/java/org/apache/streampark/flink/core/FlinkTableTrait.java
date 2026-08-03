@@ -25,6 +25,7 @@ import org.apache.flink.table.api.ExplainDetail;
 import org.apache.flink.table.api.StatementSet;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableConfig;
+import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.catalog.Catalog;
@@ -32,6 +33,7 @@ import org.apache.flink.table.expressions.Expression;
 import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.flink.table.functions.UserDefinedFunction;
 import org.apache.flink.table.module.Module;
+import org.apache.flink.table.module.ModuleEntry;
 import org.apache.flink.table.types.AbstractDataType;
 
 import java.util.Optional;
@@ -265,6 +267,31 @@ public abstract class FlinkTableTrait implements TableEnvironment {
     @Override
     public StatementSet createStatementSet() {
         return delegate().createStatementSet();
+    }
+
+    @Override
+    public void useModules(String... modules) {
+        delegate().useModules(modules);
+    }
+
+    @Override
+    public ModuleEntry[] listFullModules() {
+        return delegate().listFullModules();
+    }
+
+    @Override
+    public void createTemporaryTable(String path, TableDescriptor descriptor) {
+        delegate().createTemporaryTable(path, descriptor);
+    }
+
+    @Override
+    public void createTable(String path, TableDescriptor descriptor) {
+        delegate().createTable(path, descriptor);
+    }
+
+    @Override
+    public Table from(TableDescriptor descriptor) {
+        return delegate().from(descriptor);
     }
 
     @Override

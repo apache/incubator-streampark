@@ -29,16 +29,11 @@ import scala.Tuple3;
  */
 public class StreamTableContext extends FlinkStreamTableTrait {
 
-    private final StreamExecutionEnvironment streamEnv;
-    private final StreamTableEnvironment tableEnv;
-
     public StreamTableContext(
                               ParameterTool parameter,
                               StreamExecutionEnvironment streamEnv,
                               StreamTableEnvironment tableEnv) {
         super(parameter, streamEnv, tableEnv);
-        this.streamEnv = streamEnv;
-        this.tableEnv = tableEnv;
     }
 
     public StreamTableContext(
@@ -54,20 +49,20 @@ public class StreamTableContext extends FlinkStreamTableTrait {
     public <T> org.apache.flink.table.api.Table fromDataStream(
                                                                org.apache.flink.streaming.api.scala.DataStream<T> dataStream,
                                                                org.apache.flink.table.api.Schema schema) {
-        return tableEnv.fromDataStream(dataStream, schema);
+        return tableEnv().fromDataStream(dataStream, schema);
     }
 
     @Override
     public org.apache.flink.table.api.Table fromChangelogStream(
                                                                 org.apache.flink.streaming.api.scala.DataStream<org.apache.flink.types.Row> dataStream) {
-        return tableEnv.fromChangelogStream(dataStream);
+        return tableEnv().fromChangelogStream(dataStream);
     }
 
     @Override
     public org.apache.flink.table.api.Table fromChangelogStream(
                                                                 org.apache.flink.streaming.api.scala.DataStream<org.apache.flink.types.Row> dataStream,
                                                                 org.apache.flink.table.api.Schema schema) {
-        return tableEnv.fromChangelogStream(dataStream, schema);
+        return tableEnv().fromChangelogStream(dataStream, schema);
     }
 
     @Override
@@ -75,7 +70,7 @@ public class StreamTableContext extends FlinkStreamTableTrait {
                                                                 org.apache.flink.streaming.api.scala.DataStream<org.apache.flink.types.Row> dataStream,
                                                                 org.apache.flink.table.api.Schema schema,
                                                                 org.apache.flink.table.connector.ChangelogMode changelogMode) {
-        return tableEnv.fromChangelogStream(dataStream, schema, changelogMode);
+        return tableEnv().fromChangelogStream(dataStream, schema, changelogMode);
     }
 
     @Override
@@ -83,14 +78,14 @@ public class StreamTableContext extends FlinkStreamTableTrait {
                                         String path,
                                         org.apache.flink.streaming.api.scala.DataStream<T> dataStream,
                                         org.apache.flink.table.api.Schema schema) {
-        tableEnv.createTemporaryView(path, dataStream, schema);
+        tableEnv().createTemporaryView(path, dataStream, schema);
     }
 
     @Override
     public org.apache.flink.streaming.api.scala.DataStream<org.apache.flink.types.Row> toDataStream(
                                                                                                     org.apache.flink.table.api.Table table) {
         isConvertedToDataStream = true;
-        return tableEnv.toDataStream(table);
+        return tableEnv().toDataStream(table);
     }
 
     @Override
@@ -98,7 +93,7 @@ public class StreamTableContext extends FlinkStreamTableTrait {
                                                                                org.apache.flink.table.api.Table table,
                                                                                Class<T> targetClass) {
         isConvertedToDataStream = true;
-        return tableEnv.toDataStream(table, targetClass);
+        return tableEnv().toDataStream(table, targetClass);
     }
 
     @Override
@@ -106,14 +101,14 @@ public class StreamTableContext extends FlinkStreamTableTrait {
                                                                                org.apache.flink.table.api.Table table,
                                                                                org.apache.flink.table.types.AbstractDataType<?> targetDataType) {
         isConvertedToDataStream = true;
-        return tableEnv.toDataStream(table, targetDataType);
+        return tableEnv().toDataStream(table, targetDataType);
     }
 
     @Override
     public org.apache.flink.streaming.api.scala.DataStream<org.apache.flink.types.Row> toChangelogStream(
                                                                                                          org.apache.flink.table.api.Table table) {
         isConvertedToDataStream = true;
-        return tableEnv.toChangelogStream(table);
+        return tableEnv().toChangelogStream(table);
     }
 
     @Override
@@ -121,7 +116,7 @@ public class StreamTableContext extends FlinkStreamTableTrait {
                                                                                                          org.apache.flink.table.api.Table table,
                                                                                                          org.apache.flink.table.api.Schema targetSchema) {
         isConvertedToDataStream = true;
-        return tableEnv.toChangelogStream(table, targetSchema);
+        return tableEnv().toChangelogStream(table, targetSchema);
     }
 
     @Override
@@ -130,64 +125,54 @@ public class StreamTableContext extends FlinkStreamTableTrait {
                                                                                                          org.apache.flink.table.api.Schema targetSchema,
                                                                                                          org.apache.flink.table.connector.ChangelogMode changelogMode) {
         isConvertedToDataStream = true;
-        return tableEnv.toChangelogStream(table, targetSchema, changelogMode);
-    }
-
-    @Override
-    public void useModules(String... strings) {
-        tableEnv.useModules(strings);
-    }
-
-    @Override
-    public org.apache.flink.table.module.ModuleEntry[] listFullModules() {
-        return tableEnv.listFullModules();
+        return tableEnv().toChangelogStream(table, targetSchema, changelogMode);
     }
 
     @Override
     public org.apache.flink.table.descriptors.StreamTableDescriptor connect(
                                                                             org.apache.flink.table.descriptors.ConnectorDescriptor connectorDescriptor) {
-        return tableEnv.connect(connectorDescriptor);
+        return tableEnv().connect(connectorDescriptor);
     }
 
     public StreamGraph $getStreamGraph(String jobName) {
-        return streamEnv.getStreamGraph(jobName);
+        return streamEnv().getStreamGraph(jobName);
     }
 
     public StreamGraph $getStreamGraph(String jobName, boolean clearTransformations) {
-        return streamEnv.getStreamGraph(jobName, clearTransformations);
+        return streamEnv().getStreamGraph(jobName, clearTransformations);
     }
 
     @Override
     public org.apache.flink.table.api.StatementSet createStatementSet() {
-        return tableEnv.createStatementSet();
+        return tableEnv().createStatementSet();
     }
 
     public org.apache.flink.table.api.Table fromTableSource(org.apache.flink.table.sources.TableSource<?> source) {
-        return tableEnv.fromTableSource(source);
+        return tableEnv().fromTableSource(source);
     }
 
     public void insertInto(org.apache.flink.table.api.Table table, String sinkPath, String... sinkPathContinued) {
-        tableEnv.insertInto(table, sinkPath, sinkPathContinued);
+        tableEnv().insertInto(table, sinkPath, sinkPathContinued);
     }
 
     public void insertInto(String targetPath, org.apache.flink.table.api.Table table) {
-        tableEnv.insertInto(targetPath, table);
+        tableEnv().insertInto(targetPath, table);
     }
 
     public String explain(org.apache.flink.table.api.Table table) {
-        return tableEnv.explain(table);
+        return tableEnv().explain(table);
     }
 
     public String explain(org.apache.flink.table.api.Table table, boolean extended) {
-        return tableEnv.explain(table, extended);
+        return tableEnv().explain(table, extended);
     }
 
     public String explain(boolean extended) {
-        return tableEnv.explain(extended);
+        return tableEnv().explain(extended);
     }
 
     public void sqlUpdate(String stmt) {
-        tableEnv.sqlUpdate(stmt);
+        tableEnv().sqlUpdate(stmt);
     }
 
 }

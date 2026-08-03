@@ -21,10 +21,7 @@ import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.table.api.CompiledPlan;
 import org.apache.flink.table.api.PlanReference;
-import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.TableEnvironment;
-import org.apache.flink.table.module.ModuleEntry;
 
 import scala.Tuple2;
 
@@ -42,32 +39,6 @@ public class TableContext extends FlinkTableTrait {
         this(FlinkTableInitializer.initialize(args));
     }
 
-    @Override
-    public void useModules(String... strings) {
-        delegate().useModules(strings);
-    }
-
-    @Override
-    public void createTemporaryTable(String path, TableDescriptor tableDescriptor) {
-        delegate().createTemporaryTable(path, tableDescriptor);
-    }
-
-    @Override
-    public void createTable(String path, TableDescriptor tableDescriptor) {
-        delegate().createTable(path, tableDescriptor);
-    }
-
-    @Override
-    public Table from(TableDescriptor tableDescriptor) {
-        return delegate().from(tableDescriptor);
-    }
-
-    @Override
-    public ModuleEntry[] listFullModules() {
-        return delegate().listFullModules();
-    }
-
-    @Override
     public JobExecutionResult execute(String jobName) {
         return printStartupLogo(jobName);
     }
@@ -89,5 +60,4 @@ public class TableContext extends FlinkTableTrait {
     public CompiledPlan compilePlanSql(String stmt) {
         return delegate().compilePlanSql(stmt);
     }
-
 }

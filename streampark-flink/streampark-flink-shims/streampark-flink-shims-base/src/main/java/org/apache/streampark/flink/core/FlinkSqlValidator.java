@@ -64,47 +64,38 @@ public final class FlinkSqlValidator {
             return earlyResult;
         }
 
-        String sqlDialect = SqlDialect.DEFAULT.name().toLowerCase();
-        boolean hasInsert = false;
+        ValidationState state = new ValidationState();
         for (SqlCommandCall call : sqlCommands) {
-            String args = call.operands()[0];
-            SqlCommand command = call.command();
-            switch (command) {
-                case SET:
-                case RESET:
-                    if (command == SqlCommand.SET
-                        && args.equals(TableConfigOptions.TABLE_SQL_DIALECT.key())) {
-                        sqlDialect = call.operands()[call.operands().length - 1];
-                    }
-                    break;
-                case BEGIN_STATEMENT_SET:
-                case END_STATEMENT_SET:
-                    LOG.warn("SQL Client Syntax: " + call.command().getCommandName());
-                    break;
-                default:
-                    if (command == SqlCommand.INSERT) {
-                        hasInsert = true;
-                    }
-                    try {
-                        validateSqlCommand(call, sqlDialect);
-                    } catch (RuntimeException e) {
-                        return syntaxErrorResult(call, e);
-                    }
-                    break;
+            FlinkSqlValidationResult failure = processCommand(call, state);
+            if (failure != null) {
+                return failure;
             }
         }
+        return state.toResult(sqlCommands);
+    }
 
-        if (hasInsert) {
-            return new FlinkSqlValidationResult();
+    private static FlinkSqlValidationResult processCommand(SqlCommandCall call, ValidationState state) {
+        SqlCommand command = call.command();
+        switch (command) {
+            case SET:
+            case RESET:
+                state.updateDialect(command, call);
+                return null;
+            case BEGIN_STATEMENT_SET:
+            case END_STATEMENT_SET:
+                LOG.warn("SQL Client Syntax: " + command.getCommandName());
+                return null;
+            default:
+                if (command == SqlCommand.INSERT) {
+                    state.markInsert();
+                }
+                try {
+                    validateSqlCommand(call, state.sqlDialect);
+                } catch (RuntimeException e) {
+                    return syntaxErrorResult(call, e);
+                }
+                return null;
         }
-        return FlinkSqlValidationResult.failure(
-            FlinkSqlValidationFailedType.SYNTAX_ERROR,
-            sqlCommands.get(0).lineStart(),
-            sqlCommands.get(sqlCommands.size() - 1).lineEnd(),
-            0,
-            0,
-            null,
-            "No 'INSERT' statement to trigger the execution of the Flink job.");
     }
 
     private static void validateSqlCommand(SqlCommandCall call, String sqlDialect) {
@@ -171,16 +162,8 @@ public final class FlinkSqlValidator {
     }
 
     private static SqlParser.Config getConfig(SqlDialect sqlDialect) {
-        org.apache.calcite.sql.validate.SqlConformance conformance;
-        if (sqlDialect == SqlDialect.HIVE) {
-            try {
-                conformance = FlinkSqlConformance.DEFAULT;
-            } catch (NoSuchFieldError e) {
-                conformance = FlinkSqlConformance.DEFAULT;
-            }
-        } else if (sqlDialect == SqlDialect.DEFAULT) {
-            conformance = FlinkSqlConformance.DEFAULT;
-        } else {
+        org.apache.calcite.sql.validate.SqlConformance conformance = FlinkSqlConformance.DEFAULT;
+        if (sqlDialect != SqlDialect.DEFAULT && sqlDialect != SqlDialect.HIVE) {
             throw new UnsupportedOperationException("Unsupported sqlDialect: " + sqlDialect);
         }
         return SqlParser.config()
@@ -188,6 +171,37 @@ public final class FlinkSqlValidator {
             .withConformance(conformance)
             .withLex(Lex.JAVA)
             .withIdentifierMaxLength(256);
+    }
+
+    private static final class ValidationState {
+
+        private String sqlDialect = SqlDialect.DEFAULT.name().toLowerCase();
+        private boolean hasInsert;
+
+        private void updateDialect(SqlCommand command, SqlCommandCall call) {
+            if (command == SqlCommand.SET
+                && call.operands()[0].equals(TableConfigOptions.TABLE_SQL_DIALECT.key())) {
+                sqlDialect = call.operands()[call.operands().length - 1];
+            }
+        }
+
+        private void markInsert() {
+            hasInsert = true;
+        }
+
+        private FlinkSqlValidationResult toResult(List<SqlCommandCall> sqlCommands) {
+            if (hasInsert) {
+                return new FlinkSqlValidationResult();
+            }
+            return FlinkSqlValidationResult.failure(
+                FlinkSqlValidationFailedType.SYNTAX_ERROR,
+                sqlCommands.get(0).lineStart(),
+                sqlCommands.get(sqlCommands.size() - 1).lineEnd(),
+                0,
+                0,
+                null,
+                "No 'INSERT' statement to trigger the execution of the Flink job.");
+        }
     }
 
     private static final class Log extends org.apache.streampark.common.util.LoggerSupport {
