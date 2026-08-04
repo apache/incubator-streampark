@@ -91,7 +91,7 @@ public final class SqlClient {
                                        List<String> arguments,
                                        String defaultMode) {
         for (SqlCommandCall setCall : sets) {
-            if (setCall.operands.length > 0
+            if (setCall.operands.length >= 2
                 && ExecutionOptions.RUNTIME_MODE.key().equals(setCall.operands[0])) {
                 String runtimeMode = setCall.operands[1].toUpperCase();
                 arguments.add("-D" + ExecutionOptions.RUNTIME_MODE.key() + "=" + runtimeMode);

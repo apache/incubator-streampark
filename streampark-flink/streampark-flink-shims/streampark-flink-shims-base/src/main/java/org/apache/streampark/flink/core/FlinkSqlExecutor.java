@@ -182,7 +182,10 @@ public final class FlinkSqlExecutor {
     }
 
     private static void setConfig(SqlCommandCall call, ExecutionContext ctx) {
-        String args = firstOperand(call);
+        AssertUtils.required(
+            call.operands != null && call.operands.length >= 2,
+            "SET command requires key and value operands");
+        String args = call.operands[0];
         String operand = call.operands[1];
         LOG.info("{}: {} --> {}", call.command.getName(), args, operand);
         ctx.context.getConfig().getConfiguration().setString(args, operand);
