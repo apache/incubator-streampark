@@ -411,7 +411,7 @@
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-spark-client-api</artifactId>
+            <artifactId>streampark-spark-client-api_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -431,7 +431,7 @@
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-spark-client-core</artifactId>
+            <artifactId>streampark-spark-client-core_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -456,7 +456,7 @@
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-spark-sqlclient</artifactId>
+            <artifactId>streampark-spark-sqlclient_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -634,7 +634,7 @@
                         <!-- spark-submit-core -->
                         <dependency>
                             <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-spark-client-core</artifactId>
+                            <artifactId>streampark-spark-client-core_${scala.binary.version}</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/lib</outputDirectory>
                         </dependency>

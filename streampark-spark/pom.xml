@@ -38,7 +38,7 @@
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-common_2.12</artifactId>
+            <artifactId>streampark-common</artifactId>
             <version>${project.version}</version>
         </dependency>
 

@@ -30,7 +30,7 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-common_${scala.binary.version}</artifactId>
+            <artifactId>streampark-common</artifactId>
         </dependency>
     </dependencies>
 
