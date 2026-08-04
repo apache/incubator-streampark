@@ -62,29 +62,27 @@ public final class YarnPerJobTestCase {
     private static final Logger LOG =
         StreamParkLoggerFactory.loggerFactory().getLogger(YarnPerJobTestCase.class.getName());
 
-    private static final String FLINK_HOME = System.getenv("FLINK_HOME");
-
-    private static final String USER_JAR =
-        FLINK_HOME + "/examples/streaming/SocketWindowWordCount.jar";
-
     private static final String PROGRAM_ARGS = "--hostname localhost --port 9999";
 
     private static final String OPTION = "-e yarn-per-job -p 2 -n";
 
-    private static final Configuration FLINK_DEFAULT_CONFIGURATION;
+    private static Configuration flinkDefaultConfiguration;
+    private static List<CustomCommandLine> customCommandLines;
+    private static Method deployInternalMethod;
 
-    private static final List<CustomCommandLine> CUSTOM_COMMAND_LINES;
+    private YarnPerJobTestCase() {
+    }
 
-    private static final Method DEPLOY_INTERNAL_METHOD;
-
-    static {
-        Objects.requireNonNull(FLINK_HOME, "FLINK_HOME must be set");
-        LOG.info("flinkHome: {}", FLINK_HOME);
-        FLINK_DEFAULT_CONFIGURATION = GlobalConfiguration.loadConfiguration(FLINK_HOME + "/conf");
+    private static void ensureInitialized() {
+        if (deployInternalMethod != null) {
+            return;
+        }
+        String flinkHome = Objects.requireNonNull(System.getenv("FLINK_HOME"), "FLINK_HOME must be set");
+        LOG.info("flinkHome: {}", flinkHome);
+        flinkDefaultConfiguration = GlobalConfiguration.loadConfiguration(flinkHome + "/conf");
         try {
-            CUSTOM_COMMAND_LINES =
-                CliFrontend.loadCustomCommandLines(
-                    FLINK_DEFAULT_CONFIGURATION, FLINK_HOME + "/conf");
+            customCommandLines =
+                CliFrontend.loadCustomCommandLines(flinkDefaultConfiguration, flinkHome + "/conf");
             Class<?>[] paramClass =
                 new Class<?>[]{
                         ClusterSpecification.class,
@@ -93,15 +91,12 @@ public final class YarnPerJobTestCase {
                         JobGraph.class,
                         boolean.class
                 };
-            DEPLOY_INTERNAL_METHOD =
+            deployInternalMethod =
                 YarnClusterDescriptor.class.getDeclaredMethod("deployInternal", paramClass);
-            DEPLOY_INTERNAL_METHOD.setAccessible(true);
+            deployInternalMethod.setAccessible(true);
         } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
+            throw new IllegalStateException("Failed to initialize YARN integration harness", e);
         }
-    }
-
-    private YarnPerJobTestCase() {
     }
 
     @Test
@@ -119,7 +114,7 @@ public final class YarnPerJobTestCase {
                                                                        String yarnClusterEntrypoint,
                                                                        JobGraph jobGraph,
                                                                        Boolean detached) throws Exception {
-        return (ClusterClientProvider<ApplicationId>) DEPLOY_INTERNAL_METHOD.invoke(
+        return (ClusterClientProvider<ApplicationId>) deployInternalMethod.invoke(
             clusterDescriptor,
             clusterSpecification,
             applicationName,
@@ -129,8 +124,11 @@ public final class YarnPerJobTestCase {
     }
 
     public static void main(String[] args) throws Exception {
+        ensureInitialized();
+        String flinkHome = System.getenv("FLINK_HOME");
+        String userJar = flinkHome + "/examples/streaming/SocketWindowWordCount.jar";
         Options customCommandLineOptions = new Options();
-        for (CustomCommandLine customCommandLine : CUSTOM_COMMAND_LINES) {
+        for (CustomCommandLine customCommandLine : customCommandLines) {
             customCommandLine.addGeneralOptions(customCommandLineOptions);
             customCommandLine.addRunOptions(customCommandLineOptions);
         }
@@ -141,8 +139,8 @@ public final class YarnPerJobTestCase {
             FlinkRunOption.parse(commandLineOptions, OPTION.split("\\s+"), true);
 
         CustomCommandLine activeCommandLine = null;
-        LOG.info("Custom commandlines: {}", CUSTOM_COMMAND_LINES);
-        for (CustomCommandLine cli : CUSTOM_COMMAND_LINES) {
+        LOG.info("Custom commandlines: {}", customCommandLines);
+        for (CustomCommandLine cli : customCommandLines) {
             if (cli.isActive(Preconditions.checkNotNull(commandLine))) {
                 activeCommandLine = cli;
                 break;
@@ -171,21 +169,21 @@ public final class YarnPerJobTestCase {
         YarnClusterDescriptor clusterDescriptor =
             (YarnClusterDescriptor) clientFactory.createClusterDescriptor(flinkConfig);
         String[] distJars =
-            new File(FLINK_HOME + "/lib")
+            new File(flinkHome + "/lib")
                 .list((dir, name) -> name.matches("flink-dist.*\\.jar"));
         if (distJars == null || distJars.length == 0) {
             throw new IllegalArgumentException(
-                "[StreamPark] can no found flink-dist jar in " + FLINK_HOME + "/lib");
+                "[StreamPark] can no found flink-dist jar in " + flinkHome + "/lib");
         }
         if (distJars.length > 1) {
             throw new IllegalArgumentException(
                 "[StreamPark] found multiple flink-dist jar in "
-                    + FLINK_HOME
+                    + flinkHome
                     + "/lib,["
                     + String.join(",", distJars)
                     + "]");
         }
-        clusterDescriptor.setLocalJarPath(new Path(FLINK_HOME + "/lib/" + distJars[0]));
+        clusterDescriptor.setLocalJarPath(new Path(flinkHome + "/lib/" + distJars[0]));
 
         try {
             ClusterSpecification clusterSpecification =
@@ -196,7 +194,7 @@ public final class YarnPerJobTestCase {
 
             PackagedProgram packagedProgram =
                 PackagedProgram.newBuilder()
-                    .setJarFile(new File(USER_JAR))
+                    .setJarFile(new File(userJar))
                     .setArguments(PROGRAM_ARGS.split("\\s+"))
                     .build();
             JobGraph jobGraph =
