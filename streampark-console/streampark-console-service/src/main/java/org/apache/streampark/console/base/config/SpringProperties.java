@@ -104,6 +104,16 @@ public class SpringProperties {
         String userName = userConfig.getProperty("spring.datasource.username", "admin");
         String password = userConfig.getProperty("spring.datasource.password", "streampark");
 
+        if ("admin".equals(userName) && "streampark".equals(password)) {
+          log.warn(
+              "[StreamPark] The H2 datasource is using the built-in default credentials "
+                  + "(username=\"admin\"). These same credentials protect the H2 web console at "
+                  + "/h2-console (now restricted to platform administrators). Please set "
+                  + "\"datasource.username\" and \"datasource.password\" in conf/config.yaml to a "
+                  + "strong, unique value before running this instance outside of local "
+                  + "development.");
+        }
+
         springConfig.put("spring.jpa.database-platform", "org.hibernate.dialect.H2Dialect");
         springConfig.put("spring.datasource.driver-class-name", "org.h2.Driver");
         springConfig.put("spring.datasource.username", userName);

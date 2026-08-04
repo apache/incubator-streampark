@@ -46,6 +46,7 @@ public class TeamController {
   @Autowired private TeamService teamService;
 
   @PostMapping("list")
+  @RequiresPermissions("team:view")
   public RestResponse teamList(RestRequest restRequest, Team team) {
     IPage<Team> teamList = teamService.page(team, restRequest);
     return RestResponse.success(teamList);

@@ -33,17 +33,23 @@ import java.util.LinkedHashMap;
 public class ShiroConfig {
 
   @Bean
-  public ShiroFilterFactoryBean shiroFilterFactoryBean(SecurityManager securityManager) {
+  public ShiroFilterFactoryBean shiroFilterFactoryBean(
+      SecurityManager securityManager, AdminOnlyFilter adminOnlyFilter) {
     ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
     shiroFilterFactoryBean.setSecurityManager(securityManager);
 
     LinkedHashMap<String, Filter> filters = new LinkedHashMap<>();
     filters.put("jwt", new JWTFilter());
+    filters.put("adminJwt", adminOnlyFilter);
     shiroFilterFactoryBean.setFilters(filters);
 
     LinkedHashMap<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
     filterChainDefinitionMap.put("/actuator/**", "anon");
-    filterChainDefinitionMap.put("/h2-console/**", "anon");
+    // The H2 web console gives raw SQL access to the entire application database. It must never
+    // be anonymously reachable. This is defense-in-depth on top of
+    // `spring.h2.console.settings.web-allow-others=false`, which already restricts the console to
+    // same-origin connections: only an authenticated platform administrator may open it.
+    filterChainDefinitionMap.put("/h2-console/**", "adminJwt");
 
     filterChainDefinitionMap.put("/passport/**", "anon");
     filterChainDefinitionMap.put("/systemName", "anon");

@@ -20,16 +20,21 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.exception.PermissionDeniedException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Variable;
 import org.apache.streampark.console.core.enums.ReleaseState;
+import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.core.mapper.VariableMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.VariableService;
+import org.apache.streampark.console.system.entity.Member;
+import org.apache.streampark.console.system.entity.User;
+import org.apache.streampark.console.system.service.MemberService;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -72,6 +77,8 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
 
   @Autowired private ServiceHelper serviceHelper;
 
+  @Autowired private MemberService memberService;
+
   @Override
   @Transactional(rollbackFor = Exception.class)
   public void createVariable(Variable variable) {
@@ -89,10 +96,15 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
   @Override
   @Transactional(rollbackFor = Exception.class)
   public void deleteVariable(Variable variable) {
-    if (isDependByApplications(variable)) {
+    ApiAlertException.throwIfTrue(
+        variable.getId() == null, "Sorry, the variable id cannot be null.");
+    Variable persisted = this.baseMapper.selectById(variable.getId());
+    ApiAlertException.throwIfTrue(persisted == null, "Sorry, the variable does not exist.");
+    checkTeamAccess(persisted.getTeamId());
+    if (isDependByApplications(persisted)) {
       throw new ApiAlertException("Sorry, the variable is actually used.");
     }
-    this.removeById(variable);
+    this.removeById(persisted.getId());
   }
 
   @Override
@@ -132,9 +144,14 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     if (findVariable == null) {
       throw new ApiAlertException("Sorry, the variable does not exist.");
     }
+    // Verify against the REAL, persisted teamId - never trust variable.getTeamId() from the
+    // client request, which can be spoofed to any team the attacker happens to belong to.
+    checkTeamAccess(findVariable.getTeamId());
     if (!findVariable.getVariableCode().equals(variable.getVariableCode())) {
       throw new ApiAlertException("Sorry, the variable code cannot be updated.");
     }
+    // A variable can never be moved to a different team via update.
+    variable.setTeamId(findVariable.getTeamId());
 
     variable.setModifyTime(new Date());
     this.baseMapper.updateById(variable);
@@ -215,6 +232,40 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
       }
     }
     return restore;
+  }
+
+  /**
+   * Verify that the currently logged-in user is allowed to operate on a variable that really
+   * belongs to {@code teamId} (fetched from the database, never trusted from client input). Mirrors
+   * the same ADMIN-bypass / team-membership check performed by {@code PermissionAspect} for the
+   * {@code #project.teamId} style scopes, but is applied explicitly here because {@code
+   * showOriginal}/{@code updateVariable}/{@code deleteVariable} only carry the variable id (or a
+   * client-supplied, therefore untrustworthy, teamId) rather than a nested object SpEL can resolve
+   * against.
+   *
+   * @param teamId the real teamId of the variable being accessed, as read from the database.
+   */
+  private void checkTeamAccess(Long teamId) {
+    User currentUser = serviceHelper.getLoginUser();
+    ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
+    if (currentUser.getUserType() == UserType.ADMIN) {
+      return;
+    }
+    Member member = memberService.findByUserId(teamId, currentUser.getUserId());
+    if (member == null) {
+      throw new PermissionDeniedException(
+          "Permission denied, only members of this team can access this variable.");
+    }
+  }
+
+  @Override
+  public Variable getOriginal(Long id) {
+    Variable variable = this.baseMapper.selectById(id);
+    if (variable == null) {
+      return null;
+    }
+    checkTeamAccess(variable.getTeamId());
+    return variable;
   }
 
   private boolean isDependByApplications(Variable variable) {

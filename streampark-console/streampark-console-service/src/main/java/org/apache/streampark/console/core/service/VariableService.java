@@ -72,4 +72,13 @@ public interface VariableService extends IService<Variable> {
   IPage<Application> dependAppsPage(Variable variable, RestRequest request);
 
   void updateVariable(Variable variable);
+
+  /**
+   * Get a variable with its original (unmasked) value, after verifying the current user belongs to
+   * the team that actually owns it.
+   *
+   * @param id variable id
+   * @return the variable, or {@code null} if it doesn't exist
+   */
+  Variable getOriginal(Long id);
 }
