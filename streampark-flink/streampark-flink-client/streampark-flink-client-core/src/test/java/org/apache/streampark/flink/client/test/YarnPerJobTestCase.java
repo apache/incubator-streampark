@@ -218,10 +218,7 @@ public final class YarnPerJobTestCase {
             LOG.info("------------------<<applicationId>>-------------------");
             LOG.info("Flink Job Started: applicationId: {} ", applicationId);
             LOG.info("-------------------------------------");
-            SubmitResponse.builder()
-                .clusterId(applicationId.toString())
-                .flinkConfig(flinkConfig.toMap())
-                .build();
+            new SubmitResponse(applicationId.toString(), flinkConfig.toMap());
         } finally {
             clusterDescriptor.close();
         }

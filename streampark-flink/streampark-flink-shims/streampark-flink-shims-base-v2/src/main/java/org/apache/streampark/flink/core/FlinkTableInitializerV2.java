@@ -135,11 +135,14 @@ public class FlinkTableInitializerV2 extends FlinkStreamingInitializerV2 {
     private EnvironmentSettings.Builder buildEnvSettings(ParameterTool parameter) {
         EnvironmentSettings.Builder builder = EnvironmentSettings.newInstance();
 
-        PlannerType plannerType;
-        try {
-            plannerType = PlannerType.withName(parameter.get(ConfigKeys.KEY_FLINK_TABLE_PLANNER()));
-        } catch (IllegalArgumentException e) {
-            plannerType = PlannerType.BLINK;
+        PlannerType plannerType = PlannerType.BLINK;
+        String plannerName = parameter.get(ConfigKeys.KEY_FLINK_TABLE_PLANNER(), null);
+        if (plannerName != null && !plannerName.isEmpty()) {
+            try {
+                plannerType = PlannerType.withName(plannerName);
+            } catch (IllegalArgumentException e) {
+                plannerType = PlannerType.BLINK;
+            }
         }
 
         switch (plannerType) {

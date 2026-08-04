@@ -56,7 +56,7 @@ public final class TableExt {
 
         /** Changelog stream conversion (Scala {@code \\} operator equivalent). */
         public DataStream<Row> toChangelogDataStream() {
-            return streamTableEnv.toDataStream(table);
+            return streamTableEnv.toDataStream(flinkTable);
         }
     }
 }
