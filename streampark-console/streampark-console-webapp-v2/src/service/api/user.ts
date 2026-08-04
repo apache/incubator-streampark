@@ -20,49 +20,55 @@ import type { BasicTableParams } from '@/types/api/model/baseModel'
 import { request } from '../http'
 
 export function fetchPermCode() {
-  return request.Get<string[]>('/getPermCode')
+    return request.Get<string[]>('/getPermCode')
 }
 
-export function fetchSetUserTeam(data: { teamId: string, userId?: string | number }) {
-  return request.Post<TeamSetResponse>('/user/set_team', data)
+export function fetchSetUserTeam(data: { teamId: string; userId?: string | number }) {
+    return request.Post<TeamSetResponse>('/user/set_team', data)
 }
 
 export function fetchUserList(data: BasicTableParams) {
-  return request.Post<{ records: UserListRecord[], total: number }>('/user/list', data)
+    return request.Post<{ records: UserListRecord[]; total: number }>('/user/list', data)
 }
 
 export function fetchAddUser(data: Recordable) {
-  return request.Post('/user/post', data)
+    return request.Post('/user/post', data)
 }
 
 export function fetchUpdateUser(data: Recordable) {
-  return request.Put('/user/update', data)
+    return request.Put('/user/update', data)
 }
 
 export function fetchDeleteUser(data: { userId: string }) {
-  return request.Delete('/user/delete', data)
+    return request.Delete('/user/delete', data)
 }
 
 export function fetchResetUserPassword(data: { username: string }) {
-  return request.Put<string>('/user/password/reset', data)
+    return request.Put<string>('/user/password/reset', data)
 }
 
 export function fetchUserPasswordUpdate(data: {
-  userId: string | number
-  oldPassword: string
-  password: string
+    userId: string | number
+    oldPassword: string
+    password: string
 }) {
-  return request.Put<boolean>('/user/password', data)
+    return request.Put<boolean>('/user/password', data)
 }
 
 export function fetchCheckUserName(data: { username: string }) {
-  return request.Post<boolean>('/user/check/name', data)
+    return request.Post<boolean>('/user/check/name', data)
 }
 
 export function fetchNoTokenUserList(data: Recordable = {}) {
-  return request.Post<{ records: Array<{ userId: string, username: string }> }>('/user/getNoTokenUser', data)
+    return request.Post<{ records: Array<{ userId: string; username: string }> }>(
+        '/user/getNoTokenUser',
+        data,
+    )
 }
 
 export function fetchAppOwners(data: Recordable = {}) {
-  return request.Post<Array<{ userId: string, username: string, nickName?: string }>>('/user/appOwners', data)
+    return request.Post<Array<{ userId: string; username: string; nickName?: string }>>(
+        '/user/appOwners',
+        data,
+    )
 }

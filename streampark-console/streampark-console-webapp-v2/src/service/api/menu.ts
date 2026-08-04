@@ -19,5 +19,5 @@ import type { AppRouteRecordRaw } from '@/router/types'
 import { request } from '../http'
 
 export function fetchMenuRouter() {
-  return request.Post<AppRouteRecordRaw[]>('/menu/router')
+    return request.Post<AppRouteRecordRaw[]>('/menu/router')
 }

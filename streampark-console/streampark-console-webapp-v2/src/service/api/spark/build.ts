@@ -17,10 +17,13 @@
 
 import { request } from '../../http'
 
-export function fetchBuildSparkApp(data: { appId: string, forceBuild: boolean }) {
-  return request.Post<{ data?: boolean, message?: string }>('/spark/pipe/build', data)
+export function fetchBuildSparkApp(data: { appId: string; forceBuild: boolean }) {
+    return request.Post<{ data?: boolean; message?: string }>('/spark/pipe/build', data)
 }
 
 export function fetchSparkBuildDetail(data: { appId: string }) {
-  return request.Post<{ pipeline: Recordable | null, docker: Recordable | null }>('/spark/pipe/detail', data)
+    return request.Post<{ pipeline: Recordable | null; docker: Recordable | null }>(
+        '/spark/pipe/detail',
+        data,
+    )
 }

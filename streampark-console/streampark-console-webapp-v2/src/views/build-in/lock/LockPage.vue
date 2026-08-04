@@ -34,192 +34,204 @@ const { hour, month, minute, meridiem, year, day, week } = useNow(true)
 
 const userinfo = computed(() => userStore.getUserInfo || {})
 const avatar = computed(() =>
-  userinfo.value.avatar && userinfo.value.avatar !== 'default.jpg'
-    ? userinfo.value.avatar
-    : headerImg,
+    userinfo.value.avatar && userinfo.value.avatar !== 'default.jpg'
+        ? userinfo.value.avatar
+        : headerImg,
 )
 
 async function unLock() {
-  if (!password.value)
-    return
-  loading.value = true
-  try {
-    const ok = await lockStore.unLock(password.value)
-    errMsg.value = !ok
-  }
-  finally {
-    loading.value = false
-  }
+    if (!password.value) return
+    loading.value = true
+    try {
+        const ok = await lockStore.unLock(password.value)
+        errMsg.value = !ok
+    } finally {
+        loading.value = false
+    }
 }
 
 function goLogin() {
-  userStore.logout(true)
-  lockStore.resetLockInfo()
+    userStore.logout(true)
+    lockStore.resetLockInfo()
 }
 
 function handleShowForm(show = false) {
-  showDate.value = show
+    showDate.value = show
 }
 </script>
 
 <template>
-  <div class="lock-page">
-    <div
-      v-show="showDate"
-      class="unlock-trigger"
-      @click="handleShowForm(false)"
-    >
-      <n-icon :component="ionIconComponent('LockClosedOutline')" :size="22" />
-      <span>{{ t('sys.lock.unlock') }}</span>
-    </div>
-
-    <div class="clock-row">
-      <div class="clock-block hour-block">
-        <span>{{ hour }}</span>
-        <span v-show="showDate" class="meridiem">{{ meridiem }}</span>
-      </div>
-      <div class="clock-block minute-block">
-        <span>{{ minute }}</span>
-      </div>
-    </div>
-
-    <transition name="fade-slide">
-      <div v-show="!showDate" class="lock-entry">
-        <div class="lock-entry-content">
-          <div class="lock-entry-header">
-            <img :src="avatar" class="avatar" alt="">
-            <p>{{ userinfo.username }}</p>
-          </div>
-          <n-input
-            v-model:value="password"
-            type="password"
-            show-password-on="click"
-            :placeholder="t('sys.lock.placeholder')"
-          />
-          <n-text v-if="errMsg" type="error" class="err-msg">
-            {{ t('sys.lock.alert') }}
-          </n-text>
-          <div class="lock-entry-footer">
-            <n-button text type="primary" size="small" :disabled="loading" @click="handleShowForm(true)">
-              {{ t('common.back') }}
-            </n-button>
-            <n-button text type="primary" size="small" :disabled="loading" @click="goLogin">
-              {{ t('sys.lock.backToLogin') }}
-            </n-button>
-            <n-button text type="primary" size="small" :loading="loading" @click="unLock">
-              {{ t('sys.lock.entry') }}
-            </n-button>
-          </div>
+    <div class="lock-page">
+        <div v-show="showDate" class="unlock-trigger" @click="handleShowForm(false)">
+            <n-icon :component="ionIconComponent('LockClosedOutline')" :size="22" />
+            <span>{{ t('sys.lock.unlock') }}</span>
         </div>
-      </div>
-    </transition>
 
-    <div class="lock-footer">
-      <div v-show="!showDate" class="footer-time">
-        {{ hour }}:{{ minute }} <span>{{ meridiem }}</span>
-      </div>
-      <div>{{ year }}/{{ month }}/{{ day }} {{ week }}</div>
+        <div class="clock-row">
+            <div class="clock-block hour-block">
+                <span>{{ hour }}</span>
+                <span v-show="showDate" class="meridiem">{{ meridiem }}</span>
+            </div>
+            <div class="clock-block minute-block">
+                <span>{{ minute }}</span>
+            </div>
+        </div>
+
+        <transition name="fade-slide">
+            <div v-show="!showDate" class="lock-entry">
+                <div class="lock-entry-content">
+                    <div class="lock-entry-header">
+                        <img :src="avatar" class="avatar" alt="" />
+                        <p>{{ userinfo.username }}</p>
+                    </div>
+                    <n-input
+                        v-model:value="password"
+                        type="password"
+                        show-password-on="click"
+                        :placeholder="t('sys.lock.placeholder')"
+                    />
+                    <n-text v-if="errMsg" type="error" class="err-msg">
+                        {{ t('sys.lock.alert') }}
+                    </n-text>
+                    <div class="lock-entry-footer">
+                        <n-button
+                            text
+                            type="primary"
+                            size="small"
+                            :disabled="loading"
+                            @click="handleShowForm(true)"
+                        >
+                            {{ t('common.back') }}
+                        </n-button>
+                        <n-button
+                            text
+                            type="primary"
+                            size="small"
+                            :disabled="loading"
+                            @click="goLogin"
+                        >
+                            {{ t('sys.lock.backToLogin') }}
+                        </n-button>
+                        <n-button
+                            text
+                            type="primary"
+                            size="small"
+                            :loading="loading"
+                            @click="unLock"
+                        >
+                            {{ t('sys.lock.entry') }}
+                        </n-button>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <div class="lock-footer">
+            <div v-show="!showDate" class="footer-time">
+                {{ hour }}:{{ minute }} <span>{{ meridiem }}</span>
+            </div>
+            <div>{{ year }}/{{ month }}/{{ day }} {{ week }}</div>
+        </div>
     </div>
-  </div>
 </template>
 
 <style scoped>
 .lock-page {
-  position: fixed;
-  inset: 0;
-  z-index: 3000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #000;
-  color: #bababa;
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    color: #bababa;
 }
 
 .unlock-trigger {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
 }
 
 .clock-row {
-  display: flex;
-  align-items: center;
-  gap: 40px;
+    display: flex;
+    align-items: center;
+    gap: 40px;
 }
 
 .clock-block {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: min(40vw, 320px);
-  height: min(40vh, 320px);
-  border-radius: 30px;
-  background: #141313;
-  font-size: clamp(72px, 16vw, 220px);
-  font-weight: 700;
-  position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: min(40vw, 320px);
+    height: min(40vh, 320px);
+    border-radius: 30px;
+    background: #141313;
+    font-size: clamp(72px, 16vw, 220px);
+    font-weight: 700;
+    position: relative;
 }
 
 .meridiem {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  font-size: 18px;
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    font-size: 18px;
 }
 
 .lock-entry {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgb(0 0 0 / 50%);
-  backdrop-filter: blur(8px);
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(0 0 0 / 50%);
+    backdrop-filter: blur(8px);
 }
 
 .lock-entry-content {
-  width: 260px;
+    width: 260px;
 }
 
 .lock-entry-header {
-  text-align: center;
-  margin-bottom: 12px;
+    text-align: center;
+    margin-bottom: 12px;
 }
 
 .avatar {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
 }
 
 .lock-entry-footer {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
 }
 
 .err-msg {
-  display: block;
-  margin-top: 8px;
-  font-size: 12px;
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
 }
 
 .lock-footer {
-  position: absolute;
-  bottom: 24px;
-  width: 100%;
-  text-align: center;
-  color: #d1d5db;
+    position: absolute;
+    bottom: 24px;
+    width: 100%;
+    text-align: center;
+    color: #d1d5db;
 }
 
 .footer-time {
-  font-size: 28px;
-  margin-bottom: 8px;
+    font-size: 28px;
+    margin-bottom: 8px;
 }
 </style>

@@ -15,17 +15,17 @@
  * limitations under the License.
  */
 export interface SparkApplicationConfig {
-  id?: number;
-  appId?: string;
-  /**
-   * 1)yaml <br>
-   * 2)prop <br>
-   * 3)hocon
-   */
-  format?: 1 | 2 | 3;
-  content?: string;
-  version?: number;
-  latest?: boolean;
-  createTime: string;
-  effective: boolean;
+    id?: number
+    appId?: string
+    /**
+     * 1)yaml <br>
+     * 2)prop <br>
+     * 3)hocon
+     */
+    format?: 1 | 2 | 3
+    content?: string
+    version?: number
+    latest?: boolean
+    createTime: string
+    effective: boolean
 }

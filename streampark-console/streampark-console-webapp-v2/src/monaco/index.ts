@@ -22,137 +22,131 @@ type MonacoModule = typeof import('monaco-editor')
 let loadPromise: Promise<{ monaco: MonacoModule }> | null = null
 
 async function setupMonacoEditor(): Promise<{ monaco: MonacoModule }> {
-  const [
-    monaco,
-    { default: editorWorker },
-    { default: jsonWorker },
-    { default: cssWorker },
-    { default: htmlWorker },
-    { default: tsWorker },
-  ] = await Promise.all([
-    import('monaco-editor'),
-    import('monaco-editor/esm/vs/editor/editor.worker?worker'),
-    import('monaco-editor/esm/vs/language/json/json.worker?worker'),
-    import('monaco-editor/esm/vs/language/css/css.worker?worker'),
-    import('monaco-editor/esm/vs/language/html/html.worker?worker'),
-    import('monaco-editor/esm/vs/language/typescript/ts.worker?worker'),
-  ])
+    const [
+        monaco,
+        { default: editorWorker },
+        { default: jsonWorker },
+        { default: cssWorker },
+        { default: htmlWorker },
+        { default: tsWorker },
+    ] = await Promise.all([
+        import('monaco-editor'),
+        import('monaco-editor/esm/vs/editor/editor.worker?worker'),
+        import('monaco-editor/esm/vs/language/json/json.worker?worker'),
+        import('monaco-editor/esm/vs/language/css/css.worker?worker'),
+        import('monaco-editor/esm/vs/language/html/html.worker?worker'),
+        import('monaco-editor/esm/vs/language/typescript/ts.worker?worker'),
+    ])
 
-  monaco.languages.registerCompletionItemProvider('xml', {
-    provideCompletionItems(model, position) {
-      const textUntilPosition = model.getValueInRange({
-        startLineNumber: 1,
-        startColumn: 1,
-        endLineNumber: position.lineNumber,
-        endColumn: position.column,
-      })
-      if (textUntilPosition.match(/\s*<dep(.*)\s*\n*(.*\n*)*(<\/dependency>|)?$/)) {
-        const word = model.getWordUntilPosition(position)
-        const range = {
-          startLineNumber: position.lineNumber,
-          endLineNumber: position.lineNumber,
-          startColumn: word.startColumn,
-          endColumn: word.endColumn,
-        }
-        const suggestions = [
-          {
-            label: '"dependency"',
-            insertText:
-              'dependency>\n'
-              + '    <groupId></groupId>\n'
-              + '    <artifactId></artifactId>\n'
-              + '    <version></version>\n'
-              + '</dependency',
-            kind: monaco.languages.CompletionItemKind.Function,
-            range,
-          },
-          {
-            label: '"group"',
-            insertText: 'groupId></groupId',
-            kind: monaco.languages.CompletionItemKind.Function,
-            range,
-          },
-          {
-            label: '"artifactId"',
-            insertText: 'artifactId></artifactId',
-            kind: monaco.languages.CompletionItemKind.Function,
-            range,
-          },
-          {
-            label: '"version"',
-            insertText: 'version></version>',
-            kind: monaco.languages.CompletionItemKind.Function,
-            range,
-          },
-        ]
+    monaco.languages.registerCompletionItemProvider('xml', {
+        provideCompletionItems(model, position) {
+            const textUntilPosition = model.getValueInRange({
+                startLineNumber: 1,
+                startColumn: 1,
+                endLineNumber: position.lineNumber,
+                endColumn: position.column,
+            })
+            if (textUntilPosition.match(/\s*<dep(.*)\s*\n*(.*\n*)*(<\/dependency>|)?$/)) {
+                const word = model.getWordUntilPosition(position)
+                const range = {
+                    startLineNumber: position.lineNumber,
+                    endLineNumber: position.lineNumber,
+                    startColumn: word.startColumn,
+                    endColumn: word.endColumn,
+                }
+                const suggestions = [
+                    {
+                        label: '"dependency"',
+                        insertText:
+                            'dependency>\n' +
+                            '    <groupId></groupId>\n' +
+                            '    <artifactId></artifactId>\n' +
+                            '    <version></version>\n' +
+                            '</dependency',
+                        kind: monaco.languages.CompletionItemKind.Function,
+                        range,
+                    },
+                    {
+                        label: '"group"',
+                        insertText: 'groupId></groupId',
+                        kind: monaco.languages.CompletionItemKind.Function,
+                        range,
+                    },
+                    {
+                        label: '"artifactId"',
+                        insertText: 'artifactId></artifactId',
+                        kind: monaco.languages.CompletionItemKind.Function,
+                        range,
+                    },
+                    {
+                        label: '"version"',
+                        insertText: 'version></version>',
+                        kind: monaco.languages.CompletionItemKind.Function,
+                        range,
+                    },
+                ]
 
-        if (textUntilPosition.includes('<exclusions>')) {
-          suggestions.push({
-            label: '"exclusion"',
-            insertText:
-              'exclusion>\n'
-              + '  <artifactId></artifactId>\n'
-              + '  <groupId></groupId>\n'
-              + '</exclusion',
-            kind: monaco.languages.CompletionItemKind.Function,
-            range,
-          })
-        }
-        else {
-          suggestions.push({
-            label: '"exclusions"',
-            insertText:
-              'exclusions>\n'
-              + '  <exclusion>\n'
-              + '    <artifactId></artifactId>\n'
-              + '    <groupId></groupId>\n'
-              + '  </exclusion>\n'
-              + '</exclusions',
-            kind: monaco.languages.CompletionItemKind.Function,
-            range,
-          })
-        }
-        return { suggestions }
-      }
-      return { suggestions: [] }
-    },
-  })
+                if (textUntilPosition.includes('<exclusions>')) {
+                    suggestions.push({
+                        label: '"exclusion"',
+                        insertText:
+                            'exclusion>\n' +
+                            '  <artifactId></artifactId>\n' +
+                            '  <groupId></groupId>\n' +
+                            '</exclusion',
+                        kind: monaco.languages.CompletionItemKind.Function,
+                        range,
+                    })
+                } else {
+                    suggestions.push({
+                        label: '"exclusions"',
+                        insertText:
+                            'exclusions>\n' +
+                            '  <exclusion>\n' +
+                            '    <artifactId></artifactId>\n' +
+                            '    <groupId></groupId>\n' +
+                            '  </exclusion>\n' +
+                            '</exclusions',
+                        kind: monaco.languages.CompletionItemKind.Function,
+                        range,
+                    })
+                }
+                return { suggestions }
+            }
+            return { suggestions: [] }
+        },
+    })
 
-  monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-    ...monaco.languages.typescript.javascriptDefaults.getCompilerOptions(),
-    noUnusedLocals: false,
-    noUnusedParameters: false,
-    allowUnreachableCode: true,
-    allowUnusedLabels: true,
-    strict: false,
-    allowJs: true,
-  })
+    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+        ...monaco.languages.typescript.javascriptDefaults.getCompilerOptions(),
+        noUnusedLocals: false,
+        noUnusedParameters: false,
+        allowUnreachableCode: true,
+        allowUnusedLabels: true,
+        strict: false,
+        allowJs: true,
+    })
 
-  window.MonacoEnvironment = {
-    getWorker(_, label) {
-      if (label === 'json')
-        return new jsonWorker()
-      if (label === 'css' || label === 'scss' || label === 'less')
-        return new cssWorker()
-      if (label === 'html' || label === 'handlebars' || label === 'razor')
-        return new htmlWorker()
-      if (label === 'typescript' || label === 'javascript')
-        return new tsWorker()
-      return new editorWorker()
-    },
-  }
+    window.MonacoEnvironment = {
+        getWorker(_, label) {
+            if (label === 'json') return new jsonWorker()
+            if (label === 'css' || label === 'scss' || label === 'less') return new cssWorker()
+            if (label === 'html' || label === 'handlebars' || label === 'razor')
+                return new htmlWorker()
+            if (label === 'typescript' || label === 'javascript') return new tsWorker()
+            return new editorWorker()
+        },
+    }
 
-  if (getCurrentInstance())
-    await new Promise<void>(resolve => onMounted(resolve))
+    if (getCurrentInstance()) await new Promise<void>((resolve) => onMounted(resolve))
 
-  return { monaco }
+    return { monaco }
 }
 
 /** Lazy-load Monaco editor (single shared instance). */
 export function loadMonaco() {
-  if (!loadPromise)
-    loadPromise = setupMonacoEditor()
-  return loadPromise
+    if (!loadPromise) loadPromise = setupMonacoEditor()
+    return loadPromise
 }
 
 export default loadMonaco

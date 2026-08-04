@@ -25,102 +25,100 @@ const appStore = useAppStore()
 export const isDark = computed(() => appStore.colorMode === 'dark')
 
 export function useDiffMonaco(
-  target: Nullable<Ref>,
-  language: string,
-  getOriginal: Fn,
-  getModified: Fn,
-  options: Editor.IStandaloneDiffEditorConstructionOptions,
-  immediate = true,
+    target: Nullable<Ref>,
+    language: string,
+    getOriginal: Fn,
+    getModified: Fn,
+    options: Editor.IStandaloneDiffEditorConstructionOptions,
+    immediate = true,
 ) {
-  const changeEventHook = createEventHook<string>()
-  const isSetup = ref(false)
-  let diffEditor: Editor.IStandaloneDiffEditor | undefined
+    const changeEventHook = createEventHook<string>()
+    const isSetup = ref(false)
+    let diffEditor: Editor.IStandaloneDiffEditor | undefined
 
-  const getEditor = async (): Promise<Editor.IStandaloneDiffEditor> => {
-    await until(isSetup).toBeTruthy()
-    if (diffEditor)
-      return diffEditor
-    return Promise.reject(null)
-  }
-
-  const disposeEditor = async () => {
-    diffEditor?.dispose()
-    diffEditor = undefined
-    isSetup.value = false
-  }
-
-  const setupEditor = async (el: HTMLElement, monaco?: any) => {
-    if (!el) {
-      console.warn('No editor found')
-      return
+    const getEditor = async (): Promise<Editor.IStandaloneDiffEditor> => {
+        await until(isSetup).toBeTruthy()
+        if (diffEditor) return diffEditor
+        return Promise.reject(null)
     }
-    if (!monaco) {
-      const monacoEditor = await loadMonaco()
-      monaco = monacoEditor.monaco
-    }
-    await disposeEditor()
-    const originalModel = monaco.editor.createModel(getOriginal(), language)
-    const modifiedModel = monaco.editor.createModel(getModified(), language)
-    const defaultOptions = {
-      tabSize: 2,
-      insertSpaces: true,
-      autoClosingQuotes: 'always',
-      detectIndentation: false,
-      folding: false,
-      automaticLayout: true,
-      theme: 'vs',
-      minimap: {
-        enabled: false,
-      },
-    }
-    diffEditor = monaco.editor.createDiffEditor(el, Object.assign(defaultOptions, options || {}))
-    diffEditor?.setModel({
-      original: originalModel,
-      modified: modifiedModel,
-    })
-    isSetup.value = true
-    watch(
-      isDark,
-      () => {
-        if (isDark.value)
-          monaco.editor.setTheme('vs-dark')
-        else
-          monaco.editor.setTheme('vs')
-      },
-      { immediate: true },
-    )
-  }
 
-  const init = async () => {
-    const { monaco } = await loadMonaco()
-    if (target != null) {
-      watch(
-        target,
-        () => {
-          const el = unref(target)
-          if (!el)
+    const disposeEditor = async () => {
+        diffEditor?.dispose()
+        diffEditor = undefined
+        isSetup.value = false
+    }
+
+    const setupEditor = async (el: HTMLElement, monaco?: any) => {
+        if (!el) {
+            console.warn('No editor found')
             return
-          setupEditor(el, monaco)
-        },
-        {
-          flush: 'post',
-          immediate: true,
-        },
-      )
+        }
+        if (!monaco) {
+            const monacoEditor = await loadMonaco()
+            monaco = monacoEditor.monaco
+        }
+        await disposeEditor()
+        const originalModel = monaco.editor.createModel(getOriginal(), language)
+        const modifiedModel = monaco.editor.createModel(getModified(), language)
+        const defaultOptions = {
+            tabSize: 2,
+            insertSpaces: true,
+            autoClosingQuotes: 'always',
+            detectIndentation: false,
+            folding: false,
+            automaticLayout: true,
+            theme: 'vs',
+            minimap: {
+                enabled: false,
+            },
+        }
+        diffEditor = monaco.editor.createDiffEditor(
+            el,
+            Object.assign(defaultOptions, options || {}),
+        )
+        diffEditor?.setModel({
+            original: originalModel,
+            modified: modifiedModel,
+        })
+        isSetup.value = true
+        watch(
+            isDark,
+            () => {
+                if (isDark.value) monaco.editor.setTheme('vs-dark')
+                else monaco.editor.setTheme('vs')
+            },
+            { immediate: true },
+        )
     }
-  }
 
-  if (immediate)
-    init()
+    const init = async () => {
+        const { monaco } = await loadMonaco()
+        if (target != null) {
+            watch(
+                target,
+                () => {
+                    const el = unref(target)
+                    if (!el) return
+                    setupEditor(el, monaco)
+                },
+                {
+                    flush: 'post',
+                    immediate: true,
+                },
+            )
+        }
+    }
 
-  tryOnUnmounted(() => {
-    disposeEditor()
-  })
+    if (immediate) init()
 
-  return {
-    onUpdateValue: changeEventHook.on,
-    getEditor,
-    setupEditor,
-    disposeEditor,
-  }
+    tryOnUnmounted(() => {
+        disposeEditor()
+    })
+
+    return {
+        onUpdateValue: changeEventHook.on,
+        getEditor,
+        setupEditor,
+        disposeEditor,
+    }
 }

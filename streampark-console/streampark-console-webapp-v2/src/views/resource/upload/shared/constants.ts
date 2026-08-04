@@ -16,14 +16,14 @@
  */
 
 export enum ResourceTypeEnum {
-  APP = 'APP',
-  CONNECTOR = 'CONNECTOR',
-  UDXF = 'UDXF',
-  JAR_LIBRARY = 'JAR_LIBRARY',
-  GROUP = 'GROUP',
+    APP = 'APP',
+    CONNECTOR = 'CONNECTOR',
+    UDXF = 'UDXF',
+    JAR_LIBRARY = 'JAR_LIBRARY',
+    GROUP = 'GROUP',
 }
 
 export enum EngineTypeEnum {
-  FLINK = 'FLINK',
-  SPARK = 'SPARK',
+    FLINK = 'FLINK',
+    SPARK = 'SPARK',
 }

@@ -16,19 +16,19 @@
  */
 
 import type { IconProps } from 'naive-ui'
-import { defineComponent, h } from 'vue'
+import { defineComponent } from 'vue'
 import { createIcon } from '@/utils/icon'
 
 /** Vue component for Naive UI `n-icon :component` prop. */
 export function ionIconComponent(name: string) {
-  return defineComponent({
-    name: `IonIconComponent_${name}`,
-    setup() {
-      return () => createIcon(name) ?? null
-    },
-  })
+    return defineComponent({
+        name: `IonIconComponent_${name}`,
+        setup() {
+            return () => createIcon(name) ?? null
+        },
+    })
 }
 
 export function ionIcon(name: string, props?: IconProps) {
-  return createIcon(name, props)
+    return createIcon(name, props)
 }

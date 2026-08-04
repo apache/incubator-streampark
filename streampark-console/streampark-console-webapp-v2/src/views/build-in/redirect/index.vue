@@ -26,20 +26,19 @@ Reflect.deleteProperty(params, 'path')
 const _path = Array.isArray(path) ? path.join('/') : path
 
 if (_redirect_type === 'name') {
-  replace({
-    name: _path,
-    query,
-    params,
-  })
-}
-else {
-  replace({
-    path: _path.startsWith('/') ? _path : `/${_path}`,
-    query,
-  })
+    replace({
+        name: _path,
+        query,
+        params,
+    })
+} else {
+    replace({
+        path: _path.startsWith('/') ? _path : `/${_path}`,
+        query,
+    })
 }
 </script>
 
 <template>
-  <div />
+    <div />
 </template>

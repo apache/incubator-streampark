@@ -19,33 +19,37 @@ import type { SparkCreate, SparkEnv } from '@/types/api/spark/home.type'
 import { request } from '../../http'
 
 export function fetchSparkEnvList() {
-  return request.Post<SparkEnv[]>('/spark/env/list')
+    return request.Post<SparkEnv[]>('/spark/env/list')
 }
 
 export function fetchSparkEnv(id: string) {
-  return request.Post<SparkEnv>('/spark/env/get', { id })
+    return request.Post<SparkEnv>('/spark/env/get', { id })
 }
 
 export function fetchSparkSetDefault(id: string) {
-  return request.Post('/spark/env/default', { id })
+    return request.Post('/spark/env/default', { id })
 }
 
 export function fetchSparkEnvRemove(id: string) {
-  return request.Post<boolean>('/spark/env/delete', { id })
+    return request.Post<boolean>('/spark/env/delete', { id })
 }
 
-export function fetchSparkEnvCheck(data: { id: string | null, sparkName: string, sparkHome: string }) {
-  return request.Post<number>('/spark/env/check', data)
+export function fetchSparkEnvCheck(data: {
+    id: string | null
+    sparkName: string
+    sparkHome: string
+}) {
+    return request.Post<number>('/spark/env/check', data)
 }
 
 export function fetchSparkEnvCreate(data: SparkCreate) {
-  return request.Post<{ code?: number, data?: boolean, msg?: string }>('/spark/env/create', data)
+    return request.Post<{ code?: number; data?: boolean; msg?: string }>('/spark/env/create', data)
 }
 
 export function fetchSparkEnvUpdate(data: SparkCreate) {
-  return request.Post<{ code?: number, data?: boolean, msg?: string }>('/spark/env/update', data)
+    return request.Post<{ code?: number; data?: boolean; msg?: string }>('/spark/env/update', data)
 }
 
 export function fetchSparkSync(id: string) {
-  return request.Post<boolean>('/spark/env/sync', { id })
+    return request.Post<boolean>('/spark/env/sync', { id })
 }

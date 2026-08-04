@@ -18,11 +18,11 @@
 import { createAlovaInstance } from './alova'
 
 const alova = createAlovaInstance({
-  baseURL: __URL_MAP__.api.path,
+    baseURL: __URL_MAP__.api.path,
 })
 
 export const blankInstance = createAlovaInstance({
-  baseURL: '',
+    baseURL: '',
 })
 
 type AlovaInstance = ReturnType<typeof createAlovaInstance>
@@ -32,35 +32,35 @@ type AlovaMethod = ReturnType<AlovaInstance['Post']>
 export type TypedMethod<T> = AlovaMethod & Promise<Service.RequestResult<T>>
 
 function createTypedRequest(instance: AlovaInstance) {
-  return {
-    Post<T = unknown>(
-      url: string,
-      data?: Parameters<AlovaInstance['Post']>[1],
-      config?: Parameters<AlovaInstance['Post']>[2],
-    ): TypedMethod<T> {
-      return instance.Post(url, data, config) as TypedMethod<T>
-    },
-    Get<T = unknown>(
-      url: string,
-      config?: Parameters<AlovaInstance['Get']>[1],
-    ): TypedMethod<T> {
-      return instance.Get(url, config) as TypedMethod<T>
-    },
-    Put<T = unknown>(
-      url: string,
-      data?: Parameters<AlovaInstance['Put']>[1],
-      config?: Parameters<AlovaInstance['Put']>[2],
-    ): TypedMethod<T> {
-      return instance.Put(url, data, config) as TypedMethod<T>
-    },
-    Delete<T = unknown>(
-      url: string,
-      data?: Parameters<AlovaInstance['Delete']>[1],
-      config?: Parameters<AlovaInstance['Delete']>[2],
-    ): TypedMethod<T> {
-      return instance.Delete(url, data, config) as TypedMethod<T>
-    },
-  }
+    return {
+        Post<T = unknown>(
+            url: string,
+            data?: Parameters<AlovaInstance['Post']>[1],
+            config?: Parameters<AlovaInstance['Post']>[2],
+        ): TypedMethod<T> {
+            return instance.Post(url, data, config) as TypedMethod<T>
+        },
+        Get<T = unknown>(
+            url: string,
+            config?: Parameters<AlovaInstance['Get']>[1],
+        ): TypedMethod<T> {
+            return instance.Get(url, config) as TypedMethod<T>
+        },
+        Put<T = unknown>(
+            url: string,
+            data?: Parameters<AlovaInstance['Put']>[1],
+            config?: Parameters<AlovaInstance['Put']>[2],
+        ): TypedMethod<T> {
+            return instance.Put(url, data, config) as TypedMethod<T>
+        },
+        Delete<T = unknown>(
+            url: string,
+            data?: Parameters<AlovaInstance['Delete']>[1],
+            config?: Parameters<AlovaInstance['Delete']>[2],
+        ): TypedMethod<T> {
+            return instance.Delete(url, data, config) as TypedMethod<T>
+        },
+    }
 }
 
 export const request = createTypedRequest(alova)

@@ -18,17 +18,20 @@
 import { request } from '../../http'
 
 export function fetchSavePointHistory(data: Recordable) {
-  return request.Post<{ records: Recordable[], total: number } | Recordable[]>('/flink/savepoint/history', data)
+    return request.Post<{ records: Recordable[]; total: number } | Recordable[]>(
+        '/flink/savepoint/history',
+        data,
+    )
 }
 
-export function fetchRemoveSavePoint(data: { appId: string, id: string }) {
-  return request.Post<boolean>('/flink/savepoint/delete', data)
+export function fetchRemoveSavePoint(data: { appId: string; id: string }) {
+    return request.Post<boolean>('/flink/savepoint/delete', data)
 }
 
 export function fetchSavepointTrigger(data: {
-  appId: string
-  savepointPath?: string | null
-  nativeFormat?: boolean
+    appId: string
+    savepointPath?: string | null
+    nativeFormat?: boolean
 }) {
-  return request.Post<boolean>('/flink/savepoint/trigger', data)
+    return request.Post<boolean>('/flink/savepoint/trigger', data)
 }

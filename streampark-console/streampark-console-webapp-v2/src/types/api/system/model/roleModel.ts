@@ -15,22 +15,22 @@
  * limitations under the License.
  */
 export interface RoleParam {
-  roleId?: number;
-  roleName: string;
-  description: string;
-  menuId: string[];
+    roleId?: number
+    roleName: string
+    description: string
+    menuId: string[]
 }
 
 export interface RoleListRecord {
-  roleId: string;
-  roleName: string;
-  roleCode?: any;
-  description: string;
-  createTime: string;
-  modifyTime: string;
-  sortField?: any;
-  sortOrder?: any;
-  createTimeFrom?: any;
-  createTimeTo?: any;
-  menuId?: any;
+    roleId: string
+    roleName: string
+    roleCode?: any
+    description: string
+    createTime: string
+    modifyTime: string
+    sortField?: any
+    sortOrder?: any
+    createTimeFrom?: any
+    createTimeTo?: any
+    menuId?: any
 }

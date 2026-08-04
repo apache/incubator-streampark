@@ -20,25 +20,28 @@ import type { SparkApplicationConfig } from '@/types/api/spark/conf.type'
 import { request } from '../../http'
 
 export function fetchGetSparkConf(data: { id: number | string }) {
-  return request.Post<SparkApplicationConfig>('/spark/conf/get', data)
+    return request.Post<SparkApplicationConfig>('/spark/conf/get', data)
 }
 
 export function fetchSparkConfTemplate() {
-  return request.Post<string>('/spark/conf/template')
+    return request.Post<string>('/spark/conf/template')
 }
 
 export function fetchSparkConfList(data: Recordable) {
-  return request.Post<{ total: number, records: SparkApplicationConfig[] }>('/spark/conf/list', data)
+    return request.Post<{ total: number; records: SparkApplicationConfig[] }>(
+        '/spark/conf/list',
+        data,
+    )
 }
 
 export function fetchSparkConfHistory(data: SparkApplication) {
-  return request.Post<SparkApplicationConfig[]>('/spark/conf/history', data)
+    return request.Post<SparkApplicationConfig[]>('/spark/conf/history', data)
 }
 
 export function fetchSparkConfRemove(data: { id: number }) {
-  return request.Post<boolean>('/spark/conf/delete', data)
+    return request.Post<boolean>('/spark/conf/delete', data)
 }
 
 export function fetchSysHadoopConf() {
-  return request.Post<Recordable>('/spark/conf/sysHadoopConf')
+    return request.Post<Recordable>('/spark/conf/sysHadoopConf')
 }

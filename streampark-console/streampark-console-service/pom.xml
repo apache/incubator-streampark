@@ -703,8 +703,8 @@
                                     <goal>install-node-and-pnpm</goal>
                                 </goals>
                                 <configuration>
-                                    <nodeVersion>v16.16.0</nodeVersion>
-                                    <pnpmVersion>8.5.0</pnpmVersion>
+                                    <nodeVersion>v20.18.0</nodeVersion>
+                                    <pnpmVersion>10.33.0</pnpmVersion>
                                 </configuration>
                             </execution>
                             <execution>

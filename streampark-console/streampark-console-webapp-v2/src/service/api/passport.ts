@@ -19,23 +19,24 @@ import type { LoginParams, LoginResultModel } from '@/types/api/system/model/use
 import { request } from '../http'
 
 export function fetchSignin(data: LoginParams) {
-  const method = request.Post<LoginResultModel>('/passport/signin', data)
-  method.meta = { authRole: null }
-  return method
+    const method = request.Post<LoginResultModel>('/passport/signin', data)
+    method.meta = { authRole: null }
+    return method
 }
 
 export function fetchSignout() {
-  return request.Post('/passport/signout')
+    return request.Post('/passport/signout')
 }
 
 export function fetchSignType() {
-  const method = request.Post<string[]>('/passport/signtype', {})
-  method.meta = { authRole: null }
-  return method
+    const method = request.Post<string[]>('/passport/signtype', {})
+    method.meta = { authRole: null }
+    return method
 }
 
 export function fetchSsoToken() {
-  const method = request.Get<import('@/types/api/system/model/userModel').LoginResultModel>('/sso/token')
-  method.meta = { authRole: null }
-  return method
+    const method =
+        request.Get<import('@/types/api/system/model/userModel').LoginResultModel>('/sso/token')
+    method.meta = { authRole: null }
+    return method
 }

@@ -19,31 +19,31 @@ import type { AppListRecord } from '@/types/api/flink/app.type'
 import { DeployMode } from '@/enums/flinkEnum'
 
 export function mapEditDeployFields(app: Partial<AppListRecord>) {
-  const clusterFields = {
-    remoteClusterId: null as string | null,
-    yarnSessionClusterId: null as string | null,
-    k8sSessionClusterId: null as string | null,
-  }
-  if (app.deployMode === DeployMode.STANDALONE)
-    clusterFields.remoteClusterId = (app.flinkClusterId as string) ?? null
-  else if (app.deployMode === DeployMode.YARN_SESSION)
-    clusterFields.yarnSessionClusterId = (app.flinkClusterId as string) ?? null
-  else if (app.deployMode === DeployMode.KUBERNETES_SESSION)
-    clusterFields.k8sSessionClusterId = (app.flinkClusterId as string) ?? null
+    const clusterFields = {
+        remoteClusterId: null as string | null,
+        yarnSessionClusterId: null as string | null,
+        k8sSessionClusterId: null as string | null,
+    }
+    if (app.deployMode === DeployMode.STANDALONE)
+        clusterFields.remoteClusterId = (app.flinkClusterId as string) ?? null
+    else if (app.deployMode === DeployMode.YARN_SESSION)
+        clusterFields.yarnSessionClusterId = (app.flinkClusterId as string) ?? null
+    else if (app.deployMode === DeployMode.KUBERNETES_SESSION)
+        clusterFields.k8sSessionClusterId = (app.flinkClusterId as string) ?? null
 
-  return {
-    ...clusterFields,
-    alertId: (app.alertId as string) ?? null,
-    resolveOrder: app.resolveOrder ?? 0,
-    checkPointFailure: {
-      cpMaxFailureInterval: app.cpMaxFailureInterval ?? null,
-      cpFailureRateInterval: app.cpFailureRateInterval ?? null,
-      cpFailureAction: app.cpFailureAction ?? null,
-    },
-    k8sNamespace: app.k8sNamespace ?? '',
-    serviceAccount: app.serviceAccount ?? '',
-    flinkImage: app.flinkImage ?? '',
-    k8sRestExposedType: app.k8sRestExposedType ?? 0,
-    useSysHadoopConf: Boolean(app.k8sHadoopIntegration),
-  }
+    return {
+        ...clusterFields,
+        alertId: (app.alertId as string) ?? null,
+        resolveOrder: app.resolveOrder ?? 0,
+        checkPointFailure: {
+            cpMaxFailureInterval: app.cpMaxFailureInterval ?? null,
+            cpFailureRateInterval: app.cpFailureRateInterval ?? null,
+            cpFailureAction: app.cpFailureAction ?? null,
+        },
+        k8sNamespace: app.k8sNamespace ?? '',
+        serviceAccount: app.serviceAccount ?? '',
+        flinkImage: app.flinkImage ?? '',
+        k8sRestExposedType: app.k8sRestExposedType ?? 0,
+        useSysHadoopConf: Boolean(app.k8sHadoopIntegration),
+    }
 }

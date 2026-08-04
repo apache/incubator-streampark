@@ -21,22 +21,20 @@ export const NOT_FOUND_ROUTE_NAME = 'not-found'
 
 /** Must be registered after dynamic auth routes so it does not shadow real pages. */
 export const NOT_FOUND_ROUTE: RouteRecordRaw = {
-  path: '/:pathMatch(.*)*',
-  name: NOT_FOUND_ROUTE_NAME,
-  component: () => import('@/views/build-in/not-found/index.vue'),
-  meta: {
-    title: '找不到页面',
-    withoutTab: true,
-  },
+    path: '/:pathMatch(.*)*',
+    name: NOT_FOUND_ROUTE_NAME,
+    component: () => import('@/views/build-in/not-found/index.vue'),
+    meta: {
+        title: '找不到页面',
+        withoutTab: true,
+    },
 }
 
 export function registerNotFoundRoute(router: import('vue-router').Router) {
-  if (router.hasRoute(NOT_FOUND_ROUTE_NAME))
-    router.removeRoute(NOT_FOUND_ROUTE_NAME)
-  router.addRoute(NOT_FOUND_ROUTE)
+    if (router.hasRoute(NOT_FOUND_ROUTE_NAME)) router.removeRoute(NOT_FOUND_ROUTE_NAME)
+    router.addRoute(NOT_FOUND_ROUTE)
 }
 
 export function removeNotFoundRoute(router: import('vue-router').Router) {
-  if (router.hasRoute(NOT_FOUND_ROUTE_NAME))
-    router.removeRoute(NOT_FOUND_ROUTE_NAME)
+    if (router.hasRoute(NOT_FOUND_ROUTE_NAME)) router.removeRoute(NOT_FOUND_ROUTE_NAME)
 }

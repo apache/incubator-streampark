@@ -17,42 +17,45 @@
 
 import type { BasicTableParams } from '@/types/api/model/baseModel'
 import type {
-  ResourceDeleteParam,
-  ResourceListRecord,
-  ResourceParam,
+    ResourceDeleteParam,
+    ResourceListRecord,
+    ResourceParam,
 } from '@/types/api/resource/upload/model/resourceModel'
 import { request } from '../../http'
 
 export function fetchResourceList(data: BasicTableParams) {
-  return request.Post<ResourceListRecord[] | { records?: ResourceListRecord[], total?: number }>('/resource/page', data)
+    return request.Post<ResourceListRecord[] | { records?: ResourceListRecord[]; total?: number }>(
+        '/resource/page',
+        data,
+    )
 }
 
 export function fetchAddResource(data: ResourceParam) {
-  return request.Post<boolean>('/resource/add', data)
+    return request.Post<boolean>('/resource/add', data)
 }
 
 export function fetchUpdateResource(data: ResourceParam) {
-  return request.Put<boolean>('/resource/update', data)
+    return request.Put<boolean>('/resource/update', data)
 }
 
 export function fetchResourceDelete(data: ResourceDeleteParam) {
-  return request.Delete<{ status?: string, message?: string }>('/resource/delete', data)
+    return request.Delete<{ status?: string; message?: string }>('/resource/delete', data)
 }
 
 export function fetchTeamResource(data: Recordable = {}) {
-  return request.Post<ResourceListRecord[]>('/resource/list', data)
+    return request.Post<ResourceListRecord[]>('/resource/list', data)
 }
 
 export function checkResource(data: ResourceParam & Recordable) {
-  return request.Post<Recordable>('/resource/check', data)
+    return request.Post<Recordable>('/resource/check', data)
 }
 
 export function fetchUpload(formData: FormData) {
-  return request.Post<{ path: string, mainClass?: string }>('/resource/upload', formData, {
-    timeout: 1000 * 60 * 10,
-  })
+    return request.Post<{ path: string; mainClass?: string }>('/resource/upload', formData, {
+        timeout: 1000 * 60 * 10,
+    })
 }
 
 export function fetchUploadJars() {
-  return request.Post<string[]>('/resource/upload_jars')
+    return request.Post<string[]>('/resource/upload_jars')
 }

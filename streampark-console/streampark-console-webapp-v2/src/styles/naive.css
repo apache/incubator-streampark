@@ -1,14 +1,14 @@
 .n-modal-mask {
-  backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
 }
 
 /* Align tabs flush with the bottom edge. */
 .v-x-scroll {
-  height: 100%;
+    height: 100%;
 }
 
 /* Fix QR code sizing. */
-.n-qr-code{
-  height: unset !important;
-  width: unset !important;;
+.n-qr-code {
+    height: unset !important;
+    width: unset !important;
 }

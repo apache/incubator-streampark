@@ -15,89 +15,93 @@
  * limitations under the License.
  */
 
-import type { AppListResponse, DashboardResponse, SparkApplication } from '@/types/api/spark/app.type'
+import type {
+    AppListResponse,
+    DashboardResponse,
+    SparkApplication,
+} from '@/types/api/spark/app.type'
 import { request } from '../../http'
 
 export function fetchSparkAppGet(data: { id: string }) {
-  return request.Post<SparkApplication>('/spark/app/get', data)
+    return request.Post<SparkApplication>('/spark/app/get', data)
 }
 
 export function fetchSparkAppCreate(data: SparkApplication) {
-  return request.Post<boolean>('/spark/app/create', data)
+    return request.Post<boolean>('/spark/app/create', data)
 }
 
 export function fetchSparkAppCopy(data: SparkApplication) {
-  return request.Post<{ data?: boolean, message?: string }>('/spark/app/copy', data)
+    return request.Post<{ data?: boolean; message?: string }>('/spark/app/copy', data)
 }
 
 export function fetchSparkAppUpdate(data: SparkApplication) {
-  return request.Post<boolean>('/spark/app/update', data)
+    return request.Post<boolean>('/spark/app/update', data)
 }
 
 export function fetchSparkDashboard() {
-  return request.Post<DashboardResponse>('/spark/app/dashboard')
+    return request.Post<DashboardResponse>('/spark/app/dashboard')
 }
 
 export function fetchSparkAppRecord(data: Recordable) {
-  return request.Post<AppListResponse>('/spark/app/list', data)
+    return request.Post<AppListResponse>('/spark/app/list', data)
 }
 
 export function fetchSparkMapping(data: SparkApplication) {
-  return request.Post<boolean>('/spark/app/mapping', data)
+    return request.Post<boolean>('/spark/app/mapping', data)
 }
 
 export function fetchSparkAppStart(data: SparkApplication) {
-  return request.Post<{ data?: boolean, message?: string }>('/spark/app/start', data)
+    return request.Post<{ data?: boolean; message?: string }>('/spark/app/start', data)
 }
 
 export function fetchCheckSparkAppStart(data: SparkApplication) {
-  return request.Post<number>('/spark/app/check/start', data)
+    return request.Post<number>('/spark/app/check/start', data)
 }
 
 export function fetchSparkAppCancel(data: SparkApplication) {
-  return request.Post<boolean>('/spark/app/cancel', data)
+    return request.Post<boolean>('/spark/app/cancel', data)
 }
 
 export function fetchSparkAppClean(data: SparkApplication) {
-  return request.Post<boolean>('/spark/app/clean', data)
+    return request.Post<boolean>('/spark/app/clean', data)
 }
 
 export function fetchSparkAppForcedStop(data: SparkApplication) {
-  return request.Post<boolean>('/spark/app/forcedStop', data)
+    return request.Post<boolean>('/spark/app/forcedStop', data)
 }
 
 export function fetchSparkYarn() {
-  return request.Post<string>('/spark/app/yarn')
+    return request.Post<string>('/spark/app/yarn')
 }
 
-export function fetchCheckSparkName(data: { id?: string, appName: string }) {
-  return request.Post<number>('/spark/app/check/name', data)
+export function fetchCheckSparkName(data: { id?: string; appName: string }) {
+    return request.Post<number>('/spark/app/check/name', data)
 }
 
 export function fetchSparkAppConf(params?: { config?: unknown }) {
-  return request.Post<string>('/spark/app/read_conf', params ?? {})
+    return request.Post<string>('/spark/app/read_conf', params ?? {})
 }
 
 export function fetchSparkMain(data: SparkApplication) {
-  return request.Post<string>('/spark/app/main', data)
+    return request.Post<string>('/spark/app/main', data)
 }
 
 export function fetchSparkBackUps(data: SparkApplication) {
-  return request.Post<Recordable[]>('/spark/app/backups', data)
+    return request.Post<Recordable[]>('/spark/app/backups', data)
 }
 
 export function fetchSparkOptionLog(data: SparkApplication) {
-  return request.Post<Recordable[]>('/spark/app/opt_log', data)
+    return request.Post<Recordable[]>('/spark/app/opt_log', data)
 }
 
 export function fetchSparkDeleteOptLog(id: string) {
-  return request.Post<boolean>('/spark/app/delete/opt_log', { id })
+    return request.Post<boolean>('/spark/app/delete/opt_log', { id })
 }
 
 export function fetchSparkAppRemove(id: string) {
-  return request.Post<boolean>('/spark/app/delete', { id })
+    return request.Post<boolean>('/spark/app/delete', { id })
 }
 
 export function fetchSparkRemoveBackup(id: string) {
-  return request.Post<boolean>('/spark/app/delete/bak', { id })
+    return request.Post<boolean>('/spark/app/delete/bak', { id })
 }

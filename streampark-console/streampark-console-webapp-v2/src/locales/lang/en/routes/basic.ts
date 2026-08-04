@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 export default {
-  login: 'Login',
-  errorLogList: 'Error Log',
-  notice: {
-    message: 'Notification Message',
-    exception: 'Abnormal Alarm',
-  },
-};
+    login: 'Login',
+    errorLogList: 'Error Log',
+    notice: {
+        message: 'Notification Message',
+        exception: 'Abnormal Alarm',
+    },
+}

@@ -18,21 +18,27 @@
 import { request } from '../../http'
 
 export function fetchFlinkSqlVerify(data: Recordable) {
-  return request.Post<{ code?: number, data?: Recordable, msg?: string }>('/flink/sql/verify', data)
+    return request.Post<{ code?: number; data?: Recordable; msg?: string }>(
+        '/flink/sql/verify',
+        data,
+    )
 }
 
 export function fetchFlinkSql(data: Recordable) {
-  return request.Post<Recordable>('/flink/sql/get', data)
+    return request.Post<Recordable>('/flink/sql/get', data)
 }
 
 export function fetchFlinkSqlList(data: Recordable) {
-  return request.Post<Recordable[] | { records?: Recordable[], total?: number }>('/flink/sql/list', data)
+    return request.Post<Recordable[] | { records?: Recordable[]; total?: number }>(
+        '/flink/sql/list',
+        data,
+    )
 }
 
-export function fetchRemoveFlinkSql(data: { appId: string, id: string }) {
-  return request.Post<boolean>('/flink/sql/delete', data)
+export function fetchRemoveFlinkSql(data: { appId: string; id: string }) {
+    return request.Post<boolean>('/flink/sql/delete', data)
 }
 
 export function fetchFlinkSqlHistory(data: Recordable) {
-  return request.Post<Recordable[]>('/flink/sql/history', data)
+    return request.Post<Recordable[]>('/flink/sql/history', data)
 }

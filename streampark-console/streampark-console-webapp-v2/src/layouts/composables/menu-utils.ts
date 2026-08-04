@@ -20,81 +20,96 @@ import type { MenuOption } from 'naive-ui'
 const levelSymbol = Symbol('level')
 
 export function bfs(
-  data: MenuOption[],
-  callback: (item: MenuOption, level: number, stop: () => void, parent?: MenuOption) => void,
-  childrenField = 'children',
+    data: MenuOption[],
+    callback: (item: MenuOption, level: number, stop: () => void, parent?: MenuOption) => void,
+    childrenField = 'children',
 ) {
-  let stopped = false
-  const stop = () => { stopped = true }
-
-  type QueueItem = MenuOption & { [levelSymbol]: number, __parent?: MenuOption }
-  let queue: QueueItem[] = data.map(item => ({ ...item, [levelSymbol]: 1 }))
-
-  while (queue.length > 0) {
-    const item = queue.shift()!
-    const level = item[levelSymbol]
-    const parent = item.__parent
-    const { [levelSymbol]: _, __parent: __p, ...originalItem } = item
-    callback(originalItem as MenuOption, level, stop, parent)
-    if (stopped) {
-      queue = []
-      break
+    let stopped = false
+    const stop = () => {
+        stopped = true
     }
-    const children = item[childrenField as keyof MenuOption] as MenuOption[] | undefined
-    if (children?.length) {
-      queue.push(...children.map(child => ({
-        ...child,
-        [levelSymbol]: level + 1,
-        __parent: originalItem as MenuOption,
-      })))
+
+    type QueueItem = MenuOption & { [levelSymbol]: number; __parent?: MenuOption }
+    let queue: QueueItem[] = data.map((item) => ({ ...item, [levelSymbol]: 1 }))
+
+    while (queue.length > 0) {
+        const item = queue.shift()!
+        const level = item[levelSymbol]
+        const parent = item.__parent
+        const { [levelSymbol]: _, __parent: __p, ...originalItem } = item
+        callback(originalItem as MenuOption, level, stop, parent)
+        if (stopped) {
+            queue = []
+            break
+        }
+        const children = item[childrenField as keyof MenuOption] as MenuOption[] | undefined
+        if (children?.length) {
+            queue.push(
+                ...children.map((child) => ({
+                    ...child,
+                    [levelSymbol]: level + 1,
+                    __parent: originalItem as MenuOption,
+                })),
+            )
+        }
     }
-  }
 }
 
 export function splitMenuData(
-  menus: MenuOption[],
-  _levelOfSplit: number,
-  options: { childrenField?: string } = {},
+    menus: MenuOption[],
+    _levelOfSplit: number,
+    options: { childrenField?: string } = {},
 ) {
-  const { childrenField = 'children' } = options
-  const firstLevelMenus: MenuOption[] = []
+    const { childrenField = 'children' } = options
+    const firstLevelMenus: MenuOption[] = []
 
-  bfs(menus, (menu, level, stop) => {
-    if (level > 2) {
-      stop()
-      return
-    }
-    if (level === 1) {
-      const { [childrenField]: _, ...menuWithoutChildren } = menu as MenuOption & Record<string, unknown>
-      firstLevelMenus.push(menuWithoutChildren)
-    }
-  }, childrenField)
+    bfs(
+        menus,
+        (menu, level, stop) => {
+            if (level > 2) {
+                stop()
+                return
+            }
+            if (level === 1) {
+                const { [childrenField]: _, ...menuWithoutChildren } = menu as MenuOption &
+                    Record<string, unknown>
+                firstLevelMenus.push(menuWithoutChildren)
+            }
+        },
+        childrenField,
+    )
 
-  return [firstLevelMenus] as const
+    return [firstLevelMenus] as const
 }
 
 export function buildMenuMetaMap(menus: MenuOption[], childrenField = 'children') {
-  const map = new Map<string | number, {
-    item: MenuOption
-    parentKey: string | number | null | undefined
-    childrenKeys: (string | number)[]
-  }>()
+    const map = new Map<
+        string | number,
+        {
+            item: MenuOption
+            parentKey: string | number | null | undefined
+            childrenKeys: (string | number)[]
+        }
+    >()
 
-  bfs(menus, (item, _level, _stop, parent) => {
-    const menuKey = item.key
-    const parentMenuKey = parent?.key
-    if (menuKey == null)
-      return
-    if (parentMenuKey != null) {
-      const parentEntry = map.get(parentMenuKey as string | number)
-      parentEntry?.childrenKeys.push(menuKey as string | number)
-    }
-    map.set(menuKey as string | number, {
-      item,
-      childrenKeys: [],
-      parentKey: parentMenuKey,
-    })
-  }, childrenField)
+    bfs(
+        menus,
+        (item, _level, _stop, parent) => {
+            const menuKey = item.key
+            const parentMenuKey = parent?.key
+            if (menuKey == null) return
+            if (parentMenuKey != null) {
+                const parentEntry = map.get(parentMenuKey as string | number)
+                parentEntry?.childrenKeys.push(menuKey as string | number)
+            }
+            map.set(menuKey as string | number, {
+                item,
+                childrenKeys: [],
+                parentKey: parentMenuKey,
+            })
+        },
+        childrenField,
+    )
 
-  return map
+    return map
 }

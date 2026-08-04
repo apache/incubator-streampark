@@ -19,16 +19,19 @@ import type { RouteMeta, RouteRecordRaw } from 'vue-router'
 import type { defineComponent } from 'vue'
 
 export type Component<T = any> =
-  | ReturnType<typeof defineComponent>
-  | (() => Promise<typeof import('*.vue')>)
-  | (() => Promise<T>)
+    | ReturnType<typeof defineComponent>
+    | (() => Promise<typeof import('*.vue')>)
+    | (() => Promise<T>)
 
-export type AppRouteRecordRaw = Omit<RouteRecordRaw, 'meta' | 'name' | 'children' | 'component' | 'components'> & {
-  name: string
-  meta: RouteMeta
-  component?: Component | string
-  components?: Component
-  children?: AppRouteRecordRaw[]
-  props?: Recordable
-  fullPath?: string
+export type AppRouteRecordRaw = Omit<
+    RouteRecordRaw,
+    'meta' | 'name' | 'children' | 'component' | 'components'
+> & {
+    name: string
+    meta: RouteMeta
+    component?: Component | string
+    components?: Component
+    children?: AppRouteRecordRaw[]
+    props?: Recordable
+    fullPath?: string
 }

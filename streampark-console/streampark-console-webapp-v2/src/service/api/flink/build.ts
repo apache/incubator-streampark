@@ -17,10 +17,13 @@
 
 import { request } from '../../http'
 
-export function fetchBuild(data: { appId: string, forceBuild: boolean }) {
-  return request.Post<{ data?: boolean, message?: string }>('/flink/pipe/build', data)
+export function fetchBuild(data: { appId: string; forceBuild: boolean }) {
+    return request.Post<{ data?: boolean; message?: string }>('/flink/pipe/build', data)
 }
 
 export function fetchBuildDetail(data: { appId: string }) {
-  return request.Post<{ pipeline: Recordable | null, docker: Recordable | null }>('/flink/pipe/detail', data)
+    return request.Post<{ pipeline: Recordable | null; docker: Recordable | null }>(
+        '/flink/pipe/detail',
+        data,
+    )
 }

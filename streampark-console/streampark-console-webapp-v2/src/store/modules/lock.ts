@@ -23,54 +23,53 @@ import { Persistent } from '@/utils/cache/persistent'
 import { useUserStore } from './user'
 
 interface LockState {
-  lockInfo: Nullable<LockInfo>
+    lockInfo: Nullable<LockInfo>
 }
 
 export const useLockStore = defineStore('app-lock', {
-  state: (): LockState => ({
-    lockInfo: Persistent.getLocal(LOCK_INFO_KEY),
-  }),
-  getters: {
-    getLockInfo(): Nullable<LockInfo> {
-      return this.lockInfo
+    state: (): LockState => ({
+        lockInfo: Persistent.getLocal(LOCK_INFO_KEY),
+    }),
+    getters: {
+        getLockInfo(): Nullable<LockInfo> {
+            return this.lockInfo
+        },
     },
-  },
-  actions: {
-    setLockInfo(info: LockInfo) {
-      this.lockInfo = Object.assign({}, this.lockInfo, info)
-      Persistent.setLocal(LOCK_INFO_KEY, this.lockInfo, true)
+    actions: {
+        setLockInfo(info: LockInfo) {
+            this.lockInfo = Object.assign({}, this.lockInfo, info)
+            Persistent.setLocal(LOCK_INFO_KEY, this.lockInfo, true)
+        },
+        resetLockInfo() {
+            Persistent.removeLocal(LOCK_INFO_KEY, true)
+            this.lockInfo = null
+        },
+        async unLock(password?: string) {
+            const userStore = useUserStore()
+            if (this.lockInfo?.pwd === password) {
+                this.resetLockInfo()
+                return true
+            }
+            try {
+                const username = userStore.getUserInfo?.username
+                const loginType = userStore.getUserInfo?.loginType
+                const result = await fetchSignin({
+                    username: username!,
+                    password: password!,
+                    loginType: loginType!,
+                })
+                if (result.isSuccess && result.data) {
+                    this.resetLockInfo()
+                    return true
+                }
+                return false
+            } catch {
+                return false
+            }
+        },
     },
-    resetLockInfo() {
-      Persistent.removeLocal(LOCK_INFO_KEY, true)
-      this.lockInfo = null
-    },
-    async unLock(password?: string) {
-      const userStore = useUserStore()
-      if (this.lockInfo?.pwd === password) {
-        this.resetLockInfo()
-        return true
-      }
-      try {
-        const username = userStore.getUserInfo?.username
-        const loginType = userStore.getUserInfo?.loginType
-        const result = await fetchSignin({
-          username: username!,
-          password: password!,
-          loginType: loginType!,
-        })
-        if (result.isSuccess && result.data) {
-          this.resetLockInfo()
-          return true
-        }
-        return false
-      }
-      catch {
-        return false
-      }
-    },
-  },
 })
 
 export function useLockStoreWithOut() {
-  return useLockStore(getPinia())
+    return useLockStore(getPinia())
 }

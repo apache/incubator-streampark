@@ -20,23 +20,21 @@ import { usePermission } from '@/hooks'
 
 /** Fine-grained permission directive, e.g. v-auth="'user:add'" */
 export function install(app: App) {
-  const { hasPermission } = usePermission()
+    const { hasPermission } = usePermission()
 
-  function updateAuth(el: HTMLElement, permission: string | string[]) {
-    if (!permission)
-      return
-    if (!hasPermission(permission))
-      el.parentElement?.removeChild(el)
-  }
+    function updateAuth(el: HTMLElement, permission: string | string[]) {
+        if (!permission) return
+        if (!hasPermission(permission)) el.parentElement?.removeChild(el)
+    }
 
-  const authDirective: Directive<HTMLElement, string | string[]> = {
-    mounted(el, binding) {
-      updateAuth(el, binding.value)
-    },
-    updated(el, binding) {
-      updateAuth(el, binding.value)
-    },
-  }
+    const authDirective: Directive<HTMLElement, string | string[]> = {
+        mounted(el, binding) {
+            updateAuth(el, binding.value)
+        },
+        updated(el, binding) {
+            updateAuth(el, binding.value)
+        },
+    }
 
-  app.directive('auth', authDirective)
+    app.directive('auth', authDirective)
 }

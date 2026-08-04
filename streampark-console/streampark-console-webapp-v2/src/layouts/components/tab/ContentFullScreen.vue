@@ -27,65 +27,65 @@ const previousLayoutMode = ref<LayoutMode>(appStore.layoutMode)
 let stopEscListener: (() => void) | null = null
 
 function enterFullContent() {
-  previousLayoutMode.value = appStore.layoutMode
-  appStore.layoutMode = 'full-content'
+    previousLayoutMode.value = appStore.layoutMode
+    appStore.layoutMode = 'full-content'
 }
 
 function exitFullContent() {
-  let mode = previousLayoutMode.value
-  if (mode === 'full-content' || !mode)
-    mode = 'vertical'
-  appStore.layoutMode = mode
+    let mode = previousLayoutMode.value
+    if (mode === 'full-content' || !mode) mode = 'vertical'
+    appStore.layoutMode = mode
 }
 
-watch(layoutMode, (mode) => {
-  stopEscListener?.()
-  stopEscListener = null
-  if (mode === 'full-content') {
-    stopEscListener = onKeyStroke('Escape', () => {
-      exitFullContent()
-    })
-  }
-}, { immediate: true })
+watch(
+    layoutMode,
+    (mode) => {
+        stopEscListener?.()
+        stopEscListener = null
+        if (mode === 'full-content') {
+            stopEscListener = onKeyStroke('Escape', () => {
+                exitFullContent()
+            })
+        }
+    },
+    { immediate: true },
+)
 
 onUnmounted(() => stopEscListener?.())
 </script>
 
 <template>
-  <Teleport
-    to="#sp-content-fullscreen-trigger"
-    :disabled="layoutMode === 'full-content' || appStore.isMobile"
-  >
-    <n-tooltip placement="bottom" trigger="hover">
-      <template #trigger>
-        <CommonWrapper @click="enterFullContent">
-          <n-icon>
-            <IonIcon name="ExpandOutline" />
-          </n-icon>
-        </CommonWrapper>
-      </template>
-      {{ $t('app.togglContentFullScreen') }}
-    </n-tooltip>
-  </Teleport>
-
-  <Teleport to="body">
-    <div
-      v-if="layoutMode === 'full-content'"
-      class="fixed top-4 right-0 z-[9999]"
+    <Teleport
+        to="#sp-content-fullscreen-trigger"
+        :disabled="layoutMode === 'full-content' || appStore.isMobile"
     >
-      <n-tooltip placement="left" trigger="hover">
-        <template #trigger>
-          <n-el
-            class="cursor-pointer rounded-l-lg bg-[var(--primary-color)] p-2 shadow-lg c-[var(--base-color)]"
-            @click="exitFullContent"
-          >
-            <n-icon>
-              <IonIcon name="ContractOutline" />
-            </n-icon>
-          </n-el>
-        </template>
-        {{ $t('app.togglContentFullScreen') }}
-      </n-tooltip>
-    </div>
-  </Teleport>
+        <n-tooltip placement="bottom" trigger="hover">
+            <template #trigger>
+                <CommonWrapper @click="enterFullContent">
+                    <n-icon>
+                        <IonIcon name="ExpandOutline" />
+                    </n-icon>
+                </CommonWrapper>
+            </template>
+            {{ $t('app.togglContentFullScreen') }}
+        </n-tooltip>
+    </Teleport>
+
+    <Teleport to="body">
+        <div v-if="layoutMode === 'full-content'" class="fixed top-4 right-0 z-[9999]">
+            <n-tooltip placement="left" trigger="hover">
+                <template #trigger>
+                    <n-el
+                        class="cursor-pointer rounded-l-lg bg-[var(--primary-color)] p-2 shadow-lg c-[var(--base-color)]"
+                        @click="exitFullContent"
+                    >
+                        <n-icon>
+                            <IonIcon name="ContractOutline" />
+                        </n-icon>
+                    </n-el>
+                </template>
+                {{ $t('app.togglContentFullScreen') }}
+            </n-tooltip>
+        </div>
+    </Teleport>
 </template>

@@ -27,65 +27,60 @@ const appName = import.meta.env.VITE_APP_NAME
 
 /** Collapsed sidebar shows icon only; expanded shows icon + Apache StreamPark title. */
 const showIconOnly = computed(() => {
-  if (['sidebar', 'mixed-sidebar', 'horizontal', 'vertical'].includes(appStore.layoutMode))
+    if (['sidebar', 'mixed-sidebar', 'horizontal', 'vertical'].includes(appStore.layoutMode))
+        return appStore.collapsed
+    if (['two-column', 'mixed-two-column'].includes(appStore.layoutMode)) return true
     return appStore.collapsed
-  if (['two-column', 'mixed-two-column'].includes(appStore.layoutMode))
-    return true
-  return appStore.collapsed
 })
 
 function goHome() {
-  const home = userStore.getUserInfo?.homePath || import.meta.env.VITE_HOME_PATH || '/flink/app'
-  router.push(home)
+    const home = userStore.getUserInfo?.homePath || import.meta.env.VITE_HOME_PATH || '/flink/app'
+    router.push(home)
 }
 </script>
 
 <template>
-  <div
-    class="streampark-logo h-60px flex-center cursor-pointer gap-2 px-10px overflow-hidden"
-    @click="goHome"
-  >
-    <img
-      :src="logoIcon"
-      alt="StreamPark"
-      class="streampark-logo__icon shrink-0"
+    <div
+        class="streampark-logo h-60px flex-center cursor-pointer gap-2 px-10px overflow-hidden"
+        @click="goHome"
     >
-    <div v-show="!showIconOnly" class="streampark-logo__title min-w-0">
-      <span class="streampark-logo__apache">APACHE</span>
-      <span class="streampark-logo__name">{{ appName.replace(/^Apache\s+/i, '') }}</span>
+        <img :src="logoIcon" alt="StreamPark" class="streampark-logo__icon shrink-0" />
+        <div v-show="!showIconOnly" class="streampark-logo__title min-w-0">
+            <span class="streampark-logo__apache">APACHE</span>
+            <span class="streampark-logo__name">{{ appName.replace(/^Apache\s+/i, '') }}</span>
+        </div>
     </div>
-  </div>
 </template>
 
 <style scoped>
 .streampark-logo {
-  border-bottom: 1px solid var(--n-border-color);
+    border-bottom: 1px solid var(--n-border-color);
 }
 
 .streampark-logo__icon {
-  width: 40px;
-  height: auto;
+    width: 40px;
+    height: auto;
 }
 
 .streampark-logo__title {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.15;
-  color: var(--n-text-color);
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+    color: var(--n-text-color);
 }
 
 .streampark-logo__apache {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  opacity: 0.85;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    opacity: 0.85;
 }
 
 .streampark-logo__name {
-  font-size: 18px;
-  font-weight: 300;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    font-size: 18px;
+    font-weight: 300;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 </style>

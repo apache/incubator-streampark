@@ -20,13 +20,13 @@ import type { BasicTableParams } from '@/types/api/model/baseModel'
 import { request } from '../http'
 
 export function fetchMenuList(params?: Recordable) {
-  return request.Post<MenuListModel>('/menu/list', params ?? {})
+    return request.Post<MenuListModel>('/menu/list', params ?? {})
 }
 
 export function fetchRoleMenu(params: { roleId: string | number }) {
-  return request.Post<string[]>('/role/menu', params)
+    return request.Post<string[]>('/role/menu', params)
 }
 
 export function fetchRoleListByPage(params?: BasicTableParams & { roleName?: string }) {
-  return request.Post<RolePageListGetResultModel>('/role/list', params ?? {})
+    return request.Post<RolePageListGetResultModel>('/role/list', params ?? {})
 }

@@ -18,26 +18,26 @@
 import type { HadoopConf } from '@/types/api/flink/config.type'
 import { request } from '../../http'
 
-export function fetchGetVer(data: { id: string, appId?: string }) {
-  return request.Post<Recordable>('/flink/conf/get', data)
+export function fetchGetVer(data: { id: string; appId?: string }) {
+    return request.Post<Recordable>('/flink/conf/get', data)
 }
 
 export function fetchConfTemplate() {
-  return request.Post<string>('/flink/conf/template')
+    return request.Post<string>('/flink/conf/template')
 }
 
 export function fetchSysHadoopConf() {
-  return request.Post<HadoopConf>('/flink/conf/sys_hadoop_conf')
+    return request.Post<HadoopConf>('/flink/conf/sys_hadoop_conf')
 }
 
 export function fetchListVer(data: Recordable) {
-  return request.Post<Recordable[]>('/flink/conf/list', data)
+    return request.Post<Recordable[]>('/flink/conf/list', data)
 }
 
 export function fetchRemoveConf(data: { id: string }) {
-  return request.Post<boolean>('/flink/conf/delete', data)
+    return request.Post<boolean>('/flink/conf/delete', data)
 }
 
 export function fetchConfHistory(data: Recordable) {
-  return request.Post<Recordable[]>('/flink/conf/history', data)
+    return request.Post<Recordable[]>('/flink/conf/history', data)
 }

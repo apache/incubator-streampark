@@ -20,21 +20,21 @@ import type { BasicTableParams } from '@/types/api/model/baseModel'
 import { request } from '../http'
 
 export function fetchTokenList(data?: BasicTableParams & { username?: string }) {
-  return request.Post<TokenListRecord[]>('/token/list', data ?? {})
+    return request.Post<TokenListRecord[]>('/token/list', data ?? {})
 }
 
 export function fetchTokenCreate(data: TokenCreateParam) {
-  return request.Post<TokenListRecord>('/token/create', data)
+    return request.Post<TokenListRecord>('/token/create', data)
 }
 
 export function fetchTokenStatusToggle(data: { tokenId: string }) {
-  return request.Post<boolean>('/token/toggle', data)
+    return request.Post<boolean>('/token/toggle', data)
 }
 
 export function fetchTokenDelete(data: { tokenId: string }) {
-  return request.Delete<boolean>('/token/delete', data)
+    return request.Delete<boolean>('/token/delete', data)
 }
 
 export function fetchCheckToken(data?: Recordable) {
-  return request.Post<number>('/token/check', data ?? {})
+    return request.Post<number>('/token/check', data ?? {})
 }

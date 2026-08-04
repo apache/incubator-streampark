@@ -21,13 +21,13 @@ import { decodeByBase64 } from '@/utils/cipher'
 import { useMonaco } from '@/hooks/web/useMonaco'
 
 const props = defineProps<{
-  show: boolean
-  version?: number | string | null
-  appId?: string | null
+    show: boolean
+    version?: number | string | null
+    appId?: string | null
 }>()
 
 const emit = defineEmits<{
-  'update:show': [value: boolean]
+    'update:show': [value: boolean]
 }>()
 
 const { t } = useI18n()
@@ -35,57 +35,51 @@ const loading = ref(false)
 const editorRef = ref<HTMLElement | null>(null)
 
 const { setContent } = useMonaco(editorRef, {
-  language: 'yaml',
-  code: '',
-  options: {
-    ...(getMonacoOptions(true) as Recordable),
-    readOnly: true,
-  },
+    language: 'yaml',
+    code: '',
+    options: {
+        ...(getMonacoOptions(true) as Recordable),
+        readOnly: true,
+    },
 })
 
 watch(
-  () => [props.show, props.version, props.appId] as const,
-  async ([show, version, appId]) => {
-    if (!show || version == null || !appId)
-      return
-    loading.value = true
-    try {
-      const result = await fetchGetVer({ id: String(version), appId })
-      if (!result.isSuccess)
-        throwApiFailure(result, t('sys.api.apiRequestFailed'))
-      const content = result.data?.content
-        ? decodeByBase64(result.data.content)
-        : ''
-      await setContent(content)
-    }
-    catch (e: any) {
-      showCatchError(e, t('sys.api.apiRequestFailed'))
-      await setContent('')
-    }
-    finally {
-      loading.value = false
-    }
-  },
+    () => [props.show, props.version, props.appId] as const,
+    async ([show, version, appId]) => {
+        if (!show || version == null || !appId) return
+        loading.value = true
+        try {
+            const result = await fetchGetVer({ id: String(version), appId })
+            if (!result.isSuccess) throwApiFailure(result, t('sys.api.apiRequestFailed'))
+            const content = result.data?.content ? decodeByBase64(result.data.content) : ''
+            await setContent(content)
+        } catch (e: any) {
+            showCatchError(e, t('sys.api.apiRequestFailed'))
+            await setContent('')
+        } finally {
+            loading.value = false
+        }
+    },
 )
 </script>
 
 <template>
-  <n-modal
-    :show="show"
-    preset="card"
-    :style="{ width: '860px' }"
-    :title="`${t('flink.app.detail.conf')} v${version ?? ''}`"
-    @update:show="emit('update:show', $event)"
-  >
-    <n-spin :show="loading">
-      <div ref="editorRef" class="config-view-editor" />
-    </n-spin>
-  </n-modal>
+    <n-modal
+        :show="show"
+        preset="card"
+        :style="{ width: '860px' }"
+        :title="`${t('flink.app.detail.conf')} v${version ?? ''}`"
+        @update:show="emit('update:show', $event)"
+    >
+        <n-spin :show="loading">
+            <div ref="editorRef" class="config-view-editor" />
+        </n-spin>
+    </n-modal>
 </template>
 
 <style scoped>
 .config-view-editor {
-  height: 480px;
-  width: 100%;
+    height: 480px;
+    width: 100%;
 }
 </style>

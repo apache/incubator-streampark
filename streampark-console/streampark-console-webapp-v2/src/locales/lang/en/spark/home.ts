@@ -15,39 +15,39 @@
  * limitations under the License.
  */
 export default {
-  title: 'Spark Home',
-  sparkVersion: 'Spark Version',
-  searchByName: 'Search by Spark Name',
-  conf: 'Spark Conf',
-  sync: 'Sync Conf',
-  syncSuccess: '{0} conf sync successful!',
-  defaultLabel: 'Default',
-  edit: 'Edit Spark Home',
-  delete: 'Are you sure delete this spark home ?',
-  tips: {
-    remove: 'The current spark home has been successfully deleted.',
-    setDefault: 'Successfully set the default spark home.',
-    sparkName: 'Spark alias, for example: Spark-1.12',
-    sparkHome:
-      'The absolute path of the server where Spark is located, for example: /usr/local/spark',
-    sparkNameIsRequired: 'Spark name is required',
-    sparkHomeIsRequired: 'Spark Home is required',
-    sparkNameIsRepeated: 'Spark name already exists',
-    sparkHomePathIsInvalid: 'Spark Home path is invalid',
-    sparkDistNotFound: 'spark-dist jar file not found in spark/lib path',
-    sparkDistIsRepeated:
-      'Multiple spark-dist jar files exist in spark/lib path, there must be only one!',
-    createSparkHomeSuccessful: 'Creation successful!',
-    updateSparkHomeSuccessful: 'Update successful!',
-  },
-  form: {
-    sparkName: 'Spark Name',
-    sparkHome: 'Spark Home',
-    description: 'Description',
-  },
-  placeholder: {
-    sparkName: 'Please enter Spark alias',
-    sparkHome: 'Please enter Spark installation path',
-    description: 'Spark description',
-  },
-};
+    title: 'Spark Home',
+    sparkVersion: 'Spark Version',
+    searchByName: 'Search by Spark Name',
+    conf: 'Spark Conf',
+    sync: 'Sync Conf',
+    syncSuccess: '{0} conf sync successful!',
+    defaultLabel: 'Default',
+    edit: 'Edit Spark Home',
+    delete: 'Are you sure delete this spark home ?',
+    tips: {
+        remove: 'The current spark home has been successfully deleted.',
+        setDefault: 'Successfully set the default spark home.',
+        sparkName: 'Spark alias, for example: spark-3.5',
+        sparkHome:
+            'The absolute path of the server where Spark is located, for example: /usr/local/spark',
+        sparkNameIsRequired: 'Spark name is required',
+        sparkHomeIsRequired: 'Spark Home is required',
+        sparkNameIsRepeated: 'Spark name already exists',
+        sparkHomePathIsInvalid: 'Spark Home path is invalid',
+        sparkDistNotFound: 'spark-dist jar file not found in spark/lib path',
+        sparkDistIsRepeated:
+            'Multiple spark-dist jar files exist in spark/lib path, there must be only one!',
+        createSparkHomeSuccessful: 'Creation successful!',
+        updateSparkHomeSuccessful: 'Update successful!',
+    },
+    form: {
+        sparkName: 'Spark Name',
+        sparkHome: 'Spark Home',
+        description: 'Description',
+    },
+    placeholder: {
+        sparkName: 'Please enter Spark alias',
+        sparkHome: 'Please enter Spark installation path',
+        description: 'Spark description',
+    },
+}

@@ -22,9 +22,9 @@ import App from './App.vue'
 import { bootstrap } from './bootstrap'
 
 async function setup() {
-  const app = createApp(App)
-  await bootstrap(app)
-  app.mount('#app')
+    const app = createApp(App)
+    await bootstrap(app)
+    app.mount('#app')
 }
 
 setup()

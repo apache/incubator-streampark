@@ -15,26 +15,26 @@
  * limitations under the License.
  */
 export default {
-  externalLinkSetting: 'External Link',
-  form: {
-    badgeLabel: 'Label',
-    badgeLabelPlaceholder: 'Please enter label',
-    badgeName: 'Name',
-    badgeNamePlaceholder: 'Please enter name',
-    badgeNameIsRequired: 'Name is required',
-    badgeColor: 'Color',
-    badgeColorIsRequired: 'Color is required',
-    badgePreview: 'Preview',
-    linkUrl: 'Link',
-    linkUrlPlaceholder: 'Please enter link url',
-    linkUrlIsRequired: 'Link is required',
-  },
-  operateMessage: {
-    createLinkSuccessful: 'Successfully create external link!',
-    createLinkFailed: 'Create external link failed!',
-    updateLinkSuccessful: 'Successfully update external link!',
-    updateLinkFailed: 'Update external link failed!',
-    operationFailed: 'Operation failed',
-  },
-  confDeleteTitle: 'Are you sure delete this link record',
-};
+    externalLinkSetting: 'External Link',
+    form: {
+        badgeLabel: 'Label',
+        badgeLabelPlaceholder: 'Please enter label',
+        badgeName: 'Name',
+        badgeNamePlaceholder: 'Please enter name',
+        badgeNameIsRequired: 'Name is required',
+        badgeColor: 'Color',
+        badgeColorIsRequired: 'Color is required',
+        badgePreview: 'Preview',
+        linkUrl: 'Link',
+        linkUrlPlaceholder: 'Please enter link url',
+        linkUrlIsRequired: 'Link is required',
+    },
+    operateMessage: {
+        createLinkSuccessful: 'Successfully create external link!',
+        createLinkFailed: 'Create external link failed!',
+        updateLinkSuccessful: 'Successfully update external link!',
+        updateLinkFailed: 'Update external link failed!',
+        operationFailed: 'Operation failed',
+    },
+    confDeleteTitle: 'Are you sure delete this link record',
+}

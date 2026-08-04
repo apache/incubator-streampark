@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { genMessage } from '../helper';
-const modules = import.meta.glob('./en/**/*.ts', { eager: true });
+import { genMessage } from '../helper'
+const modules = import.meta.glob('./en/**/*.ts', { eager: true })
 export default {
-  message: {
-    ...genMessage(modules as Recordable, 'en'),
-  },
-  dateLocale: null,
-  dateLocaleName: 'en',
-};
+    message: {
+        ...genMessage(modules as Recordable, 'en'),
+    },
+    dateLocale: null,
+    dateLocaleName: 'en',
+}

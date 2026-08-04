@@ -19,29 +19,29 @@ import type { BasicTableParams } from '@/types/api/model/baseModel'
 import { request } from '../../http'
 
 export interface YarnQueueRecord {
-  id: string
-  queueLabel: string
-  description?: string
-  createTime?: string
-  modifyTime?: string
+    id: string
+    queueLabel: string
+    description?: string
+    createTime?: string
+    modifyTime?: string
 }
 
 export function fetchYarnQueueList(data: BasicTableParams & { queueLabel?: string }) {
-  return request.Post<YarnQueueRecord[]>('/yarn/queue/list', data)
+    return request.Post<YarnQueueRecord[]>('/yarn/queue/list', data)
 }
 
 export function fetchYarnQueueCreate(data: Recordable) {
-  return request.Post('/yarn/queue/create', data)
+    return request.Post('/yarn/queue/create', data)
 }
 
 export function fetchYarnQueueUpdate(data: Recordable) {
-  return request.Post('/yarn/queue/update', data)
+    return request.Post('/yarn/queue/update', data)
 }
 
 export function fetchYarnQueueDelete(data: { id: string }) {
-  return request.Post<{ status: string }>('/yarn/queue/delete', data)
+    return request.Post<{ status: string }>('/yarn/queue/delete', data)
 }
 
 export function fetchCheckYarnQueue(data: Recordable) {
-  return request.Post<{ status: number }>('/yarn/queue/check', data)
+    return request.Post<{ status: number }>('/yarn/queue/check', data)
 }

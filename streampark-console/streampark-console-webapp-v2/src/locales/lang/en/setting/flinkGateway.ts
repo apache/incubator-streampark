@@ -15,27 +15,27 @@
  * limitations under the License.
  */
 export default {
-  tableTitle: 'Flink Gateway List',
-  createGateway: 'Create Flink Gateway',
-  success: 'Success',
-  gatewayType: 'Gateway Type',
-  gatewayAddress: 'Gateway Address',
-  modifyGateway: 'Edit Flink Gateway',
-  deleteGateway: 'Delete Flink Gateway',
-  deleteConfirm: 'Are you sure to delete this Flink Gateway ?',
-  name: 'Gateway Name',
-  placeholder: {
-    gatewayType: 'Please select gateway type',
-  },
-  checkResult: {
-    emptyHint: 'Flink gateway name can not be empty.',
-    emptyType: 'Flink gateway type can not be empty.',
-    emptyAddress: 'Flink gateway address can not be empty.',
-  },
-  operation: {
-    updateSuccess: 'Update Flink gateway successfully.',
-    deleteSuccess: 'Delete Flink gateway successfully.',
-    createSuccess: 'Create Flink gateway successfully.',
-    deleteFailed: 'Delete Flink gateway failed.',
-  },
-};
+    tableTitle: 'Flink Gateway List',
+    createGateway: 'Create Flink Gateway',
+    success: 'Success',
+    gatewayType: 'Gateway Type',
+    gatewayAddress: 'Gateway Address',
+    modifyGateway: 'Edit Flink Gateway',
+    deleteGateway: 'Delete Flink Gateway',
+    deleteConfirm: 'Are you sure to delete this Flink Gateway ?',
+    name: 'Gateway Name',
+    placeholder: {
+        gatewayType: 'Please select gateway type',
+    },
+    checkResult: {
+        emptyHint: 'Flink gateway name can not be empty.',
+        emptyType: 'Flink gateway type can not be empty.',
+        emptyAddress: 'Flink gateway address can not be empty.',
+    },
+    operation: {
+        updateSuccess: 'Update Flink gateway successfully.',
+        deleteSuccess: 'Delete Flink gateway successfully.',
+        createSuccess: 'Create Flink gateway successfully.',
+        deleteFailed: 'Delete Flink gateway failed.',
+    },
+}

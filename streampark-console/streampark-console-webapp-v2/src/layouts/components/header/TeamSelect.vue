@@ -23,44 +23,40 @@ const authStore = useAuthStore()
 const userStore = useUserStoreWithOut()
 
 const teamId = computed({
-  get: () => userStore.teamId || null,
-  set: (val: string | null) => {
-    if (val)
-      userStore.teamId = val
-  },
+    get: () => userStore.teamId || null,
+    set: (val: string | null) => {
+        if (val) userStore.teamId = val
+    },
 })
 
 const options = computed(() =>
-  userStore.getTeamList.map(item => ({ label: item.label, value: item.value })),
+    userStore.getTeamList.map((item) => ({ label: item.label, value: item.value })),
 )
 const loading = ref(false)
 
 async function handleTeamChange(value: string) {
-  if (!value || value === userStore.teamId)
-    return
-  loading.value = true
-  try {
-    await authStore.switchTeam(value)
-    window.$message?.success(t('common.operationSuccess'))
-  }
-  catch (e: any) {
-    showCatchError(e, t('sys.api.apiRequestFailed'))
-  }
-  finally {
-    loading.value = false
-  }
+    if (!value || value === userStore.teamId) return
+    loading.value = true
+    try {
+        await authStore.switchTeam(value)
+        window.$message?.success(t('common.operationSuccess'))
+    } catch (e: any) {
+        showCatchError(e, t('sys.api.apiRequestFailed'))
+    } finally {
+        loading.value = false
+    }
 }
 </script>
 
 <template>
-  <n-select
-    v-if="options.length > 0"
-    v-model:value="teamId"
-    size="small"
-    class="w-160px"
-    :options="options"
-    :loading="loading"
-    :placeholder="t('sys.login.selectTeam')"
-    @update:value="handleTeamChange"
-  />
+    <n-select
+        v-if="options.length > 0"
+        v-model:value="teamId"
+        size="small"
+        class="w-160px"
+        :options="options"
+        :loading="loading"
+        :placeholder="t('sys.login.selectTeam')"
+        @update:value="handleTeamChange"
+    />
 </template>

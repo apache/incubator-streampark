@@ -17,12 +17,10 @@
 
 import { format as sqlFormat } from 'sql-formatter'
 
-/**
- * Format whitespace in a Flink SQL query to make it easier to read.
- */
-export function format(query, config = {}) {
-  return sqlFormat(query, {
-    language: 'trino',
-    ...config,
-  })
+/** Format whitespace in a Flink SQL query to make it easier to read. */
+export function format(query: string, config: Record<string, unknown> = {}): string {
+    return sqlFormat(query, {
+        language: 'trino',
+        ...config,
+    })
 }

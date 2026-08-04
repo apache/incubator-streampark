@@ -18,10 +18,10 @@
 import type { NotifyList } from '@/types/api/system/model/notifyModel'
 import { request } from '../http'
 
-export function fetchNotify(data: { type: number, pageNum: number, pageSize: number }) {
-  return request.Post<NotifyList>('/message/notice', data)
+export function fetchNotify(data: { type: number; pageNum: number; pageSize: number }) {
+    return request.Post<NotifyList>('/message/notice', data)
 }
 
 export function fetchNotifyDelete(data: { id: string }) {
-  return request.Post<boolean>('/message/delete', data)
+    return request.Post<boolean>('/message/delete', data)
 }

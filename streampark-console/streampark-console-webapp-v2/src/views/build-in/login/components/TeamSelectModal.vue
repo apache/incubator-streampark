@@ -23,55 +23,55 @@ const authStore = useAuthStore()
 const userStore = useUserStoreWithOut()
 
 const show = computed({
-  get: () => authStore.pendingTeamSelect,
-  set: (val: boolean) => { authStore.pendingTeamSelect = val },
+    get: () => authStore.pendingTeamSelect,
+    set: (val: boolean) => {
+        authStore.pendingTeamSelect = val
+    },
 })
 
 const teamId = ref<string | null>(null)
 const loading = ref(false)
 
 const options = computed(() =>
-  userStore.getTeamList.map(item => ({ label: item.label, value: item.value })),
+    userStore.getTeamList.map((item) => ({ label: item.label, value: item.value })),
 )
 
 async function handleConfirm() {
-  if (!teamId.value) {
-    window.$message?.warning(t('sys.login.selectTeam'))
-    return false
-  }
-  loading.value = true
-  try {
-    await authStore.confirmTeam(teamId.value)
-    window.$message?.success(t('sys.login.loginSuccessTitle'))
-    return true
-  }
-  catch (e: any) {
-    showCatchError(e, t('sys.api.apiRequestFailed'))
-    return false
-  }
-  finally {
-    loading.value = false
-  }
+    if (!teamId.value) {
+        window.$message?.warning(t('sys.login.selectTeam'))
+        return false
+    }
+    loading.value = true
+    try {
+        await authStore.confirmTeam(teamId.value)
+        window.$message?.success(t('sys.login.loginSuccessTitle'))
+        return true
+    } catch (e: any) {
+        showCatchError(e, t('sys.api.apiRequestFailed'))
+        return false
+    } finally {
+        loading.value = false
+    }
 }
 </script>
 
 <template>
-  <n-modal
-    v-model:show="show"
-    preset="dialog"
-    :title="t('sys.login.selectTeam')"
-    :positive-text="t('common.okText')"
-    :negative-text="t('common.cancelText')"
-    :loading="loading"
-    :mask-closable="false"
-    :close-on-esc="false"
-    :on-positive-click="handleConfirm"
-  >
-    <n-select
-      v-model:value="teamId"
-      :options="options"
-      :placeholder="t('sys.login.selectTeam')"
-      class="mt-4"
-    />
-  </n-modal>
+    <n-modal
+        v-model:show="show"
+        preset="dialog"
+        :title="t('sys.login.selectTeam')"
+        :positive-text="t('common.okText')"
+        :negative-text="t('common.cancelText')"
+        :loading="loading"
+        :mask-closable="false"
+        :close-on-esc="false"
+        :on-positive-click="handleConfirm"
+    >
+        <n-select
+            v-model:value="teamId"
+            :options="options"
+            :placeholder="t('sys.login.selectTeam')"
+            class="mt-4"
+        />
+    </n-modal>
 </template>

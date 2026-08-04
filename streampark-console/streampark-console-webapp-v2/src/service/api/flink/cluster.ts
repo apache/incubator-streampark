@@ -20,53 +20,56 @@ import type { FlinkCluster } from '@/types/api/flink/flinkCluster.type'
 import { request } from '../../http'
 
 export function fetchFlinkClusterPage(data: BasicTableParams) {
-  return request.Post<FlinkCluster[] | { records?: FlinkCluster[], total?: number }>('/flink/cluster/page', data)
+    return request.Post<FlinkCluster[] | { records?: FlinkCluster[]; total?: number }>(
+        '/flink/cluster/page',
+        data,
+    )
 }
 
 export function fetchFlinkClusterList() {
-  return request.Post<FlinkCluster[]>('/flink/cluster/list')
+    return request.Post<FlinkCluster[]>('/flink/cluster/list')
 }
 
 export function fetchClusterStart(id: string) {
-  return request.Post<{ code?: number, msg?: string }>('/flink/cluster/start', { id })
+    return request.Post<{ code?: number; msg?: string }>('/flink/cluster/start', { id })
 }
 
 export function fetchClusterRemove(id: string) {
-  return request.Post<{ code?: number, msg?: string }>('/flink/cluster/delete', { id })
+    return request.Post<{ code?: number; msg?: string }>('/flink/cluster/delete', { id })
 }
 
 export function fetchClusterShutdown(id: string) {
-  return request.Post<{ code?: number, msg?: string }>('/flink/cluster/shutdown', { id })
+    return request.Post<{ code?: number; msg?: string }>('/flink/cluster/shutdown', { id })
 }
 
 export function fetchRemoteURL(id: string) {
-  return request.Post<string>('/flink/cluster/remote_url', { id })
+    return request.Post<string>('/flink/cluster/remote_url', { id })
 }
 
 export function fetchCheckCluster(data: Recordable) {
-  return request.Post<{ status?: number, msg?: string }>('/flink/cluster/check', data)
+    return request.Post<{ status?: number; msg?: string }>('/flink/cluster/check', data)
 }
 
 export function fetchCreateCluster(data: Recordable) {
-  return request.Post<boolean>('/flink/cluster/create', data)
+    return request.Post<boolean>('/flink/cluster/create', data)
 }
 
 export function fetchUpdateCluster(data: Recordable) {
-  return request.Post<boolean>('/flink/cluster/update', data)
+    return request.Post<boolean>('/flink/cluster/update', data)
 }
 
 export function fetchGetCluster(data: Recordable) {
-  return request.Post<FlinkCluster>('/flink/cluster/get', data)
+    return request.Post<FlinkCluster>('/flink/cluster/get', data)
 }
 
 export function fetchK8sNamespaces() {
-  return request.Post<string[]>('/flink/history/k8s_namespaces')
+    return request.Post<string[]>('/flink/history/k8s_namespaces')
 }
 
 export function fetchSessionClusterIds(data: Recordable) {
-  return request.Post<string[]>('/flink/history/session_cluster_ids', data)
+    return request.Post<string[]>('/flink/history/session_cluster_ids', data)
 }
 
 export function fetchFlinkBaseImages() {
-  return request.Post<string[]>('/flink/history/flink_base_images')
+    return request.Post<string[]>('/flink/history/flink_base_images')
 }

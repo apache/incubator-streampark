@@ -29,79 +29,78 @@ const password = ref('')
 
 const username = computed(() => userStore.getUserInfo?.username ?? '')
 const avatar = computed(() => {
-  const value = userStore.getUserInfo?.avatar
-  return value && value !== 'default.jpg' ? value : headerImg
+    const value = userStore.getUserInfo?.avatar
+    return value && value !== 'default.jpg' ? value : headerImg
 })
 
 function handleClose() {
-  password.value = ''
+    password.value = ''
 }
 
 async function handleLock() {
-  if (!password.value)
-    return
-  lockStore.setLockInfo({
-    isLock: true,
-    pwd: password.value,
-  })
-  password.value = ''
-  show.value = false
+    if (!password.value) return
+    lockStore.setLockInfo({
+        isLock: true,
+        pwd: password.value,
+    })
+    password.value = ''
+    show.value = false
 }
 </script>
 
 <template>
-  <n-modal
-    v-model:show="show"
-    preset="card"
-    :style="{ width: '360px' }"
-    :title="t('layout.header.lockScreen')"
-    @after-leave="handleClose"
-  >
-    <div class="lock-modal-body">
-      <div class="lock-modal-header">
-        <img :src="avatar" class="avatar" alt="">
-        <p>{{ username }}</p>
-      </div>
-      <n-form label-placement="top">
-        <n-form-item :label="t('layout.header.lockScreenPassword')" required>
-          <n-input
-            v-model:value="password"
-            type="password"
-            show-password-on="click"
-            @keyup.enter="handleLock"
-          />
-        </n-form-item>
-      </n-form>
-    </div>
-    <template #footer>
-      <n-space justify="end">
-        <n-button @click="show = false">
-          {{ t('common.cancelText') }}
-        </n-button>
-        <n-button type="primary" @click="handleLock">
-          {{ t('layout.header.lockScreenBtn') }}
-        </n-button>
-      </n-space>
-    </template>
-  </n-modal>
+    <n-modal
+        v-model:show="show"
+        preset="card"
+        :style="{ width: '360px' }"
+        :title="t('layout.header.lockScreen')"
+        @after-leave="handleClose"
+    >
+        <div class="lock-modal-body">
+            <div class="lock-modal-header">
+                <img :src="avatar" class="avatar" alt="" />
+                <p>{{ username }}</p>
+            </div>
+            <n-form label-placement="top">
+                <n-form-item :label="t('layout.header.lockScreenPassword')" required>
+                    <n-input
+                        v-model:value="password"
+                        type="password"
+                        show-password-on="click"
+                        @keyup.enter="handleLock"
+                    />
+                </n-form-item>
+            </n-form>
+        </div>
+        <template #footer>
+            <n-space justify="end">
+                <n-button @click="show = false">
+                    {{ t('common.cancelText') }}
+                </n-button>
+                <n-button type="primary" @click="handleLock">
+                    {{ t('layout.header.lockScreenBtn') }}
+                </n-button>
+            </n-space>
+        </template>
+    </n-modal>
 </template>
 
 <style scoped>
 .lock-modal-body {
-  padding-top: 8px;
+    padding-top: 8px;
 }
 
 .lock-modal-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
 }
 
 .avatar {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
 }
 </style>

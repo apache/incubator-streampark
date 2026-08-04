@@ -18,60 +18,63 @@
 import type { CSSProperties } from 'vue'
 import { computed } from 'vue'
 
-const props = withDefaults(defineProps<{
-  prefix?: string
-  name: string
-  size?: number | string
-  spin?: boolean
-}>(), {
-  prefix: 'icon',
-  size: 16,
-  spin: false,
-})
+const props = withDefaults(
+    defineProps<{
+        prefix?: string
+        name: string
+        size?: number | string
+        spin?: boolean
+    }>(),
+    {
+        prefix: 'icon',
+        size: 16,
+        spin: false,
+    },
+)
 
 defineOptions({ name: 'SvgIcon' })
 
 const symbolId = computed(() => `#${props.prefix}-${props.name}`)
 
 const iconStyle = computed((): CSSProperties => {
-  const size = `${props.size}`.replace('px', '')
-  return {
-    width: `${size}px`,
-    height: `${size}px`,
-  }
+    const size = `${props.size}`.replace('px', '')
+    return {
+        width: `${size}px`,
+        height: `${size}px`,
+    }
 })
 </script>
 
 <template>
-  <svg
-    class="streampark-svg-icon"
-    :class="[$attrs.class, spin && 'streampark-svg-icon--spin']"
-    :style="iconStyle"
-    aria-hidden="true"
-  >
-    <use :xlink:href="symbolId" />
-  </svg>
+    <svg
+        class="streampark-svg-icon"
+        :class="[$attrs.class, spin && 'streampark-svg-icon--spin']"
+        :style="iconStyle"
+        aria-hidden="true"
+    >
+        <use :xlink:href="symbolId" />
+    </svg>
 </template>
 
 <style scoped>
 .streampark-svg-icon {
-  display: inline-block;
-  overflow: hidden;
-  vertical-align: -0.15em;
-  fill: currentColor;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: -0.15em;
+    fill: currentColor;
 }
 
 .streampark-svg-icon--spin {
-  animation: streampark-svg-icon-spin 1s infinite linear;
+    animation: streampark-svg-icon-spin 1s infinite linear;
 }
 
 @keyframes streampark-svg-icon-spin {
-  from {
-    transform: rotate(0deg);
-  }
+    from {
+        transform: rotate(0deg);
+    }
 
-  to {
-    transform: rotate(360deg);
-  }
+    to {
+        transform: rotate(360deg);
+    }
 }
 </style>

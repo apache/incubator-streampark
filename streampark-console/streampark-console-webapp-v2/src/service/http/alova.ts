@@ -23,99 +23,103 @@ import { createServerTokenAuthentication } from 'alova/client'
 import adapterFetch from 'alova/fetch'
 import VueHook from 'alova/vue'
 import type { VueHookType } from 'alova/vue'
+import { DEFAULT_ALOVA_OPTIONS, DEFAULT_BACKEND_OPTIONS, isBackendSuccess } from './config'
 import {
-  DEFAULT_ALOVA_OPTIONS,
-  DEFAULT_BACKEND_OPTIONS,
-  isBackendSuccess,
-} from './config'
-import {
-  buildBusinessError,
-  buildResponseError,
-  finalizeRequestError,
-  handleRefreshToken,
-  handleServiceResult,
-  parseResponseJson,
-  showTransportError,
+    buildBusinessError,
+    buildResponseError,
+    finalizeRequestError,
+    handleRefreshToken,
+    handleServiceResult,
+    parseResponseJson,
+    showTransportError,
 } from './handle'
 
 const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication<VueHookType>({
-  refreshTokenOnSuccess: {
-    isExpired: async (response, method) => {
-      const res = await response.clone().json()
-      const isExpired = method.meta && method.meta.isExpired
-      return (response.status === 401 || res.code === 401) && !isExpired
+    refreshTokenOnSuccess: {
+        isExpired: async (response, method) => {
+            const res = await response.clone().json()
+            const isExpired = method.meta && method.meta.isExpired
+            return (response.status === 401 || res.code === 401) && !isExpired
+        },
+        handler: async (_response, method) => {
+            if (!method.meta) method.meta = { isExpired: true }
+            else method.meta.isExpired = true
+            await handleRefreshToken()
+        },
     },
-    handler: async (_response, method) => {
-      if (!method.meta)
-        method.meta = { isExpired: true }
-      else
-        method.meta.isExpired = true
-      await handleRefreshToken()
+    assignToken: (method) => {
+        const token = getToken()
+        if (token) method.config.headers.Authorization = token
+        const teamId =
+            localStorage.getItem(APP_TEAMID_KEY_) || sessionStorage.getItem(APP_TEAMID_KEY_)
+        if (teamId) method.config.headers['Team-Id'] = teamId
     },
-  },
-  assignToken: (method) => {
-    const token = getToken()
-    if (token)
-      method.config.headers.Authorization = token
-    const teamId = localStorage.getItem(APP_TEAMID_KEY_) || sessionStorage.getItem(APP_TEAMID_KEY_)
-    if (teamId)
-      method.config.headers['Team-Id'] = teamId
-  },
 })
 
 export function createAlovaInstance(
-  alovaConfig: Service.AlovaConfig,
-  backendConfig?: Service.BackendConfig,
+    alovaConfig: Service.AlovaConfig,
+    backendConfig?: Service.BackendConfig,
 ) {
-  const _backendConfig = { ...DEFAULT_BACKEND_OPTIONS, ...backendConfig }
-  const _alovaConfig = { ...DEFAULT_ALOVA_OPTIONS, ...alovaConfig }
+    const _backendConfig = { ...DEFAULT_BACKEND_OPTIONS, ...backendConfig }
+    const _alovaConfig = { ...DEFAULT_ALOVA_OPTIONS, ...alovaConfig }
 
-  return createAlova({
-    statesHook: VueHook,
-    requestAdapter: adapterFetch(),
-    cacheFor: null,
-    baseURL: _alovaConfig.baseURL,
-    timeout: _alovaConfig.timeout,
-    beforeRequest: onAuthRequired((method) => {
-      const useJson = method.meta?.isJsonPost === true
-      if (method.type === 'POST' && !useJson) {
-        if (method.data == null)
-          method.data = {}
-        method.config.headers['Content-Type'] = 'application/x-www-form-urlencoded'
-        const teamId = localStorage.getItem(APP_TEAMID_KEY_) || sessionStorage.getItem(APP_TEAMID_KEY_)
-        if (teamId && typeof method.data === 'object' && !(method.data instanceof URLSearchParams)) {
-          const payload = method.data as Record<string, unknown>
-          if (payload.teamId == null)
-            payload.teamId = Number.parseInt(teamId, 10)
-        }
-        if (typeof method.data === 'object' && !(method.data instanceof URLSearchParams)) {
-          method.data = qs.stringify(method.data, { arrayFormat: 'brackets' })
-        }
-      }
-      alovaConfig.beforeRequest?.(method)
-    }),
-    responded: onResponseRefreshToken({
-      onSuccess: async (response, method) => {
-        const { status } = response
-        if (status === 200 && method.meta?.isBlob)
-          return response.blob()
+    return createAlova({
+        statesHook: VueHook,
+        requestAdapter: adapterFetch(),
+        cacheFor: null,
+        baseURL: _alovaConfig.baseURL,
+        timeout: _alovaConfig.timeout,
+        beforeRequest: onAuthRequired((method) => {
+            const useJson = method.meta?.isJsonPost === true
+            if (method.type === 'POST' && !useJson) {
+                if (method.data == null) method.data = {}
+                method.config.headers['Content-Type'] = 'application/x-www-form-urlencoded'
+                const teamId =
+                    localStorage.getItem(APP_TEAMID_KEY_) || sessionStorage.getItem(APP_TEAMID_KEY_)
+                if (
+                    teamId &&
+                    typeof method.data === 'object' &&
+                    !(method.data instanceof URLSearchParams)
+                ) {
+                    const payload = method.data as Record<string, unknown>
+                    if (payload.teamId == null) payload.teamId = Number.parseInt(teamId, 10)
+                }
+                if (typeof method.data === 'object' && !(method.data instanceof URLSearchParams)) {
+                    method.data = qs.stringify(method.data, { arrayFormat: 'brackets' })
+                }
+            }
+            alovaConfig.beforeRequest?.(method)
+        }),
+        responded: onResponseRefreshToken({
+            onSuccess: async (response, method) => {
+                const { status } = response
+                if (status === 200 && method.meta?.isBlob) return response.blob()
 
-        const apiData = await parseResponseJson(response)
+                const apiData = await parseResponseJson(response)
 
-        if (status === 200) {
-          if (apiData && isBackendSuccess(apiData, _backendConfig))
-            return handleServiceResult(apiData)
-          if (apiData)
-            return finalizeRequestError(buildBusinessError(apiData, _backendConfig), method)
-          return finalizeRequestError(buildResponseError(response, null, _backendConfig), method)
-        }
+                if (status === 200) {
+                    if (apiData && isBackendSuccess(apiData, _backendConfig))
+                        return handleServiceResult(apiData)
+                    if (apiData)
+                        return finalizeRequestError(
+                            buildBusinessError(apiData, _backendConfig),
+                            method,
+                        )
+                    return finalizeRequestError(
+                        buildResponseError(response, null, _backendConfig),
+                        method,
+                    )
+                }
 
-        return finalizeRequestError(buildResponseError(response, apiData, _backendConfig), method)
-      },
-      onError: (error, method) => {
-        showTransportError(error, method)
-      },
-      onComplete: async () => {},
-    }),
-  })
+                return finalizeRequestError(
+                    buildResponseError(response, apiData, _backendConfig),
+                    method,
+                )
+            },
+            onError: (error, method) => {
+                showTransportError(error, method)
+            },
+            onComplete: async () => {},
+        }),
+    })
 }

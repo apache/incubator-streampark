@@ -15,23 +15,23 @@
  * limitations under the License.
  */
 export default {
-  addToken: '新增令牌',
-  modifyToken: '编辑令牌',
-  copyToken: '复制令牌',
-  deleteToken: '删除令牌',
-  selectUserAlertMessage: '请选择一个用户',
-  table: {
-    title: '令牌列表',
-    userName: '用户名',
-    token: '令牌',
-    status: '状态',
-  },
-  operation: {
-    copySuccess: '复制成功',
-    deleteTokenConfirm: '您确定删除该令牌 ?',
-    deleteSuccess: '删除成功',
-    deleteFailed: '删除失败',
-    updateSuccess: '更新成功',
-    createSuccess: '创建成功',
-  },
-};
+    addToken: '新增令牌',
+    modifyToken: '编辑令牌',
+    copyToken: '复制令牌',
+    deleteToken: '删除令牌',
+    selectUserAlertMessage: '请选择一个用户',
+    table: {
+        title: '令牌列表',
+        userName: '用户名',
+        token: '令牌',
+        status: '状态',
+    },
+    operation: {
+        copySuccess: '复制成功',
+        deleteTokenConfirm: '您确定删除该令牌 ?',
+        deleteSuccess: '删除成功',
+        deleteFailed: '删除失败',
+        updateSuccess: '更新成功',
+        createSuccess: '创建成功',
+    },
+}

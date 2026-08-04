@@ -16,18 +16,18 @@
  */
 
 export interface NotifyItem {
-  id: string
-  appId?: string
-  userId?: string
-  title: string
-  type: number
-  context: string
-  readed: number
-  createTime: string
-  extra?: string
+    id: string
+    appId?: string
+    userId?: string
+    title: string
+    type: number
+    context: string
+    readed: number
+    createTime: string
+    extra?: string
 }
 
 export interface NotifyList {
-  records: NotifyItem[]
-  total: string | number
+    records: NotifyItem[]
+    total: string | number
 }

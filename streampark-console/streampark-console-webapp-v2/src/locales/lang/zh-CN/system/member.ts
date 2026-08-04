@@ -15,23 +15,23 @@
  * limitations under the License.
  */
 export default {
-  addMember: '添加成员',
-  modifyMember: '编辑成员',
-  deleteMember: '删除成员',
-  deletePopConfirm: '确定要删除这个成员 ?',
-  add: '添加',
-  success: '成功',
-  fail: '失败',
-  searchByUser: '根据用户名搜索',
-  searchByRole: '根据角色名称搜索',
-  table: {
-    title: '成员列表',
-    userName: '用户名',
-    roleName: '角色名称',
-    createTime: '创建时间',
-    modifyTime: '修改时间',
-  },
-  userNameRequire: '请选择用户',
-  roleRequire: '请选择角色',
-  selectTeamFirst: '请先选择团队!',
-};
+    addMember: '添加成员',
+    modifyMember: '编辑成员',
+    deleteMember: '删除成员',
+    deletePopConfirm: '确定要删除这个成员 ?',
+    add: '添加',
+    success: '成功',
+    fail: '失败',
+    searchByUser: '根据用户名搜索',
+    searchByRole: '根据角色名称搜索',
+    table: {
+        title: '成员列表',
+        userName: '用户名',
+        roleName: '角色名称',
+        createTime: '创建时间',
+        modifyTime: '修改时间',
+    },
+    userNameRequire: '请选择用户',
+    roleRequire: '请选择角色',
+    selectTeamFirst: '请先选择团队!',
+}

@@ -15,21 +15,21 @@
  * limitations under the License.
  */
 export default {
-  addTeam: 'Add Team',
-  team: 'Team',
-  modifyTeam: 'Modify Team',
-  deleteTeam: 'Delete Team',
-  deletePopConfirm: 'Are you sure delete this team ?',
-  add: 'Add',
-  success: 'successful',
-  fail: 'failed',
-  searchByTeam: 'Search by team name',
-  table: {
-    title: 'Team List',
-    teamName: 'Team name',
-    teamNamePlaceholder: 'please enter Team Name',
-    description: 'Description',
-    descriptionMessage: 'exceeds maximum length limit of 100 characters',
-    teamMessage: 'teamName must be at least 4 characters',
-  },
-};
+    addTeam: 'Add Team',
+    team: 'Team',
+    modifyTeam: 'Modify Team',
+    deleteTeam: 'Delete Team',
+    deletePopConfirm: 'Are you sure delete this team ?',
+    add: 'Add',
+    success: 'successful',
+    fail: 'failed',
+    searchByTeam: 'Search by team name',
+    table: {
+        title: 'Team List',
+        teamName: 'Team name',
+        teamNamePlaceholder: 'please enter Team Name',
+        description: 'Description',
+        descriptionMessage: 'exceeds maximum length limit of 100 characters',
+        teamMessage: 'teamName must be at least 4 characters',
+    },
+}

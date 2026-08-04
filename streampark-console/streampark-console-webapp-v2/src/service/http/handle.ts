@@ -18,82 +18,81 @@
 import { useAuthStore } from '@/store'
 import { $t } from '@/utils'
 import {
-  extractRestResponseMessage,
-  formatApiErrorMessage,
-  notifyRequestError,
-  parseResponseJson,
-  resolveRequestErrorMessage,
+    extractRestResponseMessage,
+    formatApiErrorMessage,
+    notifyRequestError,
+    resolveRequestErrorMessage,
 } from '@/utils/errorMessage'
 
 export { notifyRequestError, parseResponseJson } from '@/utils/errorMessage'
 
 export function buildBusinessError(
-  data: Record<string, unknown>,
-  config: Required<Service.BackendConfig>,
+    data: Record<string, unknown>,
+    config: Required<Service.BackendConfig>,
 ): Service.RequestError {
-  const { codeKey, dataKey } = config
-  return {
-    errorType: 'Business Error',
-    code: data[codeKey] as Service.RequestCode,
-    message: extractRestResponseMessage(data, config),
-    data: data[dataKey],
-  }
+    const { codeKey, dataKey } = config
+    return {
+        errorType: 'Business Error',
+        code: data[codeKey] as Service.RequestCode,
+        message: extractRestResponseMessage(data, config),
+        data: data[dataKey],
+    }
 }
 
 export function buildResponseError(
-  response: Response,
-  body: Record<string, unknown> | null,
-  config: Required<Service.BackendConfig>,
+    response: Response,
+    body: Record<string, unknown> | null,
+    config: Required<Service.BackendConfig>,
 ): Service.RequestError {
-  const message = resolveRequestErrorMessage(response.status, body, config)
-  const businessCode = body?.[config.codeKey]
-  return {
-    errorType: body && businessCode != null ? 'Business Error' : 'Response Error',
-    code: (businessCode ?? response.status) as Service.RequestCode,
-    message,
-    data: body?.[config.dataKey] ?? null,
-  }
+    const message = resolveRequestErrorMessage(response.status, body, config)
+    const businessCode = body?.[config.codeKey]
+    return {
+        errorType: body && businessCode != null ? 'Business Error' : 'Response Error',
+        code: (businessCode ?? response.status) as Service.RequestCode,
+        message,
+        data: body?.[config.dataKey] ?? null,
+    }
 }
 
 export function finalizeRequestError(
-  error: Service.RequestError,
-  method: { meta?: Recordable },
+    error: Service.RequestError,
+    method: { meta?: Recordable },
 ): Service.RequestResult<unknown> {
-  const silent = method.meta?.silentError === true
-  if (!silent)
-    notifyRequestError(error)
-  return handleServiceResult({ ...error, errorNotified: !silent }, false)
+    const silent = method.meta?.silentError === true
+    if (!silent) notifyRequestError(error)
+    return handleServiceResult({ ...error, errorNotified: !silent }, false)
 }
 
 export function handleServiceResult<T = unknown>(
-  data: Service.RequestError | Record<string, unknown>,
-  isSuccess = true,
+    data: Service.RequestError | Record<string, unknown>,
+    isSuccess = true,
 ): Service.RequestResult<T> {
-  const errorNotified = !isSuccess && Boolean((data as Recordable).errorNotified)
-  return {
-    isSuccess,
-    errorType: isSuccess ? null : (data.errorType as Service.RequestErrorType ?? 'Business Error'),
-    code: data.code as Service.RequestCode,
-    message: formatApiErrorMessage(data.message) || String(data.message ?? ''),
-    data: data.data as T,
-    errorNotified,
-  }
+    const errorNotified = !isSuccess && Boolean((data as Recordable).errorNotified)
+    return {
+        isSuccess,
+        errorType: isSuccess
+            ? null
+            : ((data.errorType as Service.RequestErrorType) ?? 'Business Error'),
+        code: data.code as Service.RequestCode,
+        message: formatApiErrorMessage(data.message) || String(data.message ?? ''),
+        data: data.data as T,
+        errorNotified,
+    }
 }
 
 export async function handleRefreshToken() {
-  await useAuthStore().logout()
+    await useAuthStore().logout()
 }
 
-export function showTransportError(error: Error, method: { type: string, url: string }) {
-  const text = error.message || ''
-  let message = $t('http.defaultTip')
-  if (text.includes('timeout') || text.includes('Timeout'))
-    message = $t('sys.api.apiTimeoutMessage')
-  else if (text.includes('NetworkError') || text.includes('Failed to fetch'))
-    message = $t('sys.api.networkExceptionMsg')
-  else if (text)
-    message = text
+export function showTransportError(error: Error, method: { type: string; url: string }) {
+    const text = error.message || ''
+    let message = $t('http.defaultTip')
+    if (text.includes('timeout') || text.includes('Timeout'))
+        message = $t('sys.api.apiTimeoutMessage')
+    else if (text.includes('NetworkError') || text.includes('Failed to fetch'))
+        message = $t('sys.api.networkExceptionMsg')
+    else if (text) message = text
 
-  window.$message?.error(message)
-  console.warn(`[${method.type}] ${method.url}`, error)
+    window.$message?.error(message)
+    console.warn(`[${method.type}] ${method.url}`, error)
 }

@@ -19,63 +19,61 @@ import { getMonacoOptions } from '@/views/flink/app/shared/data/index'
 import { useMonaco } from '@/hooks/web/useMonaco'
 
 const props = defineProps<{
-  show: boolean
-  value?: string
-  suggestions?: Array<{ text: string, value: string }>
-  title?: string
+    show: boolean
+    value?: string
+    suggestions?: Array<{ text: string; value: string }>
+    title?: string
 }>()
 
 const emit = defineEmits<{
-  'update:show': [value: boolean]
+    'update:show': [value: boolean]
 }>()
 
 const { t } = useI18n()
 const editorRef = ref<HTMLElement | null>(null)
 
 const { setContent } = useMonaco(editorRef, {
-  language: 'sql',
-  code: '',
-  options: {
-    ...(getMonacoOptions(true) as Recordable),
-    readOnly: true,
-  },
+    language: 'sql',
+    code: '',
+    options: {
+        ...(getMonacoOptions(true) as Recordable),
+        readOnly: true,
+    },
 })
 
 const previewContent = computed(() => {
-  if (!props.value)
-    return ''
-  const map = (props.suggestions ?? []).reduce<Record<string, string>>((acc, cur) => {
-    acc[cur.text] = cur.value
-    return acc
-  }, {})
-  return props.value.replace(/\$\{(.*?)}/g, (_node, key: string) => map[key] ?? `\${${key}}`)
+    if (!props.value) return ''
+    const map = (props.suggestions ?? []).reduce<Record<string, string>>((acc, cur) => {
+        acc[cur.text] = cur.value
+        return acc
+    }, {})
+    return props.value.replace(/\$\{(.*?)}/g, (_node, key: string) => map[key] ?? `\${${key}}`)
 })
 
 watch(
-  () => [props.show, previewContent.value] as const,
-  async ([show]) => {
-    if (show)
-      await setContent(previewContent.value)
-  },
+    () => [props.show, previewContent.value] as const,
+    async ([show]) => {
+        if (show) await setContent(previewContent.value)
+    },
 )
 </script>
 
 <template>
-  <n-drawer
-    :show="show"
-    :width="720"
-    placement="right"
-    @update:show="emit('update:show', $event)"
-  >
-    <n-drawer-content :title="title ?? t('spark.app.sparkSql.preview')" closable>
-      <div ref="editorRef" class="preview-editor" />
-    </n-drawer-content>
-  </n-drawer>
+    <n-drawer
+        :show="show"
+        :width="720"
+        placement="right"
+        @update:show="emit('update:show', $event)"
+    >
+        <n-drawer-content :title="title ?? t('spark.app.sparkSql.preview')" closable>
+            <div ref="editorRef" class="preview-editor" />
+        </n-drawer-content>
+    </n-drawer>
 </template>
 
 <style scoped>
 .preview-editor {
-  height: calc(100vh - 150px);
-  width: 100%;
+    height: calc(100vh - 150px);
+    width: 100%;
 }
 </style>

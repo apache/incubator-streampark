@@ -21,22 +21,20 @@ import type { LocaleType } from '/#/config'
 export type AppLocale = LocaleType
 
 const LOCALE_ALIASES: Record<string, AppLocale> = {
-  zhCN: 'zh_CN',
-  zh_CN: 'zh_CN',
-  enUS: 'en',
-  en: 'en',
+    zhCN: 'zh_CN',
+    zh_CN: 'zh_CN',
+    enUS: 'en',
+    en: 'en',
 }
 
 export function normalizeAppLocale(value?: string | null): AppLocale {
-  if (value && LOCALE_ALIASES[value])
-    return LOCALE_ALIASES[value]
-  const envDefault = import.meta.env.VITE_DEFAULT_LANG
-  if (envDefault && LOCALE_ALIASES[envDefault])
-    return LOCALE_ALIASES[envDefault]
-  return 'zh_CN'
+    if (value && LOCALE_ALIASES[value]) return LOCALE_ALIASES[value]
+    const envDefault = import.meta.env.VITE_DEFAULT_LANG
+    if (envDefault && LOCALE_ALIASES[envDefault]) return LOCALE_ALIASES[envDefault]
+    return 'zh_CN'
 }
 
-export const APP_LOCALE_OPTIONS: Array<{ label: string, value: AppLocale }> = [
-  { label: '中文', value: 'zh_CN' },
-  { label: 'English', value: 'en' },
+export const APP_LOCALE_OPTIONS: Array<{ label: string; value: AppLocale }> = [
+    { label: '中文', value: 'zh_CN' },
+    { label: 'English', value: 'en' },
 ]

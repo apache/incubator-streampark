@@ -18,140 +18,156 @@
 import { ionIconComponent } from '@/utils/ionIcon'
 import { fetchBuildDetail } from '@/service'
 import {
-  handleAppBuildStatusColor,
-  handleAppBuildStatueText,
-  handleAppBuildStepText,
-  handleAppBuildStepTimelineColor,
+    handleAppBuildStatusColor,
+    handleAppBuildStatueText,
+    handleAppBuildStepText,
+    handleAppBuildStepTimelineColor,
 } from '@/views/flink/app/shared/utils'
 import { useTimeoutFn } from '@vueuse/core'
 import { toTagColor } from '@/utils/tagColor'
 const props = defineProps<{
-  show: boolean
-  appId: string | null
+    show: boolean
+    appId: string | null
 }>()
 
 const emit = defineEmits<{
-  'update:show': [value: boolean]
+    'update:show': [value: boolean]
 }>()
 
 const { t } = useI18n()
 const pipeline = ref<Recordable | null>(null)
 const errorLogVisible = ref(false)
 
-const { start: startPolling, stop: stopPolling } = useTimeoutFn(() => {
-  loadDetail(true)
-  startPolling()
-}, 1000, { immediate: false })
+const { start: startPolling, stop: stopPolling } = useTimeoutFn(
+    () => {
+        loadDetail(true)
+        startPolling()
+    },
+    1000,
+    { immediate: false },
+)
 
 watch(
-  () => [props.show, props.appId] as const,
-  ([show, appId]) => {
-    if (show && appId) {
-      pipeline.value = null
-      loadDetail(false)
-      startPolling()
-    }
-    else {
-      stopPolling()
-    }
-  },
+    () => [props.show, props.appId] as const,
+    ([show, appId]) => {
+        if (show && appId) {
+            pipeline.value = null
+            loadDetail(false)
+            startPolling()
+        } else {
+            stopPolling()
+        }
+    },
 )
 
 function closeDrawer() {
-  stopPolling()
-  emit('update:show', false)
+    stopPolling()
+    emit('update:show', false)
 }
 
 async function loadDetail(silent = false) {
-  if (!props.appId)
-    return
-  try {
-    const result = await fetchBuildDetail({ appId: props.appId })
-    if (!result.isSuccess)
-      throwApiFailure(result, t('sys.api.apiRequestFailed'))
-    pipeline.value = result.data?.pipeline ?? null
-  }
-  catch (e: any) {
-    if (!silent) {
-      showCatchError(e, t('sys.api.apiRequestFailed'))
-      stopPolling()
+    if (!props.appId) return
+    try {
+        const result = await fetchBuildDetail({ appId: props.appId })
+        if (!result.isSuccess) throwApiFailure(result, t('sys.api.apiRequestFailed'))
+        pipeline.value = result.data?.pipeline ?? null
+    } catch (e: any) {
+        if (!silent) {
+            showCatchError(e, t('sys.api.apiRequestFailed'))
+            stopPolling()
+        }
     }
-  }
 }
 </script>
 
 <template>
-  <n-drawer :show="show" :width="500" @update:show="(v) => { if (!v) closeDrawer() }">
-    <n-drawer-content :title="t('flink.app.view.buildTitle')" closable>
-      <h3 class="mb-8px flex items-center gap-8px">
-        <n-icon :component="ionIconComponent('SpeedometerOutline')" />
-        Summary
-      </h3>
-      <template v-if="pipeline">
-        <n-progress
-          :percentage="pipeline.percent ?? 0"
-          :status="pipeline.hasError ? 'error' : (pipeline.percent < 100 ? 'default' : 'success')"
-        />
-        <div class="mt-10px">
-          <n-tag :color="toTagColor(handleAppBuildStatusColor(pipeline.pipeStatus))">
-            {{ handleAppBuildStatueText(pipeline.pipeStatus) }}
-          </n-tag>
-          <span class="ml-8px">cost {{ pipeline.costSec }} seconds</span>
-        </div>
-      </template>
-      <n-empty v-else />
+    <n-drawer
+        :show="show"
+        :width="500"
+        @update:show="
+            (v) => {
+                if (!v) closeDrawer()
+            }
+        "
+    >
+        <n-drawer-content :title="t('flink.app.view.buildTitle')" closable>
+            <h3 class="mb-8px flex items-center gap-8px">
+                <n-icon :component="ionIconComponent('SpeedometerOutline')" />
+                Summary
+            </h3>
+            <template v-if="pipeline">
+                <n-progress
+                    :percentage="pipeline.percent ?? 0"
+                    :status="
+                        pipeline.hasError ? 'error' : pipeline.percent < 100 ? 'default' : 'success'
+                    "
+                />
+                <div class="mt-10px">
+                    <n-tag :color="toTagColor(handleAppBuildStatusColor(pipeline.pipeStatus))">
+                        {{ handleAppBuildStatueText(pipeline.pipeStatus) }}
+                    </n-tag>
+                    <span class="ml-8px">cost {{ pipeline.costSec }} seconds</span>
+                </div>
+            </template>
+            <n-empty v-else />
 
-      <n-divider />
+            <n-divider />
 
-      <h3 class="mb-12px">
-        {{ t('flink.app.view.stepTitle') }}
-      </h3>
-      <n-timeline v-if="pipeline?.steps?.length">
-        <n-timeline-item
-          v-for="stepItem in pipeline.steps"
-          :key="stepItem.seq"
-          :color="handleAppBuildStepTimelineColor(stepItem)"
-        >
-          <p>
-            <n-tag :color="toTagColor(handleAppBuildStepTimelineColor(stepItem))" size="small">
-              {{ handleAppBuildStepText(stepItem.status) }}
-            </n-tag>
-            <b class="ml-8px">Step-{{ stepItem.seq }}</b> {{ stepItem.desc }}
-          </p>
-          <p v-if="stepItem.status !== 0 && stepItem.status !== 1" class="text-12px text-gray-500">
-            {{ stepItem.ts }}
-          </p>
-        </n-timeline-item>
-      </n-timeline>
-      <n-empty v-else />
+            <h3 class="mb-12px">
+                {{ t('flink.app.view.stepTitle') }}
+            </h3>
+            <n-timeline v-if="pipeline?.steps?.length">
+                <n-timeline-item
+                    v-for="stepItem in pipeline.steps"
+                    :key="stepItem.seq"
+                    :color="handleAppBuildStepTimelineColor(stepItem)"
+                >
+                    <p>
+                        <n-tag
+                            :color="toTagColor(handleAppBuildStepTimelineColor(stepItem))"
+                            size="small"
+                        >
+                            {{ handleAppBuildStepText(stepItem.status) }}
+                        </n-tag>
+                        <b class="ml-8px">Step-{{ stepItem.seq }}</b> {{ stepItem.desc }}
+                    </p>
+                    <p
+                        v-if="stepItem.status !== 0 && stepItem.status !== 1"
+                        class="text-12px text-gray-500"
+                    >
+                        {{ stepItem.ts }}
+                    </p>
+                </n-timeline-item>
+            </n-timeline>
+            <n-empty v-else />
 
-      <template v-if="pipeline?.hasError" #footer>
-        <n-space justify="end">
-          <n-button type="primary" @click="errorLogVisible = true">
-            {{ t('flink.app.view.errorLog') }}
-          </n-button>
-        </n-space>
-      </template>
-    </n-drawer-content>
-  </n-drawer>
+            <template v-if="pipeline?.hasError" #footer>
+                <n-space justify="end">
+                    <n-button type="primary" @click="errorLogVisible = true">
+                        {{ t('flink.app.view.errorLog') }}
+                    </n-button>
+                </n-space>
+            </template>
+        </n-drawer-content>
+    </n-drawer>
 
-  <n-drawer v-model:show="errorLogVisible" :width="640">
-    <n-drawer-content :title="t('flink.app.view.errorLog')" closable>
-      <h3>{{ t('flink.app.view.errorSummary') }}</h3>
-      <p class="my-12px">
-        {{ pipeline?.errorSummary }}
-      </p>
-      <n-divider />
-      <h3>{{ t('flink.app.view.errorStack') }}</h3>
-      <pre class="error-stack">{{ pipeline?.errorStack }}</pre>
-    </n-drawer-content>
-  </n-drawer>
+    <n-drawer v-model:show="errorLogVisible" :width="640">
+        <n-drawer-content :title="t('flink.app.view.errorLog')" closable>
+            <h3>{{ t('flink.app.view.errorSummary') }}</h3>
+            <p class="my-12px">
+                {{ pipeline?.errorSummary }}
+            </p>
+            <n-divider />
+            <h3>{{ t('flink.app.view.errorStack') }}</h3>
+            <pre class="error-stack">{{ pipeline?.errorStack }}</pre>
+        </n-drawer-content>
+    </n-drawer>
 </template>
 
 <style scoped>
 .error-stack {
-  font-size: 12px;
-  white-space: pre-wrap;
-  word-break: break-all;
+    font-size: 12px;
+    white-space: pre-wrap;
+    word-break: break-all;
 }
 </style>

@@ -19,44 +19,47 @@ import type { SystemSetting } from '@/types/api/setting/types/setting.type'
 import { request } from '../../http'
 
 export function fetchSystemSettingAll() {
-  return request.Post<SystemSetting[]>('/setting/all')
+    return request.Post<SystemSetting[]>('/setting/all')
 }
 
-export function fetchSystemSettingUpdate(data: { settingKey: string, settingValue: string | boolean }) {
-  return request.Post('/setting/update', data)
+export function fetchSystemSettingUpdate(data: {
+    settingKey: string
+    settingValue: string | boolean
+}) {
+    return request.Post('/setting/update', data)
 }
 
 export function fetchDockerConfig() {
-  return request.Post<Recordable>('/setting/docker')
+    return request.Post<Recordable>('/setting/docker')
 }
 
 export function fetchEmailConfig() {
-  return request.Post<Recordable>('/setting/email')
+    return request.Post<Recordable>('/setting/email')
 }
 
 export function fetchDockerUpdate(data: Recordable) {
-  return request.Post('/setting/update/docker', data)
+    return request.Post('/setting/update/docker', data)
 }
 
 export function fetchEmailUpdate(data: Recordable) {
-  return request.Post('/setting/update/email', data)
+    return request.Post('/setting/update/email', data)
 }
 
 export function fetchVerifyDocker(data: Recordable) {
-  return request.Post<SettingVerifyResult>('/setting/check/docker', data)
+    return request.Post<SettingVerifyResult>('/setting/check/docker', data)
 }
 
 export function fetchVerifyEmail(data: Recordable) {
-  return request.Post<SettingVerifyResult>('/setting/check/email', data)
+    return request.Post<SettingVerifyResult>('/setting/check/email', data)
 }
 
 export function fetchCheckHadoop() {
-  return request.Post<boolean>('/setting/check/hadoop')
+    return request.Post<boolean>('/setting/check/hadoop')
 }
 
 export interface SettingVerifyResult {
-  status: number
-  msg?: string
+    status: number
+    msg?: string
 }
 
 export * from './yarnQueue'

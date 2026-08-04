@@ -15,25 +15,25 @@
  * limitations under the License.
  */
 export interface FlinkCluster {
-  id: string;
-  address: string;
-  clusterId: string;
-  clusterName: string;
-  deployMode: number;
-  versionId: string;
-  k8sNamespace: string;
-  serviceAccount?: any;
-  description: string;
-  userId: string;
-  flinkImage?: any;
-  options: string;
-  yarnQueue: string;
-  k8sHadoopIntegration: boolean;
-  dynamicProperties: string;
-  k8sRestExposedType: number;
-  k8sConf?: any;
-  resolveOrder: number;
-  exception?: any;
-  clusterState: number;
-  createTime: string;
+    id: string
+    address: string
+    clusterId: string
+    clusterName: string
+    deployMode: number
+    versionId: string
+    k8sNamespace: string
+    serviceAccount?: any
+    description: string
+    userId: string
+    flinkImage?: any
+    options: string
+    yarnQueue: string
+    k8sHadoopIntegration: boolean
+    dynamicProperties: string
+    k8sRestExposedType: number
+    k8sConf?: any
+    resolveOrder: number
+    exception?: any
+    clusterState: number
+    createTime: string
 }

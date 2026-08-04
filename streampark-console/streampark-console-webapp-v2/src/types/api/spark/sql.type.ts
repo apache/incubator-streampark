@@ -15,20 +15,20 @@
  * limitations under the License.
  */
 export interface SparkSql {
-  id?: number;
-  appId?: string;
-  sql?: string;
-  teamResource?: string;
-  dependency?: string;
-  version?: number;
-  /**
-   * candidate number: 0: none candidate <br>
-   * 1: newly added record becomes a candidate <br>
-   * 2: specific history becomes a candidate <br>
-   */
-  candidate?: number;
-  createTime?: string;
-  effective?: boolean;
-  sqlDifference?: boolean;
-  dependencyDifference?: boolean;
+    id?: number
+    appId?: string
+    sql?: string
+    teamResource?: string
+    dependency?: string
+    version?: number
+    /**
+     * candidate number: 0: none candidate <br>
+     * 1: newly added record becomes a candidate <br>
+     * 2: specific history becomes a candidate <br>
+     */
+    candidate?: number
+    createTime?: string
+    effective?: boolean
+    sqlDifference?: boolean
+    dependencyDifference?: boolean
 }

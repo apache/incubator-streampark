@@ -15,30 +15,30 @@
  * limitations under the License.
  */
 export interface VariableListRecord {
-  id: string;
-  variableCode: string;
-  variableValue: string;
-  description: string;
-  creatorId: string;
-  creatorName: string;
-  teamId: string;
-  createTime: string;
-  modifyTime: string;
-  desensitization: boolean;
-  sortField?: string;
-  sortOrder?: string;
+    id: string
+    variableCode: string
+    variableValue: string
+    description: string
+    creatorId: string
+    creatorName: string
+    teamId: string
+    createTime: string
+    modifyTime: string
+    desensitization: boolean
+    sortField?: string
+    sortOrder?: string
 }
 
 export interface VariableParam {
-  id?: string;
-  variableCode: string;
-  variableValue: string;
-  description: string;
+    id?: string
+    variableCode: string
+    variableValue: string
+    description: string
 }
 
 export interface VariableDeleteParam {
-  id: string;
-  variableCode: string;
-  variableValue: string;
-  teamId: string;
+    id: string
+    variableCode: string
+    variableValue: string
+    teamId: string
 }

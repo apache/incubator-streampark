@@ -1,54 +1,54 @@
-import type { LocaleSetting, LocaleType } from '/#/config';
+import type { LocaleSetting, LocaleType } from '/#/config'
 
-import { defineStore } from 'pinia';
-import { getPinia } from '@/store/index';
+import { defineStore } from 'pinia'
+import { getPinia } from '@/store/index'
 
-import { LOCALE_KEY } from '@/enums/cacheEnum';
-import { createLocalStorage } from '@/utils/cache';
-import { localeSetting } from '@/settings/localeSetting';
+import { LOCALE_KEY } from '@/enums/cacheEnum'
+import { createLocalStorage } from '@/utils/cache'
+import { localeSetting } from '@/settings/localeSetting'
 
-const ls = createLocalStorage();
+const ls = createLocalStorage()
 
-const lsLocaleSetting = (ls.get(LOCALE_KEY) || localeSetting) as LocaleSetting;
+const lsLocaleSetting = (ls.get(LOCALE_KEY) || localeSetting) as LocaleSetting
 
 interface LocaleState {
-  localInfo: LocaleSetting;
+    localInfo: LocaleSetting
 }
 
 export const useLocaleStore = defineStore('app-locale', {
-  state: (): LocaleState => ({
-    localInfo: lsLocaleSetting,
-  }),
-  getters: {
-    getShowPicker(): boolean {
-      return !!this.localInfo?.showPicker;
+    state: (): LocaleState => ({
+        localInfo: lsLocaleSetting,
+    }),
+    getters: {
+        getShowPicker(): boolean {
+            return !!this.localInfo?.showPicker
+        },
+        getLocale(): LocaleType {
+            return this.localInfo?.locale ?? 'en'
+        },
     },
-    getLocale(): LocaleType {
-      return this.localInfo?.locale ?? 'en';
+    actions: {
+        /**
+         * Set up multilingual information and cache
+         * @param info multilingual info
+         */
+        setLocaleInfo(info: Partial<LocaleSetting>) {
+            this.localInfo = { ...this.localInfo, ...info }
+            ls.set(LOCALE_KEY, this.localInfo)
+        },
+        /**
+         * Initialize multilingual information and load the existing configuration from the local cache
+         */
+        initLocale() {
+            this.setLocaleInfo({
+                ...localeSetting,
+                ...this.localInfo,
+            })
+        },
     },
-  },
-  actions: {
-    /**
-     * Set up multilingual information and cache
-     * @param info multilingual info
-     */
-    setLocaleInfo(info: Partial<LocaleSetting>) {
-      this.localInfo = { ...this.localInfo, ...info };
-      ls.set(LOCALE_KEY, this.localInfo);
-    },
-    /**
-     * Initialize multilingual information and load the existing configuration from the local cache
-     */
-    initLocale() {
-      this.setLocaleInfo({
-        ...localeSetting,
-        ...this.localInfo,
-      });
-    },
-  },
-});
+})
 
 // Need to be used outside the setup
 export function useLocaleStoreWithOut() {
-  return useLocaleStore(getPinia())
+    return useLocaleStore(getPinia())
 }

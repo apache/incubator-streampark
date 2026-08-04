@@ -18,71 +18,64 @@
 import type { TreeOption } from 'naive-ui'
 
 export interface MenuTreeNode {
-  id: string
-  text: string
-  permission?: string
-  path?: string
-  children?: MenuTreeNode[]
+    id: string
+    text: string
+    permission?: string
+    path?: string
+    children?: MenuTreeNode[]
 }
 
 const permissionIdMap = new Map<string, string>()
 
 export function formatMenuLabel(text: string, t: (key: string) => string) {
-  if (/^\w+\.\w+$/.test(text))
-    return t(`menu.${text}`)
-  return text
+    if (/^\w+\.\w+$/.test(text)) return t(`menu.${text}`)
+    return text
 }
 
 export function transformMenuTree(
-  nodes: MenuTreeNode[] | undefined,
-  t: (key: string) => string,
+    nodes: MenuTreeNode[] | undefined,
+    t: (key: string) => string,
 ): TreeOption[] {
-  if (!nodes?.length)
-    return []
-  return nodes.map((node) => {
-    const mapKey = node.permission || node.path
-    if (mapKey && !permissionIdMap.has(mapKey))
-      permissionIdMap.set(mapKey, node.id)
-    return {
-      key: node.id,
-      label: formatMenuLabel(node.text, t),
-      children: node.children?.length ? transformMenuTree(node.children, t) : undefined,
-    }
-  })
+    if (!nodes?.length) return []
+    return nodes.map((node) => {
+        const mapKey = node.permission || node.path
+        if (mapKey && !permissionIdMap.has(mapKey)) permissionIdMap.set(mapKey, node.id)
+        return {
+            key: node.id,
+            label: formatMenuLabel(node.text, t),
+            children: node.children?.length ? transformMenuTree(node.children, t) : undefined,
+        }
+    })
 }
 
 export function collectLeafKeys(nodes: MenuTreeNode[] | undefined, keys: string[] = []) {
-  if (!nodes?.length)
+    if (!nodes?.length) return keys
+    for (const node of nodes) {
+        if (node.children?.length) collectLeafKeys(node.children, keys)
+        else keys.push(node.id)
+    }
     return keys
-  for (const node of nodes) {
-    if (node.children?.length)
-      collectLeafKeys(node.children, keys)
-    else
-      keys.push(node.id)
-  }
-  return keys
 }
 
 export function filterCheckedLeafKeys(allRoleMenuIds: string[], leafKeys: string[]) {
-  const leafSet = new Set(leafKeys)
-  return allRoleMenuIds.filter(id => leafSet.has(id))
+    const leafSet = new Set(leafKeys)
+    return allRoleMenuIds.filter((id) => leafSet.has(id))
 }
 
 export function getPermissionMenuId(permission: string) {
-  return permissionIdMap.get(permission)
+    return permissionIdMap.get(permission)
 }
 
 export function resetPermissionIdMap() {
-  permissionIdMap.clear()
+    permissionIdMap.clear()
 }
 
 export function resolveListData<T>(
-  data: T[] | { records?: T[], total?: number | string } | null | undefined,
+    data: T[] | { records?: T[]; total?: number | string } | null | undefined,
 ) {
-  if (Array.isArray(data))
-    return { records: data, total: data.length }
-  return {
-    records: data?.records ?? [],
-    total: Number(data?.total ?? data?.records?.length ?? 0),
-  }
+    if (Array.isArray(data)) return { records: data, total: data.length }
+    return {
+        records: data?.records ?? [],
+        total: Number(data?.total ?? data?.records?.length ?? 0),
+    }
 }

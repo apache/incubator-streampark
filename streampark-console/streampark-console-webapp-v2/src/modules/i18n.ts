@@ -19,6 +19,6 @@ import type { App } from 'vue'
 export { i18n, setupI18n } from '@/locales/setupI18n'
 
 export async function install(app: App) {
-  const { setupI18n } = await import('@/locales/setupI18n')
-  await setupI18n(app)
+    const { setupI18n } = await import('@/locales/setupI18n')
+    await setupI18n(app)
 }

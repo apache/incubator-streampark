@@ -21,8 +21,8 @@ import { fetchGatewayCreate } from '@/service'
 const props = defineProps<{ show: boolean }>()
 
 const emit = defineEmits<{
-  'update:show': [value: boolean]
-  success: []
+    'update:show': [value: boolean]
+    success: []
 }>()
 
 const { t } = useI18n()
@@ -30,73 +30,81 @@ const formRef = ref<FormInst | null>(null)
 const submitting = ref(false)
 
 const formModel = ref({
-  gatewayName: '',
-  address: '',
-  description: '',
+    gatewayName: '',
+    address: '',
+    description: '',
 })
 
 const rules: FormRules = {
-  gatewayName: [{ required: true, message: t('setting.flinkGateway.checkResult.emptyHint'), trigger: 'blur' }],
-  address: [{ required: true, message: t('setting.flinkGateway.checkResult.emptyAddress'), trigger: 'blur' }],
+    gatewayName: [
+        {
+            required: true,
+            message: t('setting.flinkGateway.checkResult.emptyHint'),
+            trigger: 'blur',
+        },
+    ],
+    address: [
+        {
+            required: true,
+            message: t('setting.flinkGateway.checkResult.emptyAddress'),
+            trigger: 'blur',
+        },
+    ],
 }
 
 watch(
-  () => props.show,
-  (show) => {
-    if (!show)
-      return
-    formModel.value = { gatewayName: '', address: '', description: '' }
-    nextTick(() => formRef.value?.restoreValidation())
-  },
+    () => props.show,
+    (show) => {
+        if (!show) return
+        formModel.value = { gatewayName: '', address: '', description: '' }
+        nextTick(() => formRef.value?.restoreValidation())
+    },
 )
 
 function closeDrawer() {
-  emit('update:show', false)
+    emit('update:show', false)
 }
 
 async function handleSubmit() {
-  await formRef.value?.validate()
-  submitting.value = true
-  try {
-    const result = await fetchGatewayCreate(formModel.value)
-    if (!result.isSuccess)
-      throwApiFailure(result, t('sys.api.apiRequestFailed'))
-    closeDrawer()
-    emit('success')
-  }
-  catch (e: any) {
-    showCatchError(e, t('sys.api.apiRequestFailed'))
-  }
-  finally {
-    submitting.value = false
-  }
+    await formRef.value?.validate()
+    submitting.value = true
+    try {
+        const result = await fetchGatewayCreate(formModel.value)
+        if (!result.isSuccess) throwApiFailure(result, t('sys.api.apiRequestFailed'))
+        closeDrawer()
+        emit('success')
+    } catch (e: any) {
+        showCatchError(e, t('sys.api.apiRequestFailed'))
+    } finally {
+        submitting.value = false
+    }
 }
 </script>
 
 <template>
-  <n-drawer :show="show" :width="480" @update:show="emit('update:show', $event)">
-    <n-drawer-content :title="t('setting.flinkGateway.createGateway')" closable>
-      <n-form ref="formRef" :model="formModel" :rules="rules" label-placement="top">
-        <n-form-item :label="t('setting.flinkGateway.name')" path="gatewayName">
-          <n-input v-model:value="formModel.gatewayName" />
-        </n-form-item>
-        <n-form-item :label="t('setting.flinkGateway.gatewayAddress')" path="address">
-          <n-input v-model:value="formModel.address" />
-        </n-form-item>
-        <n-form-item :label="t('common.description')" path="description">
-          <n-input v-model:value="formModel.description" type="textarea" :rows="3" />
-        </n-form-item>
-      </n-form>
-      <template #footer>
-        <n-space justify="end">
-          <n-button @click="closeDrawer">
-            {{ t('common.cancelText') }}
-          </n-button>
-          <n-button type="primary" :loading="submitting" @click="handleSubmit">
-            {{ t('common.submitText') }}
-          </n-button>
-        </n-space>
-      </template>
-    </n-drawer-content>
-  </n-drawer>
+    <n-drawer :show="show" :width="480" @update:show="emit('update:show', $event)">
+        <n-drawer-content :title="t('setting.flinkGateway.createGateway')" closable>
+            <n-form ref="formRef" :model="formModel" :rules="rules" label-placement="top">
+                <n-form-item :label="t('setting.flinkGateway.name')" path="gatewayName">
+                    <n-input v-model:value="formModel.gatewayName" />
+                </n-form-item>
+                <n-form-item :label="t('setting.flinkGateway.gatewayAddress')" path="address">
+                    <n-input v-model:value="formModel.address" />
+                </n-form-item>
+                <n-form-item :label="t('common.description')" path="description">
+                    <n-input v-model:value="formModel.description" type="textarea" :rows="3" />
+                </n-form-item>
+            </n-form>
+            <template #footer>
+                <n-space justify="end">
+                    <n-button @click="closeDrawer">
+                        {{ t('common.cancelText') }}
+                    </n-button>
+                    <n-button type="primary" :loading="submitting" @click="handleSubmit">
+                        {{ t('common.submitText') }}
+                    </n-button>
+                </n-space>
+            </template>
+        </n-drawer-content>
+    </n-drawer>
 </template>

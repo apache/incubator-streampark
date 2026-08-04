@@ -19,30 +19,29 @@ import { getPinia } from '@/store/index'
 import { fetchPermCode } from '@/service'
 
 interface PermissionState {
-  permCodeList: string[] | number[]
+    permCodeList: string[] | number[]
 }
 
 export const usePermissionStore = defineStore('app-permission', {
-  state: (): PermissionState => ({
-    permCodeList: [],
-  }),
-  getters: {
-    getPermCodeList(): string[] | number[] {
-      return this.permCodeList
+    state: (): PermissionState => ({
+        permCodeList: [],
+    }),
+    getters: {
+        getPermCodeList(): string[] | number[] {
+            return this.permCodeList
+        },
     },
-  },
-  actions: {
-    setPermCodeList(codeList: string[]) {
-      this.permCodeList = codeList
+    actions: {
+        setPermCodeList(codeList: string[]) {
+            this.permCodeList = codeList
+        },
+        async changePermissionCode() {
+            const result = await fetchPermCode()
+            if (result.isSuccess && result.data) this.setPermCodeList(result.data as string[])
+        },
     },
-    async changePermissionCode() {
-      const result = await fetchPermCode()
-      if (result.isSuccess && result.data)
-        this.setPermCodeList(result.data as string[])
-    },
-  },
 })
 
 export function usePermissionStoreWithOut() {
-  return usePermissionStore(getPinia())
+    return usePermissionStore(getPinia())
 }

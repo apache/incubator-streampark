@@ -18,66 +18,66 @@
  * @description: Login interface parameters
  */
 export interface LoginParams {
-  username: string;
-  password: string;
-  loginType: string;
+    username: string
+    password: string
+    loginType: string
 }
 
 export interface RoleInfo {
-  roleName: string;
-  value: string;
+    roleName: string
+    value: string
 }
 
 /**
  * @description: Login interface return value
  */
 export interface LoginResultModel {
-  expire?: string;
-  permissions: string[];
-  roles: string[];
-  token: string;
-  user: GetUserInfoModel;
+    expire?: string
+    permissions: string[]
+    roles: string[]
+    token: string
+    user: GetUserInfoModel
 }
 
 /**
  * @description: Get user information return value
  */
 export interface GetUserInfoModel {
-  roles: RoleInfo[];
-  userId: string | number;
-  username: string;
-  nickName: string;
-  avatar: string;
-  desc?: string;
-  lastTeamId?: string;
+    roles: RoleInfo[]
+    userId: string | number
+    username: string
+    nickName: string
+    avatar: string
+    desc?: string
+    lastTeamId?: string
 }
 export interface TeamSetResponse {
-  permissions: string[];
-  roles: string[];
-  user: GetUserInfoModel;
+    permissions: string[]
+    roles: string[]
+    user: GetUserInfoModel
 }
 
 // user list api response
 export interface UserListRecord {
-  userId: string;
-  username: string;
-  password: string;
-  email?: string;
-  userType: string;
-  status: string;
-  createTime: string;
-  modifyTime: string;
-  lastLoginTime: string;
-  sex: string;
-  description?: string;
-  avatar?: string;
-  sortField?: string;
-  sortOrder?: string;
-  createTimeFrom?: string;
-  createTimeTo?: string;
-  id?: string;
-  salt: string;
-  nickName: string;
-  teamId: string;
-  loginType: string;
+    userId: string
+    username: string
+    password: string
+    email?: string
+    userType: string
+    status: string
+    createTime: string
+    modifyTime: string
+    lastLoginTime: string
+    sex: string
+    description?: string
+    avatar?: string
+    sortField?: string
+    sortOrder?: string
+    createTimeFrom?: string
+    createTimeTo?: string
+    id?: string
+    salt: string
+    nickName: string
+    teamId: string
+    loginType: string
 }

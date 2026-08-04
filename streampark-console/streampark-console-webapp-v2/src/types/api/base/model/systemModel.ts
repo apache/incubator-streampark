@@ -14,46 +14,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { BasicFetchResult, BasicPageParams } from '@/types/api/model/baseModel';
+import type { BasicFetchResult, BasicPageParams } from '@/types/api/model/baseModel'
 
 export type RoleParams = {
-  roleName?: string;
-  status?: string;
-};
+    roleName?: string
+    status?: string
+}
 
-export type RolePageParams = BasicPageParams & RoleParams;
+export type RolePageParams = BasicPageParams & RoleParams
 
 export type MenuParams = {
-  menuName?: string;
-  status?: string;
-  roleId?: number;
-  type?: string;
-};
+    menuName?: string
+    status?: string
+    roleId?: number
+    type?: string
+}
 
 export interface UserListItem {
-  userId: string;
-  username: string;
-  nickName: string;
-  createTime: string;
-  status: number;
-  lastTeamId: number;
+    userId: string
+    username: string
+    nickName: string
+    createTime: string
+    status: number
+    lastTeamId: number
 }
 
 export interface RoleListItem {
-  id: string;
-  roleName: string;
-  roleValue: string;
-  status: number;
-  orderNo: string;
-  createTime: string;
+    id: string
+    roleName: string
+    roleValue: string
+    status: number
+    orderNo: string
+    createTime: string
 }
 
-export type UserListGetResultModel = BasicFetchResult<UserListItem>;
+export type UserListGetResultModel = BasicFetchResult<UserListItem>
 
-export type RolePageListGetResultModel = BasicFetchResult<RoleListItem>;
+export type RolePageListGetResultModel = BasicFetchResult<RoleListItem>
 
 export interface MenuListModel {
-  ids: Array<string>;
-  rows: any;
-  total: number;
+    ids: Array<string>
+    rows: any
+    total: number
 }

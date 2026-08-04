@@ -42,12 +42,12 @@ export * from './api/spark/build'
 export * from './api/spark/sql'
 export * from './api/spark/app'
 export {
-  fetchGetSparkConf,
-  fetchSparkConfHistory,
-  fetchSparkConfList,
-  fetchSparkConfRemove,
-  fetchSparkConfTemplate,
-  fetchSysHadoopConf as fetchSparkSysHadoopConf,
+    fetchGetSparkConf,
+    fetchSparkConfHistory,
+    fetchSparkConfList,
+    fetchSparkConfRemove,
+    fetchSparkConfTemplate,
+    fetchSysHadoopConf as fetchSparkSysHadoopConf,
 } from './api/spark/conf'
 export * from './api/flink/sql'
 export * from './api/flink/podtmpl'
@@ -56,8 +56,8 @@ export * from './api/base/error'
 
 /** Nova dict store stub — StreamPark uses backend enums instead */
 export async function fetchDictList(_code: string) {
-  return {
-    isSuccess: true,
-    data: [] as Array<{ label: string, value: string }>,
-  }
+    return {
+        isSuccess: true,
+        data: [] as Array<{ label: string; value: string }>,
+    }
 }

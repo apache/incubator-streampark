@@ -18,57 +18,57 @@
 import { request } from '../../http'
 
 export function fetchProjectList(data?: Recordable) {
-  return request.Post<Recordable[]>('/project/list', data ?? {})
+    return request.Post<Recordable[]>('/project/list', data ?? {})
 }
 
 export function fetchProjectExists(data: Recordable) {
-  return request.Post<boolean>('/project/exists', data)
+    return request.Post<boolean>('/project/exists', data)
 }
 
 export function fetchProjectGitCheck(data: Recordable) {
-  return request.Post<Recordable>('/project/git_check', data)
+    return request.Post<Recordable>('/project/git_check', data)
 }
 
 export function fetchProjectBranches(data: Recordable) {
-  return request.Post<string[]>('/project/branches', data)
+    return request.Post<string[]>('/project/branches', data)
 }
 
 export function fetchProjectCreate(data: Recordable) {
-  return request.Post<boolean>('/project/create', data)
+    return request.Post<boolean>('/project/create', data)
 }
 
 export function fetchProjectDetail(data: Recordable) {
-  return request.Post<Recordable>('/project/get', data)
+    return request.Post<Recordable>('/project/get', data)
 }
 
 export function fetchProjectUpdate(data: Recordable) {
-  return request.Post<boolean>('/project/update', data)
+    return request.Post<boolean>('/project/update', data)
 }
 
 export function fetchProjectBuild(data: Recordable) {
-  return request.Post<boolean>('/project/build', data)
+    return request.Post<boolean>('/project/build', data)
 }
 
 export function fetchProjectBuildLog(data: Recordable) {
-  return request.Post<string>('/project/build_log', data)
+    return request.Post<string>('/project/build_log', data)
 }
 
 export function fetchProjectDelete(data: Recordable) {
-  return request.Post<boolean>('/project/delete', data)
+    return request.Post<boolean>('/project/delete', data)
 }
 
 export function fetchProjectModules(data: Recordable) {
-  return request.Post<string[]>('/project/modules', data)
+    return request.Post<string[]>('/project/modules', data)
 }
 
 export function fetchProjectJars(data: Recordable) {
-  return request.Post<string[]>('/project/jars', data)
+    return request.Post<string[]>('/project/jars', data)
 }
 
 export function fetchProjectListConf(data: Recordable) {
-  return request.Post<Recordable[]>('/project/list_conf', data)
+    return request.Post<Recordable[]>('/project/list_conf', data)
 }
 
 export function fetchProjectSelect(data: Recordable) {
-  return request.Post<Recordable[]>('/project/select', data)
+    return request.Post<Recordable[]>('/project/select', data)
 }

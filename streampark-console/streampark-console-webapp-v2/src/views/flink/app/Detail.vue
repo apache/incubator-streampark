@@ -41,45 +41,43 @@ const requestModalVisible = ref(false)
 const requestApiName = ref('')
 
 async function loadExternalLinks(appId: string) {
-  const result = await fetchAppExternalLink({ appId })
-  if (result.isSuccess && Array.isArray(result.data))
-    externalLinks.value = result.data
+    const result = await fetchAppExternalLink({ appId })
+    if (result.isSuccess && Array.isArray(result.data)) externalLinks.value = result.data
 }
 
 function openRequestModal(name: string) {
-  requestApiName.value = name
-  requestModalVisible.value = true
+    requestApiName.value = name
+    requestModalVisible.value = true
 }
 
 function openExternalLink(url: string) {
-  window.open(url, '_blank')
+    window.open(url, '_blank')
 }
 
 function deployModeLabel(mode?: number) {
-  return deployModes.find(d => d.value === mode)?.label ?? String(mode ?? '-')
+    return deployModes.find((d) => d.value === mode)?.label ?? String(mode ?? '-')
 }
 
 async function loadApp() {
-  const appId = route.query.appId as string
-  if (!appId) {
-    router.back()
-    return
-  }
-  const result = await fetchAppGet({ id: appId })
-  if (!result.isSuccess) {
-    showResultError(result, t('sys.api.apiRequestFailed'))
-    return
-  }
-  Object.assign(app, result.data)
-  appNotRunning.value = !app.appControl?.allowView
-  await loadExternalLinks(appId)
+    const appId = route.query.appId as string
+    if (!appId) {
+        router.back()
+        return
+    }
+    const result = await fetchAppGet({ id: appId })
+    if (!result.isSuccess) {
+        showResultError(result, t('sys.api.apiRequestFailed'))
+        return
+    }
+    Object.assign(app, result.data)
+    appNotRunning.value = !app.appControl?.allowView
+    await loadExternalLinks(appId)
 }
 
 function goEdit() {
-  if (app.appType === AppTypeEnum.STREAMPARK_FLINK)
-    router.push({ path: '/flink/app/edit_streampark', query: { appId: app.id } })
-  else
-    router.push({ path: '/flink/app/edit_flink', query: { appId: app.id } })
+    if (app.appType === AppTypeEnum.STREAMPARK_FLINK)
+        router.push({ path: '/flink/app/edit_streampark', query: { appId: app.id } })
+    else router.push({ path: '/flink/app/edit_flink', query: { appId: app.id } })
 }
 
 const { pause } = useIntervalFn(loadApp, 5000, { immediateCallback: true })
@@ -88,95 +86,101 @@ onUnmounted(() => pause())
 </script>
 
 <template>
-  <n-card :bordered="false">
-    <template #header>
-      <div class="flex items-center justify-between">
-        <span>{{ t('flink.app.detail.detailTitle') }} — {{ app.jobName }}</span>
-        <n-space>
-          <n-tag
-            v-for="link in externalLinks"
-            :key="link.id ?? link.badgeName"
-            :color="toTagColor(link.badgeColor)"
-            class="cursor-pointer"
-            @click="openExternalLink(link.linkUrl)"
-          >
-            {{ link.badgeLabel || link.badgeName }}
-          </n-tag>
-          <n-button type="primary" :disabled="appNotRunning" @click="handleView(app as AppListRecord)">
-            <template #icon>
-              <n-icon :component="ionIconComponent('CloudOutline')" />
-            </template>
-            {{ t('flink.app.detail.flinkWebUi') }}
-          </n-button>
-          <n-button size="small" @click="openRequestModal('flinkStart')">
-            {{ t('flink.app.detail.copyStartcURL') }}
-          </n-button>
-          <n-button size="small" @click="openRequestModal('flinkCancel')">
-            {{ t('flink.app.detail.copyCancelcURL') }}
-          </n-button>
-          <n-button v-auth="'app:update'" type="primary" ghost @click="goEdit">
-            {{ t('flink.app.operation.edit') }}
-          </n-button>
-          <n-button circle @click="router.back()">
-            <template #icon>
-              <n-icon :component="ionIconComponent('ArrowBackOutline')" />
-            </template>
-          </n-button>
-        </n-space>
-      </div>
-    </template>
+    <n-card :bordered="false">
+        <template #header>
+            <div class="flex items-center justify-between">
+                <span>{{ t('flink.app.detail.detailTitle') }} — {{ app.jobName }}</span>
+                <n-space>
+                    <n-tag
+                        v-for="link in externalLinks"
+                        :key="link.id ?? link.badgeName"
+                        :color="toTagColor(link.badgeColor)"
+                        class="cursor-pointer"
+                        @click="openExternalLink(link.linkUrl)"
+                    >
+                        {{ link.badgeLabel || link.badgeName }}
+                    </n-tag>
+                    <n-button
+                        type="primary"
+                        :disabled="appNotRunning"
+                        @click="handleView(app as AppListRecord)"
+                    >
+                        <template #icon>
+                            <n-icon :component="ionIconComponent('CloudOutline')" />
+                        </template>
+                        {{ t('flink.app.detail.flinkWebUi') }}
+                    </n-button>
+                    <n-button size="small" @click="openRequestModal('flinkStart')">
+                        {{ t('flink.app.detail.copyStartcURL') }}
+                    </n-button>
+                    <n-button size="small" @click="openRequestModal('flinkCancel')">
+                        {{ t('flink.app.detail.copyCancelcURL') }}
+                    </n-button>
+                    <n-button v-auth="'app:update'" type="primary" ghost @click="goEdit">
+                        {{ t('flink.app.operation.edit') }}
+                    </n-button>
+                    <n-button circle @click="router.back()">
+                        <template #icon>
+                            <n-icon :component="ionIconComponent('ArrowBackOutline')" />
+                        </template>
+                    </n-button>
+                </n-space>
+            </div>
+        </template>
 
-    <n-descriptions bordered :column="2" size="small" label-placement="left">
-      <n-descriptions-item :label="t('flink.app.appName')">
-        {{ app.jobName }}
-      </n-descriptions-item>
-      <n-descriptions-item :label="t('flink.app.jobType')">
-        <n-tag size="small">
-          {{ app.jobType === JobTypeEnum.JAR ? 'JAR' : app.jobType === JobTypeEnum.SQL ? 'SQL' : 'PY' }}
-        </n-tag>
-      </n-descriptions-item>
-      <n-descriptions-item :label="t('flink.app.runStatus')">
-        <AppStateTag option="state" :data="app" />
-      </n-descriptions-item>
-      <n-descriptions-item :label="t('flink.app.releaseBuild')">
-        <AppStateTag option="release" :data="app" />
-      </n-descriptions-item>
-      <n-descriptions-item :label="t('flink.app.flinkVersion')">
-        {{ app.flinkVersion }}
-      </n-descriptions-item>
-      <n-descriptions-item :label="t('flink.app.deployMode')">
-        {{ deployModeLabel(app.deployMode) }}
-      </n-descriptions-item>
-      <n-descriptions-item :label="t('flink.app.owner')">
-        {{ app.nickName || app.userName }}
-      </n-descriptions-item>
-      <n-descriptions-item :label="t('flink.app.tags')">
-        {{ app.tags || '-' }}
-      </n-descriptions-item>
-      <n-descriptions-item :label="t('common.description')" :span="2">
-        {{ app.description || '-' }}
-      </n-descriptions-item>
-      <n-descriptions-item v-if="app.mainClass" :label="t('flink.app.mainClass')">
-        {{ app.mainClass }}
-      </n-descriptions-item>
-      <n-descriptions-item v-if="app.jar" :label="t('flink.app.uploadJobJar')">
-        {{ app.jar }}
-      </n-descriptions-item>
-      <n-descriptions-item :label="t('flink.app.modifiedTime')">
-        {{ app.modifyTime }}
-      </n-descriptions-item>
-      <n-descriptions-item :label="t('common.createTime')">
-        {{ app.createTime }}
-      </n-descriptions-item>
-    </n-descriptions>
+        <n-descriptions bordered :column="2" size="small" label-placement="left">
+            <n-descriptions-item :label="t('flink.app.appName')">
+                {{ app.jobName }}
+            </n-descriptions-item>
+            <n-descriptions-item :label="t('flink.app.jobType')">
+                <n-tag size="small">
+                    {{
+                        app.jobType === JobTypeEnum.JAR
+                            ? 'JAR'
+                            : app.jobType === JobTypeEnum.SQL
+                              ? 'SQL'
+                              : 'PY'
+                    }}
+                </n-tag>
+            </n-descriptions-item>
+            <n-descriptions-item :label="t('flink.app.runStatus')">
+                <AppStateTag option="state" :data="app" />
+            </n-descriptions-item>
+            <n-descriptions-item :label="t('flink.app.releaseBuild')">
+                <AppStateTag option="release" :data="app" />
+            </n-descriptions-item>
+            <n-descriptions-item :label="t('flink.app.flinkVersion')">
+                {{ app.flinkVersion }}
+            </n-descriptions-item>
+            <n-descriptions-item :label="t('flink.app.deployMode')">
+                {{ deployModeLabel(app.deployMode) }}
+            </n-descriptions-item>
+            <n-descriptions-item :label="t('flink.app.owner')">
+                {{ app.nickName || app.userName }}
+            </n-descriptions-item>
+            <n-descriptions-item :label="t('flink.app.tags')">
+                {{ app.tags || '-' }}
+            </n-descriptions-item>
+            <n-descriptions-item :label="t('common.description')" :span="2">
+                {{ app.description || '-' }}
+            </n-descriptions-item>
+            <n-descriptions-item v-if="app.mainClass" :label="t('flink.app.mainClass')">
+                {{ app.mainClass }}
+            </n-descriptions-item>
+            <n-descriptions-item v-if="app.jar" :label="t('flink.app.uploadJobJar')">
+                {{ app.jar }}
+            </n-descriptions-item>
+            <n-descriptions-item :label="t('flink.app.modifiedTime')">
+                {{ app.modifyTime }}
+            </n-descriptions-item>
+            <n-descriptions-item :label="t('common.createTime')">
+                {{ app.createTime }}
+            </n-descriptions-item>
+        </n-descriptions>
 
-    <n-divider />
+        <n-divider />
 
-    <AppDetailTabs :app="app" />
-    <RequestModal
-      v-model:show="requestModalVisible"
-      :app="app"
-      :api-name="requestApiName"
-    />
-  </n-card>
+        <AppDetailTabs :app="app" />
+        <RequestModal v-model:show="requestModalVisible" :app="app" :api-name="requestApiName" />
+    </n-card>
 </template>

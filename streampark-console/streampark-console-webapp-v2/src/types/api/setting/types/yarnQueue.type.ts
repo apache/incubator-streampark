@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 export interface YarnQueue {
-  id: number;
-  teamId: number;
-  queueLabel: string;
-  description: string;
-  createTime: string;
-  modifyTime: string;
+    id: number
+    teamId: number
+    queueLabel: string
+    description: string
+    createTime: string
+    modifyTime: string
 }

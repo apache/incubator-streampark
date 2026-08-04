@@ -20,15 +20,17 @@ import { installRouter } from '@/router'
 import { installPinia } from '@/store'
 
 export async function bootstrap(app: App) {
-  installPinia(app)
+    installPinia(app)
 
-  const modules = import.meta.glob<{ install: (app: App) => void | Promise<void> }>('./modules/*.ts', {
-    eager: true,
-  })
-  for (const module of Object.values(modules)) {
-    if (module.install)
-      await module.install(app)
-  }
+    const modules = import.meta.glob<{ install: (app: App) => void | Promise<void> }>(
+        './modules/*.ts',
+        {
+            eager: true,
+        },
+    )
+    for (const module of Object.values(modules)) {
+        if (module.install) await module.install(app)
+    }
 
-  await installRouter(app)
+    await installRouter(app)
 }

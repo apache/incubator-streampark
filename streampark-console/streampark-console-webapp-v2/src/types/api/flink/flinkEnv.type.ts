@@ -16,22 +16,22 @@
  */
 // flink home data
 export interface FlinkEnv {
-  id: string;
-  flinkName: string;
-  flinkHome: string;
-  flinkConf: string;
-  description: string;
-  scalaVersion: string;
-  version: string;
-  isDefault: boolean;
-  createTime: string;
-  streamParkScalaVersion: string;
-  versionOfMiddle?: any;
+    id: string
+    flinkName: string
+    flinkHome: string
+    flinkConf: string
+    description: string
+    scalaVersion: string
+    version: string
+    isDefault: boolean
+    createTime: string
+    streamParkScalaVersion: string
+    versionOfMiddle?: any
 }
 
 export interface FlinkCreate {
-  id?: string | null;
-  flinkName: string;
-  flinkHome: string;
-  description: string;
+    id?: string | null
+    flinkName: string
+    flinkHome: string
+    description: string
 }

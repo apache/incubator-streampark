@@ -19,5 +19,5 @@ import { CacheTypeEnum } from '@/enums/cacheEnum'
 
 /** Minimal project settings retained for auth cache compatibility */
 export default {
-  permissionCacheType: CacheTypeEnum.LOCAL,
+    permissionCacheType: CacheTypeEnum.LOCAL,
 }

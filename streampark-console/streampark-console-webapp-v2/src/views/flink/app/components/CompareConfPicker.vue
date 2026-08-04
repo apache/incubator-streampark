@@ -18,8 +18,8 @@
 import ConfigCompareModal from './ConfigCompareModal.vue'
 
 const props = defineProps<{
-  appId: string
-  configVersions: Array<{ id: string, version?: number, effective?: boolean }>
+    appId: string
+    configVersions: Array<{ id: string; version?: number; effective?: boolean }>
 }>()
 
 const selected = defineModel<string[]>('value', { default: () => [] })
@@ -30,45 +30,41 @@ const compareVisible = ref(false)
 const compareSource = ref<string | number | null>(null)
 
 const versionOptions = computed(() =>
-  props.configVersions.map(ver => ({
-    label: `v${ver.version ?? ver.id}${ver.effective ? ' (effective)' : ''}`,
-    value: ver.id,
-  })),
+    props.configVersions.map((ver) => ({
+        label: `v${ver.version ?? ver.id}${ver.effective ? ' (effective)' : ''}`,
+        value: ver.id,
+    })),
 )
 
 function handleCompare() {
-  if (selected.value.length !== 2) {
-    window.$message?.warning(t('flink.app.addAppTips.compareConfPlaceholder'))
-    return
-  }
-  compareSource.value = selected.value[0]
-  compareVisible.value = true
+    if (selected.value.length !== 2) {
+        window.$message?.warning(t('flink.app.addAppTips.compareConfPlaceholder'))
+        return
+    }
+    compareSource.value = selected.value[0]
+    compareVisible.value = true
 }
 </script>
 
 <template>
-  <n-space align="center" class="w-full">
-    <n-select
-      v-model:value="selected"
-      style="flex: 1"
-      multiple
-      :max-tag-count="2"
-      :options="versionOptions"
-      :placeholder="t('flink.app.addAppTips.compareConfPlaceholder')"
+    <n-space align="center" class="w-full">
+        <n-select
+            v-model:value="selected"
+            style="flex: 1"
+            multiple
+            :max-tag-count="2"
+            :options="versionOptions"
+            :placeholder="t('flink.app.addAppTips.compareConfPlaceholder')"
+        />
+        <n-button type="primary" :disabled="selected.length !== 2" @click="handleCompare">
+            {{ t('common.compareText') }}
+        </n-button>
+    </n-space>
+    <ConfigCompareModal
+        v-model:show="compareVisible"
+        :app-id="appId"
+        :source-version="compareSource"
+        :initial-target="selected[1]"
+        :versions="versionOptions"
     />
-    <n-button
-      type="primary"
-      :disabled="selected.length !== 2"
-      @click="handleCompare"
-    >
-      {{ t('common.compareText') }}
-    </n-button>
-  </n-space>
-  <ConfigCompareModal
-    v-model:show="compareVisible"
-    :app-id="appId"
-    :source-version="compareSource"
-    :initial-target="selected[1]"
-    :versions="versionOptions"
-  />
 </template>

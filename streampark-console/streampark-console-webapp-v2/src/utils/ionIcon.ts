@@ -19,11 +19,11 @@ import type { IconProps } from 'naive-ui'
 import { createIcon } from '@/utils/icon'
 
 export function ionIcon(name: string, props?: IconProps) {
-  return createIcon(name, props)
+    return createIcon(name, props)
 }
 
 export function ionIconRender(name: string, props?: IconProps) {
-  return () => ionIcon(name, props)
+    return () => ionIcon(name, props)
 }
 
 export { ionIconComponent } from './ionIconComponent'

@@ -15,59 +15,59 @@
  * limitations under the License.
  */
 export default {
-  okText: 'OK',
-  closeText: 'Close',
-  detailText: 'Detail',
-  submitText: 'Submit',
+    okText: 'OK',
+    closeText: 'Close',
+    detailText: 'Detail',
+    submitText: 'Submit',
 
-  failed: 'Failed',
-  cancelText: 'Cancel',
-  loadingText: 'Loading...',
-  saveText: 'Save',
-  delText: 'Delete',
-  resetText: 'Reset',
-  searchText: 'Search',
-  queryText: 'Search',
+    failed: 'Failed',
+    cancelText: 'Cancel',
+    loadingText: 'Loading...',
+    saveText: 'Save',
+    delText: 'Delete',
+    resetText: 'Reset',
+    searchText: 'Search',
+    queryText: 'Search',
 
-  inputText: 'Please enter ',
-  chooseText: 'Please choose ',
+    inputText: 'Please enter ',
+    chooseText: 'Please choose ',
 
-  redo: 'Refresh',
-  reload: 'Reload',
-  close: 'Close Tab',
-  back: 'Back',
-  default: 'Default',
+    redo: 'Refresh',
+    reload: 'Reload',
+    close: 'Close Tab',
+    back: 'Back',
+    default: 'Default',
 
-  light: 'Light',
-  dark: 'Dark',
+    light: 'Light',
+    dark: 'Dark',
 
-  history: 'History',
-  apply: 'Apply',
+    history: 'History',
+    apply: 'Apply',
 
-  tip: 'Tip',
+    tip: 'Tip',
 
-  next: 'Next',
-  previous: 'Previous',
+    next: 'Next',
+    previous: 'Previous',
 
-  view: 'View',
-  detail: 'view detail',
+    view: 'View',
+    detail: 'view detail',
 
-  add: 'Add New',
-  edit: 'Edit',
+    add: 'Add New',
+    edit: 'Edit',
 
-  yes: 'Yes',
-  no: 'No',
+    yes: 'Yes',
+    no: 'No',
 
-  createTime: 'Create Time',
-  modifyTime: 'Modify Time',
-  description: 'Description',
+    createTime: 'Create Time',
+    modifyTime: 'Modify Time',
+    description: 'Description',
 
-  switchOn: 'ON',
-  switchOff: 'OFF',
+    switchOn: 'ON',
+    switchOff: 'OFF',
 
-  jobType: {
-    jar: 'JAR',
-    sql: 'SQL',
-    py: 'PY',
-  },
-};
+    jobType: {
+        jar: 'JAR',
+        sql: 'SQL',
+        py: 'PY',
+    },
+}

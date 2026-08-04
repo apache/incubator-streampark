@@ -31,88 +31,86 @@ const formModalVisible = ref(false)
 const formModalType = ref<SettingFormType | null>(null)
 
 const settingsList = computed(() => {
-  const filterValue = (key: string) => settings.value.filter(i => i.settingKey.includes(key))
-  return [
-    {
-      key: 1,
-      title: t('setting.system.systemSettingItems.mavenSetting.name'),
-      isPassword: (item: SystemSetting) => item.settingKey === 'streampark.maven.auth.password',
-      data: filterValue('streampark.maven'),
-    },
-    {
-      key: 2,
-      title: t('setting.system.systemSettingItems.dockerSetting.name'),
-      isPassword: (item: SystemSetting) => item.settingKey === 'docker.register.password',
-      data: filterValue('docker.register'),
-    },
-    {
-      key: 3,
-      title: t('setting.system.systemSettingItems.emailSetting.name'),
-      isPassword: (item: SystemSetting) => item.settingKey === 'alert.email.password',
-      data: filterValue('alert.email'),
-    },
-    {
-      key: 4,
-      title: t('setting.system.systemSettingItems.ingressSetting.name'),
-      isPassword: () => false,
-      data: filterValue('ingress.mode'),
-    },
-  ]
+    const filterValue = (key: string) => settings.value.filter((i) => i.settingKey.includes(key))
+    return [
+        {
+            key: 1,
+            title: t('setting.system.systemSettingItems.mavenSetting.name'),
+            isPassword: (item: SystemSetting) =>
+                item.settingKey === 'streampark.maven.auth.password',
+            data: filterValue('streampark.maven'),
+        },
+        {
+            key: 2,
+            title: t('setting.system.systemSettingItems.dockerSetting.name'),
+            isPassword: (item: SystemSetting) => item.settingKey === 'docker.register.password',
+            data: filterValue('docker.register'),
+        },
+        {
+            key: 3,
+            title: t('setting.system.systemSettingItems.emailSetting.name'),
+            isPassword: (item: SystemSetting) => item.settingKey === 'alert.email.password',
+            data: filterValue('alert.email'),
+        },
+        {
+            key: 4,
+            title: t('setting.system.systemSettingItems.ingressSetting.name'),
+            isPassword: () => false,
+            data: filterValue('ingress.mode'),
+        },
+    ]
 })
 
 async function loadSettings() {
-  const result = await fetchSystemSettingAll()
-  if (result.isSuccess)
-    settings.value = result.data ?? []
+    const result = await fetchSystemSettingAll()
+    if (result.isSuccess) settings.value = result.data ?? []
 }
 
 async function handleSettingUpdate(record: SystemSetting) {
-  try {
-    const result = await fetchSystemSettingUpdate({
-      settingKey: record.settingKey,
-      settingValue: record.settingValue !== 'true',
-    })
-    if (!result.isSuccess)
-      throwApiFailure(result, t('sys.api.apiRequestFailed'))
-    window.$message?.success(t('setting.system.update.success'))
-    loadSettings()
-  }
-  catch (e: any) {
-    showCatchError(e, t('sys.api.apiRequestFailed'))
-  }
+    try {
+        const result = await fetchSystemSettingUpdate({
+            settingKey: record.settingKey,
+            settingValue: record.settingValue !== 'true',
+        })
+        if (!result.isSuccess) throwApiFailure(result, t('sys.api.apiRequestFailed'))
+        window.$message?.success(t('setting.system.update.success'))
+        loadSettings()
+    } catch (e: any) {
+        showCatchError(e, t('sys.api.apiRequestFailed'))
+    }
 }
 
 function handleOpenForm(type: SettingFormType) {
-  formModalType.value = type
-  formModalVisible.value = true
+    formModalType.value = type
+    formModalVisible.value = true
 }
 
 onMounted(loadSettings)
 </script>
 
 <template>
-  <n-card :bordered="false" class="h-full">
-    <n-text strong>{{ t('setting.system.systemSetting') }}</n-text>
-    <n-collapse v-model:expanded-names="collapseActive" class="mt-16px">
-      <n-collapse-item
-        v-for="item in settingsList"
-        :key="item.key"
-        :title="item.title"
-        :name="String(item.key)"
-      >
-        <SettingList
-          :data="item.data"
-          :is-password="item.isPassword"
-          @update-value="handleSettingUpdate"
-          @open-form="handleOpenForm"
-          @reload="loadSettings"
+    <n-card :bordered="false" class="h-full">
+        <n-text strong>{{ t('setting.system.systemSetting') }}</n-text>
+        <n-collapse v-model:expanded-names="collapseActive" class="mt-16px">
+            <n-collapse-item
+                v-for="item in settingsList"
+                :key="item.key"
+                :title="item.title"
+                :name="String(item.key)"
+            >
+                <SettingList
+                    :data="item.data"
+                    :is-password="item.isPassword"
+                    @update-value="handleSettingUpdate"
+                    @open-form="handleOpenForm"
+                    @reload="loadSettings"
+                />
+            </n-collapse-item>
+        </n-collapse>
+        <SettingFormModal
+            v-model:show="formModalVisible"
+            :type="formModalType"
+            @success="loadSettings"
         />
-      </n-collapse-item>
-    </n-collapse>
-    <SettingFormModal
-      v-model:show="formModalVisible"
-      :type="formModalType"
-      @success="loadSettings"
-    />
-  </n-card>
+    </n-card>
 </template>

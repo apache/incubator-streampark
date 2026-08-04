@@ -19,17 +19,17 @@ import type { RoleParam } from '@/types/api/system/model/roleModel'
 import { request } from '../http'
 
 export function fetchRoleCreate(data: RoleParam) {
-  return request.Post('/role/post', data)
+    return request.Post('/role/post', data)
 }
 
 export function fetchRoleUpdate(data: RoleParam) {
-  return request.Put('/role/update', data)
+    return request.Put('/role/update', data)
 }
 
 export function fetchRoleDelete(data: { roleId: string }) {
-  return request.Delete('/role/delete', data)
+    return request.Delete('/role/delete', data)
 }
 
 export function fetchCheckRoleName(data: { roleName: string }) {
-  return request.Post<boolean>('/role/check/name', data)
+    return request.Post<boolean>('/role/check/name', data)
 }

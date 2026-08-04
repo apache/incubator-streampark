@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-export type LayoutMode
-  = | 'vertical'
+export type LayoutMode =
+    | 'vertical'
     | 'horizontal'
     | 'sidebar'
     | 'mixed-sidebar'

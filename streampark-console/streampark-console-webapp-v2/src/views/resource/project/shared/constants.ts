@@ -18,39 +18,42 @@
 import { BuildStateEnum } from '@/enums/flinkEnum'
 
 export function useProjectConstants() {
-  const { t } = useI18n()
+    const { t } = useI18n()
 
-  const statusList = computed(() => [
-    { label: t('flink.project.projectStatus.all'), key: '' },
-    { label: t('flink.project.projectStatus.notBuild'), key: String(BuildStateEnum.NOT_BUDIL) },
-    { label: t('flink.project.projectStatus.building'), key: String(BuildStateEnum.BUILDING) },
-    { label: t('flink.project.projectStatus.buildSuccess'), key: String(BuildStateEnum.SUCCESSFUL) },
-    { label: t('flink.project.projectStatus.buildFailed'), key: String(BuildStateEnum.FAILED) },
-  ])
+    const statusList = computed(() => [
+        { label: t('flink.project.projectStatus.all'), key: '' },
+        { label: t('flink.project.projectStatus.notBuild'), key: String(BuildStateEnum.NOT_BUDIL) },
+        { label: t('flink.project.projectStatus.building'), key: String(BuildStateEnum.BUILDING) },
+        {
+            label: t('flink.project.projectStatus.buildSuccess'),
+            key: String(BuildStateEnum.SUCCESSFUL),
+        },
+        { label: t('flink.project.projectStatus.buildFailed'), key: String(BuildStateEnum.FAILED) },
+    ])
 
-  const buildStateMap = computed(() => ({
-    [String(BuildStateEnum.NOT_BUDIL)]: {
-      color: '#C0C0C0',
-      label: t('flink.project.projectStatus.notBuild'),
-    },
-    [String(BuildStateEnum.NEED_REBUILD)]: {
-      color: '#FFA500',
-      label: t('flink.project.projectStatus.needRebuild'),
-    },
-    [String(BuildStateEnum.BUILDING)]: {
-      color: '#1AB58E',
-      label: t('flink.project.projectStatus.building'),
-      className: 'status-processing-building',
-    },
-    [String(BuildStateEnum.SUCCESSFUL)]: {
-      color: '#52c41a',
-      label: t('flink.project.projectStatus.successful'),
-    },
-    [String(BuildStateEnum.FAILED)]: {
-      color: '#f5222d',
-      label: t('flink.project.projectStatus.failed'),
-    },
-  }))
+    const buildStateMap = computed(() => ({
+        [String(BuildStateEnum.NOT_BUDIL)]: {
+            color: '#C0C0C0',
+            label: t('flink.project.projectStatus.notBuild'),
+        },
+        [String(BuildStateEnum.NEED_REBUILD)]: {
+            color: '#FFA500',
+            label: t('flink.project.projectStatus.needRebuild'),
+        },
+        [String(BuildStateEnum.BUILDING)]: {
+            color: '#1AB58E',
+            label: t('flink.project.projectStatus.building'),
+            className: 'status-processing-building',
+        },
+        [String(BuildStateEnum.SUCCESSFUL)]: {
+            color: '#52c41a',
+            label: t('flink.project.projectStatus.successful'),
+        },
+        [String(BuildStateEnum.FAILED)]: {
+            color: '#f5222d',
+            label: t('flink.project.projectStatus.failed'),
+        },
+    }))
 
-  return { statusList, buildStateMap }
+    return { statusList, buildStateMap }
 }

@@ -20,19 +20,19 @@ import type { BasicTableParams } from '@/types/api/model/baseModel'
 import { request } from '../http'
 
 export function fetchTeamList(data: BasicTableParams & { teamName?: string }) {
-  return request.Post<TeamListRecord[]>('/team/list', data)
+    return request.Post<TeamListRecord[]>('/team/list', data)
 }
 
 export function fetchTeamCreate(data: TeamParam) {
-  return request.Post('/team/post', data)
+    return request.Post('/team/post', data)
 }
 
 export function fetchTeamUpdate(data: TeamParam) {
-  return request.Put('/team/update', data)
+    return request.Put('/team/update', data)
 }
 
 export function fetchTeamDelete(params: { id: string }) {
-  const method = request.Delete<{ status: string }>('/team/delete')
-  method.config.params = params
-  return method
+    const method = request.Delete<{ status: string }>('/team/delete')
+    method.config.params = params
+    return method
 }

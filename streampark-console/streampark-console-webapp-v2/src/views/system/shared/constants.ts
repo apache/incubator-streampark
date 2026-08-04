@@ -16,25 +16,25 @@
  */
 
 export const enum FormTypeEnum {
-  Create = 'create',
-  Edit = 'edit',
-  View = 'view',
+    Create = 'create',
+    Edit = 'edit',
+    View = 'view',
 }
 
 export const enum StatusEnum {
-  Effective = '1',
-  Locked = '0',
+    Effective = '1',
+    Locked = '0',
 }
 
 export const enum GenderEnum {
-  Male = '0',
-  Female = '1',
-  Other = '2',
+    Male = '0',
+    Female = '1',
+    Other = '2',
 }
 
 export const enum UserTypeEnum {
-  ADMIN = 'ADMIN',
-  USER = 'USER',
+    ADMIN = 'ADMIN',
+    USER = 'USER',
 }
 
 export const LOGIN_TYPE_PASSWORD = 'PASSWORD'

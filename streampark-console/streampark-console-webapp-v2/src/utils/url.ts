@@ -16,7 +16,6 @@
  */
 
 export function baseUrl() {
-  if (import.meta.env.PROD)
-    return `${location.protocol}//${location.host}`
-  return ''
+    if (import.meta.env.PROD) return `${location.protocol}//${location.host}`
+    return ''
 }

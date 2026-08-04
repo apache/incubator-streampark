@@ -19,25 +19,25 @@ import type { AlertCreate, AlertSetting } from '@/types/api/setting/types/alert.
 import { request } from '../../http'
 
 export function fetchAlertSetting() {
-  return request.Post<AlertSetting[]>('/flink/alert/list')
+    return request.Post<AlertSetting[]>('/flink/alert/list')
 }
 
 export function fetchSendAlert(data: { id: string }) {
-  return request.Post<boolean>('/flink/alert/send', data)
+    return request.Post<boolean>('/flink/alert/send', data)
 }
 
 export function fetchAlertDelete(data: { id: string }) {
-  return request.Delete<{ data?: boolean, message?: string }>('/flink/alert/delete', data)
+    return request.Delete<{ data?: boolean; message?: string }>('/flink/alert/delete', data)
 }
 
 export function fetchExistsAlert(data: { alertName: string }) {
-  return request.Post<boolean>('/flink/alert/exists', data)
+    return request.Post<boolean>('/flink/alert/exists', data)
 }
 
 export function fetchAlertAdd(data: AlertCreate) {
-  return request.Post<{ data?: boolean, message?: string }>('/flink/alert/add', data)
+    return request.Post<{ data?: boolean; message?: string }>('/flink/alert/add', data)
 }
 
 export function fetchAlertUpdate(data: AlertCreate) {
-  return request.Post<{ data?: boolean, message?: string }>('/flink/alert/update', data)
+    return request.Post<{ data?: boolean; message?: string }>('/flink/alert/update', data)
 }

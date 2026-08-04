@@ -23,56 +23,55 @@ defineOptions({ name: 'SparkAppDashboard' })
 const { t } = useI18n()
 const loading = ref(false)
 
-const stats = ref<Array<{
-  title: string
-  value: string | number
-  footer: Array<{ title: string, value: string | number }>
-}>>([])
+const stats = ref<
+    Array<{
+        title: string
+        value: string | number
+        footer: Array<{ title: string; value: string | number }>
+    }>
+>([])
 
 async function loadDashboard(showLoading = true) {
-  if (showLoading)
-    loading.value = true
-  try {
-    const result = await fetchSparkDashboard()
-    if (!result.isSuccess)
-      throwApiFailure(result, t('sys.api.apiRequestFailed'))
-    const res = result.data as DashboardResponse
-    stats.value = [
-      {
-        title: t('spark.app.dashboard.runningTasks'),
-        value: res.runningApplication,
-        footer: [
-          { title: t('spark.app.dashboard.totalTask'), value: res.numTasks ?? 0 },
-          { title: t('spark.app.dashboard.totalStage'), value: res.numStages ?? 0 },
-        ],
-      },
-      {
-        title: t('spark.app.dashboard.completedTask'),
-        value: res.numCompletedTasks,
-        footer: [
-          { title: t('spark.app.dashboard.completedStage'), value: res.numCompletedStages },
-        ],
-      },
-      {
-        title: t('spark.app.dashboard.memory'),
-        value: `${res.usedMemory} MB`,
-        footer: [],
-      },
-      {
-        title: t('spark.app.dashboard.VCore'),
-        value: res.usedVCores,
-        footer: [],
-      },
-    ]
-  }
-  catch (e: any) {
-    if (showLoading)
-      showCatchError(e, t('sys.api.apiRequestFailed'))
-  }
-  finally {
-    if (showLoading)
-      loading.value = false
-  }
+    if (showLoading) loading.value = true
+    try {
+        const result = await fetchSparkDashboard()
+        if (!result.isSuccess) throwApiFailure(result, t('sys.api.apiRequestFailed'))
+        const res = result.data as DashboardResponse
+        stats.value = [
+            {
+                title: t('spark.app.dashboard.runningTasks'),
+                value: res.runningApplication,
+                footer: [
+                    { title: t('spark.app.dashboard.totalTask'), value: res.numTasks ?? 0 },
+                    { title: t('spark.app.dashboard.totalStage'), value: res.numStages ?? 0 },
+                ],
+            },
+            {
+                title: t('spark.app.dashboard.completedTask'),
+                value: res.numCompletedTasks,
+                footer: [
+                    {
+                        title: t('spark.app.dashboard.completedStage'),
+                        value: res.numCompletedStages,
+                    },
+                ],
+            },
+            {
+                title: t('spark.app.dashboard.memory'),
+                value: `${res.usedMemory} MB`,
+                footer: [],
+            },
+            {
+                title: t('spark.app.dashboard.VCore'),
+                value: res.usedVCores,
+                footer: [],
+            },
+        ]
+    } catch (e: any) {
+        if (showLoading) showCatchError(e, t('sys.api.apiRequestFailed'))
+    } finally {
+        if (showLoading) loading.value = false
+    }
 }
 
 onMounted(() => loadDashboard(true))
@@ -81,18 +80,21 @@ defineExpose({ loadDashboard })
 </script>
 
 <template>
-  <n-grid :x-gap="16" :y-gap="16" class="mb-16px">
-    <n-gi v-for="(item, index) in stats" :key="index" :span="6" :xs="24" :md="6">
-      <n-card :bordered="false" size="small">
-        <n-spin :show="loading">
-          <n-statistic :label="item.title" :value="item.value" />
-          <div v-if="item.footer.length" class="mt-8px flex flex-wrap gap-12px text-12px text-gray-500">
-            <span v-for="(footer, fi) in item.footer" :key="fi">
-              {{ footer.title }}: {{ footer.value }}
-            </span>
-          </div>
-        </n-spin>
-      </n-card>
-    </n-gi>
-  </n-grid>
+    <n-grid :x-gap="16" :y-gap="16" class="mb-16px">
+        <n-gi v-for="(item, index) in stats" :key="index" :span="6" :xs="24" :md="6">
+            <n-card :bordered="false" size="small">
+                <n-spin :show="loading">
+                    <n-statistic :label="item.title" :value="item.value" />
+                    <div
+                        v-if="item.footer.length"
+                        class="mt-8px flex flex-wrap gap-12px text-12px text-gray-500"
+                    >
+                        <span v-for="(footer, fi) in item.footer" :key="fi">
+                            {{ footer.title }}: {{ footer.value }}
+                        </span>
+                    </div>
+                </n-spin>
+            </n-card>
+        </n-gi>
+    </n-grid>
 </template>

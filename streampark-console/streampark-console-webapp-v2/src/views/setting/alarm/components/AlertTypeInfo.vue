@@ -20,8 +20,8 @@ import { SvgIcon } from '@/components/Icon'
 import { alertTypes } from './constants'
 
 const props = defineProps<{
-  alertType: string
-  alertSource: AlertSetting
+    alertType: string
+    alertSource: AlertSetting
 }>()
 
 const { t } = useI18n()
@@ -34,58 +34,58 @@ const weChat = computed(() => JSON.parse(props.alertSource.weComParams || '{}'))
 const lark = computed(() => JSON.parse(props.alertSource.larkParams || '{}'))
 
 function desensitization(dataString: string) {
-  return String(dataString).replace(/^(.{4})(?:.+)(.{4})$/, '$1********$2')
+    return String(dataString).replace(/^(.{4})(?:.+)(.{4})$/, '$1********$2')
 }
 </script>
 
 <template>
-  <div class="alert-type-info mt-10px flex cursor-pointer items-center text-16px">
-    <div class="flex items-center">
-      <SvgIcon :name="typeMap[alertType]?.icon" :size="20" class="!align-middle" />
-      <span class="pl-10px">
-        {{ typeMap[alertType]?.name }}
-      </span>
+    <div class="alert-type-info mt-10px flex cursor-pointer items-center text-16px">
+        <div class="flex items-center">
+            <SvgIcon :name="typeMap[alertType]?.icon" :size="20" class="!align-middle" />
+            <span class="pl-10px">
+                {{ typeMap[alertType]?.name }}
+            </span>
+        </div>
     </div>
-  </div>
-  <n-descriptions size="small" :column="1" class="mt-10px pl-15px">
-    <template v-if="alertType === '1'">
-      <n-descriptions-item :label="t('setting.alarm.alertEmail')">
-        <span class="text-blue-500">{{ emailInfo.contacts || '' }}</span>
-      </n-descriptions-item>
-    </template>
-    <template v-else-if="alertType === '2'">
-      <n-descriptions-item :label="t('setting.alarm.dingTalkUser')">
-        {{ dingTalk.contacts || '' }}
-      </n-descriptions-item>
-      <n-descriptions-item :label="t('setting.alarm.larkIsAtAll')">
-        <n-tag :type="dingTalk.isAtAll ? 'success' : 'error'" class="!leading-20px">
-          {{ dingTalk.isAtAll }}
-        </n-tag>
-      </n-descriptions-item>
-    </template>
-    <template v-else-if="alertType === '4'">
-      <n-descriptions-item :label="t('setting.alarm.weChattoken')">
-        {{ desensitization(weChat.token || '') }}
-      </n-descriptions-item>
-    </template>
-    <template v-else-if="alertType === '16'">
-      <n-descriptions-item :label="t('setting.alarm.larkIsAtAll')">
-        <n-tag :type="lark.isAtAll ? 'success' : 'error'" class="!leading-20px">
-          {{ lark.isAtAll }}
-        </n-tag>
-      </n-descriptions-item>
-    </template>
-  </n-descriptions>
+    <n-descriptions size="small" :column="1" class="mt-10px pl-15px">
+        <template v-if="alertType === '1'">
+            <n-descriptions-item :label="t('setting.alarm.alertEmail')">
+                <span class="text-blue-500">{{ emailInfo.contacts || '' }}</span>
+            </n-descriptions-item>
+        </template>
+        <template v-else-if="alertType === '2'">
+            <n-descriptions-item :label="t('setting.alarm.dingTalkUser')">
+                {{ dingTalk.contacts || '' }}
+            </n-descriptions-item>
+            <n-descriptions-item :label="t('setting.alarm.larkIsAtAll')">
+                <n-tag :type="dingTalk.isAtAll ? 'success' : 'error'" class="!leading-20px">
+                    {{ dingTalk.isAtAll }}
+                </n-tag>
+            </n-descriptions-item>
+        </template>
+        <template v-else-if="alertType === '4'">
+            <n-descriptions-item :label="t('setting.alarm.weChattoken')">
+                {{ desensitization(weChat.token || '') }}
+            </n-descriptions-item>
+        </template>
+        <template v-else-if="alertType === '16'">
+            <n-descriptions-item :label="t('setting.alarm.larkIsAtAll')">
+                <n-tag :type="lark.isAtAll ? 'success' : 'error'" class="!leading-20px">
+                    {{ lark.isAtAll }}
+                </n-tag>
+            </n-descriptions-item>
+        </template>
+    </n-descriptions>
 </template>
 
 <style scoped>
 .alert-type-info::before {
-  content: '';
-  width: 0;
-  height: 20px;
-  margin-top: 2px;
-  border: 2px solid #24c6dc;
-  border-radius: 2px;
-  transform: translateX(-10px);
+    content: '';
+    width: 0;
+    height: 20px;
+    margin-top: 2px;
+    border: 2px solid #24c6dc;
+    border-radius: 2px;
+    transform: translateX(-10px);
 }
 </style>

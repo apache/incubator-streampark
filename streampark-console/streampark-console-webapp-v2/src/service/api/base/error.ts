@@ -18,5 +18,5 @@
 import { request } from '../../http'
 
 export function fireErrorApi() {
-  return request.Get('/error')
+    return request.Get('/error')
 }

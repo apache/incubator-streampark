@@ -2,46 +2,46 @@
  * @description: menu type
  */
 export enum MenuTypeEnum {
-  // left menu
-  SIDEBAR = 'sidebar',
+    // left menu
+    SIDEBAR = 'sidebar',
 
-  MIX_SIDEBAR = 'mix-sidebar',
-  // mixin menu
-  MIX = 'mix',
-  // top menu
-  TOP_MENU = 'top-menu',
+    MIX_SIDEBAR = 'mix-sidebar',
+    // mixin menu
+    MIX = 'mix',
+    // top menu
+    TOP_MENU = 'top-menu',
 }
 
 // Folding trigger position
 export enum TriggerEnum {
-  NONE = 'NONE',
-  FOOTER = 'FOOTER',
-  HEADER = 'HEADER',
+    NONE = 'NONE',
+    FOOTER = 'FOOTER',
+    HEADER = 'HEADER',
 }
 
-export type Mode = 'vertical' | 'vertical-right' | 'horizontal' | 'inline';
+export type Mode = 'vertical' | 'vertical-right' | 'horizontal' | 'inline'
 
 // menu mode
 export enum MenuModeEnum {
-  VERTICAL = 'vertical',
-  HORIZONTAL = 'horizontal',
-  VERTICAL_RIGHT = 'vertical-right',
-  INLINE = 'inline',
+    VERTICAL = 'vertical',
+    HORIZONTAL = 'horizontal',
+    VERTICAL_RIGHT = 'vertical-right',
+    INLINE = 'inline',
 }
 
 export enum MenuSplitTyeEnum {
-  NONE,
-  TOP,
-  LEFT,
+    NONE,
+    TOP,
+    LEFT,
 }
 
 export enum TopMenuAlignEnum {
-  CENTER = 'center',
-  START = 'start',
-  END = 'end',
+    CENTER = 'center',
+    START = 'start',
+    END = 'end',
 }
 
 export enum MixSidebarTriggerEnum {
-  HOVER = 'hover',
-  CLICK = 'click',
+    HOVER = 'hover',
+    CLICK = 'click',
 }

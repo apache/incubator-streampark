@@ -15,23 +15,23 @@
  * limitations under the License.
  */
 export default {
-  addMember: 'Add Member',
-  modifyMember: 'Modify Member',
-  deleteMember: 'Delete Member',
-  deletePopConfirm: 'Are you sure delete this member ?',
-  add: 'Add',
-  success: 'successful',
-  fail: 'failed',
-  searchByUser: 'Search by username',
-  searchByRole: 'Search by role',
-  table: {
-    title: 'Member List',
-    userName: 'Username',
-    roleName: 'Role name',
-    createTime: 'Create Time',
-    modifyTime: 'Modify Time',
-  },
-  userNameRequire: 'please select a user name',
-  roleRequire: 'please select role',
-  selectTeamFirst: 'Please select Team first!!!',
-};
+    addMember: 'Add Member',
+    modifyMember: 'Modify Member',
+    deleteMember: 'Delete Member',
+    deletePopConfirm: 'Are you sure delete this member ?',
+    add: 'Add',
+    success: 'successful',
+    fail: 'failed',
+    searchByUser: 'Search by username',
+    searchByRole: 'Search by role',
+    table: {
+        title: 'Member List',
+        userName: 'Username',
+        roleName: 'Role name',
+        createTime: 'Create Time',
+        modifyTime: 'Modify Time',
+    },
+    userNameRequire: 'please select a user name',
+    roleRequire: 'please select role',
+    selectTeamFirst: 'Please select Team first!!!',
+}

@@ -28,19 +28,18 @@ export * from './router'
 export * from './tab'
 
 export function installPinia(app: App) {
-  globalPinia = createPinia()
-  globalPinia.use(piniaPluginPersistedstate)
-  app.use(globalPinia)
+    globalPinia = createPinia()
+    globalPinia.use(piniaPluginPersistedstate)
+    app.use(globalPinia)
 }
 
 export function getPinia(): Pinia {
-  if (!globalPinia)
-    throw new Error('Pinia is not installed')
-  return globalPinia
+    if (!globalPinia) throw new Error('Pinia is not installed')
+    return globalPinia
 }
 
 export const store = new Proxy({} as Pinia, {
-  get(_target, prop) {
-    return Reflect.get(getPinia(), prop)
-  },
+    get(_target, prop) {
+        return Reflect.get(getPinia(), prop)
+    },
 })

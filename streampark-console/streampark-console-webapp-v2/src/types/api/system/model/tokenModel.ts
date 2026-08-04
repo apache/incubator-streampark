@@ -16,20 +16,20 @@
  */
 // token list record
 export interface TokenListRecord {
-  id: string;
-  userId: string;
-  token: string;
-  status: number;
-  description: string;
-  createTime: string;
-  modifyTime: string;
-  username: string;
-  userStatus: string;
-  finalStatus: number;
+    id: string
+    userId: string
+    token: string
+    status: number
+    description: string
+    createTime: string
+    modifyTime: string
+    username: string
+    userStatus: string
+    finalStatus: number
 }
 
 export interface TokenCreateParam {
-  userId: number;
-  description: string;
-  teamId: string;
+    userId: number
+    description: string
+    teamId: string
 }

@@ -15,32 +15,32 @@
  * limitations under the License.
  */
 export interface ResourceListRecord {
-  id: string;
-  resourceName: string;
-  resourceType: string;
-  resource: string;
-  engineType: string;
-  mainClass: string;
-  description: string;
-  creatorId: string;
-  creatorName: string;
-  teamId: string;
-  createTime: string;
-  modifyTime: string;
-  sortField?: string;
-  sortOrder?: string;
+    id: string
+    resourceName: string
+    resourceType: string
+    resource: string
+    engineType: string
+    mainClass: string
+    description: string
+    creatorId: string
+    creatorName: string
+    teamId: string
+    createTime: string
+    modifyTime: string
+    sortField?: string
+    sortOrder?: string
 }
 
 export interface ResourceParam {
-  id?: string;
-  resourceName: string;
-  connector?: string;
-  engineType: string;
-  description: string;
+    id?: string
+    resourceName: string
+    connector?: string
+    engineType: string
+    description: string
 }
 
 export interface ResourceDeleteParam {
-  id: string;
-  resourceName: string;
-  teamId: string;
+    id: string
+    resourceName: string
+    teamId: string
 }

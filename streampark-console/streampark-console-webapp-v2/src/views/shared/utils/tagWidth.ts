@@ -17,19 +17,18 @@
 
 /** Match naive-ui small tag metrics so state columns align without clipping i18n text. */
 export function computeStateTagWidth(maxTitle?: string): number {
-  if (!maxTitle)
-    return 0
-  const dom = document.createElement('span')
-  dom.style.display = 'inline-block'
-  dom.style.fontSize = '12px'
-  dom.style.fontWeight = '600'
-  dom.style.padding = '0 7px'
-  dom.style.border = '1px solid transparent'
-  dom.style.boxSizing = 'border-box'
-  dom.style.whiteSpace = 'nowrap'
-  dom.textContent = maxTitle
-  document.body.appendChild(dom)
-  const width = Math.ceil(dom.getBoundingClientRect().width)
-  document.body.removeChild(dom)
-  return width
+    if (!maxTitle) return 0
+    const dom = document.createElement('span')
+    dom.style.display = 'inline-block'
+    dom.style.fontSize = '12px'
+    dom.style.fontWeight = '600'
+    dom.style.padding = '0 7px'
+    dom.style.border = '1px solid transparent'
+    dom.style.boxSizing = 'border-box'
+    dom.style.whiteSpace = 'nowrap'
+    dom.textContent = maxTitle
+    document.body.appendChild(dom)
+    const width = Math.ceil(dom.getBoundingClientRect().width)
+    document.body.removeChild(dom)
+    return width
 }

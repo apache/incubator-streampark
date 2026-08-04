@@ -15,15 +15,15 @@
  * limitations under the License.
  */
 export default {
-  table: {
-    title: '菜单列表',
-    name: '菜单名称',
-    icon: '图标',
-    type: '类型',
-    path: '路径',
-    component: 'Vue组件',
-    permission: '权限',
-    order: '排序',
-    display: '展示',
-  },
-};
+    table: {
+        title: '菜单列表',
+        name: '菜单名称',
+        icon: '图标',
+        type: '类型',
+        path: '路径',
+        component: 'Vue组件',
+        permission: '权限',
+        order: '排序',
+        display: '展示',
+    },
+}

@@ -15,25 +15,25 @@
  * limitations under the License.
  */
 export interface MemberListRecord {
-  id: string;
-  teamId: string;
-  userId: string;
-  roleId: string;
-  createTime: string;
-  modifyTime: string;
-  userName: string;
-  roleName: string;
-  sortField?: string;
-  sortOrder?: string;
-  createTimeFrom?: string;
-  createTimeTo?: string;
+    id: string
+    teamId: string
+    userId: string
+    roleId: string
+    createTime: string
+    modifyTime: string
+    userName: string
+    roleName: string
+    sortField?: string
+    sortOrder?: string
+    createTimeFrom?: string
+    createTimeTo?: string
 }
 export interface AddMemberParams {
-  userName: string;
-  roleId: number;
+    userName: string
+    roleId: number
 }
 
 export interface UpdateMemberParams extends AddMemberParams {
-  id: string;
-  userId: string;
+    id: string
+    userId: string
 }

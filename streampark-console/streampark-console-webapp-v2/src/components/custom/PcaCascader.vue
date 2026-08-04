@@ -2,26 +2,28 @@
 import type { CascaderOption } from 'naive-ui'
 
 defineOptions({
-  name: 'PcaCascader',
+    name: 'PcaCascader',
 })
 
 // Data from https://github.com/modood/Administrative-divisions-of-China
 const pcaCode = shallowRef<CascaderOption[]>()
 async function fetchPcaCode() {
-  return await fetch('https://cdn.jsdelivr.net/gh/modood/Administrative-divisions-of-China/dist/pca-code.json').then(res => res.json())
+    return await fetch(
+        'https://cdn.jsdelivr.net/gh/modood/Administrative-divisions-of-China/dist/pca-code.json',
+    ).then((res) => res.json())
 }
 onMounted(async () => {
-  pcaCode.value = await fetchPcaCode()
+    pcaCode.value = await fetchPcaCode()
 })
 </script>
 
 <template>
-  <n-cascader
-    :options="pcaCode"
-    value-field="code"
-    label-field="name"
-    check-strategy="all"
-    filterable
-    clearable
-  />
+    <n-cascader
+        :options="pcaCode"
+        value-field="code"
+        label-field="name"
+        check-strategy="all"
+        filterable
+        clearable
+    />
 </template>

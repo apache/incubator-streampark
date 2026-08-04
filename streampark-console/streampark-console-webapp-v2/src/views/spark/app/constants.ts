@@ -18,9 +18,9 @@
 import { DeployMode } from '@/enums/sparkEnum'
 
 export const deployModes = [
-  { label: 'Standalone', value: DeployMode.REMOTE },
-  { label: 'Yarn-Cluster', value: DeployMode.YARN_CLUSTER },
-  { label: 'Yarn-Client', value: DeployMode.YARN_CLIENT },
+    { label: 'Standalone', value: DeployMode.REMOTE },
+    { label: 'Yarn-Cluster', value: DeployMode.YARN_CLUSTER },
+    { label: 'Yarn-Client', value: DeployMode.YARN_CLIENT },
 ]
 
 export { createSparkStateMap as stateMapFactory } from './shared/constants'

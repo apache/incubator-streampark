@@ -3,5 +3,5 @@ import AppMain from './AppMain.vue'
 </script>
 
 <template>
-  <AppMain />
+    <AppMain />
 </template>

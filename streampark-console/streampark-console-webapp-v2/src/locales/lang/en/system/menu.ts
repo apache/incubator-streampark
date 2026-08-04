@@ -15,15 +15,15 @@
  * limitations under the License.
  */
 export default {
-  table: {
-    title: 'Menu List',
-    name: 'Menu Name',
-    icon: 'Icon',
-    type: 'Type',
-    path: 'Path',
-    component: 'Vue Component',
-    permission: 'Permission',
-    order: 'order',
-    display: 'display',
-  },
-};
+    table: {
+        title: 'Menu List',
+        name: 'Menu Name',
+        icon: 'Icon',
+        type: 'Type',
+        path: 'Path',
+        component: 'Vue Component',
+        permission: 'Permission',
+        order: 'order',
+        display: 'display',
+    },
+}

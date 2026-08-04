@@ -16,51 +16,48 @@
  */
 
 export interface AdaptivePollingOptions {
-  idleMs?: number
-  activeMs?: number
-  isBusy?: () => boolean
+    idleMs?: number
+    activeMs?: number
+    isBusy?: () => boolean
 }
 
 export function useAdaptivePolling(callback: () => void, options: AdaptivePollingOptions = {}) {
-  const idleMs = options.idleMs ?? 5000
-  const activeMs = options.activeMs ?? 2000
-  const isBusy = options.isBusy ?? (() => false)
+    const idleMs = options.idleMs ?? 5000
+    const activeMs = options.activeMs ?? 2000
+    const isBusy = options.isBusy ?? (() => false)
 
-  let stopped = false
-  let timerId: ReturnType<typeof setTimeout> | null = null
+    let stopped = false
+    let timerId: ReturnType<typeof setTimeout> | null = null
 
-  function getDelay() {
-    return isBusy() ? activeMs : idleMs
-  }
-
-  function schedule() {
-    if (stopped)
-      return
-    if (timerId)
-      clearTimeout(timerId)
-    timerId = setTimeout(() => {
-      timerId = null
-      if (stopped)
-        return
-      callback()
-      schedule()
-    }, getDelay())
-  }
-
-  function start() {
-    stopped = false
-    schedule()
-  }
-
-  function stop() {
-    stopped = true
-    if (timerId) {
-      clearTimeout(timerId)
-      timerId = null
+    function getDelay() {
+        return isBusy() ? activeMs : idleMs
     }
-  }
 
-  onUnmounted(stop)
+    function schedule() {
+        if (stopped) return
+        if (timerId) clearTimeout(timerId)
+        timerId = setTimeout(() => {
+            timerId = null
+            if (stopped) return
+            callback()
+            schedule()
+        }, getDelay())
+    }
 
-  return { start, stop }
+    function start() {
+        stopped = false
+        schedule()
+    }
+
+    function stop() {
+        stopped = true
+        if (timerId) {
+            clearTimeout(timerId)
+            timerId = null
+        }
+    }
+
+    onUnmounted(stop)
+
+    return { start, stop }
 }

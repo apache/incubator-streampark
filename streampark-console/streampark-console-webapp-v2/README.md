@@ -71,8 +71,20 @@ pnpm install && pnpm build
 |---|---|
 | Maven 变量 | `frontend.project.name=streampark-console-webapp-v2` |
 | 静态资源 | `streampark-console-service` assembly 拷贝 `../streampark-console-webapp-v2/dist` |
-| CI | `.github/workflows/frontend.yml` — Node 20、`pnpm typecheck/build`、i18n/routes 校验 |
+| CI | `.github/workflows/frontend.yml` — Node 20、`pnpm typecheck` + `pnpm build` only |
 | 开发端口 | v2: `10002`；后端 API: `10000` |
+
+## Quality checks
+
+| Script | CI | Notes |
+|---|---|---|
+| `pnpm typecheck` | Yes | Vue/TS type check |
+| `pnpm build` | Yes | Production build |
+| `pnpm check:i18n` | No | Requires dev server at `localhost:10002` |
+| `pnpm check:routes` | No | Requires dev server at `localhost:10002` |
+| `pnpm check:login` | No | Requires dev server at `localhost:10002` |
+| `pnpm lint:eslint` | No | ESLint (local) |
+| `pnpm lint:prettier` | No | Prettier (local) |
 
 ## 目录说明
 

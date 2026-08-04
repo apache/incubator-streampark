@@ -20,53 +20,53 @@ import { formatToDateTime } from '@/utils/dateUtil'
 import { ErrorTypeEnum } from '@/enums/exceptionEnum'
 
 export interface ErrorLogState {
-  errorLogInfoList: Nullable<ErrorLogInfo[]>
-  errorLogListCount: number
+    errorLogInfoList: Nullable<ErrorLogInfo[]>
+    errorLogListCount: number
 }
 
 export const useErrorLogStore = defineStore('app-error-log', {
-  state: (): ErrorLogState => ({
-    errorLogInfoList: null,
-    errorLogListCount: 0,
-  }),
-  getters: {
-    getErrorLogInfoList(): ErrorLogInfo[] {
-      return this.errorLogInfoList || []
+    state: (): ErrorLogState => ({
+        errorLogInfoList: null,
+        errorLogListCount: 0,
+    }),
+    getters: {
+        getErrorLogInfoList(): ErrorLogInfo[] {
+            return this.errorLogInfoList || []
+        },
+        getErrorLogListCount(): number {
+            return this.errorLogListCount
+        },
     },
-    getErrorLogListCount(): number {
-      return this.errorLogListCount
+    actions: {
+        addErrorLogInfo(info: ErrorLogInfo) {
+            const item = {
+                ...info,
+                time: formatToDateTime(Date.now()),
+            }
+            this.errorLogInfoList = [item, ...(this.errorLogInfoList || [])]
+            this.errorLogListCount += 1
+        },
+        setErrorLogListCount(count: number) {
+            this.errorLogListCount = count
+        },
+        clearErrorLog() {
+            this.errorLogInfoList = null
+            this.errorLogListCount = 0
+        },
     },
-  },
-  actions: {
-    addErrorLogInfo(info: ErrorLogInfo) {
-      const item = {
-        ...info,
-        time: formatToDateTime(Date.now()),
-      }
-      this.errorLogInfoList = [item, ...(this.errorLogInfoList || [])]
-      this.errorLogListCount += 1
-    },
-    setErrorLogListCount(count: number) {
-      this.errorLogListCount = count
-    },
-    clearErrorLog() {
-      this.errorLogInfoList = null
-      this.errorLogListCount = 0
-    },
-  },
 })
 
 export function setupErrorHandle(app: import('vue').App) {
-  app.config.errorHandler = (err, instance, info) => {
-    const errorLogStore = useErrorLogStore()
-    errorLogStore.addErrorLogInfo({
-      type: ErrorTypeEnum.VUE,
-      name: (err as Error)?.name,
-      file: instance?.$?.type?.name || '',
-      message: (err as Error)?.message || String(err),
-      stack: (err as Error)?.stack,
-      detail: info,
-      url: window.location.href,
-    })
-  }
+    app.config.errorHandler = (err, instance, info) => {
+        const errorLogStore = useErrorLogStore()
+        errorLogStore.addErrorLogInfo({
+            type: ErrorTypeEnum.VUE,
+            name: (err as Error)?.name,
+            file: instance?.$?.type?.name || '',
+            message: (err as Error)?.message || String(err),
+            stack: (err as Error)?.stack,
+            detail: info,
+            url: window.location.href,
+        })
+    }
 }

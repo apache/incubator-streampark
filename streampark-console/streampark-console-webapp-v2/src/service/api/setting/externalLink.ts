@@ -18,31 +18,31 @@
 import { request } from '../../http'
 
 export interface ExternalLink {
-  id?: string
-  badgeName: string
-  badgeLabel?: string
-  badgeColor: string
-  linkUrl: string
-  createTime?: string
-  modifyTime?: number
+    id?: string
+    badgeName: string
+    badgeLabel?: string
+    badgeColor: string
+    linkUrl: string
+    createTime?: string
+    modifyTime?: number
 }
 
 export function fetchExternalLinkList() {
-  return request.Post<ExternalLink[]>('/flink/externalLink/list')
+    return request.Post<ExternalLink[]>('/flink/externalLink/list')
 }
 
 export function fetchExternalLinkCreate(data: ExternalLink) {
-  return request.Post<ExternalLink>('/flink/externalLink/create', data)
+    return request.Post<ExternalLink>('/flink/externalLink/create', data)
 }
 
 export function fetchExternalLinkUpdate(data: ExternalLink) {
-  return request.Post<ExternalLink>('/flink/externalLink/update', data)
+    return request.Post<ExternalLink>('/flink/externalLink/update', data)
 }
 
 export function fetchExternalLinkDelete(data: { id: string }) {
-  return request.Delete('/flink/externalLink/delete', data)
+    return request.Delete('/flink/externalLink/delete', data)
 }
 
 export function fetchAppExternalLink(data: { appId: string }) {
-  return request.Post<ExternalLink[]>('/flink/externalLink/render', data)
+    return request.Post<ExternalLink[]>('/flink/externalLink/render', data)
 }

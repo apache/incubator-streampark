@@ -16,22 +16,22 @@
  */
 // flink home data
 export interface SparkEnv {
-  id: string;
-  sparkName: string;
-  sparkHome: string;
-  sparkConf: string;
-  description: string;
-  scalaVersion: string;
-  version: string;
-  isDefault: boolean;
-  createTime: string;
-  streamParkScalaVersion: string;
-  versionOfMiddle?: any;
+    id: string
+    sparkName: string
+    sparkHome: string
+    sparkConf: string
+    description: string
+    scalaVersion: string
+    version: string
+    isDefault: boolean
+    createTime: string
+    streamParkScalaVersion: string
+    versionOfMiddle?: any
 }
 
 export interface SparkCreate {
-  id?: string | null;
-  flinkName: string;
-  flinkHome: string;
-  description: string;
+    id?: string | null
+    flinkName: string
+    flinkHome: string
+    description: string
 }

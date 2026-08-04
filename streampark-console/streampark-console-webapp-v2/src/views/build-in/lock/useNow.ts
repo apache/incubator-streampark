@@ -20,57 +20,56 @@ import { reactive, toRefs } from 'vue'
 import { tryOnMounted, tryOnUnmounted } from '@vueuse/core'
 
 export function useNow(immediate = true) {
-  let timer: ReturnType<typeof setInterval> | undefined
+    let timer: ReturnType<typeof setInterval> | undefined
 
-  const state = reactive({
-    year: 0,
-    month: 0,
-    week: '',
-    day: 0,
-    hour: '',
-    minute: '',
-    second: 0,
-    meridiem: '',
-  })
+    const state = reactive({
+        year: 0,
+        month: 0,
+        week: '',
+        day: 0,
+        hour: '',
+        minute: '',
+        second: 0,
+        meridiem: '',
+    })
 
-  function update() {
-    const now = dateUtil()
-    const h = now.format('HH')
-    const m = now.format('mm')
-    const s = now.get('s')
+    function update() {
+        const now = dateUtil()
+        const h = now.format('HH')
+        const m = now.format('mm')
+        const s = now.get('s')
 
-    state.year = now.get('y')
-    state.month = now.get('M') + 1
-    state.week = `Week ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.day()]}`
-    state.day = now.get('date')
-    state.hour = h
-    state.minute = m
-    state.second = s
-    state.meridiem = now.format('A')
-  }
+        state.year = now.get('y')
+        state.month = now.get('M') + 1
+        state.week = `Week ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.day()]}`
+        state.day = now.get('date')
+        state.hour = h
+        state.minute = m
+        state.second = s
+        state.meridiem = now.format('A')
+    }
 
-  function start() {
-    update()
-    clearInterval(timer)
-    timer = setInterval(() => update(), 1000)
-  }
+    function start() {
+        update()
+        clearInterval(timer)
+        timer = setInterval(() => update(), 1000)
+    }
 
-  function stop() {
-    clearInterval(timer)
-  }
+    function stop() {
+        clearInterval(timer)
+    }
 
-  tryOnMounted(() => {
-    if (immediate)
-      start()
-  })
+    tryOnMounted(() => {
+        if (immediate) start()
+    })
 
-  tryOnUnmounted(() => {
-    stop()
-  })
+    tryOnUnmounted(() => {
+        stop()
+    })
 
-  return {
-    ...toRefs(state),
-    start,
-    stop,
-  }
+    return {
+        ...toRefs(state),
+        start,
+        stop,
+    }
 }

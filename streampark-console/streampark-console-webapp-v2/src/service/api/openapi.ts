@@ -17,10 +17,10 @@
 
 import { request } from '../http'
 
-export function fetchCopyCurl(data: { baseUrl: string, appId: string, name: string }) {
-  return request.Post<string>('/openapi/curl', data)
+export function fetchCopyCurl(data: { baseUrl: string; appId: string; name: string }) {
+    return request.Post<string>('/openapi/curl', data)
 }
 
 export function fetchApiSchema(data: { name: string }) {
-  return request.Post<Recordable>('/openapi/schema', data)
+    return request.Post<Recordable>('/openapi/schema', data)
 }

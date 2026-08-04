@@ -160,17 +160,18 @@ The `streampark-common` module has the strongest stability guarantees — change
 
 - **Frontend development server:**
   ```shell
-  cd streampark-console/streampark-console-webapp && pnpm dev
+  cd streampark-console/streampark-console-webapp-v2 && pnpm dev
   ```
+  Legacy Ant Design app: `streampark-console/streampark-console-webapp` (port 10001).
 
 - **Frontend lint:**
   ```shell
-  cd streampark-console/streampark-console-webapp && pnpm lint:eslint && pnpm lint:prettier
+  cd streampark-console/streampark-console-webapp-v2 && pnpm lint:eslint && pnpm lint:prettier
   ```
 
 - **Frontend build:**
   ```shell
-  cd streampark-console/streampark-console-webapp && pnpm build
+  cd streampark-console/streampark-console-webapp-v2 && pnpm build
   ```
 
 - **Run Docker Compose (local):**

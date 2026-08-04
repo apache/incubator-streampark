@@ -18,39 +18,39 @@
 import { request } from '../../http'
 
 export interface FlinkGatewayRecord {
-  id: string
-  gatewayName: string
-  gatewayType?: string
-  address: string
-  description?: string
-  createTime?: string
-  modifyTime?: string
+    id: string
+    gatewayName: string
+    gatewayType?: string
+    address: string
+    description?: string
+    createTime?: string
+    modifyTime?: string
 }
 
 export function fetchGatewayList() {
-  return request.Get<FlinkGatewayRecord[]>('/flink/gateway/list')
+    return request.Get<FlinkGatewayRecord[]>('/flink/gateway/list')
 }
 
 export function fetchGatewayCreate(data: Recordable) {
-  return request.Post('/flink/gateway/create', data)
+    return request.Post('/flink/gateway/create', data)
 }
 
 export function fetchGatewayUpdate(data: Recordable) {
-  return request.Post('/flink/gateway/update', data)
+    return request.Post('/flink/gateway/update', data)
 }
 
 export function fetchGatewayDelete(data: { id: string }) {
-  return request.Delete('/flink/gateway/delete', data)
+    return request.Delete('/flink/gateway/delete', data)
 }
 
 export function fetchGatewayCheckName(params: { name: string }) {
-  const method = request.Get<boolean>('/flink/gateway/check/name')
-  method.config.params = params
-  return method
+    const method = request.Get<boolean>('/flink/gateway/check/name')
+    method.config.params = params
+    return method
 }
 
 export function fetchGatewayCheckAddress(params: { address: string }) {
-  const method = request.Get<boolean>('/flink/gateway/check/address')
-  method.config.params = params
-  return method
+    const method = request.Get<boolean>('/flink/gateway/check/address')
+    method.config.params = params
+    return method
 }

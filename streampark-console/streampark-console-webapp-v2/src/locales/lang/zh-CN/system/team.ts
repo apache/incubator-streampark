@@ -15,20 +15,20 @@
  * limitations under the License.
  */
 export default {
-  addTeam: '创建Team',
-  team: '团队',
-  modifyTeam: '编辑Team',
-  deleteTeam: '删除Team',
-  deletePopConfirm: '确定要删除这个Team ?',
-  add: '创建',
-  success: '成功',
-  fail: '失败',
-  searchByTeam: '根据团队名称搜索',
-  table: {
-    teamName: '团队',
-    description: '描述',
-    descriptionMessage: '超过了100个字符的最大长度限制',
-    teamNamePlaceholder: '请输入team名称',
-    teamMessage: 'teamName至少有4个字符',
-  },
-};
+    addTeam: '创建Team',
+    team: '团队',
+    modifyTeam: '编辑Team',
+    deleteTeam: '删除Team',
+    deletePopConfirm: '确定要删除这个Team ?',
+    add: '创建',
+    success: '成功',
+    fail: '失败',
+    searchByTeam: '根据团队名称搜索',
+    table: {
+        teamName: '团队',
+        description: '描述',
+        descriptionMessage: '超过了100个字符的最大长度限制',
+        teamNamePlaceholder: '请输入team名称',
+        teamMessage: 'teamName至少有4个字符',
+    },
+}

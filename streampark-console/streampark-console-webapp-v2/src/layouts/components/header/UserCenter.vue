@@ -30,87 +30,77 @@ const passwordModalVisible = ref(false)
 const userInfo = computed(() => userStore.getUserInfo)
 
 const options = computed(() => {
-  return [
-    {
-      label: userInfo.value?.nickName || userInfo.value?.username || t('app.userCenter'),
-      key: 'userInfo',
-      disabled: true,
-    },
-    {
-      type: 'divider',
-      key: 'd1',
-    },
-    {
-      label: t('sys.modifyPassword.title'),
-      key: 'password',
-      icon: () => ionIcon(I.password),
-    },
-    {
-      label: 'GitHub',
-      key: 'github',
-      icon: () => ionIcon('ant-design:github-outlined'),
-    },
-    {
-      label: 'Docs',
-      key: 'docs',
-      icon: () => ionIcon(I.docs),
-    },
-    {
-      type: 'divider',
-      key: 'd2',
-    },
-    {
-      label: t('app.loginOut'),
-      key: 'loginOut',
-      icon: () => ionIcon(I.logout),
-    },
-  ]
+    return [
+        {
+            label: userInfo.value?.nickName || userInfo.value?.username || t('app.userCenter'),
+            key: 'userInfo',
+            disabled: true,
+        },
+        {
+            type: 'divider',
+            key: 'd1',
+        },
+        {
+            label: t('sys.modifyPassword.title'),
+            key: 'password',
+            icon: () => ionIcon(I.password),
+        },
+        {
+            label: 'GitHub',
+            key: 'github',
+            icon: () => ionIcon('ant-design:github-outlined'),
+        },
+        {
+            label: 'Docs',
+            key: 'docs',
+            icon: () => ionIcon(I.docs),
+        },
+        {
+            type: 'divider',
+            key: 'd2',
+        },
+        {
+            label: t('app.loginOut'),
+            key: 'loginOut',
+            icon: () => ionIcon(I.logout),
+        },
+    ]
 })
 
 function handleSelect(key: string | number) {
-  if (key === 'loginOut') {
-    window.$dialog?.info({
-      title: t('app.loginOutTitle'),
-      content: t('app.loginOutContent'),
-      positiveText: t('common.confirm'),
-      negativeText: t('common.cancel'),
-      onPositiveClick: () => {
-        authStore.logout()
-      },
-    })
-  }
+    if (key === 'loginOut') {
+        window.$dialog?.info({
+            title: t('app.loginOutTitle'),
+            content: t('app.loginOutContent'),
+            positiveText: t('common.confirm'),
+            negativeText: t('common.cancel'),
+            onPositiveClick: () => {
+                authStore.logout()
+            },
+        })
+    }
 
-  if (key === 'password')
-    passwordModalVisible.value = true
+    if (key === 'password') passwordModalVisible.value = true
 
-  if (key === 'github')
-    window.open('https://github.com/apache/streampark')
+    if (key === 'github') window.open('https://github.com/apache/streampark')
 
-  if (key === 'docs')
-    window.open('https://streampark.apache.org/docs/intro')
+    if (key === 'docs') window.open('https://streampark.apache.org/docs/intro')
 }
 </script>
 
 <template>
-  <n-dropdown
-    trigger="click"
-    :options="options"
-    @select="handleSelect"
-  >
-    <n-avatar
-      round
-      class="cursor-pointer"
-    >
-      <template #fallback>
-        <div class="wh-full flex-center">
-          <n-icon>
-            <IonIcon name="PersonOutline" />
-          </n-icon>
-        </div>
-      </template>
-    </n-avatar>
-  </n-dropdown>
-  <PasswordModal v-model:show="passwordModalVisible" />
+    <n-dropdown trigger="click" :options="options" @select="handleSelect">
+        <n-avatar round class="cursor-pointer">
+            <template #fallback>
+                <div class="wh-full flex-center">
+                    <n-icon>
+                        <IonIcon name="PersonOutline" />
+                    </n-icon>
+                </div>
+            </template>
+        </n-avatar>
+    </n-dropdown>
+    <PasswordModal v-model:show="passwordModalVisible" />
 </template>
 
 <style scoped></style>

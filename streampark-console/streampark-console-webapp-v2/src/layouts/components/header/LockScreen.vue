@@ -23,15 +23,15 @@ const lockModalVisible = ref(false)
 </script>
 
 <template>
-  <n-tooltip placement="bottom" trigger="hover">
-    <template #trigger>
-      <CommonWrapper @click="lockModalVisible = true">
-        <n-icon>
-          <IonIcon name="LockClosedOutline" />
-        </n-icon>
-      </CommonWrapper>
-    </template>
-    <span>{{ t('layout.header.lockScreen') }}</span>
-  </n-tooltip>
-  <LockModal v-model:show="lockModalVisible" />
+    <n-tooltip placement="bottom" trigger="hover">
+        <template #trigger>
+            <CommonWrapper @click="lockModalVisible = true">
+                <n-icon>
+                    <IonIcon name="LockClosedOutline" />
+                </n-icon>
+            </CommonWrapper>
+        </template>
+        <span>{{ t('layout.header.lockScreen') }}</span>
+    </n-tooltip>
+    <LockModal v-model:show="lockModalVisible" />
 </template>

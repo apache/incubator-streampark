@@ -16,8 +16,8 @@
  */
 
 export interface BooleanActionResult {
-  ok: boolean
-  message?: string
+    ok: boolean
+    message?: string
 }
 
 /**
@@ -26,17 +26,13 @@ export interface BooleanActionResult {
  * callers may still receive nested `{ data: boolean, message?: string }`.
  */
 export function unwrapBooleanResult(data: unknown, fallbackMessage?: string): BooleanActionResult {
-  if (typeof data === 'boolean')
-    return { ok: data, message: fallbackMessage }
-  if (data == null)
-    return { ok: true, message: fallbackMessage }
-  if (typeof data === 'object') {
-    const record = data as Recordable
-    const message = (record.message ?? record.msg ?? fallbackMessage) as string | undefined
-    if (typeof record.data === 'boolean')
-      return { ok: record.data, message }
-    if ('data' in record)
-      return { ok: Boolean(record.data), message }
-  }
-  return { ok: Boolean(data), message: fallbackMessage }
+    if (typeof data === 'boolean') return { ok: data, message: fallbackMessage }
+    if (data == null) return { ok: true, message: fallbackMessage }
+    if (typeof data === 'object') {
+        const record = data as Recordable
+        const message = (record.message ?? record.msg ?? fallbackMessage) as string | undefined
+        if (typeof record.data === 'boolean') return { ok: record.data, message }
+        if ('data' in record) return { ok: Boolean(record.data), message }
+    }
+    return { ok: Boolean(data), message: fallbackMessage }
 }

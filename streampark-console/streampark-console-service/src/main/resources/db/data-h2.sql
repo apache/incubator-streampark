@@ -143,6 +143,10 @@ insert into `t_menu` values (130303, 130300, 'resource delete', NULL, NULL, 'res
 insert into `t_menu` values (140100, 140000, 'setting.system', '/setting/system', 'setting/system/View', null, null, '0', 1, 1, now(), now());
 insert into `t_menu` values (140200, 140000, 'setting.alarm', '/setting/alarm', 'setting/alarm/View', null, null, '0', 1, 2, now(), now());
 insert into `t_menu` values (140300, 140000, 'setting.externalLink', '/setting/extlink', 'setting/extlink/View', 'menu:view', null, '0', 1, 5, now(), now());
+insert into `t_menu` values (140500, 140000, 'setting.flinkGateway', '/setting/FlinkGateway', 'setting/FlinkGateway/index', null, 'apartment', '0', '1', 3, now(), now());
+insert into `t_menu` values (140501, 140500, 'add', null, null, 'gateway:add', null, '1', '1', null, now(), now());
+insert into `t_menu` values (140502, 140500, 'update', null, null, 'gateway:update', null, '1', '1', null, now(), now());
+insert into `t_menu` values (140503, 140500, 'delete', null, null, 'gateway:delete', null, '1', '1', null, now(), now());
 insert into `t_menu` values (140400, 140000, 'setting.yarnQueue', '/setting/yarn-queue', 'setting/yarn-queue/View', 'menu:view', null, '0', 1, 6, now(), now());
 insert into `t_menu` values (140101, 140100, 'setting view', null, null, 'setting:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (140102, 140100, 'setting update', null, null, 'setting:update', null, '1', 1, null, now(), now());
@@ -307,6 +311,14 @@ insert into `t_role_menu` values (100107, 100002, 150501);
 insert into `t_role_menu` values (100108, 100002, 150502);
 insert into `t_role_menu` values (100109, 100002, 150503);
 insert into `t_role_menu` values (100110, 100002, 150504);
+insert into `t_role_menu` values (100111, 100001, 140500);
+insert into `t_role_menu` values (100112, 100001, 140501);
+insert into `t_role_menu` values (100113, 100001, 140502);
+insert into `t_role_menu` values (100114, 100001, 140503);
+insert into `t_role_menu` values (100115, 100002, 140500);
+insert into `t_role_menu` values (100116, 100002, 140501);
+insert into `t_role_menu` values (100117, 100002, 140502);
+insert into `t_role_menu` values (100118, 100002, 140503);
 
 -- ----------------------------
 -- Records of t_setting

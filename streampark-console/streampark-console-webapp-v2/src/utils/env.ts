@@ -18,14 +18,14 @@
 import pkg from '../../package.json'
 
 export function getCommonStoragePrefix() {
-  const shortName = import.meta.env.VITE_GLOB_APP_SHORT_NAME || 'STREAMPARK'
-  return `${shortName}__${import.meta.env.MODE}`.toUpperCase()
+    const shortName = import.meta.env.VITE_GLOB_APP_SHORT_NAME || 'STREAMPARK'
+    return `${shortName}__${import.meta.env.MODE}`.toUpperCase()
 }
 
 export function getStorageShortName() {
-  return `${getCommonStoragePrefix()}__${pkg.version}__`.toUpperCase()
+    return `${getCommonStoragePrefix()}__${pkg.version}__`.toUpperCase()
 }
 
 export function isDevMode() {
-  return import.meta.env.DEV
+    return import.meta.env.DEV
 }

@@ -25,109 +25,110 @@ const { t } = useI18n()
 const router = useRouter()
 
 const {
-  submitting,
-  formModel,
-  historyRecord,
-  deployModeOptions,
-  resolveOrder,
-  k8sRestExposedType,
-  isSessionMode,
-  isStandalone,
-  isYarnSession,
-  isK8sSession,
-  showAlert,
-  flinkEnvOptions,
-  alertOptions,
-  totalMemoryOptions,
-  jmMemoryOptions,
-  tmMemoryOptions,
-  rules,
-  handleSubmitParams,
-  loadReferenceData,
-  resetForm,
+    submitting,
+    formModel,
+    historyRecord,
+    deployModeOptions,
+    resolveOrder,
+    k8sRestExposedType,
+    isSessionMode,
+    isStandalone,
+    isYarnSession,
+    isK8sSession,
+    showAlert,
+    flinkEnvOptions,
+    alertOptions,
+    totalMemoryOptions,
+    jmMemoryOptions,
+    tmMemoryOptions,
+    rules,
+    handleSubmitParams,
+    loadReferenceData,
+    resetForm,
 } = useClusterForm()
 
 const formFieldsRef = ref<InstanceType<typeof ClusterFormFields> | null>(null)
 
 async function handleSubmit() {
-  await formFieldsRef.value?.validate()
-  submitting.value = true
-  try {
-    const params = handleSubmitParams(formModel.value)
-    if (!Object.keys(params).length)
-      return
+    await formFieldsRef.value?.validate()
+    submitting.value = true
+    try {
+        const params = handleSubmitParams(formModel.value)
+        if (!Object.keys(params).length) return
 
-    const checkResult = await fetchCheckCluster(params)
-    if (!checkResult.isSuccess)
-      throwApiFailure(checkResult, t('sys.api.apiRequestFailed'))
+        const checkResult = await fetchCheckCluster(params)
+        if (!checkResult.isSuccess) throwApiFailure(checkResult, t('sys.api.apiRequestFailed'))
 
-    const checkData = checkResult.data as { status?: number, msg?: string } | undefined
-    const status = Number(checkData?.status ?? -1)
-    if (status !== 0) {
-      window.$message?.error(checkData?.msg || t('sys.api.apiRequestFailed'))
-      return
+        const checkData = checkResult.data as { status?: number; msg?: string } | undefined
+        const status = Number(checkData?.status ?? -1)
+        if (status !== 0) {
+            window.$message?.error(checkData?.msg || t('sys.api.apiRequestFailed'))
+            return
+        }
+
+        const createResult = await fetchCreateCluster(params)
+        if (!createResult.isSuccess || !createResult.data)
+            throw new Error(
+                createResult.message ||
+                    t('setting.flinkCluster.operateMessage.createFlinkSessionClusterFailed'),
+            )
+
+        window.$message?.success(
+            formModel.value.clusterName.concat(
+                t('setting.flinkCluster.operateMessage.createFlinkSessionClusterSuccessful'),
+            ),
+        )
+        router.push('/flink/cluster')
+    } catch (e: any) {
+        showCatchError(e, t('sys.api.apiRequestFailed'))
+    } finally {
+        submitting.value = false
     }
-
-    const createResult = await fetchCreateCluster(params)
-    if (!createResult.isSuccess || !createResult.data)
-      throw new Error(createResult.message || t('setting.flinkCluster.operateMessage.createFlinkSessionClusterFailed'))
-
-    window.$message?.success(
-      formModel.value.clusterName.concat(t('setting.flinkCluster.operateMessage.createFlinkSessionClusterSuccessful')),
-    )
-    router.push('/flink/cluster')
-  }
-  catch (e: any) {
-    showCatchError(e, t('sys.api.apiRequestFailed'))
-  }
-  finally {
-    submitting.value = false
-  }
 }
 
 function handleCancel() {
-  router.push('/flink/cluster')
+    router.push('/flink/cluster')
 }
 
 onMounted(async () => {
-  resetForm()
-  await loadReferenceData()
+    resetForm()
+    await loadReferenceData()
 })
 </script>
 
 <template>
-  <n-card :bordered="false" class="h-full">
-    <ClusterFormFields
-      ref="formFieldsRef"
-      :model="formModel"
-      :rules="rules"
-      :deploy-mode-options="deployModeOptions"
-      :flink-env-options="flinkEnvOptions"
-      :alert-options="alertOptions"
-      :total-memory-options="totalMemoryOptions"
-      :jm-memory-options="jmMemoryOptions"
-      :tm-memory-options="tmMemoryOptions"
-      :resolve-order="resolveOrder"
-      :k8s-rest-exposed-type="k8sRestExposedType"
-      :history-record="historyRecord"
-      :is-session-mode="isSessionMode"
-      :is-standalone="isStandalone"
-      :is-yarn-session="isYarnSession"
-      :is-k8s-session="isK8sSession"
-      :show-alert="showAlert"
-    />
-    <div class="mt-24px flex justify-center gap-12px">
-      <n-button @click="handleCancel">
-        {{ t('common.cancelText') }}
-      </n-button>
-      <n-button
-        id="e2e-flinkcluster-submit-btn"
-        type="primary"
-        :loading="submitting"
-        @click="handleSubmit"
-      >
-        {{ t('common.submitText') }}
-      </n-button>
-    </div>
-  </n-card>
+    <n-card :bordered="false" class="h-full">
+        <ClusterFormFields
+            ref="formFieldsRef"
+            :model="formModel"
+            :rules="rules"
+            :deploy-mode-options="deployModeOptions"
+            :flink-env-options="flinkEnvOptions"
+            :alert-options="alertOptions"
+            :total-memory-options="totalMemoryOptions"
+            :jm-memory-options="jmMemoryOptions"
+            :tm-memory-options="tmMemoryOptions"
+            :resolve-order="resolveOrder"
+            :k8s-rest-exposed-type="k8sRestExposedType"
+            :history-record="historyRecord"
+            :is-session-mode="isSessionMode"
+            :is-standalone="isStandalone"
+            :is-yarn-session="isYarnSession"
+            :is-k8s-session="isK8sSession"
+            :show-alert="showAlert"
+        />
+        <div class="mt-24px flex justify-center gap-12px">
+            <n-button @click="handleCancel">
+                {{ t('common.cancelText') }}
+            </n-button>
+            <n-button
+                id="e2e-flinkcluster-submit-btn"
+                type="primary"
+                :loading="submitting"
+                @click="handleSubmit"
+            >
+                {{ t('common.submitText') }}
+            </n-button>
+        </div>
+    </n-card>
 </template>

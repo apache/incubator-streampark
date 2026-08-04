@@ -17,23 +17,23 @@
 
 /** Top-level menu dirs — same svg sprites as legacy SimpleSubMenu.vue. */
 export const MENU_PATH_SVG_ICONS: Record<string, string> = {
-  '/flink': 'flink3|svg',
-  '/spark': 'spark|svg',
-  '/resource': 'resource|svg',
-  '/setting': 'settings|svg',
-  '/system': 'management|svg',
+    '/flink': 'flink3|svg',
+    '/spark': 'spark|svg',
+    '/resource': 'resource|svg',
+    '/setting': 'settings|svg',
+    '/system': 'management|svg',
 }
 
 /** Backend / legacy short icon keys (breadcrumb, permission tree, etc.). */
 export const LEGACY_ICON_ALIASES: Record<string, string> = {
-  github: 'ant-design:github-outlined',
-  user: 'ant-design:user-outlined',
-  setting: 'ant-design:setting-outlined',
-  menu: 'ant-design:menu-outlined',
+    github: 'ant-design:github-outlined',
+    user: 'ant-design:user-outlined',
+    setting: 'ant-design:setting-outlined',
+    menu: 'ant-design:menu-outlined',
 }
 
 export function isBlankMenuIcon(icon?: string | null) {
-  return !icon || icon === '0'
+    return !icon || icon === '0'
 }
 
 /**
@@ -41,24 +41,20 @@ export function isBlankMenuIcon(icon?: string | null) {
  * Leaf menu items do not display icons.
  */
 export function resolveMenuIcon(
-  icon?: string | null,
-  path?: string,
-  menuType?: AppRoute.MenuType,
+    icon?: string | null,
+    path?: string,
+    menuType?: AppRoute.MenuType,
 ): string | undefined {
-  if (menuType === 'dir' && path && MENU_PATH_SVG_ICONS[path])
-    return MENU_PATH_SVG_ICONS[path]
+    if (menuType === 'dir' && path && MENU_PATH_SVG_ICONS[path]) return MENU_PATH_SVG_ICONS[path]
 
-  if (menuType === 'page')
+    if (menuType === 'page') return undefined
+
+    if (!isBlankMenuIcon(icon)) {
+        const raw = String(icon)
+        if (raw.includes(':') || raw.endsWith('|svg')) return raw
+        if (LEGACY_ICON_ALIASES[raw]) return LEGACY_ICON_ALIASES[raw]
+        return `ant-design:${raw}-outlined`
+    }
+
     return undefined
-
-  if (!isBlankMenuIcon(icon)) {
-    const raw = String(icon)
-    if (raw.includes(':') || raw.endsWith('|svg'))
-      return raw
-    if (LEGACY_ICON_ALIASES[raw])
-      return LEGACY_ICON_ALIASES[raw]
-    return `ant-design:${raw}-outlined`
-  }
-
-  return undefined
 }

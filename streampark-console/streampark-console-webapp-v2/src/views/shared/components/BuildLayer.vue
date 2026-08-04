@@ -16,28 +16,26 @@
 -->
 <script setup lang="ts">
 defineProps<{
-  layer: Recordable
+    layer: Recordable
 }>()
 </script>
 
 <template>
-  <div class="mb-5px">
-    <n-space size="small">
-      <n-icon><IonIcon name="ArrowForwardOutline" /></n-icon>
-      <n-tag type="info">
-        {{ layer.layerId }}
-      </n-tag>
-      <n-tag>{{ layer.status }}</n-tag>
-      <template v-if="layer.totalMb != null && layer.totalMb !== 0">
-        <span class="text-12px">
-          {{ layer.currentMb }} / {{ layer.totalMb }} MB
-        </span>
-      </template>
-    </n-space>
-  </div>
-  <template v-if="layer.totalMb != null && layer.totalMb !== 0">
-    <div class="mb-15px ml-20px mr-50px">
-      <n-progress :percentage="layer.percent" processing />
+    <div class="mb-5px">
+        <n-space size="small">
+            <n-icon><IonIcon name="ArrowForwardOutline" /></n-icon>
+            <n-tag type="info">
+                {{ layer.layerId }}
+            </n-tag>
+            <n-tag>{{ layer.status }}</n-tag>
+            <template v-if="layer.totalMb != null && layer.totalMb !== 0">
+                <span class="text-12px"> {{ layer.currentMb }} / {{ layer.totalMb }} MB </span>
+            </template>
+        </n-space>
     </div>
-  </template>
+    <template v-if="layer.totalMb != null && layer.totalMb !== 0">
+        <div class="mb-15px ml-20px mr-50px">
+            <n-progress :percentage="layer.percent" processing />
+        </div>
+    </template>
 </template>

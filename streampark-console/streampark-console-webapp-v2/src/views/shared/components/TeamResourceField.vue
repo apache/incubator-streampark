@@ -25,29 +25,28 @@ const { t } = useI18n()
 const teamResources = ref<Recordable[]>([])
 
 const options = computed(() =>
-  teamResources.value
-    .filter(item => item.resourceType !== ResourceTypeEnum.APP)
-    .map(resource => ({
-      value: resource.id,
-      label: `${resource.resourceType}-${resource.resourceName}`,
-    })),
+    teamResources.value
+        .filter((item) => item.resourceType !== ResourceTypeEnum.APP)
+        .map((resource) => ({
+            value: resource.id,
+            label: `${resource.resourceType}-${resource.resourceName}`,
+        })),
 )
 
 onMounted(async () => {
-  const result = await fetchTeamResource({})
-  if (result.isSuccess)
-    teamResources.value = result.data ?? []
+    const result = await fetchTeamResource({})
+    if (result.isSuccess) teamResources.value = result.data ?? []
 })
 </script>
 
 <template>
-  <n-select
-    v-model:value="model"
-    multiple
-    filterable
-    clearable
-    :max-tag-count="3"
-    :options="options"
-    :placeholder="t('flink.app.resourcePlaceHolder')"
-  />
+    <n-select
+        v-model:value="model"
+        multiple
+        filterable
+        clearable
+        :max-tag-count="3"
+        :options="options"
+        :placeholder="t('flink.app.resourcePlaceHolder')"
+    />
 </template>

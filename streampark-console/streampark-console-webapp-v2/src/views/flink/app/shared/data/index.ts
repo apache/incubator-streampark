@@ -14,70 +14,70 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { DeployMode, FailoverStrategyEnum } from '@/enums/flinkEnum';
+import { DeployMode, FailoverStrategyEnum } from '@/enums/flinkEnum'
 
 /* Get diff editor configuration */
 export const getMonacoOptions = (readOnly: boolean) => {
-  return {
-    selectOnLineNumbers: false,
-    foldingStrategy: 'indentation', // code fragmentation
-    overviewRulerBorder: false, // Don't scroll bar borders
-    autoClosingBrackets: 'always',
-    autoClosingDelete: 'always',
-    tabSize: 2, // tab indent length
-    readOnly,
-    inherit: true,
-    scrollBeyondLastLine: false,
-    lineNumbersMinChars: 5,
-    lineHeight: 24,
-    automaticLayout: true,
-    cursorBlinking: 'line',
-    cursorStyle: 'line',
-    cursorWidth: 3,
-    renderFinalNewline: true,
-    renderLineHighlight: 'all',
-    quickSuggestionsDelay: 100, // Code prompt delay
-    scrollbar: {
-      useShadows: false,
-      vertical: 'visible',
-      horizontal: 'visible',
-      horizontalSliderSize: 5,
-      verticalSliderSize: 5,
-      horizontalScrollbarSize: 15,
-      verticalScrollbarSize: 15,
-    },
-  };
-};
+    return {
+        selectOnLineNumbers: false,
+        foldingStrategy: 'indentation', // code fragmentation
+        overviewRulerBorder: false, // Don't scroll bar borders
+        autoClosingBrackets: 'always',
+        autoClosingDelete: 'always',
+        tabSize: 2, // tab indent length
+        readOnly,
+        inherit: true,
+        scrollBeyondLastLine: false,
+        lineNumbersMinChars: 5,
+        lineHeight: 24,
+        automaticLayout: true,
+        cursorBlinking: 'line',
+        cursorStyle: 'line',
+        cursorWidth: 3,
+        renderFinalNewline: true,
+        renderLineHighlight: 'all',
+        quickSuggestionsDelay: 100, // Code prompt delay
+        scrollbar: {
+            useShadows: false,
+            vertical: 'visible',
+            horizontal: 'visible',
+            horizontalSliderSize: 5,
+            verticalSliderSize: 5,
+            horizontalScrollbarSize: 15,
+            verticalScrollbarSize: 15,
+        },
+    }
+}
 
 export const resolveOrder = [
-  { label: 'parent-first', value: 0 },
-  { label: 'child-first', value: 1 },
-];
+    { label: 'parent-first', value: 0 },
+    { label: 'child-first', value: 1 },
+]
 
 export const k8sRestExposedType = [
-  { label: 'LoadBalancer', value: 0 },
-  { label: 'ClusterIP', value: 1 },
-  { label: 'NodePort', value: 2 },
-];
+    { label: 'LoadBalancer', value: 0 },
+    { label: 'ClusterIP', value: 1 },
+    { label: 'NodePort', value: 2 },
+]
 
 export const deployModes = [
-  { label: 'standalone', value: DeployMode.STANDALONE, disabled: false },
-  { label: 'yarn application', value: DeployMode.YARN_APPLICATION, disabled: false },
-  { label: 'yarn session', value: DeployMode.YARN_SESSION, disabled: false },
-  { label: 'kubernetes session', value: DeployMode.KUBERNETES_SESSION, disabled: false },
-  {
-    label: 'kubernetes application',
-    value: DeployMode.KUBERNETES_APPLICATION,
-    disabled: false,
-  },
-  {
-    label: 'yarn per-job (deprecated, please use yarn-application mode)',
-    value: DeployMode.YARN_PER_JOB,
-    disabled: false,
-  },
-];
+    { label: 'standalone', value: DeployMode.STANDALONE, disabled: false },
+    { label: 'yarn application', value: DeployMode.YARN_APPLICATION, disabled: false },
+    { label: 'yarn session', value: DeployMode.YARN_SESSION, disabled: false },
+    { label: 'kubernetes session', value: DeployMode.KUBERNETES_SESSION, disabled: false },
+    {
+        label: 'kubernetes application',
+        value: DeployMode.KUBERNETES_APPLICATION,
+        disabled: false,
+    },
+    {
+        label: 'yarn per-job (deprecated, please use yarn-application mode)',
+        value: DeployMode.YARN_PER_JOB,
+        disabled: false,
+    },
+]
 
 export const cpTriggerAction = [
-  { label: 'alert', value: FailoverStrategyEnum.ALERT },
-  { label: 'restart', value: FailoverStrategyEnum.RESTART },
-];
+    { label: 'alert', value: FailoverStrategyEnum.ALERT },
+    { label: 'restart', value: FailoverStrategyEnum.RESTART },
+]

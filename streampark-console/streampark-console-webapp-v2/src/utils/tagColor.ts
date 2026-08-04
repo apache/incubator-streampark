@@ -16,16 +16,16 @@
  */
 
 export interface TagColor {
-  color?: string
-  textColor?: string
-  borderColor?: string
+    color?: string
+    textColor?: string
+    borderColor?: string
 }
 
 /** Naive UI Tag expects a color object, not a raw hex string. */
 export function toTagColor(hex: string, textColor = '#fff'): TagColor {
-  return {
-    color: hex,
-    textColor,
-    borderColor: hex,
-  }
+    return {
+        color: hex,
+        textColor,
+        borderColor: hex,
+    }
 }

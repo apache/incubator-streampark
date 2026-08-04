@@ -15,23 +15,23 @@
  * limitations under the License.
  */
 export default {
-  addToken: 'Add Token',
-  modifyToken: 'Edit Token',
-  copyToken: 'Copy Token',
-  deleteToken: 'Delete Token',
-  selectUserAlertMessage: 'Please select a user',
-  table: {
-    title: 'Token List',
-    userName: 'Username',
-    token: 'Token',
-    status: 'Status',
-  },
-  operation: {
-    copySuccess: 'copy success',
-    deleteTokenConfirm: 'are you sure delete this token ?',
-    deleteSuccess: 'delete token successfully',
-    deleteFailed: 'delete token failed',
-    updateSuccess: 'update token successfully',
-    createSuccess: 'create token successfully',
-  },
-};
+    addToken: 'Add Token',
+    modifyToken: 'Edit Token',
+    copyToken: 'Copy Token',
+    deleteToken: 'Delete Token',
+    selectUserAlertMessage: 'Please select a user',
+    table: {
+        title: 'Token List',
+        userName: 'Username',
+        token: 'Token',
+        status: 'Status',
+    },
+    operation: {
+        copySuccess: 'copy success',
+        deleteTokenConfirm: 'are you sure delete this token ?',
+        deleteSuccess: 'delete token successfully',
+        deleteFailed: 'delete token failed',
+        updateSuccess: 'update token successfully',
+        createSuccess: 'create token successfully',
+    },
+}

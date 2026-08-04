@@ -21,7 +21,7 @@ import SvgIcon from '@/components/Icon/src/SvgIcon.vue'
 import { resolveIconifyRef, resolveViconComponent } from '@/components/Icon/xicons'
 
 const props = defineProps<{
-  name: string
+    name: string
 }>()
 
 defineOptions({ name: 'IonIcon' })
@@ -29,21 +29,18 @@ defineOptions({ name: 'IonIcon' })
 const isSvgIcon = computed(() => props.name.endsWith('|svg'))
 const svgName = computed(() => props.name.replace('|svg', ''))
 const iconifyName = computed(() => {
-  if (isSvgIcon.value)
-    return ''
-  if (props.name.includes(':'))
-    return props.name
-  return resolveIconifyRef(props.name)
+    if (isSvgIcon.value) return ''
+    if (props.name.includes(':')) return props.name
+    return resolveIconifyRef(props.name)
 })
 const iconComponent = computed(() => {
-  if (isSvgIcon.value || iconifyName.value)
-    return undefined
-  return resolveViconComponent(props.name)
+    if (isSvgIcon.value || iconifyName.value) return undefined
+    return resolveViconComponent(props.name)
 })
 </script>
 
 <template>
-  <SvgIcon v-if="isSvgIcon" :name="svgName" :size="18" />
-  <component :is="iconComponent" v-else-if="iconComponent" />
-  <Icon v-else-if="iconifyName" :icon="iconifyName" />
+    <SvgIcon v-if="isSvgIcon" :name="svgName" :size="18" />
+    <component :is="iconComponent" v-else-if="iconComponent" />
+    <Icon v-else-if="iconifyName" :icon="iconifyName" />
 </template>

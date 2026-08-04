@@ -1,9 +1,9 @@
 export enum ProjectTypeEnum {
-  FLINK = 1,
-  SPARK = 2,
+    FLINK = 1,
+    SPARK = 2,
 }
 
 export enum CVSTypeEnum {
-  GIT = 1,
-  SVN = 2,
+    GIT = 1,
+    SVN = 2,
 }

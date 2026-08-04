@@ -23,7 +23,7 @@ const isLocked = computed(() => lockStore?.getLockInfo?.isLock ?? false)
 </script>
 
 <template>
-  <transition name="fade-bottom" mode="out-in">
-    <LockPage v-if="isLocked" />
-  </transition>
+    <transition name="fade-bottom" mode="out-in">
+        <LockPage v-if="isLocked" />
+    </transition>
 </template>

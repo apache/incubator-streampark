@@ -18,13 +18,13 @@
 import { request } from '../../http'
 
 export function fetchFlinkPodTemplates(data: Recordable = {}) {
-  return request.Post<string[]>('/flink/history/flink_pod_templates', data)
+    return request.Post<string[]>('/flink/history/flink_pod_templates', data)
 }
 
 export function fetchFlinkJmPodTemplates(data: Recordable = {}) {
-  return request.Post<string[]>('/flink/history/flink_jm_pod_templates', data)
+    return request.Post<string[]>('/flink/history/flink_jm_pod_templates', data)
 }
 
 export function fetchFlinkTmPodTemplates(data: Recordable = {}) {
-  return request.Post<string[]>('/flink/history/flink_tm_pod_templates', data)
+    return request.Post<string[]>('/flink/history/flink_tm_pod_templates', data)
 }

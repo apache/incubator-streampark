@@ -20,41 +20,44 @@ import type { FlinkCreate, FlinkEnv } from '@/types/api/flink/flinkEnv.type'
 import { request } from '../../http'
 
 export function fetchFlinkEnvPage(data: BasicTableParams) {
-  return request.Post<FlinkEnv[] | { records?: FlinkEnv[], total?: number }>('/flink/env/page', data)
+    return request.Post<FlinkEnv[] | { records?: FlinkEnv[]; total?: number }>(
+        '/flink/env/page',
+        data,
+    )
 }
 
 export function fetchListFlinkEnv() {
-  return request.Post<FlinkEnv[]>('/flink/env/list')
+    return request.Post<FlinkEnv[]>('/flink/env/list')
 }
 
 export function fetchFlinkEnvGet(id: string) {
-  return request.Post<FlinkEnv>('/flink/env/get', { id })
+    return request.Post<FlinkEnv>('/flink/env/get', { id })
 }
 
 export function fetchDefaultSet(id: string) {
-  return request.Post('/flink/env/default', { id })
+    return request.Post('/flink/env/default', { id })
 }
 
 export function fetchFlinkEnvRemove(id: string) {
-  return request.Post<{ code?: number, data?: boolean }>('/flink/env/delete', { id })
+    return request.Post<{ code?: number; data?: boolean }>('/flink/env/delete', { id })
 }
 
-export function fetchCheckEnv(data: { id: string | null, flinkName: string, flinkHome: string }) {
-  return request.Post<{ code?: number, data?: number, msg?: string }>('/flink/env/check', data)
+export function fetchCheckEnv(data: { id: string | null; flinkName: string; flinkHome: string }) {
+    return request.Post<{ code?: number; data?: number; msg?: string }>('/flink/env/check', data)
 }
 
 export function fetchValidity(id: string) {
-  return request.Post<{ code?: number, data?: boolean }>('/flink/env/validity', { id })
+    return request.Post<{ code?: number; data?: boolean }>('/flink/env/validity', { id })
 }
 
 export function fetchFlinkCreate(data: FlinkCreate) {
-  return request.Post<{ code?: number, data?: boolean, msg?: string }>('/flink/env/create', data)
+    return request.Post<{ code?: number; data?: boolean; msg?: string }>('/flink/env/create', data)
 }
 
 export function fetchFlinkUpdate(data: FlinkCreate) {
-  return request.Post<{ code?: number, data?: boolean, msg?: string }>('/flink/env/update', data)
+    return request.Post<{ code?: number; data?: boolean; msg?: string }>('/flink/env/update', data)
 }
 
 export function fetchFlinkSync(id: string) {
-  return request.Post<boolean>('/flink/env/sync', { id })
+    return request.Post<boolean>('/flink/env/sync', { id })
 }

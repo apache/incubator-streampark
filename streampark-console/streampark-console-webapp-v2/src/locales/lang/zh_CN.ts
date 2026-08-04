@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { genMessage } from '../helper';
-const modules = import.meta.glob('./zh-CN/**/*.ts', { eager: true });
+import { genMessage } from '../helper'
+const modules = import.meta.glob('./zh-CN/**/*.ts', { eager: true })
 export default {
-  message: {
-    ...genMessage(modules as Recordable<Recordable>, 'zh-CN'),
-  },
-};
+    message: {
+        ...genMessage(modules as Recordable<Recordable>, 'zh-CN'),
+    },
+}

@@ -15,19 +15,19 @@
  * limitations under the License.
  */
 export interface BasicPageParams {
-  page: number;
-  pageSize: number;
+    page: number
+    pageSize: number
 }
 
 export interface BasicFetchResult<T> {
-  records: T[];
-  total: number;
+    records: T[]
+    total: number
 }
 
 export interface BasicTableParams {
-  page?: number;
-  pageNum?: number;
-  pageSize: number;
-  teamId?: string | null;
-  [key: string]: Nullable<string | number> | undefined | null;
+    page?: number
+    pageNum?: number
+    pageSize: number
+    teamId?: string | null
+    [key: string]: Nullable<string | number> | undefined | null
 }

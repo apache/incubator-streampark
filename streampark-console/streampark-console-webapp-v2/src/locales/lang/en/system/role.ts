@@ -15,23 +15,23 @@
  * limitations under the License.
  */
 export default {
-  deleteTip: 'Are you sure delete this Role',
-  assignment: 'menu assignment',
-  form: {
-    roleName: 'Role name',
-    menuId: 'permission',
-    menuIdRequired: 'Please select the permission.',
-    create: 'Add Role',
-    edit: 'Edit Role',
-    delete: 'Delete Role',
-    view: 'View Role',
-    noViewPermission: 'You must include the view permission under application',
-    roleNameLen: 'Role name should not be longer than 255 characters',
-    exist: 'Sorry, the role name already exists',
-    empty: 'Role name cannot be empty',
-  },
-  searchByRole: 'Search by role name',
-  roleInfo: 'Role Info',
-  tableTitle: 'Role List',
-  modifyTime: 'Not yet modified',
-};
+    deleteTip: 'Are you sure delete this Role',
+    assignment: 'menu assignment',
+    form: {
+        roleName: 'Role name',
+        menuId: 'permission',
+        menuIdRequired: 'Please select the permission.',
+        create: 'Add Role',
+        edit: 'Edit Role',
+        delete: 'Delete Role',
+        view: 'View Role',
+        noViewPermission: 'You must include the view permission under application',
+        roleNameLen: 'Role name should not be longer than 255 characters',
+        exist: 'Sorry, the role name already exists',
+        empty: 'Role name cannot be empty',
+    },
+    searchByRole: 'Search by role name',
+    roleInfo: 'Role Info',
+    tableTitle: 'Role List',
+    modifyTime: 'Not yet modified',
+}

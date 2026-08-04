@@ -18,21 +18,21 @@
 import { request } from '../../http'
 
 export function fetchSysHosts(data: Recordable = {}) {
-  return request.Post<string[]>('/flink/podtmpl/sys_hosts', data)
+    return request.Post<string[]>('/flink/podtmpl/sys_hosts', data)
 }
 
 export function fetchInitPodTemplate(data: Recordable = {}) {
-  return request.Post<string>('/flink/podtmpl/init', data)
+    return request.Post<string>('/flink/podtmpl/init', data)
 }
 
 export function fetchCompleteHostAliasToPodTemplate(data: Recordable) {
-  return request.Post<string>('/flink/podtmpl/comp_host_alias', data)
+    return request.Post<string>('/flink/podtmpl/comp_host_alias', data)
 }
 
 export function fetchExtractHostAliasFromPodTemplate(data: Recordable) {
-  return request.Post<string[]>('/flink/podtmpl/extract_host_alias', data)
+    return request.Post<string[]>('/flink/podtmpl/extract_host_alias', data)
 }
 
 export function fetchPreviewHostAlias(data: Recordable) {
-  return request.Post<string>('/flink/podtmpl/preview_host_alias', data)
+    return request.Post<string>('/flink/podtmpl/preview_host_alias', data)
 }

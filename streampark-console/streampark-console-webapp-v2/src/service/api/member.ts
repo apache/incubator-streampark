@@ -15,39 +15,42 @@
  * limitations under the License.
  */
 
-import type { AddMemberParams, MemberListRecord, UpdateMemberParams } from '@/types/api/system/model/memberModel'
+import type {
+    AddMemberParams,
+    MemberListRecord,
+    UpdateMemberParams,
+} from '@/types/api/system/model/memberModel'
 import type { UserListItem } from '@/types/api/base/model/systemModel'
 import type { BasicTableParams } from '@/types/api/model/baseModel'
 import { request } from '../http'
 
 export interface UserTeamItem {
-  id: string
-  teamName: string
+    id: string
+    teamName: string
 }
 
 export function fetchUserTeam(data: { userId: number | string }) {
-  return request.Post<UserTeamItem[]>('/member/teams', data)
+    return request.Post<UserTeamItem[]>('/member/teams', data)
 }
 
-export function fetchMemberList(data: BasicTableParams & { userName?: string, roleName?: string }) {
-  return request.Post<MemberListRecord[]>('/member/list', data)
+export function fetchMemberList(data: BasicTableParams & { userName?: string; roleName?: string }) {
+    return request.Post<MemberListRecord[]>('/member/list', data)
 }
 
 export function fetchAddMember(data: AddMemberParams) {
-  return request.Post('/member/post', data)
+    return request.Post('/member/post', data)
 }
 
 export function fetchUpdateMember(data: UpdateMemberParams) {
-  return request.Put('/member/update', data)
+    return request.Put('/member/update', data)
 }
 
 export function fetchMemberDelete(data: { id: string }) {
-  return request.Delete<{ status: string }>('/member/delete', data)
+    return request.Delete<{ status: string }>('/member/delete', data)
 }
 
 export function fetchCandidateUsers(params?: { teamId?: string | number }) {
-  const method = request.Post<UserListItem[]>('/member/candidateUsers', {})
-  if (params)
-    method.config.params = params
-  return method
+    const method = request.Post<UserListItem[]>('/member/candidateUsers', {})
+    if (params) method.config.params = params
+    return method
 }

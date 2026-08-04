@@ -18,21 +18,24 @@
 import { request } from '../../http'
 
 export function fetchSparkSqlVerify(data: Recordable) {
-  return request.Post<Recordable>('/spark/sql/verify', data)
+    return request.Post<Recordable>('/spark/sql/verify', data)
 }
 
 export function fetchSparkSqlList(data: Recordable) {
-  return request.Post<Recordable[] | { records?: Recordable[], total?: number }>('/spark/sql/list', data)
+    return request.Post<Recordable[] | { records?: Recordable[]; total?: number }>(
+        '/spark/sql/list',
+        data,
+    )
 }
 
-export function fetchSparkSqlRemove(data: { id: string, appId: string }) {
-  return request.Post<boolean>('/spark/sql/delete', data)
+export function fetchSparkSqlRemove(data: { id: string; appId: string }) {
+    return request.Post<boolean>('/spark/sql/delete', data)
 }
 
 export function fetchSparkSql(data: Recordable) {
-  return request.Post<Recordable>('/spark/sql/get', data)
+    return request.Post<Recordable>('/spark/sql/get', data)
 }
 
 export function fetchSparkSqlHistory(data: Recordable) {
-  return request.Post<Recordable[]>('/spark/sql/history', data)
+    return request.Post<Recordable[]>('/spark/sql/history', data)
 }

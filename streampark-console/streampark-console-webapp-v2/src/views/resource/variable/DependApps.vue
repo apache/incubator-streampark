@@ -30,53 +30,49 @@ const tableData = ref<Recordable[]>([])
 const variableCode = computed(() => String(route.query.id ?? ''))
 
 const columns = computed<DataTableColumns<Recordable>>(() => [
-  { title: t('flink.variable.depend.jobName'), key: 'jobName', width: 500 },
-  { title: t('flink.variable.depend.nickName'), key: 'nickName' },
-  { title: t('common.createTime'), key: 'createTime' },
+    { title: t('flink.variable.depend.jobName'), key: 'jobName', width: 500 },
+    { title: t('flink.variable.depend.nickName'), key: 'nickName' },
+    { title: t('common.createTime'), key: 'createTime' },
 ])
 
 async function loadData() {
-  if (!variableCode.value)
-    return
-  loading.value = true
-  try {
-    const result = await fetchDependApps({ variableCode: variableCode.value })
-    if (!result.isSuccess)
-      throwApiFailure(result, t('sys.api.apiRequestFailed'))
-    const { records } = resolveListData(result.data)
-    tableData.value = records
-  }
-  catch (e: any) {
-    showCatchError(e, t('sys.api.apiRequestFailed'))
-    tableData.value = []
-  }
-  finally {
-    loading.value = false
-  }
+    if (!variableCode.value) return
+    loading.value = true
+    try {
+        const result = await fetchDependApps({ variableCode: variableCode.value })
+        if (!result.isSuccess) throwApiFailure(result, t('sys.api.apiRequestFailed'))
+        const { records } = resolveListData(result.data)
+        tableData.value = records
+    } catch (e: any) {
+        showCatchError(e, t('sys.api.apiRequestFailed'))
+        tableData.value = []
+    } finally {
+        loading.value = false
+    }
 }
 
 watch(() => route.query.id, loadData, { immediate: true })
 </script>
 
 <template>
-  <n-card :bordered="false" class="h-full">
-    <div class="mb-16px flex items-center justify-between gap-12px">
-      <n-text strong>
-        {{ t('flink.variable.depend.headerTitle', [variableCode]) }}
-      </n-text>
-      <n-button type="primary" circle @click="router.back()">
-        <template #icon>
-          <n-icon><IonIcon name="ArrowBackOutline" /></n-icon>
-        </template>
-      </n-button>
-    </div>
-    <n-data-table
-      :loading="loading"
-      :columns="columns"
-      :data="tableData"
-      :row-key="(row: Recordable) => String(row.id ?? row.jobName)"
-      flex-height
-      class="min-h-480px"
-    />
-  </n-card>
+    <n-card :bordered="false" class="h-full">
+        <div class="mb-16px flex items-center justify-between gap-12px">
+            <n-text strong>
+                {{ t('flink.variable.depend.headerTitle', [variableCode]) }}
+            </n-text>
+            <n-button type="primary" circle @click="router.back()">
+                <template #icon>
+                    <n-icon><IonIcon name="ArrowBackOutline" /></n-icon>
+                </template>
+            </n-button>
+        </div>
+        <n-data-table
+            :loading="loading"
+            :columns="columns"
+            :data="tableData"
+            :row-key="(row: Recordable) => String(row.id ?? row.jobName)"
+            flex-height
+            class="min-h-480px"
+        />
+    </n-card>
 </template>

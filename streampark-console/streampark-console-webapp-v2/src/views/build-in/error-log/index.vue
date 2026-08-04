@@ -32,90 +32,102 @@ const detailVisible = ref(false)
 const detailRecord = ref<ErrorLogInfo | null>(null)
 
 const typeColorMap: Record<string, 'success' | 'info' | 'warning' | 'error' | 'default'> = {
-  [ErrorTypeEnum.VUE]: 'success',
-  [ErrorTypeEnum.RESOURCE]: 'info',
-  [ErrorTypeEnum.PROMISE]: 'warning',
-  [ErrorTypeEnum.AJAX]: 'error',
+    [ErrorTypeEnum.VUE]: 'success',
+    [ErrorTypeEnum.RESOURCE]: 'info',
+    [ErrorTypeEnum.PROMISE]: 'warning',
+    [ErrorTypeEnum.AJAX]: 'error',
 }
 
 const columns = computed<DataTableColumns<ErrorLogInfo>>(() => [
-  {
-    title: t('sys.errorLog.tableColumnType'),
-    key: 'type',
-    width: 100,
-    render(row) {
-      return h(NTag, { size: 'small', type: typeColorMap[row.type] ?? 'default' }, { default: () => row.type })
+    {
+        title: t('sys.errorLog.tableColumnType'),
+        key: 'type',
+        width: 100,
+        render(row) {
+            return h(
+                NTag,
+                { size: 'small', type: typeColorMap[row.type] ?? 'default' },
+                { default: () => row.type },
+            )
+        },
     },
-  },
-  { title: 'URL', key: 'url', ellipsis: { tooltip: true }, width: 180 },
-  { title: t('sys.errorLog.tableColumnDate'), key: 'time', width: 170 },
-  { title: t('sys.errorLog.tableColumnFile'), key: 'file', ellipsis: { tooltip: true }, width: 180 },
-  { title: 'Name', key: 'name', ellipsis: { tooltip: true }, width: 160 },
-  { title: t('sys.errorLog.tableColumnMsg'), key: 'message', ellipsis: { tooltip: true } },
-  {
-    title: t('component.table.operation'),
-    key: 'action',
-    width: 100,
-    render(row) {
-      return h(NButton, { text: true, type: 'primary', onClick: () => openDetail(row) }, {
-        default: () => t('sys.errorLog.tableActionDesc'),
-      })
+    { title: 'URL', key: 'url', ellipsis: { tooltip: true }, width: 180 },
+    { title: t('sys.errorLog.tableColumnDate'), key: 'time', width: 170 },
+    {
+        title: t('sys.errorLog.tableColumnFile'),
+        key: 'file',
+        ellipsis: { tooltip: true },
+        width: 180,
     },
-  },
+    { title: 'Name', key: 'name', ellipsis: { tooltip: true }, width: 160 },
+    { title: t('sys.errorLog.tableColumnMsg'), key: 'message', ellipsis: { tooltip: true } },
+    {
+        title: t('component.table.operation'),
+        key: 'action',
+        width: 100,
+        render(row) {
+            return h(
+                NButton,
+                { text: true, type: 'primary', onClick: () => openDetail(row) },
+                {
+                    default: () => t('sys.errorLog.tableActionDesc'),
+                },
+            )
+        },
+    },
 ])
 
 watch(
-  () => errorLogStore.getErrorLogInfoList,
-  (list) => {
-    tableData.value = list ? [...list] : []
-  },
-  { immediate: true, deep: true },
+    () => errorLogStore.getErrorLogInfoList,
+    (list) => {
+        tableData.value = list ? [...list] : []
+    },
+    { immediate: true, deep: true },
 )
 
-if (import.meta.env.DEV)
-  window.$message?.info(t('sys.errorLog.enableMessage'))
+if (import.meta.env.DEV) window.$message?.info(t('sys.errorLog.enableMessage'))
 
 function openDetail(row: ErrorLogInfo) {
-  detailRecord.value = row
-  detailVisible.value = true
+    detailRecord.value = row
+    detailVisible.value = true
 }
 
 function fireVueError() {
-  throw new Error('fire vue error!')
+    throw new Error('fire vue error!')
 }
 
 function fireResourceError() {
-  const img = new Image()
-  img.src = `${Date.now()}.png`
+    const img = new Image()
+    img.src = `${Date.now()}.png`
 }
 
 async function fireAjaxError() {
-  await fireErrorApi()
+    await fireErrorApi()
 }
 </script>
 
 <template>
-  <n-card :bordered="false" :title="t('sys.errorLog.tableTitle')">
-    <template #header-extra>
-      <n-space>
-        <n-button type="primary" @click="fireVueError">
-          {{ t('sys.errorLog.fireVueError') }}
-        </n-button>
-        <n-button type="primary" @click="fireResourceError">
-          {{ t('sys.errorLog.fireResourceError') }}
-        </n-button>
-        <n-button type="primary" @click="fireAjaxError">
-          {{ t('sys.errorLog.fireAjaxError') }}
-        </n-button>
-      </n-space>
-    </template>
-    <n-data-table
-      :columns="columns"
-      :data="tableData"
-      :row-key="(row: ErrorLogInfo) => String(row.time)"
-      flex-height
-      class="min-h-480px"
-    />
-    <ErrorLogDetailModal v-model:show="detailVisible" :record="detailRecord" />
-  </n-card>
+    <n-card :bordered="false" :title="t('sys.errorLog.tableTitle')">
+        <template #header-extra>
+            <n-space>
+                <n-button type="primary" @click="fireVueError">
+                    {{ t('sys.errorLog.fireVueError') }}
+                </n-button>
+                <n-button type="primary" @click="fireResourceError">
+                    {{ t('sys.errorLog.fireResourceError') }}
+                </n-button>
+                <n-button type="primary" @click="fireAjaxError">
+                    {{ t('sys.errorLog.fireAjaxError') }}
+                </n-button>
+            </n-space>
+        </template>
+        <n-data-table
+            :columns="columns"
+            :data="tableData"
+            :row-key="(row: ErrorLogInfo) => String(row.time)"
+            flex-height
+            class="min-h-480px"
+        />
+        <ErrorLogDetailModal v-model:show="detailVisible" :record="detailRecord" />
+    </n-card>
 </template>

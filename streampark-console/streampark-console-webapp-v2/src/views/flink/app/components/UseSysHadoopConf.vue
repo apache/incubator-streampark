@@ -25,25 +25,23 @@ const drawerVisible = ref(false)
 </script>
 
 <template>
-  <div class="flex items-center gap-8px">
-    <n-switch v-model:value="model">
-      <template #checked>{{ t('common.switchOn') }}</template>
-      <template #unchecked>{{ t('common.switchOff') }}</template>
-    </n-switch>
-    <n-popover trigger="hover">
-      <template #trigger>
-        <n-button quaternary circle size="tiny">
-          ?
+    <div class="flex items-center gap-8px">
+        <n-switch v-model:value="model">
+            <template #checked>{{ t('common.switchOn') }}</template>
+            <template #unchecked>{{ t('common.switchOff') }}</template>
+        </n-switch>
+        <n-popover trigger="hover">
+            <template #trigger>
+                <n-button quaternary circle size="tiny"> ? </n-button>
+            </template>
+            <div class="max-w-280px text-13px">
+                <p>{{ t('flink.app.useSysHadoopConfTip1') }}</p>
+                <p>{{ t('flink.app.useSysHadoopConfTip2') }}</p>
+            </div>
+        </n-popover>
+        <n-button v-if="model" size="small" @click="drawerVisible = true">
+            {{ t('common.view') }}
         </n-button>
-      </template>
-      <div class="max-w-280px text-13px">
-        <p>{{ t('flink.app.useSysHadoopConfTip1') }}</p>
-        <p>{{ t('flink.app.useSysHadoopConfTip2') }}</p>
-      </div>
-    </n-popover>
-    <n-button v-if="model" size="small" @click="drawerVisible = true">
-      {{ t('common.view') }}
-    </n-button>
-    <HadoopConfDrawer v-model:show="drawerVisible" />
-  </div>
+        <HadoopConfDrawer v-model:show="drawerVisible" />
+    </div>
 </template>

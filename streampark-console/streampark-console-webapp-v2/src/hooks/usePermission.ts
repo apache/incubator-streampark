@@ -22,32 +22,25 @@ const ADMIN_USERNAME = 'admin'
 
 /** StreamPark permission helper (perm codes + roles from backend login payload) */
 export function usePermission() {
-  function hasPermission(permission?: string | string[], def = true) {
-    if (!permission)
-      return def
+    function hasPermission(permission?: string | string[], def = true) {
+        if (!permission) return def
 
-    const userStore = useUserStoreWithOut()
-    if (userStore.getUserInfo?.username === ADMIN_USERNAME)
-      return true
+        const userStore = useUserStoreWithOut()
+        if (userStore.getUserInfo?.username === ADMIN_USERNAME) return true
 
-    const permCodes = userStore.getPermissions || []
-    if (permCodes.length) {
-      if (isArray(permission))
-        return permission.some(code => permCodes.includes(code))
-      if (isString(permission))
-        return permCodes.includes(permission)
+        const permCodes = userStore.getPermissions || []
+        if (permCodes.length) {
+            if (isArray(permission)) return permission.some((code) => permCodes.includes(code))
+            if (isString(permission)) return permCodes.includes(permission)
+        }
+
+        const roles = (userStore.getRoleList || []) as string[]
+        if (roles.includes('admin') || roles.includes('super')) return true
+
+        if (isArray(permission)) return permission.some((role) => roles.includes(role))
+        if (isString(permission)) return roles.includes(permission)
+        return false
     }
 
-    const roles = (userStore.getRoleList || []) as string[]
-    if (roles.includes('admin') || roles.includes('super'))
-      return true
-
-    if (isArray(permission))
-      return permission.some(role => roles.includes(role))
-    if (isString(permission))
-      return roles.includes(permission)
-    return false
-  }
-
-  return { hasPermission }
+    return { hasPermission }
 }

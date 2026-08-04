@@ -16,55 +16,52 @@
  */
 
 export interface PomDependency {
-  groupId: string
-  artifactId: string
-  version: string
-  classifier?: string
-  exclusions?: Array<{ groupId: string, artifactId: string }>
+    groupId: string
+    artifactId: string
+    version: string
+    classifier?: string
+    exclusions?: Array<{ groupId: string; artifactId: string }>
 }
 
 export function toPomString(pom: PomDependency) {
-  const { groupId, artifactId, version, classifier, exclusions = [] } = pom
-  let exclusionString = ''
-  let classifierString = ''
-  if (exclusions.length > 0) {
-    exclusions.forEach((item) => {
-      exclusionString
-        += '      <exclusion>\n'
-          + `        <groupId>${item.groupId}</groupId>\n`
-          + `        <artifactId>${item.artifactId}</artifactId>\n`
-          + '      </exclusion>\n'
-    })
-    exclusionString = `    <exclusions>\n${exclusionString}    </exclusions>\n`
-  }
-  if (classifier != null)
-    classifierString = `    <classifier>${classifier}</classifier>\n`
+    const { groupId, artifactId, version, classifier, exclusions = [] } = pom
+    let exclusionString = ''
+    let classifierString = ''
+    if (exclusions.length > 0) {
+        exclusions.forEach((item) => {
+            exclusionString +=
+                '      <exclusion>\n' +
+                `        <groupId>${item.groupId}</groupId>\n` +
+                `        <artifactId>${item.artifactId}</artifactId>\n` +
+                '      </exclusion>\n'
+        })
+        exclusionString = `    <exclusions>\n${exclusionString}    </exclusions>\n`
+    }
+    if (classifier != null) classifierString = `    <classifier>${classifier}</classifier>\n`
 
-  return `  <dependency>\n`
-    + `    <groupId>${groupId}</groupId>\n`
-    + `    <artifactId>${artifactId}</artifactId>\n`
-    + `    <version>${version}</version>\n`
-    + classifierString
-    + exclusionString
-    + '  </dependency>'
+    return (
+        `  <dependency>\n` +
+        `    <groupId>${groupId}</groupId>\n` +
+        `    <artifactId>${artifactId}</artifactId>\n` +
+        `    <version>${version}</version>\n` +
+        classifierString +
+        exclusionString +
+        '  </dependency>'
+    )
 }
 
 export function getPomId(pom: Pick<PomDependency, 'groupId' | 'artifactId' | 'classifier'>) {
-  if (pom.classifier != null)
-    return `${pom.groupId}_${pom.artifactId}_${pom.classifier}`
-  return `${pom.groupId}_${pom.artifactId}`
+    if (pom.classifier != null) return `${pom.groupId}_${pom.artifactId}_${pom.classifier}`
+    return `${pom.groupId}_${pom.artifactId}`
 }
 
 export function buildDependencyJson(
-  pomRecords: PomDependency[],
-  jarRecords: string[],
+    pomRecords: PomDependency[],
+    jarRecords: string[],
 ): string | null {
-  const dependency: Recordable = {}
-  if (pomRecords.length > 0)
-    dependency.pom = pomRecords
-  if (jarRecords.length > 0)
-    dependency.jar = jarRecords
-  if (dependency.pom === undefined && dependency.jar === undefined)
-    return null
-  return JSON.stringify(dependency)
+    const dependency: Recordable = {}
+    if (pomRecords.length > 0) dependency.pom = pomRecords
+    if (jarRecords.length > 0) dependency.jar = jarRecords
+    if (dependency.pom === undefined && dependency.jar === undefined) return null
+    return JSON.stringify(dependency)
 }
