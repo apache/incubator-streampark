@@ -47,14 +47,16 @@ import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** perJob to submit jobs programmatically */
 public final class YarnPerJobTestCase {
@@ -100,10 +102,33 @@ public final class YarnPerJobTestCase {
     }
 
     @Test
-    void requiresFlinkHomeForManualIntegration() {
-        Assumptions.assumeTrue(
-            System.getenv("FLINK_HOME") != null,
-            "Manual YARN integration harness; set FLINK_HOME to run main()");
+    void verifyYarnPerJobHarnessCompatibility() throws Exception {
+        Method deployInternal =
+            YarnClusterDescriptor.class.getDeclaredMethod(
+                "deployInternal",
+                ClusterSpecification.class,
+                String.class,
+                String.class,
+                JobGraph.class,
+                boolean.class);
+        assertThat(deployInternal).isNotNull();
+
+        SubmitResponse response = new SubmitResponse("application_123", Collections.emptyMap());
+        assertThat(response.clusterId()).isEqualTo("application_123");
+        assertThat(YarnDeploymentTarget.PER_JOB.getName()).isEqualTo("yarn-per-job");
+
+        Options commandLineOptions =
+            FlinkRunOption.mergeOptions(FlinkRunOption.getRunCommandOptions(), new Options());
+        org.apache.commons.cli.CommandLine commandLine =
+            FlinkRunOption.parse(commandLineOptions, OPTION.split("\\s+"), true);
+        assertThat(commandLine.getOptionValue("e")).isEqualTo("yarn-per-job");
+
+        String flinkHome = System.getenv("FLINK_HOME");
+        if (flinkHome != null) {
+            ensureInitialized();
+            assertThat(customCommandLines).isNotEmpty();
+            assertThat(new File(flinkHome, "lib").exists()).isTrue();
+        }
     }
 
     @SuppressWarnings("unchecked")
