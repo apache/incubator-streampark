@@ -33,7 +33,6 @@ const COMPONENT_ALIASES: Record<string, string> = {
     'base/redirect/index.vue': 'build-in/redirect/index.vue',
     'base/lock/index.vue': 'build-in/lock/index.vue',
     'base/error-log/index.vue': 'build-in/error-log/index.vue',
-    'setting/FlinkGateway/index.vue': 'flink/gateway/index.vue',
 }
 
 function normalizeComponentRel(componentPath: string): string {
