@@ -247,7 +247,10 @@ export const useAppTableAction = (
           okButtonProps: {
             class: 'e2e-flinkapp-delete-confirm',
           },
-          title: t('flink.app.operation.deleteTip'),
+          title:
+            record.deployMode === DeployMode.MANAGED_APPLICATION
+              ? t('flink.app.managed.deleteLocalTip')
+              : t('flink.app.operation.deleteTip'),
           confirm: handleDelete.bind(null, record),
         },
       },

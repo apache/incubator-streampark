@@ -32,6 +32,13 @@ export interface ManagedResourcePool {
   usedCu?: number;
 }
 
+export interface ManagedDraftDirectory {
+  id: string;
+  name: string;
+  path?: string;
+  parentId?: string;
+}
+
 export interface ManagedFlinkEnvironment {
   clusterId: string;
   clusterName: string;
@@ -118,6 +125,8 @@ export interface ManagedFlinkRuntimeConfig {
   checkpoint: ManagedFlinkCheckpointConfig;
   restartStrategy: ManagedFlinkRestartStrategyConfig;
   retryOnFailure: boolean;
+  retryIntervalMin?: number;
+  retryMaxCount?: number;
   customProperties: Record<string, string>;
 }
 

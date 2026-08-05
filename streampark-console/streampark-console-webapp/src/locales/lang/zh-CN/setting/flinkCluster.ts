@@ -89,19 +89,19 @@ export default {
     region: '地域',
     project: '项目',
     resourcePool: '资源池',
-    draftDirectoryId: '草稿目录 ID',
+    draftDirectoryId: '草稿目录',
     probe: '测试环境',
     probeSuccess: '托管 Flink 环境可用',
     probeFailed: '托管 Flink 环境检测失败',
     metadataUnavailable: '托管环境元数据不可用，请刷新后重试。',
     placeholder: {
-      draftDirectoryId: '请输入云厂商草稿目录 ID',
+      draftDirectoryId: '请按名称选择草稿目录',
     },
     required: {
       cloudAccount: '请选择云账号',
       project: '请选择项目',
       resourcePool: '请选择资源池',
-      draftDirectoryId: '请输入有效的草稿目录 ID',
+      draftDirectoryId: '请选择草稿目录',
     },
   },
 };

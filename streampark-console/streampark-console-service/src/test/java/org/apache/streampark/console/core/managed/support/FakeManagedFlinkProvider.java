@@ -303,7 +303,7 @@ public class FakeManagedFlinkProvider implements ManagedFlinkProvider {
                     .build());
         return ManagedSnapshotCreateResult.builder()
             .jobId(request.getJobId())
-            .instanceId(request.getInstanceId())
+            .instanceId("fake-snapshot-operation-instance")
             .providerRequestId("fake-snapshot-request-id")
             .providerState("CREATING")
             .build();
@@ -429,6 +429,14 @@ public class FakeManagedFlinkProvider implements ManagedFlinkProvider {
                              String jobId,
                              String instanceId,
                              ManagedJobState state) {
+        setJobStatus(jobId, instanceId, state, null);
+    }
+
+    public void setJobStatus(
+                             String jobId,
+                             String instanceId,
+                             ManagedJobState state,
+                             String flinkUiUrl) {
         jobs.put(
             jobId,
             ManagedJobStatus.builder()
@@ -437,6 +445,7 @@ public class FakeManagedFlinkProvider implements ManagedFlinkProvider {
                 .state(state)
                 .providerState(state.name())
                 .providerRequestId("fake-job-lookup-request-id")
+                .flinkUiUrl(flinkUiUrl)
                 .build());
     }
 

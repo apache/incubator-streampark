@@ -35,8 +35,11 @@ import org.apache.streampark.console.core.managed.api.ManagedSnapshotState;
 import org.apache.streampark.console.core.managed.api.ProviderContext;
 import org.apache.streampark.console.core.managed.api.ProviderErrorCategory;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.volcengine.flink20250101.model.DeployRequestForStartApplicationInstanceInput;
+import com.volcengine.flink20250101.model.GetApplicationInstanceResponse;
+import com.volcengine.flink20250101.model.RecordForListApplicationInstanceOutput;
 import com.volcengine.flink20250101.model.RecordForListGWSApplicationOutput;
 import com.volcengine.flink20250101.model.RestartGWSApplicationRequest;
 import com.volcengine.flink20250101.model.SavepointInfoForListGWSSavepointOutput;
@@ -44,12 +47,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -102,6 +108,42 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
                             + "\"ResourcePoolName\":\"Pool One\","
                             + "\"Resource\":{\"CapacityCU\":3000,\"UsedCU\":12.5}}]}}",
                         "request-pool"));
+        when(client.post(
+            any(),
+            eq("ListGWSDirectory"),
+            eq("2021-06-01"),
+            anyMap(),
+            any()))
+                .thenReturn(
+                    response(
+                        "{\"Result\":{\"DirectoryTree\":[{"
+                            + "\"DirectoryId\":\"2082077328433315800\","
+                            + "\"DirectoryName\":\"team\","
+                            + "\"ChildDirectoryDtoList\":[{"
+                            + "\"DirectoryId\":\"2082077328433315841\","
+                            + "\"DirectoryName\":\"StreamPark\"}]}]}}",
+                        "request-directory"));
+    }
+
+    @Test
+    void shouldListDraftDirectoriesByDisplayName() {
+        assertThat(provider.listDraftDirectories(validContext(), "project-1", "stream"))
+            .singleElement()
+            .satisfies(
+                directory -> {
+                    assertThat(directory.getId()).isEqualTo("2082077328433315841");
+                    assertThat(directory.getName()).isEqualTo("StreamPark");
+                    assertThat(directory.getPath()).isEqualTo("/team/StreamPark");
+                    assertThat(directory.getParentId()).isEqualTo("2082077328433315800");
+                });
+
+        verify(client)
+            .post(
+                eq(validContext()),
+                eq("ListGWSDirectory"),
+                eq("2021-06-01"),
+                argThat(parameters -> "project-1".equals(parameters.get("ProjectId"))),
+                eq(Collections.emptyMap()));
     }
 
     @Override
@@ -251,6 +293,161 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
     }
 
     @Test
+    void shouldPreserveProviderDraftFieldsAndFlattenDynamicOptions() throws Exception {
+        String providerDraft =
+            "{"
+                + "\"Id\":\"draft-1\","
+                + "\"ProjectId\":\"project-1\","
+                + "\"AccountId\":\"account-1\","
+                + "\"UserId\":\"user-1\","
+                + "\"Platform\":\"StreamX\","
+                + "\"JobId\":\"job-uuid-1\","
+                + "\"State\":\"CREATED\","
+                + "\"ResourceVersion\":\"0\","
+                + "\"CreateTime\":\"2026-08-04 18:55:11\""
+                + "}";
+        String runtimeConfig =
+            "{"
+                + "\"resource\":{"
+                + "\"parallelism\":2,"
+                + "\"taskManagerCpu\":1,"
+                + "\"taskManagerMemoryGiB\":4,"
+                + "\"taskManagerSlots\":2,"
+                + "\"jobManagerCpu\":1,"
+                + "\"jobManagerMemoryGiB\":4},"
+                + "\"checkpoint\":{"
+                + "\"enabled\":true,"
+                + "\"intervalMs\":300000,"
+                + "\"timeoutMs\":600000,"
+                + "\"backend\":\"rocksdb\"},"
+                + "\"restartStrategy\":{"
+                + "\"type\":\"exponential-delay\","
+                + "\"parameters\":{"
+                + "\"restart-strategy.exponential-delay.initial-backoff\":\"1s\"}},"
+                + "\"retryOnFailure\":true,"
+                + "\"retryIntervalMin\":1,"
+                + "\"retryMaxCount\":3,"
+                + "\"customProperties\":{\"custom.runtime\":\"runtime\"}"
+                + "}";
+
+        JsonNode body =
+            provider.updateRequestBody(
+                objectMapper.readTree(providerDraft),
+                ManagedDraftRequest.builder()
+                    .projectId("project-1")
+                    .jobName("updated-name")
+                    .jobType("STREAMING_SQL")
+                    .engineVersion("1.17")
+                    .sqlText("SELECT 1")
+                    .optionsJson(runtimeConfig)
+                    .dynamicOptionsJson(
+                        "{\"custom.runtime\":\"release\",\"paimon.connector.version\":\"1.1\"}")
+                    .dependencyJson("[]")
+                    .build());
+
+        assertThat(body.path("AccountId").asText()).isEqualTo("account-1");
+        assertThat(body.path("UserId").asText()).isEqualTo("user-1");
+        assertThat(body.path("Platform").asText()).isEqualTo("StreamX");
+        assertThat(body.path("JobId").asText()).isEqualTo("job-uuid-1");
+        assertThat(body.path("ResourceVersion").asText()).isEqualTo("0");
+        assertThat(body.path("Options").asText()).isEqualTo("{}");
+        assertThat(body.path("JobName").asText()).isEqualTo("updated-name");
+        assertThat(body.path("SqlText").asText()).isEqualTo("SELECT 1");
+        assertThat(body.path("Dependency").asText()).isEqualTo("[]");
+
+        JsonNode dynamicOptions = objectMapper.readTree(body.path("DynamicOptions").asText());
+        assertThat(dynamicOptions.path("parallelism.default").asText()).isEqualTo("2");
+        assertThat(dynamicOptions.path("jobmanager.memory.process.size").asText())
+            .isEqualTo("4096mb");
+        assertThat(dynamicOptions.path("taskmanager.memory.process.size").asText())
+            .isEqualTo("4096mb");
+        assertThat(dynamicOptions.path("execution.checkpointing.interval").asText())
+            .isEqualTo("300s");
+        assertThat(dynamicOptions.path("execution.checkpointing.timeout").asText())
+            .isEqualTo("600s");
+        assertThat(dynamicOptions.path("restart-strategy").asText())
+            .isEqualTo("exponential-delay");
+        assertThat(dynamicOptions.path("restart.attempt.enable").asText()).isEqualTo("true");
+        assertThat(dynamicOptions.path("restart.attempt.interval.min").asText()).isEqualTo("1");
+        assertThat(dynamicOptions.path("restart.attempt.max.count").asText()).isEqualTo("3");
+        assertThat(dynamicOptions.path("custom.runtime").asText()).isEqualTo("release");
+        assertThat(dynamicOptions.path("paimon.connector.version").asText()).isEqualTo("1.1");
+    }
+
+    @Test
+    void shouldGetExistingDraftWithLegacyPostProtocolBeforeUpdate() throws Exception {
+        when(client.postOnce(
+            any(),
+            eq("GetGWSApplicationDraft"),
+            eq("2021-06-01"),
+            anyMap(),
+            any()))
+                .thenReturn(
+                    response(
+                        "{\"Result\":{"
+                            + "\"Id\":\"draft-1\","
+                            + "\"AccountId\":\"account-1\","
+                            + "\"UserId\":\"user-1\","
+                            + "\"Platform\":\"StreamX\","
+                            + "\"JobId\":\"job-uuid-1\","
+                            + "\"State\":\"CREATED\","
+                            + "\"ResourceVersion\":\"0\","
+                            + "\"CreateTime\":\"2026-08-04 18:55:11\"}}",
+                        "request-get-draft"));
+        when(client.postOnce(
+            any(),
+            eq("UpdateGWSApplicationDraft"),
+            eq("2021-06-01"),
+            anyMap(),
+            any()))
+                .thenReturn(response("{\"Result\":{\"Success\":true}}", "request-update"));
+
+        provider.upsertDraft(
+            validContext(),
+            ManagedDraftRequest.builder()
+                .existingDraftId("draft-1")
+                .projectId("project-1")
+                .directoryId(1L)
+                .jobName("job-1")
+                .jobType("STREAMING_SQL")
+                .engineVersion("1.17")
+                .sqlText("SELECT 1")
+                .optionsJson("{}")
+                .dynamicOptionsJson("{}")
+                .dependencyJson("[]")
+                .definitionHash("definition-hash")
+                .build());
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, String>> query = ArgumentCaptor.forClass(Map.class);
+        ArgumentCaptor<Object> body = ArgumentCaptor.forClass(Object.class);
+        verify(client)
+            .postOnce(
+                any(),
+                eq("GetGWSApplicationDraft"),
+                eq("2021-06-01"),
+                query.capture(),
+                body.capture());
+        assertThat(query.getValue())
+            .hasSize(1)
+            .containsEntry("ProjectId", "project-1");
+        assertThat(body.getValue()).isEqualTo(Map.of("Id", "draft-1"));
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, String>> updateQuery = ArgumentCaptor.forClass(Map.class);
+        verify(client)
+            .postOnce(
+                any(),
+                eq("UpdateGWSApplicationDraft"),
+                eq("2021-06-01"),
+                updateQuery.capture(),
+                any());
+        assertThat(updateQuery.getValue())
+            .hasSize(1)
+            .containsEntry("ProjectId", "project-1");
+    }
+
+    @Test
     void shouldMapStartRestoreStrategiesToExactSdkValues() {
         assertThat(
             VolcengineManagedFlinkProvider.startRequest(
@@ -378,6 +575,41 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
     }
 
     @Test
+    void shouldSelectRunningInstanceWhenRestartHasCreatedANewInstance() {
+        assertThat(
+            VolcengineManagedFlinkProvider.selectLatestInstanceId(
+                List.of(
+                    new RecordForListApplicationInstanceOutput()
+                        .id("new-instance")
+                        .state("RUNNING"),
+                    new RecordForListApplicationInstanceOutput()
+                        .id("old-instance")
+                        .state("STOPPED")),
+                "RUNNING"))
+                    .isEqualTo("new-instance");
+    }
+
+    @Test
+    void shouldBuildApplicationConsoleUrlFromInstanceMetadata() {
+        GetApplicationInstanceResponse instance =
+            new GetApplicationInstanceResponse()
+                .id("2083124027591327745")
+                .applicationId("s-2083124027591327745")
+                .deploymentId("gts-job-uuid");
+
+        assertThat(
+            VolcengineManagedFlinkProvider.consoleUrl(
+                validContext(), "2083106196409372673", instance))
+                    .isEqualTo(
+                        "https://console.volcengine.com/flink/"
+                            + "region:flink+cn-beijing/project/project-1/job/manage/"
+                            + "2083106196409372673/detail?"
+                            + "ClusterId=s-2083124027591327745"
+                            + "&GtsJobUuid=gts-job-uuid"
+                            + "&AppId=2083106196409372673");
+    }
+
+    @Test
     void shouldMapRestartRestoreStrategiesToExactSdkEnum() {
         assertThat(
             VolcengineManagedFlinkProvider.restartRequest(
@@ -442,6 +674,8 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
         assertThat(VolcengineManagedFlinkProvider.snapshotState("COMPLETED"))
             .isEqualTo(ManagedSnapshotState.COMPLETED);
         assertThat(VolcengineManagedFlinkProvider.snapshotState("FAILED"))
+            .isEqualTo(ManagedSnapshotState.FAILED);
+        assertThat(VolcengineManagedFlinkProvider.snapshotState("FAIL"))
             .isEqualTo(ManagedSnapshotState.FAILED);
         assertThat(VolcengineManagedFlinkProvider.snapshotState("future-state"))
             .isEqualTo(ManagedSnapshotState.OTHER);

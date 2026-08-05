@@ -28,6 +28,7 @@ import org.apache.streampark.console.core.managed.model.ManagedFlinkSnapshotOper
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -41,6 +42,7 @@ import java.util.Set;
 /** Reconciles an accepted snapshot mutation through provider reads only. */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ManagedFlinkSnapshotReconcileService {
 
     private final ManagedFlinkApplicationService applicationService;
@@ -89,14 +91,14 @@ public class ManagedFlinkSnapshotReconcileService {
             ManagedSnapshot matched = match(request, snapshots);
             if (matched == null
                 || matched.getState() == null
-                || matched.getState() == ManagedSnapshotState.CREATING
                 || matched.getState() == ManagedSnapshotState.OTHER) {
                 operationService.markAwaitingReconcile(
                     operationId,
                     operation.getProviderRequestId(),
                     operation.getProviderOperationId(),
                     operation.getResultJson());
-            } else if (matched.getState() == ManagedSnapshotState.COMPLETED) {
+            } else if (matched.getState() == ManagedSnapshotState.CREATING
+                || matched.getState() == ManagedSnapshotState.COMPLETED) {
                 operationService.markSucceeded(
                     operationId,
                     operation.getProviderRequestId(),
@@ -118,6 +120,10 @@ public class ManagedFlinkSnapshotReconcileService {
                 exception.getCategory().name() + ":SnapshotLookupFailed",
                 "Managed Flink snapshot reconciliation is temporarily unavailable.");
         } catch (Exception exception) {
+            log.warn(
+                "Managed Flink snapshot operation {} reconciliation failed.",
+                operationId,
+                exception);
             operationService.markFailed(
                 operationId,
                 true,
@@ -144,19 +150,30 @@ public class ManagedFlinkSnapshotReconcileService {
             request.getBaselineSnapshotIds() == null
                 ? Collections.emptySet()
                 : new HashSet<>(request.getBaselineSnapshotIds());
-        return snapshots.stream()
-            .filter(
-                value -> value != null
-                    && value.getSnapshotId() != null
-                    && !baseline.contains(value.getSnapshotId())
-                    && request
-                        .getProviderDescription()
-                        .equals(value.getDescription()))
-            .max(
-                Comparator.comparing(
-                    value -> defaultValue(
-                        value.getCompletionTime(),
-                        defaultValue(value.getTriggerTime(), ""))))
+        Comparator<ManagedSnapshot> newestFirst =
+            Comparator.comparing(
+                value -> defaultValue(
+                    value.getCompletionTime(),
+                    defaultValue(value.getTriggerTime(), "")));
+        List<ManagedSnapshot> candidates =
+            snapshots.stream()
+                .filter(
+                    value -> value != null
+                        && value.getSnapshotId() != null
+                        && !baseline.contains(value.getSnapshotId()))
+                .collect(java.util.stream.Collectors.toList());
+        ManagedSnapshot descriptionMatch =
+            candidates.stream()
+                .filter(
+                    value -> request.getProviderDescription() != null
+                        && request.getProviderDescription().equals(value.getDescription()))
+                .max(newestFirst)
+                .orElse(null);
+        if (descriptionMatch != null) {
+            return descriptionMatch;
+        }
+        return candidates.stream()
+            .max(newestFirst)
             .orElse(null);
     }
 

@@ -31,6 +31,7 @@ import org.apache.streampark.console.core.managed.api.ManagedFlinkProviderType;
 import org.apache.streampark.console.core.managed.api.ManagedJobRestoreMode;
 import org.apache.streampark.console.core.managed.api.ManagedJobState;
 import org.apache.streampark.console.core.managed.api.ManagedSnapshot;
+import org.apache.streampark.console.core.managed.api.ManagedSnapshotLookupRequest;
 import org.apache.streampark.console.core.managed.api.ManagedSnapshotState;
 import org.apache.streampark.console.core.managed.api.ProviderErrorCategory;
 import org.apache.streampark.console.core.managed.model.CloudAccountCreateRequest;
@@ -546,11 +547,16 @@ class ManagedFlinkReleaseServiceTest extends SpringUnitTestBase {
         String jobId = managedJobId(appId);
 
         fakeProvider.setJobStatus(
-            jobId, "fake-instance-1", ManagedJobState.RUNNING);
+            jobId,
+            "fake-instance-1",
+            ManagedJobState.RUNNING,
+            "https://flink.example.test/overview");
         forceSyncDue(appId);
         assertThat(jobSyncService.synchronizeDue()).isEqualTo(1);
         assertThat(applicationMapper.selectById(appId).getState())
             .isEqualTo(FlinkAppStateEnum.RUNNING.getValue());
+        assertThat(applicationMapper.selectById(appId).getJobManagerUrl())
+            .isEqualTo("https://flink.example.test/overview");
         assertThat(applicationMapper.selectById(appId).getOptionState())
             .isEqualTo(OptionStateEnum.NONE.getValue());
         assertThat(managedApplicationMapper.selectById(appId).getSyncState())
@@ -857,7 +863,7 @@ class ManagedFlinkReleaseServiceTest extends SpringUnitTestBase {
         snapshotExecutor.execute(accepted.getOperationId());
         assertThat(
             operationService.getRequired(appId, accepted.getOperationId()).getState())
-                .isEqualTo("UNKNOWN");
+                .isEqualTo("SUCCEEDED");
         assertThat(fakeProvider.getSnapshotCreateCount()).isEqualTo(1);
 
         ManagedFlinkOperationView replay = snapshotService.create(request);
@@ -885,6 +891,52 @@ class ManagedFlinkReleaseServiceTest extends SpringUnitTestBase {
         assertThatThrownBy(() -> snapshotService.create(request))
             .hasMessageContaining("idempotency key");
         assertThat(fakeProvider.getSnapshotCreateCount()).isEqualTo(1);
+    }
+
+    @Test
+    void shouldReleaseWriteLockOnceCreatingSnapshotIsFoundDuringReconciliation() {
+        Long appId = createApplication("snapshot-creating-reconcile");
+        releaseAndExecute(appId);
+        ManagedFlinkOperationView start =
+            lifecycleService.start(
+                lifecycleRequest(
+                    appId, "snapshot-creating-reconcile-start", ManagedJobRestoreMode.FRESH));
+        lifecycleExecutor.execute(start.getOperationId());
+        setApplicationState(appId, FlinkAppStateEnum.RUNNING);
+
+        ManagedFlinkSnapshotCreateRequest request = new ManagedFlinkSnapshotCreateRequest();
+        request.setTeamId(TEAM_ID);
+        request.setAppId(appId);
+        request.setIdempotencyKey("snapshot-creating-reconcile-once");
+        request.setDescription("creating snapshot");
+        ManagedFlinkOperationView accepted = snapshotService.create(request);
+        snapshotExecutor.execute(accepted.getOperationId());
+
+        String jobId = managedJobId(appId);
+        ManagedSnapshot created = fakeProvider.listSnapshots(null,
+            ManagedSnapshotLookupRequest.builder().jobId(jobId).build()).get(0);
+        fakeProvider.putSnapshot(
+            jobId,
+            ManagedSnapshot.builder()
+                .snapshotId(created.getSnapshotId())
+                .instanceId(created.getInstanceId())
+                .snapshotType(created.getSnapshotType())
+                .state(ManagedSnapshotState.CREATING)
+                .providerState("CREATING")
+                .description(null)
+                .build());
+
+        ManagedFlinkOperationView reconciled =
+            operationReconcileService.reconcile(TEAM_ID, appId, accepted.getOperationId());
+        assertThat(reconciled.getState()).isEqualTo("SUCCEEDED");
+
+        ManagedFlinkOperationView next =
+            lifecycleService.restart(
+                lifecycleRequest(
+                    appId,
+                    "snapshot-creating-reconcile-restart",
+                    ManagedJobRestoreMode.LATEST_STATE));
+        assertThat(next.getState()).isEqualTo("ACCEPTED");
     }
 
     private ManagedFlinkOperation releaseAndExecute(Long appId) {

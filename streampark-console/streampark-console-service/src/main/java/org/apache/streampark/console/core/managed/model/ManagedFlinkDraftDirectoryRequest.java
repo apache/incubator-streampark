@@ -15,27 +15,20 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.managed.api;
+package org.apache.streampark.console.core.managed.model;
 
-import lombok.Builder;
-import lombok.Value;
+import lombok.Getter;
+import lombok.Setter;
 
-/** Provider-neutral status returned by a stable managed Flink job lookup. */
-@Value
-@Builder
-public class ManagedJobStatus {
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
-    String jobId;
+/** Queries provider draft directories under one cloud project. */
+@Getter
+@Setter
+public class ManagedFlinkDraftDirectoryRequest extends ManagedFlinkMetadataRequest {
 
-    String instanceId;
-
-    ManagedJobState state;
-
-    String providerState;
-
-    String providerRequestId;
-
-    String flinkUiUrl;
-
-    String consoleUrl;
+    @NotBlank
+    @Size(max = 128)
+    private String projectId;
 }

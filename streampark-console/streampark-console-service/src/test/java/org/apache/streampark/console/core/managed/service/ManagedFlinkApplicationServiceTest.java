@@ -48,6 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -151,6 +152,44 @@ class ManagedFlinkApplicationServiceTest extends SpringUnitTestBase {
     }
 
     @Test
+    void shouldCopyManagedConfigurationWithoutCloudIdentity() {
+        Long environmentId = createEnvironment("managed-copy-env", true);
+        Long sourceAppId =
+            applicationService.create(
+                request(environmentId, "managed-copy-source", "SELECT 1"));
+        ManagedFlinkApplication sourceManaged =
+            managedApplicationMapper.selectById(sourceAppId);
+        sourceManaged.setExternalDraftId("draft-1");
+        sourceManaged.setExternalApplicationId("job-1");
+        sourceManaged.setExternalInstanceId("instance-1");
+        sourceManaged.setDeployedDefinitionHash(sourceManaged.getLocalDefinitionHash());
+        assertThat(managedApplicationMapper.updateById(sourceManaged)).isEqualTo(1);
+
+        FlinkApplication target = applicationMapper.selectById(sourceAppId);
+        target.setId(null);
+        target.setJobName("managed-copy-target");
+        target.setJobId(null);
+        target.setState(FlinkAppStateEnum.ADDED.getValue());
+        target.setCreateTime(new Date());
+        target.setModifyTime(new Date());
+        assertThat(applicationMapper.insert(target)).isEqualTo(1);
+
+        applicationService.copyLocalConfiguration(sourceAppId, target.getId());
+
+        ManagedFlinkApplication copied =
+            managedApplicationMapper.selectById(target.getId());
+        assertThat(copied.getManagedEnvId()).isEqualTo(environmentId);
+        assertThat(copied.getLocalDefinitionHash())
+            .hasSize(64)
+            .isNotEqualTo(sourceManaged.getLocalDefinitionHash());
+        assertThat(copied.getExternalDraftId()).isNull();
+        assertThat(copied.getExternalApplicationId()).isNull();
+        assertThat(copied.getExternalInstanceId()).isNull();
+        assertThat(copied.getDeployedDefinitionHash()).isNull();
+        assertThat(copied.getVersion()).isZero();
+    }
+
+    @Test
     void shouldAggregateManagedStatisticsByTeam() {
         Long environmentId = createEnvironment("managed-statistics-env", true);
         Long appId =
@@ -176,6 +215,36 @@ class ManagedFlinkApplicationServiceTest extends SpringUnitTestBase {
         assertThat(healthy.getHealthy()).isEqualTo(1);
         assertThat(healthy.getPending()).isZero();
         assertThat(applicationService.statistics(OTHER_TEAM_ID).getTotal()).isZero();
+    }
+
+    @Test
+    void shouldDeleteOnlyLocalManagedApplicationRecords() {
+        Long environmentId = createEnvironment("managed-delete-env", true);
+        Long appId =
+            applicationService.create(
+                request(environmentId, "managed-delete-app", "SELECT 1"));
+
+        applicationService.deleteLocal(appId);
+
+        assertThat(applicationMapper.selectById(appId)).isNull();
+        assertThat(managedApplicationMapper.selectById(appId)).isNull();
+    }
+
+    @Test
+    void shouldRejectLocalDeletionWhileManagedApplicationIsRunning() {
+        Long environmentId = createEnvironment("managed-delete-running-env", true);
+        Long appId =
+            applicationService.create(
+                request(environmentId, "managed-delete-running-app", "SELECT 1"));
+        FlinkApplication application = applicationMapper.selectById(appId);
+        application.setState(FlinkAppStateEnum.RUNNING.getValue());
+        assertThat(applicationMapper.updateById(application)).isEqualTo(1);
+
+        assertThatExceptionOfType(ApiAlertException.class)
+            .isThrownBy(() -> applicationService.deleteLocal(appId))
+            .withMessageContaining("must be stopped");
+        assertThat(applicationMapper.selectById(appId)).isNotNull();
+        assertThat(managedApplicationMapper.selectById(appId)).isNotNull();
     }
 
     @Test

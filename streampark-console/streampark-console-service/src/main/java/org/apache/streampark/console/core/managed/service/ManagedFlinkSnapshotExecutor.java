@@ -88,11 +88,10 @@ class ManagedFlinkSnapshotExecutor {
                             .description(snapshot.getProviderDescription())
                             .build());
             if (result == null
-                || !snapshot.getJobId().equals(result.getJobId())
-                || !snapshot.getInstanceId().equals(result.getInstanceId())) {
+                || !snapshot.getJobId().equals(result.getJobId())) {
                 throw new IllegalStateException("Managed Flink snapshot receipt is invalid.");
             }
-            operationService.markAwaitingReconcile(
+            operationService.markSucceeded(
                 operationId,
                 result.getProviderRequestId(),
                 null,
@@ -119,7 +118,8 @@ class ManagedFlinkSnapshotExecutor {
                     : "Managed Flink snapshot operation could not be prepared.");
             log.warn(
                 "Managed Flink snapshot operation {} failed in local orchestration.",
-                operationId);
+                operationId,
+                exception);
         }
     }
 

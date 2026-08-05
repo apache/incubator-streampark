@@ -18,8 +18,10 @@
 package org.apache.streampark.console.core.managed.service;
 
 import org.apache.streampark.console.core.managed.api.CloudProject;
+import org.apache.streampark.console.core.managed.api.ManagedDraftDirectory;
 import org.apache.streampark.console.core.managed.api.ManagedFlinkCapability;
 import org.apache.streampark.console.core.managed.api.ManagedResourcePool;
+import org.apache.streampark.console.core.managed.model.ManagedFlinkDraftDirectoryRequest;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkMetadataRequest;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkResourcePoolRequest;
 
@@ -33,4 +35,6 @@ public interface ManagedFlinkMetadataService {
     List<CloudProject> projects(ManagedFlinkMetadataRequest request);
 
     List<ManagedResourcePool> resourcePools(ManagedFlinkResourcePoolRequest request);
+
+    List<ManagedDraftDirectory> draftDirectories(ManagedFlinkDraftDirectoryRequest request);
 }

@@ -41,6 +41,10 @@ public class ManagedFlinkRuntimeConfig {
 
     private Boolean retryOnFailure = false;
 
+    private Integer retryIntervalMin;
+
+    private Integer retryMaxCount;
+
     private Map<String, String> customProperties = new LinkedHashMap<>();
 
     @Getter

@@ -121,6 +121,7 @@ public class ManagedFlinkJobSyncService {
                         .projectId(target.environment.getProjectId())
                         .jobName(target.application.getJobName())
                         .jobId(target.managed.getExternalApplicationId())
+                        .instanceId(target.managed.getExternalInstanceId())
                         .build());
             if (status == null) {
                 recordNotFound(target.appId);
@@ -209,6 +210,10 @@ public class ManagedFlinkJobSyncService {
                                 .set(
                                     ManagedFlinkApplication::getProviderRawState,
                                     safeProviderState(status))
+                                .set(
+                                    StringUtils.isNotBlank(status.getConsoleUrl()),
+                                    ManagedFlinkApplication::getConsoleUrl,
+                                    status.getConsoleUrl())
                                 .set(ManagedFlinkApplication::getSyncState, SYNC_HEALTHY)
                                 .set(ManagedFlinkApplication::getLastSyncTime, now)
                                 .set(ManagedFlinkApplication::getConsecutiveSyncFailures, 0)

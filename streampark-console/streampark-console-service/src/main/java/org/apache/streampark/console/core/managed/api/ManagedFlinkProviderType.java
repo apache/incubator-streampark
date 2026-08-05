@@ -19,5 +19,27 @@ package org.apache.streampark.console.core.managed.api;
 
 /** Supported managed Flink provider types. */
 public enum ManagedFlinkProviderType {
-    VOLCENGINE
+
+    VOLCENGINE("https://console.volcengine.com/flink");
+
+    private final String consoleUrl;
+
+    ManagedFlinkProviderType(String consoleUrl) {
+        this.consoleUrl = consoleUrl;
+    }
+
+    public String getConsoleUrl() {
+        return consoleUrl;
+    }
+
+    public static String consoleUrl(String providerType) {
+        if (providerType == null) {
+            return null;
+        }
+        try {
+            return valueOf(providerType).getConsoleUrl();
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
+    }
 }

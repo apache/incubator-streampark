@@ -41,6 +41,7 @@
   import { useDrawer } from '/@/components/Drawer';
   import { LinkBadge } from '/@/components/LinkBadge';
   import ManagedFlinkDetailPanel from './components/ManagedFlink/DetailPanel.vue';
+  import { fetchManagedFlinkUiUrl } from '/@/api/flink/managedFlink';
 
   defineOptions({
     name: 'ApplicationDetail',
@@ -51,6 +52,7 @@
   const { t } = useI18n();
 
   const appNotRunning = ref(true);
+  const flinkUiLoading = ref(false);
 
   const yarn = ref('');
   const externalLinks = ref<ExternalLink[]>([]);
@@ -127,6 +129,25 @@
   function handleManagedConsoleView() {
     if (app.managedConsoleUrl) {
       window.open(app.managedConsoleUrl, '_blank', 'noopener,noreferrer');
+    }
+  }
+
+  async function handleManagedFlinkView() {
+    const popup = window.open('about:blank', '_blank');
+    if (popup) popup.opener = null;
+    flinkUiLoading.value = true;
+    try {
+      const url = await fetchManagedFlinkUiUrl({
+        teamId: String(app.teamId),
+        appId: String(app.id),
+      });
+      if (popup) popup.location.href = url;
+      else window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      popup?.close();
+      throw error;
+    } finally {
+      flinkUiLoading.value = false;
     }
   }
 
@@ -224,7 +245,18 @@
           {{ t('flink.app.detail.flinkWebUi') }}
         </a-button>
         <a-button
-          v-else
+          v-if="isManaged"
+          type="primary"
+          @click="handleManagedFlinkView"
+          :disabled="appNotRunning"
+          :loading="flinkUiLoading"
+          class="float-right -mt-8px mr-20px"
+        >
+          <Icon icon="ant-design:dashboard-outlined" />
+          {{ t('flink.app.detail.flinkWebUi') }}
+        </a-button>
+        <a-button
+          v-if="isManaged"
           type="primary"
           @click="handleManagedConsoleView"
           :disabled="!app.managedConsoleUrl"

@@ -34,6 +34,7 @@
     fetchManagedEnvironment,
     fetchManagedOperations,
     fetchManagedSnapshots,
+    fetchReconcileManagedOperation,
   } from '/@/api/flink/managedFlink';
   import type {
     ManagedFlinkApplication,
@@ -60,6 +61,7 @@
   const snapshots = ref<ManagedFlinkSnapshot[]>([]);
   const operations = ref<ManagedFlinkOperation[]>([]);
   const loading = ref(false);
+  const reconcilingOperationId = ref<string>();
 
   const identity = computed(() => {
     if (!props.app.id || !props.app.teamId) {
@@ -156,6 +158,12 @@
       dataIndex: 'errorMessage',
       ellipsis: true,
     },
+    {
+      title: t('flink.app.managed.operationAction'),
+      dataIndex: 'action',
+      width: 190,
+      fixed: 'right',
+    },
   ]);
 
   watch(identity, (value) => value && load(), { immediate: true });
@@ -224,6 +232,26 @@
 
   function formatTime(value?: string) {
     return value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '—';
+  }
+
+  async function handleReconcile(record: ManagedFlinkOperation) {
+    const currentIdentity = unref(identity);
+    if (!currentIdentity || record.state !== 'UNKNOWN') {
+      return;
+    }
+    reconcilingOperationId.value = String(record.operationId);
+    try {
+      const reconciled = await fetchReconcileManagedOperation({
+        ...currentIdentity,
+        operationId: String(record.operationId),
+      });
+      operations.value = operations.value.map((operation) =>
+        operation.operationId === reconciled.operationId ? reconciled : operation,
+      );
+      await load();
+    } finally {
+      reconcilingOperationId.value = undefined;
+    }
   }
 </script>
 
@@ -393,6 +421,18 @@
               </template>
               <template v-else-if="column.dataIndex === 'errorMessage'">
                 {{ record.errorMessage || record.errorCode || '—' }}
+              </template>
+              <template v-else-if="column.dataIndex === 'action'">
+                <Button
+                  v-if="record.state === 'UNKNOWN'"
+                  type="link"
+                  size="small"
+                  :loading="reconcilingOperationId === String(record.operationId)"
+                  @click="handleReconcile(record)"
+                >
+                  {{ t('flink.app.managed.reconcileOperation') }}
+                </Button>
+                <span v-else>—</span>
               </template>
             </template>
           </Table>

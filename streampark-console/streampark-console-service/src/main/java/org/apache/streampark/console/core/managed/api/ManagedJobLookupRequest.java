@@ -30,4 +30,6 @@ public class ManagedJobLookupRequest {
     String jobName;
 
     String jobId;
+
+    String instanceId;
 }

@@ -21,6 +21,7 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkApplicationIdRequest;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkApplicationSaveRequest;
+import org.apache.streampark.console.core.managed.model.ManagedFlinkDraftDirectoryRequest;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkEnvironmentCreateRequest;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkEnvironmentIdRequest;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkEnvironmentListRequest;
@@ -88,6 +89,12 @@ public class ManagedFlinkMetadataController {
         return RestResponse.success(metadataService.resourcePools(request));
     }
 
+    @PostMapping("draft-directories")
+    @Permission(team = "#request.teamId")
+    public RestResponse draftDirectories(@Valid ManagedFlinkDraftDirectoryRequest request) {
+        return RestResponse.success(metadataService.draftDirectories(request));
+    }
+
     @PostMapping("environment/list")
     @Permission(team = "#request.teamId")
     public RestResponse listEnvironments(
@@ -144,6 +151,15 @@ public class ManagedFlinkMetadataController {
             applicationService.get(request.getTeamId(), request.getAppId()));
     }
 
+    @PostMapping("application/flink-ui")
+    @RequiresPermissions("app:detail")
+    @Permission(app = "#request.appId", team = "#request.teamId")
+    public RestResponse getApplicationFlinkUi(
+                                              @Valid ManagedFlinkApplicationIdRequest request) {
+        return RestResponse.success(
+            applicationService.getFlinkUiUrl(request.getTeamId(), request.getAppId()));
+    }
+
     @PostMapping("application/statistics")
     @RequiresPermissions("app:view")
     @Permission(team = "#request.teamId")
@@ -160,7 +176,7 @@ public class ManagedFlinkMetadataController {
     }
 
     @PostMapping("application/update")
-    @RequiresPermissions("app:update")
+    @RequiresPermissions("app:release")
     @Permission(app = "#request.appId", team = "#request.teamId")
     public RestResponse updateApplication(
                                           @RequestBody @Valid ManagedFlinkApplicationSaveRequest request) {

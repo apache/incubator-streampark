@@ -41,6 +41,8 @@ import org.apache.streampark.console.core.enums.ChangeTypeEnum;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
+import org.apache.streampark.console.core.managed.api.ManagedFlinkProviderType;
+import org.apache.streampark.console.core.managed.service.ManagedFlinkApplicationService;
 import org.apache.streampark.console.core.managed.service.ManagedFlinkRoutingGuard;
 import org.apache.streampark.console.core.mapper.FlinkApplicationMapper;
 import org.apache.streampark.console.core.mapper.ManagedFlinkApplicationMapper;
@@ -153,6 +155,9 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
     @Autowired
     private ManagedFlinkApplicationMapper managedFlinkApplicationMapper;
 
+    @Autowired
+    private ManagedFlinkApplicationService managedFlinkApplicationService;
+
     @PostConstruct
     public void resetOptionState() {
         this.lambdaUpdate().set(FlinkApplication::getOptionState, OptionStateEnum.NONE.getValue()).update();
@@ -206,6 +211,10 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
     public Boolean remove(Long appId) {
 
         FlinkApplication application = getById(appId);
+        if (FlinkDeployMode.isManagedMode(application.getDeployModeEnum())) {
+            managedFlinkApplicationService.deleteLocal(appId);
+            return true;
+        }
         ManagedFlinkRoutingGuard.rejectLegacyRoute(application.getDeployModeEnum(), "application removal");
 
         // 1) remove flink sql
@@ -398,6 +407,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
     @SuppressWarnings("checkstyle:WhitespaceAround")
     @Override
     @SneakyThrows
+    @Transactional(rollbackFor = Exception.class)
     public Long copy(FlinkApplication appParam) {
         boolean existsByJobName = this.existsByJobName(appParam.getJobName());
         ApiAlertException.throwIfFalse(
@@ -476,6 +486,10 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
                 config.setVersion(1);
                 configService.save(config);
                 configService.setLatestOrEffective(true, config.getId(), newApp.getId());
+            }
+            if (FlinkDeployMode.isManagedMode(persist.getDeployModeEnum())) {
+                managedFlinkApplicationService.copyLocalConfiguration(
+                    persist.getId(), newApp.getId());
             }
             return newApp.getId();
         } else {
@@ -791,6 +805,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
             enrichManagedMetadata(
                 application, managedFlinkApplicationMapper.selectById(application.getId()));
         }
+        application.setAppControl(getAppControl(application));
 
         return application;
     }
@@ -808,7 +823,10 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         application.setManagedLastSyncTime(managed.getLastSyncTime());
         application.setManagedConsecutiveSyncFailures(managed.getConsecutiveSyncFailures());
         application.setManagedNextSyncTime(managed.getNextSyncTime());
-        application.setManagedConsoleUrl(managed.getConsoleUrl());
+        application.setManagedConsoleUrl(
+            StringUtils.defaultIfBlank(
+                managed.getConsoleUrl(),
+                ManagedFlinkProviderType.consoleUrl(managed.getProviderType())));
         application.setExternalApplicationId(managed.getExternalApplicationId());
         application.setExternalInstanceId(managed.getExternalInstanceId());
         application.setManagedLocalDefinitionHash(managed.getLocalDefinitionHash());

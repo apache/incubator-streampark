@@ -19,8 +19,10 @@ package org.apache.streampark.console.core.managed.service;
 
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.managed.api.CloudProject;
+import org.apache.streampark.console.core.managed.api.ManagedDraftDirectory;
 import org.apache.streampark.console.core.managed.api.ManagedFlinkCapability;
 import org.apache.streampark.console.core.managed.api.ManagedResourcePool;
+import org.apache.streampark.console.core.managed.model.ManagedFlinkDraftDirectoryRequest;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkMetadataRequest;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkResourcePoolRequest;
 
@@ -70,5 +72,22 @@ public class ManagedFlinkMetadataServiceImpl implements ManagedFlinkMetadataServ
             .getProvider()
             .listResourcePools(
                 session.getContext(), request.getProjectId(), request.getKeyword());
+    }
+
+    @Override
+    public List<ManagedDraftDirectory> draftDirectories(
+                                                        ManagedFlinkDraftDirectoryRequest request) {
+        ManagedFlinkProviderSession session =
+            contextService.resolve(
+                request.getTeamId(), request.getCloudAccountId(), request.getProjectId());
+        try {
+            return session
+                .getProvider()
+                .listDraftDirectories(
+                    session.getContext(), request.getProjectId(), request.getKeyword());
+        } catch (UnsupportedOperationException exception) {
+            throw new ApiAlertException(
+                "The managed Flink provider does not support draft directory discovery.");
+        }
     }
 }

@@ -25,6 +25,7 @@ import org.apache.streampark.console.core.managed.api.ManagedDeployRequest;
 import org.apache.streampark.console.core.managed.api.ManagedDeployment;
 import org.apache.streampark.console.core.managed.api.ManagedDeploymentLookupRequest;
 import org.apache.streampark.console.core.managed.api.ManagedDraft;
+import org.apache.streampark.console.core.managed.api.ManagedDraftDirectory;
 import org.apache.streampark.console.core.managed.api.ManagedDraftRequest;
 import org.apache.streampark.console.core.managed.api.ManagedFlinkCapability;
 import org.apache.streampark.console.core.managed.api.ManagedFlinkProvider;
@@ -49,6 +50,8 @@ import org.apache.streampark.console.core.managed.api.ProviderErrorCategory;
 import org.apache.streampark.console.core.managed.api.StagedArtifact;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.volcengine.ApiException;
 import com.volcengine.ApiResponse;
 import com.volcengine.flink20250101.model.AppForStartApplicationInstanceInput;
@@ -60,10 +63,15 @@ import com.volcengine.flink20250101.model.CreateGWSSavepointResponse;
 import com.volcengine.flink20250101.model.DeployGWSApplicationDraftRequest;
 import com.volcengine.flink20250101.model.DeployGWSApplicationDraftResponse;
 import com.volcengine.flink20250101.model.DeployRequestForStartApplicationInstanceInput;
+import com.volcengine.flink20250101.model.GetApplicationInstanceRequest;
+import com.volcengine.flink20250101.model.GetApplicationInstanceResponse;
+import com.volcengine.flink20250101.model.ListApplicationInstanceRequest;
+import com.volcengine.flink20250101.model.ListApplicationInstanceResponse;
 import com.volcengine.flink20250101.model.ListGWSApplicationRequest;
 import com.volcengine.flink20250101.model.ListGWSApplicationResponse;
 import com.volcengine.flink20250101.model.ListGWSSavepointRequest;
 import com.volcengine.flink20250101.model.ListGWSSavepointResponse;
+import com.volcengine.flink20250101.model.RecordForListApplicationInstanceOutput;
 import com.volcengine.flink20250101.model.RecordForListGWSApplicationOutput;
 import com.volcengine.flink20250101.model.RestartGWSApplicationRequest;
 import com.volcengine.flink20250101.model.RestartGWSApplicationResponse;
@@ -71,8 +79,6 @@ import com.volcengine.flink20250101.model.RestoreStrategyForStartApplicationInst
 import com.volcengine.flink20250101.model.SavepointInfoForListGWSSavepointOutput;
 import com.volcengine.flink20250101.model.StartApplicationInstanceRequest;
 import com.volcengine.flink20250101.model.StartApplicationInstanceResponse;
-import com.volcengine.flink20250101.model.UpdateGWSApplicationDraftRequest;
-import com.volcengine.flink20250101.model.UpdateGWSApplicationDraftResponse;
 import com.volcengine.model.ResponseMetadata;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,12 +109,18 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
     private static final String PROJECT_API_VERSION = "2021-06-01";
     private static final String RESOURCE_POOL_ACTION = "ListGMCSResourcePool";
     private static final String RESOURCE_POOL_API_VERSION = "2022-06-01";
+    private static final String DRAFT_DIRECTORY_ACTION = "ListGWSDirectory";
+    private static final String DRAFT_DIRECTORY_API_VERSION = "2021-06-01";
     private static final String FLINK_API_VERSION = "2025-01-01";
+    private static final String DRAFT_WRITE_API_VERSION = "2021-06-01";
+    private static final String DRAFT_GET_ACTION = "GetGWSApplicationDraft";
+    private static final String DRAFT_GET_API_VERSION = "2021-06-01";
     private static final String JOB_GET_ACTION = "GetGWSApplication";
     private static final String JOB_GET_API_VERSION = "2021-06-01";
 
     private final VolcengineOpenApiClient openApiClient;
     private final VolcengineFlinkProperties properties;
+    private final ObjectMapper objectMapper;
     private final VolcengineCredentialResolver credentialResolver;
     private final VolcengineSdkClientFactory sdkClientFactory;
 
@@ -116,10 +128,12 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
     public VolcengineManagedFlinkProvider(
                                           VolcengineOpenApiClient openApiClient,
                                           VolcengineFlinkProperties properties,
+                                          ObjectMapper objectMapper,
                                           VolcengineCredentialResolver credentialResolver,
                                           VolcengineSdkClientFactory sdkClientFactory) {
         this.openApiClient = openApiClient;
         this.properties = properties;
+        this.objectMapper = objectMapper;
         this.credentialResolver = credentialResolver;
         this.sdkClientFactory = sdkClientFactory;
     }
@@ -127,7 +141,7 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
     VolcengineManagedFlinkProvider(
                                    VolcengineOpenApiClient openApiClient,
                                    VolcengineFlinkProperties properties) {
-        this(openApiClient, properties, null, null);
+        this(openApiClient, properties, new ObjectMapper(), null, null);
     }
 
     @Override
@@ -239,6 +253,31 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
     }
 
     @Override
+    public List<ManagedDraftDirectory> listDraftDirectories(
+                                                            ProviderContext context,
+                                                            String projectId,
+                                                            String keyword) {
+        Map<String, String> parameters = new LinkedHashMap<>();
+        parameters.put("ProjectId", trimToEmpty(projectId));
+        VolcengineOpenApiResponse response =
+            openApiClient.post(
+                context,
+                DRAFT_DIRECTORY_ACTION,
+                DRAFT_DIRECTORY_API_VERSION,
+                parameters,
+                Collections.emptyMap());
+        String normalizedKeyword = trimToEmpty(keyword).toLowerCase(Locale.ROOT);
+        List<ManagedDraftDirectory> directories = new ArrayList<>();
+        Set<String> seen = new LinkedHashSet<>();
+        JsonNode items = draftDirectoryItems(response.getRoot());
+        if (items != null) {
+            appendDraftDirectories(
+                items, null, null, normalizedKeyword, directories, seen);
+        }
+        return Collections.unmodifiableList(directories);
+    }
+
+    @Override
     public StagedArtifact stageArtifact(
                                         ProviderContext context, ArtifactStageRequest request) {
         throw artifactStagingUnavailable();
@@ -253,46 +292,46 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
     @Override
     public ManagedDraft upsertDraft(ProviderContext context, ManagedDraftRequest request) {
         requireDraftRequest(request);
-        String action = "CreateGWSApplicationDraft";
-        try (
-            VolcengineCredentials credentials = credentialResolver.resolve(context);
-            VolcengineSdkClientFactory.Session session =
-                sdkClientFactory.open(context, credentials)) {
-            String draftId = request.getExistingDraftId();
-            String providerRequestId = null;
+        String draftId = request.getExistingDraftId();
+        String createRequestId = null;
+        JsonNode providerDraft;
+        if (isBlank(draftId)) {
+            VolcengineOpenApiResponse created =
+                openApiClient.postOnce(
+                    context,
+                    "CreateGWSApplicationDraft",
+                    DRAFT_WRITE_API_VERSION,
+                    Collections.singletonMap("ProjectId", request.getProjectId()),
+                    createRequestBody(request));
+            providerDraft = result(created.getRoot());
+            draftId = text(providerDraft, "Id", "ID");
+            createRequestId = created.getRequestId();
             if (isBlank(draftId)) {
-                Map<String, Object> body = createRequestBody(request);
-                VolcengineOpenApiResponse created =
-                    openApiClient.postOnce(
-                        context,
-                        "CreateGWSApplicationDraft",
-                        FLINK_API_VERSION,
-                        Collections.singletonMap("ProjectId", request.getProjectId()),
-                        body);
-                JsonNode data = result(created.getRoot());
-                draftId = text(data, "Id", "ID");
-                providerRequestId = created.getRequestId();
-                if (isBlank(draftId)) {
-                    throw invalidResponse(providerRequestId);
-                }
+                throw invalidResponse(createRequestId);
             }
-            action = "UpdateGWSApplicationDraft";
-            ApiResponse<UpdateGWSApplicationDraftResponse> updated =
-                session
-                    .api()
-                    .updateGWSApplicationDraftWithHttpInfo(updateRequest(draftId, request));
-            if (updated.getData() == null
-                || !Boolean.TRUE.equals(updated.getData().isSuccess())) {
-                throw invalidResponse(requestId(updated));
+            if (!hasDraftUpdateContext(providerDraft)) {
+                providerDraft = getDraft(context, request.getProjectId(), draftId);
             }
-            return ManagedDraft.builder()
-                .draftId(draftId)
-                .providerRequestId(firstNonBlank(requestId(updated), providerRequestId))
-                .definitionHash(request.getDefinitionHash())
-                .build();
-        } catch (ApiException exception) {
-            throw sdkFailure(action, exception);
+        } else {
+            providerDraft = getDraft(context, request.getProjectId(), draftId);
         }
+
+        VolcengineOpenApiResponse updated =
+            openApiClient.postOnce(
+                context,
+                "UpdateGWSApplicationDraft",
+                DRAFT_WRITE_API_VERSION,
+                Collections.singletonMap("ProjectId", request.getProjectId()),
+                updateRequestBody(providerDraft, request));
+        JsonNode updateResult = result(updated.getRoot());
+        if (updateResult.has("Success") && !updateResult.path("Success").asBoolean()) {
+            throw invalidResponse(updated.getRequestId());
+        }
+        return ManagedDraft.builder()
+            .draftId(draftId)
+            .providerRequestId(firstNonBlank(updated.getRequestId(), createRequestId))
+            .definitionHash(request.getDefinitionHash())
+            .build();
     }
 
     @Override
@@ -479,13 +518,157 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
             return null;
         }
         String providerState = text(data, "State", "Status");
+        String instanceId = text(data, "InstanceId", "ApplicationInstanceId");
+        if (isBlank(instanceId)) {
+            instanceId = latestInstanceId(context, jobId, providerState);
+        }
+        instanceId = firstNonBlank(instanceId, request.getInstanceId());
+        InstanceLinks instanceLinks = getInstanceLinks(context, jobId, instanceId);
         return ManagedJobStatus.builder()
             .jobId(jobId)
-            .instanceId(text(data, "InstanceId", "ApplicationInstanceId"))
+            .instanceId(instanceId)
             .state(providerJobState(providerState))
             .providerState(providerState)
             .providerRequestId(response.getRequestId())
+            .flinkUiUrl(instanceLinks.flinkUiUrl)
+            .consoleUrl(instanceLinks.consoleUrl)
             .build();
+    }
+
+    private String latestInstanceId(
+                                    ProviderContext context,
+                                    String jobId,
+                                    String providerState) {
+        if (credentialResolver == null || sdkClientFactory == null) {
+            return null;
+        }
+        try (
+            VolcengineCredentials credentials = credentialResolver.resolve(context);
+            VolcengineSdkClientFactory.Session session =
+                sdkClientFactory.open(context, credentials)) {
+            ListApplicationInstanceRequest request =
+                new ListApplicationInstanceRequest()
+                    .projectId(context.getProjectId())
+                    .jobId(Long.valueOf(jobId))
+                    .pageNum("1")
+                    .pageSize("20")
+                    .sortField("StartTime")
+                    .sortOrder("DESC");
+            ListApplicationInstanceResponse response =
+                session.api().listApplicationInstance(request);
+            return selectLatestInstanceId(
+                response == null ? null : response.getRecords(), providerState);
+        } catch (Exception exception) {
+            log.warn(
+                "Unable to resolve latest Volcengine instance for job {}: {}",
+                jobId,
+                exception.getClass().getSimpleName());
+            return null;
+        }
+    }
+
+    static String selectLatestInstanceId(
+                                         List<RecordForListApplicationInstanceOutput> records,
+                                         String providerState) {
+        if (records == null || records.isEmpty()) {
+            return null;
+        }
+        if ("RUNNING".equalsIgnoreCase(providerState)) {
+            for (RecordForListApplicationInstanceOutput record : records) {
+                if (record != null
+                    && "RUNNING".equalsIgnoreCase(record.getState())
+                    && !isBlank(record.getId())) {
+                    return record.getId();
+                }
+            }
+        }
+        for (RecordForListApplicationInstanceOutput record : records) {
+            if (record != null && !isBlank(record.getId())) {
+                return record.getId();
+            }
+        }
+        return null;
+    }
+
+    private InstanceLinks getInstanceLinks(
+                                           ProviderContext context,
+                                           String applicationId,
+                                           String instanceId) {
+        if (isBlank(instanceId)
+            || credentialResolver == null
+            || sdkClientFactory == null) {
+            return InstanceLinks.EMPTY;
+        }
+        try (
+            VolcengineCredentials credentials = credentialResolver.resolve(context);
+            VolcengineSdkClientFactory.Session session =
+                sdkClientFactory.open(context, credentials)) {
+            GetApplicationInstanceResponse instance =
+                session
+                    .api()
+                    .getApplicationInstanceWithHttpInfo(
+                        new GetApplicationInstanceRequest().instanceId(instanceId))
+                    .getData();
+            if (instance == null) {
+                return InstanceLinks.EMPTY;
+            }
+            return new InstanceLinks(
+                firstNonBlank(instance.getCompleteRestUrl(), instance.getRestUrl()),
+                consoleUrl(context, applicationId, instance));
+        } catch (Exception exception) {
+            log.warn(
+                "Unable to resolve Volcengine instance links for instance {}: {}",
+                instanceId,
+                exception.getClass().getSimpleName());
+            return InstanceLinks.EMPTY;
+        }
+    }
+
+    static String consoleUrl(
+                             ProviderContext context,
+                             String applicationId,
+                             GetApplicationInstanceResponse instance) {
+        String region = context == null ? null : context.getRegion();
+        String projectId = context == null ? null : context.getProjectId();
+        String clusterId =
+            instance == null
+                ? null
+                : firstNonBlank(
+                    instance.getApplicationId(),
+                    isBlank(instance.getId()) ? null : "s-" + instance.getId());
+        String gtsJobUuid = instance == null ? null : instance.getDeploymentId();
+        if (isBlank(region)
+            || isBlank(projectId)
+            || isBlank(applicationId)
+            || isBlank(clusterId)
+            || isBlank(gtsJobUuid)) {
+            return null;
+        }
+        return "https://console.volcengine.com/flink/region:flink+"
+            + region
+            + "/project/"
+            + projectId
+            + "/job/manage/"
+            + applicationId
+            + "/detail?ClusterId="
+            + clusterId
+            + "&GtsJobUuid="
+            + gtsJobUuid
+            + "&AppId="
+            + applicationId;
+    }
+
+    private static final class InstanceLinks {
+
+        private static final InstanceLinks EMPTY = new InstanceLinks(null, null);
+
+        private final String flinkUiUrl;
+        private final String consoleUrl;
+
+        private InstanceLinks(String flinkUiUrl, String consoleUrl) {
+            this.flinkUiUrl = flinkUiUrl;
+            this.consoleUrl = consoleUrl;
+        }
     }
 
     @Override
@@ -569,20 +752,138 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
         return body;
     }
 
-    private static UpdateGWSApplicationDraftRequest updateRequest(
-                                                                  String draftId,
-                                                                  ManagedDraftRequest request) {
-        UpdateGWSApplicationDraftRequest body = new UpdateGWSApplicationDraftRequest();
-        body.setId(draftId);
-        body.setProjectId(request.getProjectId());
-        body.setJobName(request.getJobName());
-        body.setJobType(providerJobType(request.getJobType()));
-        body.setEngineVersion(providerEngineVersion(request.getEngineVersion()));
-        body.setSqlText(request.getSqlText());
-        body.setOptions(request.getOptionsJson());
-        body.setDynamicOptions(request.getDynamicOptionsJson());
-        body.setDependency(request.getDependencyJson());
+    private JsonNode getDraft(ProviderContext context, String projectId, String draftId) {
+        Map<String, String> parameters = Collections.singletonMap("ProjectId", projectId);
+        Map<String, String> body = Collections.singletonMap("Id", draftId);
+        JsonNode draft =
+            result(
+                openApiClient
+                    .postOnce(context, DRAFT_GET_ACTION, DRAFT_GET_API_VERSION, parameters, body)
+                    .getRoot());
+        if (!draft.isObject() || isBlank(text(draft, "Id", "ID"))) {
+            throw invalidResponse(null);
+        }
+        return draft;
+    }
+
+    private static boolean hasDraftUpdateContext(JsonNode draft) {
+        return draft != null
+            && draft.isObject()
+            && !isBlank(text(draft, "AccountId"))
+            && !isBlank(text(draft, "UserId"))
+            && !isBlank(text(draft, "Platform"))
+            && !isBlank(text(draft, "JobId"))
+            && !isBlank(text(draft, "State"))
+            && !isBlank(text(draft, "ResourceVersion"))
+            && !isBlank(text(draft, "CreateTime"));
+    }
+
+    ObjectNode updateRequestBody(JsonNode providerDraft, ManagedDraftRequest request) {
+        if (providerDraft == null || !providerDraft.isObject()) {
+            throw invalidResponse(null);
+        }
+        ObjectNode body = ((ObjectNode) providerDraft).deepCopy();
+        body.put("ProjectId", request.getProjectId());
+        body.put("JobName", request.getJobName());
+        body.put("JobType", providerJobType(request.getJobType()));
+        body.put("EngineVersion", providerEngineVersion(request.getEngineVersion()));
+        body.put("SqlText", request.getSqlText());
+        body.put("Options", "{}");
+        body.put("DynamicOptions", dynamicOptions(request));
+        if (!isBlank(request.getDependencyJson())) {
+            body.put("Dependency", request.getDependencyJson());
+        }
         return body;
+    }
+
+    private String dynamicOptions(ManagedDraftRequest request) {
+        Map<String, String> options = new LinkedHashMap<>();
+        JsonNode runtime = readObject(request.getOptionsJson(), "Options");
+        JsonNode resource = runtime.path("resource");
+        put(options, "parallelism.default", resource.get("parallelism"));
+        put(options, "kubernetes.taskmanager.cpu", resource.get("taskManagerCpu"));
+        putMemory(options, "taskmanager.memory.process.size", resource.get("taskManagerMemoryGiB"));
+        put(options, "taskmanager.numberOfTaskSlots", resource.get("taskManagerSlots"));
+        put(options, "kubernetes.jobmanager.cpu", resource.get("jobManagerCpu"));
+        putMemory(options, "jobmanager.memory.process.size", resource.get("jobManagerMemoryGiB"));
+
+        JsonNode checkpoint = runtime.path("checkpoint");
+        if (checkpoint.path("enabled").asBoolean(false)) {
+            putDuration(options, "execution.checkpointing.interval", checkpoint.get("intervalMs"));
+            putDuration(options, "execution.checkpointing.timeout", checkpoint.get("timeoutMs"));
+            put(options, "state.backend", checkpoint.get("backend"));
+        }
+
+        JsonNode restartStrategy = runtime.path("restartStrategy");
+        put(options, "restart-strategy", restartStrategy.get("type"));
+        merge(options, restartStrategy.path("parameters"));
+        JsonNode retryOnFailure = runtime.get("retryOnFailure");
+        if (retryOnFailure != null && retryOnFailure.isBoolean()) {
+            options.put("restart.attempt.enable", retryOnFailure.asText());
+        }
+        put(options, "restart.attempt.interval.min", runtime.get("retryIntervalMin"));
+        put(options, "restart.attempt.max.count", runtime.get("retryMaxCount"));
+        merge(options, runtime.path("customProperties"));
+        merge(options, readObject(request.getDynamicOptionsJson(), "DynamicOptions"));
+        try {
+            return objectMapper.writeValueAsString(options);
+        } catch (Exception exception) {
+            throw invalidDraftOptions("DynamicOptions");
+        }
+    }
+
+    private JsonNode readObject(String value, String field) {
+        if (isBlank(value)) {
+            return objectMapper.createObjectNode();
+        }
+        try {
+            JsonNode node = objectMapper.readTree(value);
+            if (!node.isObject()) {
+                throw invalidDraftOptions(field);
+            }
+            return node;
+        } catch (ManagedFlinkProviderException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw invalidDraftOptions(field);
+        }
+    }
+
+    private static void merge(Map<String, String> target, JsonNode source) {
+        if (source == null || !source.isObject()) {
+            return;
+        }
+        source.fields().forEachRemaining(entry -> put(target, entry.getKey(), entry.getValue()));
+    }
+
+    private static void put(Map<String, String> target, String key, JsonNode value) {
+        if (value != null && !value.isNull() && !value.asText().trim().isEmpty()) {
+            target.put(key, value.asText());
+        }
+    }
+
+    private static void putDuration(Map<String, String> target, String key, JsonNode millis) {
+        if (millis == null || !millis.canConvertToLong()) {
+            return;
+        }
+        long value = millis.asLong();
+        target.put(key, value % 1000 == 0 ? value / 1000 + "s" : value + "ms");
+    }
+
+    private static void putMemory(Map<String, String> target, String key, JsonNode gibibytes) {
+        if (gibibytes == null || !gibibytes.isNumber()) {
+            return;
+        }
+        BigDecimal mebibytes = gibibytes.decimalValue().multiply(BigDecimal.valueOf(1024));
+        target.put(key, mebibytes.stripTrailingZeros().toPlainString() + "mb");
+    }
+
+    private static ManagedFlinkProviderException invalidDraftOptions(String field) {
+        return new ManagedFlinkProviderException(
+            ProviderErrorCategory.VALIDATION,
+            "InvalidDraft" + field,
+            null,
+            "Managed Flink draft options are invalid.");
     }
 
     static String providerJobType(String value) {
@@ -743,6 +1044,7 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
             case "AVAILABLE":
                 return ManagedSnapshotState.COMPLETED;
             case "FAILED":
+            case "FAIL":
             case "ERROR":
                 return ManagedSnapshotState.FAILED;
             case "EXPIRED":
@@ -1054,6 +1356,91 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
             }
         }
         return count;
+    }
+
+    private static JsonNode draftDirectoryItems(JsonNode root) {
+        JsonNode data = root == null ? null : root.get("Result");
+        if (data == null || data.isNull()) {
+            data = root;
+        }
+        if (data != null && data.isArray()) {
+            return data;
+        }
+        JsonNode items =
+            firstArray(
+                data,
+                "DirectoryTree",
+                "DirectoryList",
+                "Directories",
+                "DataList",
+                "Items",
+                "List");
+        if (items == null && data != null && data.has("Data")) {
+            items =
+                firstArray(
+                    data.get("Data"),
+                    "DirectoryTree",
+                    "DirectoryList",
+                    "Directories",
+                    "DataList",
+                    "Items",
+                    "List");
+        }
+        return items;
+    }
+
+    private static void appendDraftDirectories(
+                                               JsonNode items,
+                                               String inheritedParentId,
+                                               String parentPath,
+                                               String keyword,
+                                               List<ManagedDraftDirectory> directories,
+                                               Set<String> seen) {
+        for (JsonNode item : items) {
+            String id = text(item, "DirectoryId", "DirectoryID", "Id", "ID");
+            String name = text(item, "DirectoryName", "Name");
+            String path = firstNonBlank(text(item, "Path", "DirectoryPath"), childPath(parentPath, name));
+            String parentId =
+                firstNonBlank(
+                    text(
+                        item,
+                        "ParentDirectoryId",
+                        "ParentDirectoryID",
+                        "ParentId",
+                        "ParentID"),
+                    inheritedParentId);
+            if (id != null && name != null && seen.add(id)) {
+                if (keyword.isEmpty()
+                    || name.toLowerCase(Locale.ROOT).contains(keyword)
+                    || (path != null && path.toLowerCase(Locale.ROOT).contains(keyword))) {
+                    directories.add(
+                        ManagedDraftDirectory.builder()
+                            .id(id)
+                            .name(name)
+                            .path(path)
+                            .parentId(parentId)
+                            .build());
+                }
+                JsonNode children =
+                    firstArray(
+                        item,
+                        "ChildDirectoryDtoList",
+                        "ChildDirectories",
+                        "Children",
+                        "DirectoryTree");
+                if (children != null) {
+                    appendDraftDirectories(
+                        children, id, path, keyword, directories, seen);
+                }
+            }
+        }
+    }
+
+    private static String childPath(String parentPath, String name) {
+        if (name == null) {
+            return null;
+        }
+        return isBlank(parentPath) ? "/" + name : parentPath + "/" + name;
     }
 
     private static boolean reachedTotal(JsonNode data, int count) {

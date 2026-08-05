@@ -42,12 +42,14 @@ import { AlertSetting } from '/@/api/setting/types/alert.type';
 import { fetchAlertSetting } from '/@/api/setting/alert';
 import {
   fetchAvailableCloudAccounts,
+  fetchManagedDraftDirectories,
   fetchManagedProjects,
   fetchManagedResourcePools,
 } from '/@/api/flink/managedFlink';
 import type {
   ManagedCloudAccount,
   ManagedCloudProject,
+  ManagedDraftDirectory,
   ManagedFlinkEnvironment,
   ManagedResourcePool,
 } from '/@/api/flink/managedFlink.type';
@@ -64,11 +66,14 @@ export const useClusterSetting = () => {
   const managedAccounts = ref<ManagedCloudAccount[]>([]);
   const managedProjects = ref<ManagedCloudProject[]>([]);
   const managedResourcePools = ref<ManagedResourcePool[]>([]);
+  const managedDraftDirectories = ref<ManagedDraftDirectory[]>([]);
   const accountsLoading = ref(false);
   const projectsLoading = ref(false);
   const resourcePoolsLoading = ref(false);
+  const draftDirectoriesLoading = ref(false);
   let projectRequestSequence = 0;
   let resourcePoolRequestSequence = 0;
+  let draftDirectoryRequestSequence = 0;
   const historyRecord = reactive<{
     k8sNamespace: string[];
     k8sSessionClusterId: string[];
@@ -146,11 +151,14 @@ export const useClusterSetting = () => {
   async function loadManagedProjects(cloudAccountId?: string) {
     const sequence = ++projectRequestSequence;
     ++resourcePoolRequestSequence;
+    ++draftDirectoryRequestSequence;
     managedProjects.value = [];
     managedResourcePools.value = [];
+    managedDraftDirectories.value = [];
     if (!cloudAccountId) {
       projectsLoading.value = false;
       resourcePoolsLoading.value = false;
+      draftDirectoriesLoading.value = false;
       return;
     }
     projectsLoading.value = true;
@@ -193,9 +201,36 @@ export const useClusterSetting = () => {
     }
   }
 
+  async function loadManagedDraftDirectories(cloudAccountId?: string, projectId?: string) {
+    const sequence = ++draftDirectoryRequestSequence;
+    managedDraftDirectories.value = [];
+    if (!cloudAccountId || !projectId) {
+      draftDirectoriesLoading.value = false;
+      return;
+    }
+    draftDirectoriesLoading.value = true;
+    try {
+      const result = await fetchManagedDraftDirectories({
+        teamId: requireTeamId(),
+        cloudAccountId,
+        projectId,
+      });
+      if (sequence === draftDirectoryRequestSequence) {
+        managedDraftDirectories.value = result;
+      }
+    } finally {
+      if (sequence === draftDirectoryRequestSequence) {
+        draftDirectoriesLoading.value = false;
+      }
+    }
+  }
+
   async function prepareManagedEnvironment(environment: ManagedFlinkEnvironment) {
     await loadManagedProjects(environment.cloudAccountId);
-    await loadManagedResourcePools(environment.cloudAccountId, environment.projectId);
+    await Promise.all([
+      loadManagedResourcePools(environment.cloudAccountId, environment.projectId),
+      loadManagedDraftDirectories(environment.cloudAccountId, environment.projectId),
+    ]);
   }
 
   const getClusterSchema = computed((): FormSchema[] => {
@@ -262,6 +297,7 @@ export const useClusterSetting = () => {
               unref(managedAccounts).find((account) => account.id === cloudAccountId)?.region || '';
             formModel.projectId = undefined;
             formModel.resourcePoolId = undefined;
+            formModel.draftDirectoryId = undefined;
             await loadManagedProjects(cloudAccountId);
           },
         }),
@@ -295,7 +331,11 @@ export const useClusterSetting = () => {
           })),
           onChange: async (projectId?: string) => {
             formModel.resourcePoolId = undefined;
-            await loadManagedResourcePools(formModel.cloudAccountId, projectId);
+            formModel.draftDirectoryId = undefined;
+            await Promise.all([
+              loadManagedResourcePools(formModel.cloudAccountId, projectId),
+              loadManagedDraftDirectories(formModel.cloudAccountId, projectId),
+            ]);
           },
         }),
         rules: [{ required: true, message: t('setting.flinkCluster.managed.required.project') }],
@@ -325,18 +365,25 @@ export const useClusterSetting = () => {
       {
         field: 'draftDirectoryId',
         label: t('setting.flinkCluster.managed.draftDirectoryId'),
-        component: 'Input',
+        component: 'Select',
         ifShow: ({ values }) => isManagedMode(values),
-        componentProps: {
+        componentProps: ({ formModel }) => ({
+          showSearch: true,
+          allowClear: true,
+          loading: unref(draftDirectoriesLoading),
+          disabled: !formModel.projectId,
           placeholder: t('setting.flinkCluster.managed.placeholder.draftDirectoryId'),
-        },
+          options: unref(managedDraftDirectories).map((directory) => ({
+            label:
+              directory.path && directory.path !== directory.name
+                ? `${directory.name} (${directory.path})`
+                : directory.name,
+            value: directory.id,
+          })),
+        }),
         rules: [
           {
             required: true,
-            message: t('setting.flinkCluster.managed.required.draftDirectoryId'),
-          },
-          {
-            pattern: /^[1-9]\d*$/,
             message: t('setting.flinkCluster.managed.required.draftDirectoryId'),
           },
         ],

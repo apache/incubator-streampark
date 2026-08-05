@@ -26,9 +26,15 @@ public interface ManagedFlinkApplicationService {
 
     Long create(ManagedFlinkApplicationSaveRequest request);
 
+    void copyLocalConfiguration(Long sourceAppId, Long targetAppId);
+
     void update(ManagedFlinkApplicationSaveRequest request);
 
+    void deleteLocal(Long appId);
+
     ManagedFlinkApplicationView get(Long teamId, Long appId);
+
+    String getFlinkUiUrl(Long teamId, Long appId);
 
     ManagedFlinkApplicationStatisticsView statistics(Long teamId);
 }

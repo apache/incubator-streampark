@@ -20,6 +20,7 @@ import { ContentTypeEnum } from '/@/enums/httpEnum';
 import type {
   ManagedCloudAccount,
   ManagedCloudProject,
+  ManagedDraftDirectory,
   ManagedFlinkEnvironment,
   ManagedFlinkEnvironmentForm,
   ManagedFlinkEnvironmentUpdateForm,
@@ -38,6 +39,7 @@ enum Api {
   AVAILABLE_ACCOUNTS = '/cloud/account/available',
   PROJECTS = '/flink/managed/projects',
   RESOURCE_POOLS = '/flink/managed/resource-pools',
+  DRAFT_DIRECTORIES = '/flink/managed/draft-directories',
   ENVIRONMENT_LIST = '/flink/managed/environment/list',
   ENVIRONMENT_GET = '/flink/managed/environment/get',
   ENVIRONMENT_CREATE = '/flink/managed/environment/create',
@@ -45,6 +47,7 @@ enum Api {
   ENVIRONMENT_DELETE = '/flink/managed/environment/delete',
   ENVIRONMENT_PROBE = '/flink/managed/environment/probe',
   APPLICATION_GET = '/flink/managed/application/get',
+  APPLICATION_FLINK_UI = '/flink/managed/application/flink-ui',
   APPLICATION_CREATE = '/flink/managed/application/create',
   APPLICATION_UPDATE = '/flink/managed/application/update',
   APPLICATION_RELEASE = '/flink/managed/application/release',
@@ -78,6 +81,15 @@ export function fetchManagedResourcePools(data: {
   keyword?: string;
 }): Promise<ManagedResourcePool[]> {
   return defHttp.post({ url: Api.RESOURCE_POOLS, data });
+}
+
+export function fetchManagedDraftDirectories(data: {
+  teamId: string;
+  cloudAccountId: string;
+  projectId: string;
+  keyword?: string;
+}): Promise<ManagedDraftDirectory[]> {
+  return defHttp.post({ url: Api.DRAFT_DIRECTORIES, data });
 }
 
 export function fetchManagedEnvironments(data: {
@@ -126,6 +138,10 @@ export function fetchManagedApplication(data: {
   return defHttp.post({ url: Api.APPLICATION_GET, data });
 }
 
+export function fetchManagedFlinkUiUrl(data: { teamId: string; appId: string }): Promise<string> {
+  return defHttp.post({ url: Api.APPLICATION_FLINK_UI, data });
+}
+
 export function fetchCreateManagedApplication(data: ManagedFlinkApplicationForm): Promise<string> {
   return defHttp.post({
     url: Api.APPLICATION_CREATE,
@@ -138,6 +154,7 @@ export function fetchUpdateManagedApplication(data: ManagedFlinkApplicationForm)
   return defHttp.post({
     url: Api.APPLICATION_UPDATE,
     data,
+    timeout: 30_000,
     headers: { 'Content-Type': ContentTypeEnum.JSON },
   });
 }

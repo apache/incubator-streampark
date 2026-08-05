@@ -135,6 +135,10 @@
     return Math.max(totalCpu, totalMemory / numberValue(unref(capability)?.memoryPerCpuGiB, 4));
   }
 
+  function defaultEngineVersion(engineVersions: string[]): string | undefined {
+    return engineVersions.includes('FLINK_VERSION_1_17') ? 'FLINK_VERSION_1_17' : engineVersions[0];
+  }
+
   async function updateEstimate() {
     const values = getFieldsValue() as Recordable;
     await setFieldsValue({ estimatedCu: estimateCu(values) });
@@ -149,7 +153,7 @@
     const minCpu = numberValue(currentCapability.minCpu, 0.5);
     const minMemory = minCpu * numberValue(currentCapability.memoryPerCpuGiB, 4);
     await setFieldsValue({
-      engineVersion: currentCapability.engineVersions[0],
+      engineVersion: defaultEngineVersion(currentCapability.engineVersions),
       jobType: currentCapability.jobTypes[0],
       schedulingStrategy: currentCapability.schedulingStrategies[0] || 'DEFAULT',
       taskManagerCpu: minCpu,
@@ -194,6 +198,24 @@
       return Promise.reject(t('flink.app.managed.checkpointTimeoutInvalid'));
     }
     return Promise.resolve();
+  }
+
+  function validatePositiveNumber(label: string) {
+    return (_rule: unknown, value: unknown) => {
+      if (value === undefined || value === null || value === '' || numberValue(value) < 1) {
+        return Promise.reject(t('flink.app.managed.positiveNumberRequired', { label }));
+      }
+      return Promise.resolve();
+    };
+  }
+
+  async function applyRestartStrategyDefaults(strategy: string) {
+    if (strategy !== 'FIXED_DELAY') return;
+    const values = getFieldsValue() as Recordable;
+    await setFieldsValue({
+      restartAttempts: values.restartAttempts || 10,
+      restartDelaySeconds: values.restartDelaySeconds || 20,
+    });
   }
 
   const formSchemas = computed<FormSchema[]>(() => {
@@ -387,7 +409,12 @@
         component: 'InputNumber',
         componentProps: { min: 1, step: 1000, class: '!w-full' },
         ifShow: ({ values }) => Boolean(values.checkpointEnabled),
-        rules: [{ required: true, type: 'number', min: 1 }],
+        rules: [
+          {
+            required: true,
+            validator: validatePositiveNumber(t('flink.app.managed.checkpointInterval')),
+          },
+        ],
       },
       {
         field: 'checkpointTimeoutMs',
@@ -430,7 +457,9 @@
             { label: t('flink.app.managed.restartNone'), value: 'NONE' },
             { label: t('flink.app.managed.restartFixedDelay'), value: 'FIXED_DELAY' },
             { label: t('flink.app.managed.restartFailureRate'), value: 'FAILURE_RATE' },
+            { label: t('flink.app.managed.restartExponentialDelay'), value: 'EXPONENTIAL_DELAY' },
           ],
+          onChange: applyRestartStrategyDefaults,
         },
         rules: [{ required: true, message: t('flink.app.managed.required.restartStrategy') }],
       },
@@ -443,10 +472,10 @@
         rules: [{ required: true, type: 'number', min: 1 }],
       },
       {
-        field: 'restartDelayMs',
+        field: 'restartDelaySeconds',
         label: t('flink.app.managed.restartDelay'),
         component: 'InputNumber',
-        componentProps: { min: 1, step: 1000, class: '!w-full' },
+        componentProps: { min: 1, step: 1, precision: 0, class: '!w-full' },
         ifShow: ({ values }) =>
           ['FIXED_DELAY', 'FAILURE_RATE'].includes(values.restartStrategyType),
         rules: [{ required: true, type: 'number', min: 1 }],
@@ -460,17 +489,73 @@
         rules: [{ required: true, type: 'number', min: 1 }],
       },
       {
-        field: 'failureRateIntervalMs',
+        field: 'failureRateIntervalSeconds',
         label: t('flink.app.managed.failureRateInterval'),
         component: 'InputNumber',
-        componentProps: { min: 1, step: 1000, class: '!w-full' },
+        componentProps: { min: 1, step: 1, precision: 0, class: '!w-full' },
         ifShow: ({ values }) => values.restartStrategyType === 'FAILURE_RATE',
         rules: [{ required: true, type: 'number', min: 1 }],
+      },
+      {
+        field: 'exponentialInitialBackoffSeconds',
+        label: t('flink.app.managed.initialBackoff'),
+        component: 'InputNumber',
+        componentProps: { min: 1, step: 1, class: '!w-full' },
+        ifShow: ({ values }) => values.restartStrategyType === 'EXPONENTIAL_DELAY',
+      },
+      {
+        field: 'exponentialMaxBackoffSeconds',
+        label: t('flink.app.managed.maxBackoff'),
+        component: 'InputNumber',
+        componentProps: { min: 1, step: 1, class: '!w-full' },
+        ifShow: ({ values }) => values.restartStrategyType === 'EXPONENTIAL_DELAY',
+      },
+      {
+        field: 'exponentialBackoffMultiplier',
+        label: t('flink.app.managed.backoffMultiplier'),
+        component: 'InputNumber',
+        componentProps: { min: 1, step: 0.1, class: '!w-full' },
+        ifShow: ({ values }) => values.restartStrategyType === 'EXPONENTIAL_DELAY',
+      },
+      {
+        field: 'exponentialResetThresholdSeconds',
+        label: t('flink.app.managed.resetBackoffThreshold'),
+        component: 'InputNumber',
+        componentProps: { min: 1, step: 1, class: '!w-full' },
+        ifShow: ({ values }) => values.restartStrategyType === 'EXPONENTIAL_DELAY',
+      },
+      {
+        field: 'exponentialJitterFactor',
+        label: t('flink.app.managed.jitterFactor'),
+        component: 'InputNumber',
+        componentProps: { min: 0, max: 1, step: 0.1, class: '!w-full' },
+        ifShow: ({ values }) => values.restartStrategyType === 'EXPONENTIAL_DELAY',
+      },
+      {
+        field: 'exponentialAttemptsBeforeReset',
+        label: t('flink.app.managed.attemptsBeforeReset'),
+        component: 'InputNumber',
+        componentProps: { min: 1, step: 1, precision: 0, class: '!w-full' },
+        ifShow: ({ values }) => values.restartStrategyType === 'EXPONENTIAL_DELAY',
       },
       {
         field: 'retryOnFailure',
         label: t('flink.app.managed.retryOnFailure'),
         component: 'Switch',
+      },
+      {
+        field: 'retryIntervalMin',
+        label: t('flink.app.managed.retryIntervalMin'),
+        component: 'InputNumber',
+        componentProps: { min: 1, step: 1, precision: 0, class: '!w-full' },
+        ifShow: ({ values }) => Boolean(values.retryOnFailure),
+      },
+      {
+        field: 'retryMaxCount',
+        label: t('flink.app.managed.retryMaxCount'),
+        component: 'InputNumber',
+        componentProps: { min: 1, step: 1, precision: 0, class: '!w-full' },
+        ifShow: ({ values }) => Boolean(values.retryOnFailure),
       },
       {
         field: 'releaseDivider',
@@ -554,18 +639,40 @@
       .join('\n');
   }
 
+  function durationSeconds(value?: string): number | undefined {
+    if (!value) return undefined;
+    const matched = value.match(/^([0-9]+(?:\.[0-9]+)?)(?:s|second)$/);
+    return matched ? Number(matched[1]) : undefined;
+  }
+
   function restartParameters(values: Recordable): Record<string, string> {
     if (values.restartStrategyType === 'FIXED_DELAY') {
       return {
-        attempts: String(values.restartAttempts),
-        delayMs: String(values.restartDelayMs),
+        'restart-strategy.fixed-delay.attempts': String(values.restartAttempts),
+        'restart-strategy.fixed-delay.delay': `${values.restartDelaySeconds}second`,
       };
     }
     if (values.restartStrategyType === 'FAILURE_RATE') {
       return {
-        maxFailuresPerInterval: String(values.maxFailuresPerInterval),
-        failureRateIntervalMs: String(values.failureRateIntervalMs),
-        delayMs: String(values.restartDelayMs),
+        'restart-strategy.failure-rate.max-failures-per-interval': String(
+          values.maxFailuresPerInterval,
+        ),
+        'restart-strategy.failure-rate.failure-rate-interval': `${values.failureRateIntervalSeconds}second`,
+        'restart-strategy.failure-rate.delay': `${values.restartDelaySeconds}second`,
+      };
+    }
+    if (values.restartStrategyType === 'EXPONENTIAL_DELAY') {
+      return {
+        'restart-strategy.exponential-delay.initial-backoff': `${values.exponentialInitialBackoffSeconds}s`,
+        'restart-strategy.exponential-delay.max-backoff': `${values.exponentialMaxBackoffSeconds}s`,
+        'restart-strategy.exponential-delay.backoff-multiplier': String(
+          values.exponentialBackoffMultiplier,
+        ),
+        'restart-strategy.exponential-delay.reset-backoff-threshold': `${values.exponentialResetThresholdSeconds}s`,
+        'restart-strategy.exponential-delay.jitter-factor': String(values.exponentialJitterFactor),
+        'restart-strategy.exponential-delay.attempts-before-reset-backoff': String(
+          values.exponentialAttemptsBeforeReset,
+        ),
       };
     }
     return {};
@@ -596,16 +703,23 @@
         },
         checkpoint: {
           enabled: Boolean(values.checkpointEnabled),
-          intervalMs: values.checkpointEnabled ? values.checkpointIntervalMs : undefined,
-          timeoutMs: values.checkpointEnabled ? values.checkpointTimeoutMs : undefined,
-          stateTtlMs: values.checkpointEnabled ? values.stateTtlMs : undefined,
+          intervalMs: values.checkpointEnabled
+            ? numberValue(values.checkpointIntervalMs)
+            : undefined,
+          timeoutMs: values.checkpointEnabled ? numberValue(values.checkpointTimeoutMs) : undefined,
+          stateTtlMs:
+            values.checkpointEnabled && values.stateTtlMs
+              ? numberValue(values.stateTtlMs)
+              : undefined,
           backend: values.checkpointEnabled ? values.checkpointBackend : undefined,
         },
         restartStrategy: {
-          type: values.restartStrategyType,
+          type: String(values.restartStrategyType).toLowerCase().replaceAll('_', '-'),
           parameters: restartParameters(values),
         },
         retryOnFailure: Boolean(values.retryOnFailure),
+        retryIntervalMin: values.retryOnFailure ? values.retryIntervalMin : undefined,
+        retryMaxCount: values.retryOnFailure ? values.retryMaxCount : undefined,
         customProperties: parseProperties(values.runtimeCustomProperties),
       },
       releaseConfig: {
@@ -682,18 +796,54 @@
       checkpointTimeoutMs: app.runtimeConfig.checkpoint?.timeoutMs,
       stateTtlMs: app.runtimeConfig.checkpoint?.stateTtlMs,
       checkpointBackend: app.runtimeConfig.checkpoint?.backend,
-      restartStrategyType: restart?.type || 'NONE',
-      restartAttempts: restart?.parameters?.attempts
-        ? Number(restart.parameters.attempts)
+      restartStrategyType: String(restart?.type || 'NONE')
+        .toUpperCase()
+        .replaceAll('-', '_'),
+      restartAttempts: restart?.parameters?.['restart-strategy.fixed-delay.attempts']
+        ? Number(restart.parameters['restart-strategy.fixed-delay.attempts'])
+        : 10,
+      restartDelaySeconds:
+        durationSeconds(
+          restart?.parameters?.['restart-strategy.fixed-delay.delay'] ||
+            restart?.parameters?.['restart-strategy.failure-rate.delay'],
+        ) || 20,
+      maxFailuresPerInterval: restart?.parameters?.[
+        'restart-strategy.failure-rate.max-failures-per-interval'
+      ]
+        ? Number(restart.parameters['restart-strategy.failure-rate.max-failures-per-interval'])
         : undefined,
-      restartDelayMs: restart?.parameters?.delayMs ? Number(restart.parameters.delayMs) : undefined,
-      maxFailuresPerInterval: restart?.parameters?.maxFailuresPerInterval
-        ? Number(restart.parameters.maxFailuresPerInterval)
+      failureRateIntervalSeconds: durationSeconds(
+        restart?.parameters?.['restart-strategy.failure-rate.failure-rate-interval'],
+      ),
+      exponentialInitialBackoffSeconds: durationSeconds(
+        restart?.parameters?.['restart-strategy.exponential-delay.initial-backoff'],
+      ),
+      exponentialMaxBackoffSeconds: durationSeconds(
+        restart?.parameters?.['restart-strategy.exponential-delay.max-backoff'],
+      ),
+      exponentialBackoffMultiplier: restart?.parameters?.[
+        'restart-strategy.exponential-delay.backoff-multiplier'
+      ]
+        ? Number(restart.parameters['restart-strategy.exponential-delay.backoff-multiplier'])
         : undefined,
-      failureRateIntervalMs: restart?.parameters?.failureRateIntervalMs
-        ? Number(restart.parameters.failureRateIntervalMs)
+      exponentialResetThresholdSeconds: durationSeconds(
+        restart?.parameters?.['restart-strategy.exponential-delay.reset-backoff-threshold'],
+      ),
+      exponentialJitterFactor: restart?.parameters?.[
+        'restart-strategy.exponential-delay.jitter-factor'
+      ]
+        ? Number(restart.parameters['restart-strategy.exponential-delay.jitter-factor'])
+        : undefined,
+      exponentialAttemptsBeforeReset: restart?.parameters?.[
+        'restart-strategy.exponential-delay.attempts-before-reset-backoff'
+      ]
+        ? Number(
+            restart.parameters['restart-strategy.exponential-delay.attempts-before-reset-backoff'],
+          )
         : undefined,
       retryOnFailure: app.runtimeConfig.retryOnFailure,
+      retryIntervalMin: app.runtimeConfig.retryIntervalMin,
+      retryMaxCount: app.runtimeConfig.retryMaxCount,
       priority: app.releaseConfig.priority,
       schedulingStrategy: app.releaseConfig.schedulingStrategy,
       runtimeCustomProperties: stringifyProperties(app.runtimeConfig.customProperties),
@@ -729,9 +879,19 @@
           checkpointIntervalMs: 60000,
           checkpointTimeoutMs: 600000,
           restartStrategyType: 'FIXED_DELAY',
-          restartAttempts: 3,
-          restartDelayMs: 10000,
+          restartAttempts: 10,
+          restartDelaySeconds: 20,
+          maxFailuresPerInterval: 20,
+          failureRateIntervalSeconds: 600,
+          exponentialInitialBackoffSeconds: 1,
+          exponentialMaxBackoffSeconds: 60,
+          exponentialBackoffMultiplier: 1.5,
+          exponentialResetThresholdSeconds: 3600,
+          exponentialJitterFactor: 0.1,
+          exponentialAttemptsBeforeReset: 120,
           retryOnFailure: false,
+          retryIntervalMin: 1,
+          retryMaxCount: 3,
           priority: 50,
           schedulingStrategy: 'DEFAULT',
         });

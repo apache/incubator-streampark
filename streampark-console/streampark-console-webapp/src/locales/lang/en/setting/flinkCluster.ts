@@ -91,19 +91,19 @@ export default {
     region: 'Region',
     project: 'Project',
     resourcePool: 'Resource Pool',
-    draftDirectoryId: 'Draft Directory ID',
+    draftDirectoryId: 'Draft Directory',
     probe: 'Test Environment',
     probeSuccess: 'The managed Flink environment is available',
     probeFailed: 'The managed Flink environment probe failed',
     metadataUnavailable: 'Managed environment metadata is unavailable. Refresh and retry.',
     placeholder: {
-      draftDirectoryId: 'Enter the provider draft directory ID',
+      draftDirectoryId: 'Select a draft directory by name',
     },
     required: {
       cloudAccount: 'Cloud Account is required',
       project: 'Project is required',
       resourcePool: 'Resource Pool is required',
-      draftDirectoryId: 'A positive Draft Directory ID is required',
+      draftDirectoryId: 'Select a draft directory',
     },
   },
 };

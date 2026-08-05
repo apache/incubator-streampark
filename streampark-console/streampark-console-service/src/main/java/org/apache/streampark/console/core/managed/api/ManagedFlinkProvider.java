@@ -37,6 +37,13 @@ public interface ManagedFlinkProvider {
     List<ManagedResourcePool> listResourcePools(
                                                 ProviderContext context, String projectId, String keyword);
 
+    default List<ManagedDraftDirectory> listDraftDirectories(
+                                                             ProviderContext context,
+                                                             String projectId,
+                                                             String keyword) {
+        throw new UnsupportedOperationException("Managed draft directory discovery is not supported.");
+    }
+
     StagedArtifact stageArtifact(ProviderContext context, ArtifactStageRequest request);
 
     StagedArtifact findArtifact(ProviderContext context, ArtifactLookupRequest request);

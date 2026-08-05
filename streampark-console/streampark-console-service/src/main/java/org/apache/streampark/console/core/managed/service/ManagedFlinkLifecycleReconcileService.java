@@ -40,6 +40,8 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class ManagedFlinkLifecycleReconcileService {
 
+    private static final long TERMINAL_FAILURE_GRACE_MILLIS = 30_000L;
+
     private final ManagedFlinkApplicationService applicationService;
     private final ManagedFlinkOperationService operationService;
     private final ManagedFlinkProviderContextService providerContextService;
@@ -80,8 +82,18 @@ public class ManagedFlinkLifecycleReconcileService {
                         .projectId(snapshot.getProjectId())
                         .jobName(snapshot.getJobName())
                         .jobId(snapshot.getJobId())
+                        .instanceId(snapshot.getInstanceId())
                         .build());
             if (!confirmsAcceptance(snapshot, status)) {
+                if (confirmsFailure(operation, snapshot, status)) {
+                    operationService.markFailed(
+                        operationId,
+                        false,
+                        status.getProviderRequestId(),
+                        "PROVIDER:LifecycleTransitionFailed",
+                        "Managed Flink lifecycle transition failed at the provider.");
+                    return operationService.getView(appId, operationId);
+                }
                 return remainUnknown(
                     appId,
                     operationId,
@@ -166,6 +178,30 @@ public class ManagedFlinkLifecycleReconcileService {
             default:
                 return false;
         }
+    }
+
+    private boolean confirmsFailure(
+                                    ManagedFlinkOperation operation,
+                                    ManagedFlinkLifecycleSnapshot snapshot,
+                                    ManagedJobStatus status) {
+        if (status == null
+            || status.getState() == null
+            || !snapshot.getJobId().equals(status.getJobId())) {
+            return false;
+        }
+        if (status.getState() == ManagedJobState.FAILED) {
+            return true;
+        }
+        if (operation.getModifyTime() == null
+            || System.currentTimeMillis() - operation.getModifyTime().getTime() < TERMINAL_FAILURE_GRACE_MILLIS) {
+            return false;
+        }
+        boolean sameInstance =
+            Objects.equals(snapshot.getInstanceId(), status.getInstanceId());
+        return ("START".equals(snapshot.getOperationType())
+            || "RESTART".equals(snapshot.getOperationType()))
+            && status.getState() == ManagedJobState.STOPPED
+            && sameInstance;
     }
 
     private String result(ManagedJobStatus status) {

@@ -29,6 +29,7 @@ import org.apache.streampark.console.core.managed.api.CloudProject;
 import org.apache.streampark.console.core.managed.api.CredentialCheckResult;
 import org.apache.streampark.console.core.managed.api.ManagedFlinkCapability;
 import org.apache.streampark.console.core.managed.api.ManagedFlinkProviderException;
+import org.apache.streampark.console.core.managed.api.ManagedFlinkProviderType;
 import org.apache.streampark.console.core.managed.api.ManagedResourcePool;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkEnvironmentCreateRequest;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkEnvironmentListRequest;
@@ -431,7 +432,8 @@ public class ManagedFlinkEnvironmentServiceImpl implements ManagedFlinkEnvironme
         environment.setResourcePoolId(resourcePoolId.trim());
         environment.setResourcePoolName(StringUtils.trimToNull(resourcePoolName));
         environment.setDraftDirectoryId(draftDirectoryId);
-        environment.setConsoleUrl(null);
+        environment.setConsoleUrl(
+            ManagedFlinkProviderType.consoleUrl(account.getProviderType()));
     }
 
     private static ManagedFlinkEnvironmentView toView(

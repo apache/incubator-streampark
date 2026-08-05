@@ -31,6 +31,9 @@ import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.ResourceFromEnum;
+import org.apache.streampark.console.core.managed.api.ManagedFlinkProviderType;
+import org.apache.streampark.console.core.managed.api.ManagedJobLookupRequest;
+import org.apache.streampark.console.core.managed.api.ManagedJobStatus;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkApplicationSaveRequest;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkApplicationStatisticsView;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkApplicationView;
@@ -54,6 +57,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
@@ -72,6 +76,7 @@ public class ManagedFlinkApplicationServiceImpl implements ManagedFlinkApplicati
     private final CloudAccountAuthorizationService authorizationService;
     private final ManagedFlinkAuditContext auditContext;
     private final ManagedFlinkApplicationValidator validator;
+    private final ManagedFlinkProviderContextService providerContextService;
     private final ManagedFlinkDefinitionHasher definitionHasher;
     private final FlinkSqlService flinkSqlService;
     private final ResourceService resourceService;
@@ -123,6 +128,42 @@ public class ManagedFlinkApplicationServiceImpl implements ManagedFlinkApplicati
             managedApplicationMapper.insert(managed) == 1,
             "Failed to create the managed Flink application configuration.");
         return application.getId();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void copyLocalConfiguration(Long sourceAppId, Long targetAppId) {
+        FlinkApplication source = applicationMapper.selectById(sourceAppId);
+        FlinkApplication target = applicationMapper.selectById(targetAppId);
+        ManagedFlinkApplication sourceManaged = managedApplicationMapper.selectById(sourceAppId);
+        ApiAlertException.throwIfTrue(
+            source == null
+                || target == null
+                || sourceManaged == null
+                || !Objects.equals(source.getTeamId(), target.getTeamId())
+                || !FlinkDeployMode.isManagedMode(source.getDeployModeEnum())
+                || !FlinkDeployMode.isManagedMode(target.getDeployModeEnum()),
+            "Managed Flink application copy source is invalid.");
+
+        ManagedFlinkRuntimeConfig runtime =
+            read(sourceManaged.getRuntimeConfigJson(), ManagedFlinkRuntimeConfig.class);
+        ManagedFlinkReleaseConfig release =
+            read(sourceManaged.getReleaseConfigJson(), ManagedFlinkReleaseConfig.class);
+        ManagedFlinkApplication copied = new ManagedFlinkApplication();
+        copied.setAppId(targetAppId);
+        copied.setManagedEnvId(sourceManaged.getManagedEnvId());
+        copied.setProviderType(sourceManaged.getProviderType());
+        copied.setEngineVersion(sourceManaged.getEngineVersion());
+        copied.setExecutionMode(sourceManaged.getExecutionMode());
+        copied.setRuntimeConfigJson(sourceManaged.getRuntimeConfigJson());
+        copied.setReleaseConfigJson(sourceManaged.getReleaseConfigJson());
+        copied.setConsecutiveSyncFailures(0);
+        copied.setVersion(0);
+        copied.setLocalDefinitionHash(
+            definitionHasher.hash(viewRequest(target, copied, runtime, release)));
+        ApiAlertException.throwIfFalse(
+            managedApplicationMapper.insert(copied) == 1,
+            "Failed to copy the managed Flink application configuration.");
     }
 
     @Override
@@ -191,6 +232,37 @@ public class ManagedFlinkApplicationServiceImpl implements ManagedFlinkApplicati
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteLocal(Long appId) {
+        ApiAlertException.throwIfNull(appId, "Managed Flink application ID is required.");
+        FlinkApplication application = applicationMapper.selectById(appId);
+        ManagedFlinkApplication managed = managedApplicationMapper.selectById(appId);
+        ApiAlertException.throwIfTrue(
+            application == null
+                || managed == null
+                || !FlinkDeployMode.isManagedMode(application.getDeployModeEnum()),
+            "Managed Flink application does not exist.");
+        ApiAlertException.throwIfFalse(
+            Arrays.asList(
+                FlinkAppStateEnum.ADDED.getValue(),
+                FlinkAppStateEnum.FAILED.getValue(),
+                FlinkAppStateEnum.CANCELED.getValue(),
+                FlinkAppStateEnum.FINISHED.getValue(),
+                FlinkAppStateEnum.LOST.getValue(),
+                FlinkAppStateEnum.TERMINATED.getValue(),
+                FlinkAppStateEnum.POS_TERMINATED.getValue(),
+                FlinkAppStateEnum.SUCCEEDED.getValue(),
+                FlinkAppStateEnum.KILLED.getValue())
+                .contains(application.getState()),
+            "Managed Flink application must be stopped before deleting its local record.");
+
+        flinkSqlService.removeByAppId(appId);
+        ApiAlertException.throwIfFalse(
+            applicationMapper.deleteById(appId) == 1,
+            "Failed to delete the managed Flink application local record.");
+    }
+
+    @Override
     public ManagedFlinkApplicationView get(Long teamId, Long appId) {
         ApplicationContext context = requireApplication(teamId, appId);
         FlinkApplication application = context.getApplication();
@@ -232,9 +304,50 @@ public class ManagedFlinkApplicationServiceImpl implements ManagedFlinkApplicati
             .lastSyncTime(managed.getLastSyncTime())
             .consecutiveSyncFailures(managed.getConsecutiveSyncFailures())
             .nextSyncTime(managed.getNextSyncTime())
-            .consoleUrl(managed.getConsoleUrl())
+            .consoleUrl(
+                StringUtils.defaultIfBlank(
+                    managed.getConsoleUrl(),
+                    ManagedFlinkProviderType.consoleUrl(managed.getProviderType())))
             .version(managed.getVersion())
             .build();
+    }
+
+    @Override
+    public String getFlinkUiUrl(Long teamId, Long appId) {
+        ApplicationContext applicationContext = requireApplication(teamId, appId);
+        FlinkApplication application = applicationContext.getApplication();
+        ManagedFlinkApplication managed = applicationContext.getManaged();
+        ApiAlertException.throwIfFalse(
+            FlinkAppStateEnum.getState(application.getState()) == FlinkAppStateEnum.RUNNING,
+            "Managed Flink job is not running.");
+        ApiAlertException.throwIfTrue(
+            StringUtils.isBlank(managed.getExternalApplicationId())
+                || StringUtils.isBlank(managed.getExternalInstanceId()),
+            "Managed Flink running job identity is unavailable.");
+        ManagedFlinkEnvironment environment = environmentMapper.selectById(managed.getManagedEnvId());
+        ApiAlertException.throwIfTrue(
+            environment == null
+                || environment.getCloudAccountId() == null
+                || StringUtils.isBlank(environment.getProjectId()),
+            "Managed Flink environment is unavailable.");
+        ManagedFlinkProviderSession session =
+            providerContextService.resolve(
+                teamId, environment.getCloudAccountId(), environment.getProjectId());
+        ManagedJobStatus status =
+            session
+                .getProvider()
+                .getJob(
+                    session.getContext(),
+                    ManagedJobLookupRequest.builder()
+                        .projectId(environment.getProjectId())
+                        .jobName(application.getJobName())
+                        .jobId(managed.getExternalApplicationId())
+                        .instanceId(managed.getExternalInstanceId())
+                        .build());
+        ApiAlertException.throwIfTrue(
+            status == null || StringUtils.isBlank(status.getFlinkUiUrl()),
+            "Managed Flink Web UI is temporarily unavailable.");
+        return status.getFlinkUiUrl();
     }
 
     @Override

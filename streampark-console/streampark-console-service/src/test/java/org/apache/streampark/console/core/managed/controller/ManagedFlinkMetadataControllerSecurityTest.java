@@ -40,9 +40,10 @@ class ManagedFlinkMetadataControllerSecurityTest {
                 Map.entry("deleteEnvironment", "cluster:delete"),
                 Map.entry("probeEnvironment", "cluster:update"),
                 Map.entry("getApplication", "app:detail"),
+                Map.entry("getApplicationFlinkUi", "app:detail"),
                 Map.entry("applicationStatistics", "app:view"),
                 Map.entry("createApplication", "app:create"),
-                Map.entry("updateApplication", "app:update"),
+                Map.entry("updateApplication", "app:release"),
                 Map.entry("releaseApplication", "app:release"),
                 Map.entry("startApplication", "app:start"),
                 Map.entry("stopApplication", "app:cancel"),
@@ -80,6 +81,7 @@ class ManagedFlinkMetadataControllerSecurityTest {
                 method("capability"),
                 method("projects"),
                 method("resourcePools"),
+                method("draftDirectories"),
                 method("listEnvironments"),
                 method("getEnvironment")))
                     .allSatisfy(

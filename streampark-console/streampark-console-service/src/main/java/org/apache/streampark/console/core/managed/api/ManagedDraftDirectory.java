@@ -20,22 +20,16 @@ package org.apache.streampark.console.core.managed.api;
 import lombok.Builder;
 import lombok.Value;
 
-/** Provider-neutral status returned by a stable managed Flink job lookup. */
+/** Provider draft directory metadata exposed to the environment registration form. */
 @Value
 @Builder
-public class ManagedJobStatus {
+public class ManagedDraftDirectory {
 
-    String jobId;
+    String id;
 
-    String instanceId;
+    String name;
 
-    ManagedJobState state;
+    String path;
 
-    String providerState;
-
-    String providerRequestId;
-
-    String flinkUiUrl;
-
-    String consoleUrl;
+    String parentId;
 }
