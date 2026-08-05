@@ -725,7 +725,7 @@
                                     <goal>install-node-and-pnpm</goal>
                                 </goals>
                                 <configuration>
-                                    <nodeVersion>v20.18.0</nodeVersion>
+                                    <nodeVersion>v20.19.0</nodeVersion>
                                     <pnpmVersion>10.33.0</pnpmVersion>
                                 </configuration>
                             </execution>
@@ -736,7 +736,7 @@
                                 </goals>
                                 <phase>generate-resources</phase>
                                 <configuration>
-                                    <arguments>install --ignore-scripts</arguments>
+                                    <arguments>install --frozen-lockfile</arguments>
                                 </configuration>
                             </execution>
                             <execution>
