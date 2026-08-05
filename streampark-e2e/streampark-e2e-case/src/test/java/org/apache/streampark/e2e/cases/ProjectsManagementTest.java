@@ -50,7 +50,7 @@ public class ProjectsManagementTest {
     private static final String branch = "dev";
 
     private static final String buildArgument =
-        "-pl quickstart-flink/quickstart-apacheflink/apacheflinksql_1.16 -am -Dmaven.test.skip=true";
+        "-pl quickstart-flink/quickstart-apacheflink/apacheflinksql_1.17 -am -Dmaven.test.skip=true";
 
     private static final String description = "e2e test project description";
 

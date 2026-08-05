@@ -223,19 +223,9 @@ public class SparkApplicationManageServiceImpl
                         record.setBuildStatus(pipeStates.get(record.getId()).getCode());
                     }
 
-                    AppControl appControl = new AppControl()
-                        .setAllowBuild(
-                            record.getBuildStatus() == null
-                                || !PipelineStatusEnum.running
-                                    .getCode()
-                                    .equals(record.getBuildStatus()))
-                        .setAllowStart(
-                            !record.shouldTracking()
-                                && PipelineStatusEnum.success
-                                    .getCode()
-                                    .equals(record.getBuildStatus()))
-                        .setAllowStop(record.isRunning())
-                        .setAllowView(record.shouldTracking());
+                    AppControl appControl =
+                        AppControl.fromPipelineBuildStatus(
+                            record.getBuildStatus(), record.shouldTracking(), record.isRunning());
                     record.setAppControl(appControl);
                 })
             .collect(Collectors.toList());

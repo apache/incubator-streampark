@@ -18,13 +18,11 @@
 package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.common.conf.ConfigKeys;
-import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.SparkDeployMode;
 import org.apache.streampark.common.enums.SparkJobType;
 import org.apache.streampark.common.enums.StorageType;
-import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.bean.AppControl;
@@ -34,7 +32,6 @@ import org.apache.streampark.console.core.enums.ResourceFromEnum;
 import org.apache.streampark.console.core.enums.SparkAppStateEnum;
 import org.apache.streampark.console.core.metrics.spark.SparkApplicationSummary;
 import org.apache.streampark.console.core.util.YarnQueueLabelExpression;
-import org.apache.streampark.flink.packer.maven.DependencyInfo;
 import org.apache.streampark.spark.kubernetes.model.SparkK8sPodTemplates;
 
 import org.apache.commons.lang3.StringUtils;
@@ -59,7 +56,7 @@ import java.util.Objects;
 @Setter
 @TableName("t_spark_app")
 @Slf4j
-public class SparkApplication extends BaseEntity {
+public class SparkApplication extends BaseEntity implements ApplicationEntitySupport, ReleaseOutcomeTarget {
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -337,27 +334,6 @@ public class SparkApplication extends BaseEntity {
     }
 
     /** Local compilation and packaging working directory */
-    @JsonIgnore
-    public String getDistHome() {
-        String path = String.format("%s/%s/%s", Workspace.APP_LOCAL_DIST(), projectId.toString(), getModule());
-        log.info("local distHome:{}", path);
-        return path;
-    }
-
-    @JsonIgnore
-    public String getLocalAppHome() {
-        String path = String.format("%s/%s", Workspace.local().APP_WORKSPACE(), id.toString());
-        log.info("local appHome:{}", path);
-        return path;
-    }
-
-    @JsonIgnore
-    public String getRemoteAppHome() {
-        String path = String.format("%s/%s", Workspace.remote().APP_WORKSPACE(), id.toString());
-        log.info("remote appHome:{}", path);
-        return path;
-    }
-
     /** Automatically identify remoteAppHome or localAppHome based on app SparkDeployMode */
     @JsonIgnore
     public String getAppHome() {
@@ -447,26 +423,8 @@ public class SparkApplication extends BaseEntity {
     }
 
     @JsonIgnore
-    public DependencyInfo getDependencyInfo() {
-        return Dependency.toDependency(getDependency()).toJarPackDeps();
-    }
-
-    @JsonIgnore
     public boolean isRunning() {
         return SparkAppStateEnum.RUNNING.getValue() == this.getState();
-    }
-
-    @JsonIgnore
-    public boolean isNeedRollback() {
-        return ReleaseStateEnum.NEED_ROLLBACK.get() == this.getRelease();
-    }
-
-    @JsonIgnore
-    public boolean isNeedRestartOnFailed() {
-        if (this.restartSize != null && this.restartCount != null) {
-            return this.restartSize > 0 && this.restartCount <= this.restartSize;
-        }
-        return false;
     }
 
     @JsonIgnore
@@ -487,16 +445,6 @@ public class SparkApplication extends BaseEntity {
             default:
                 throw new UnsupportedOperationException("Unsupported ".concat(deployModeEnum.getName()));
         }
-    }
-
-    @JsonIgnore
-    public FsOperator getFsOperator() {
-        return FsOperator.of(getStorageType());
-    }
-
-    @JsonIgnore
-    public Workspace getWorkspace() {
-        return Workspace.of(getStorageType());
     }
 
     public void fillRunningMetrics(SparkApplicationSummary summary) {

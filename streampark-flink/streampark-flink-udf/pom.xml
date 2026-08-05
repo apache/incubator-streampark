@@ -24,13 +24,13 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>streampark-flink-udf_${scala.binary.version}</artifactId>
+    <artifactId>streampark-flink-udf</artifactId>
     <name>StreamPark : Flink Udf</name>
 
     <dependencies>
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-common_${scala.binary.version}</artifactId>
+            <artifactId>streampark-common</artifactId>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -54,12 +54,7 @@
     </dependencies>
 
     <build>
-        <plugins>
-            <plugin>
-                <groupId>net.alchim31.maven</groupId>
-                <artifactId>scala-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
+        <plugins></plugins>
     </build>
 
     <profiles>

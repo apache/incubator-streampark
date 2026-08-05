@@ -25,27 +25,20 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>streampark-flink-shims-base_${scala.binary.version}</artifactId>
+    <artifactId>streampark-flink-shims-base</artifactId>
     <name>StreamPark : Flink Shims Base</name>
 
     <dependencies>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-common_${scala.binary.version}</artifactId>
+            <artifactId>streampark-common</artifactId>
         </dependency>
 
         <!--flink base-->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-core</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-scala_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -60,20 +53,6 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-kubernetes</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-table-api-scala-bridge_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
             <scope>provided</scope>
         </dependency>

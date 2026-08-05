@@ -24,30 +24,29 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>streampark-flink-client-core_${scala.binary.version}</artifactId>
+    <artifactId>streampark-flink-client-core</artifactId>
     <name>StreamPark : Flink Client Core</name>
 
     <dependencies>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-client-api_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-client-api</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- The flink session mode would resolve the DAG within StreamPark process,
           so a full build dependencies is required. -->
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-${streampark.flink.shims.version}_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-shims_flink-${streampark.flink.shims.version}</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-kubernetes_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-kubernetes</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -89,48 +88,7 @@
             <artifactId>guava</artifactId>
             <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.json4s</groupId>
-            <artifactId>json4s-jackson_${scala.binary.version}</artifactId>
-        </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <createDependencyReducedPom>true</createDependencyReducedPom>
-                            <dependencyReducedPomLocation>${project.basedir}/target/dependency-reduced-pom.xml</dependencyReducedPomLocation>
-                            <artifactSet>
-                                <includes>
-                                    <include>org.json4s:*</include>
-                                </includes>
-                            </artifactSet>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
     <profiles>
         <profile>
             <id>apache-release</id>

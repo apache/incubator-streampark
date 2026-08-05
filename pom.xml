@@ -64,6 +64,7 @@
 
     <modules>
         <module>streampark-common</module>
+        <module>streampark-common-scala-bridge</module>
         <module>streampark-flink</module>
         <module>streampark-spark</module>
         <module>streampark-console</module>
@@ -97,7 +98,7 @@
         <flink.version>1.20.1</flink.version>
         <flink.shaded.version>1.8.1</flink.shaded.version>
         <streampark.shaded.version>1.0.0</streampark.shaded.version>
-        <streampark.flink.shims.version>1.14</streampark.flink.shims.version>
+        <streampark.flink.shims.version>1.17</streampark.flink.shims.version>
         <spark.version>3.1.2</spark.version>
         <scalikejdbc.version>4.0.0</scalikejdbc.version>
         <hive.version>2.3.4</hive.version>
@@ -221,7 +222,13 @@
 
             <dependency>
                 <groupId>org.apache.streampark</groupId>
-                <artifactId>streampark-common_${scala.binary.version}</artifactId>
+                <artifactId>streampark-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.streampark</groupId>
+                <artifactId>streampark-common-scala-bridge_${scala.binary.version}</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -925,6 +932,7 @@
                             <exclude>src/main/resources/*.dict</exclude>
 
                             <exclude>streampark-console-webapp/**</exclude>
+                            <exclude>streampark-console-webapp-v2/**</exclude>
                         </excludes>
                     </configuration>
                     <executions>

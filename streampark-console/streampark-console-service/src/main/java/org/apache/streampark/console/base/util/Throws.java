@@ -159,7 +159,7 @@ public class Throws {
         try {
             return createRuntimeExceptionInternal(exceptionClass, errorMsgs);
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to instantiate exception type: " + exceptionClass.getName(), e);
         }
     }
 
@@ -176,7 +176,8 @@ public class Throws {
                         ? exceptionClass.getConstructor(String.class)
                         : exceptionClass.getConstructor();
                 } catch (NoSuchMethodException e) {
-                    throw new RuntimeException(e);
+                    throw new IllegalStateException(
+                        "No suitable constructor for exception type: " + exceptionClass.getName(), e);
                 }
             });
         AssertUtils.notNull(

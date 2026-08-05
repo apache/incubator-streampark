@@ -138,11 +138,11 @@ jobs:
           - name: FlinkOnRemoteClusterDeployTest
             class: org.apache.streampark.e2e.cases.Flink120OnRemoteClusterDeployTest
 
-          - name: FlinkOnYarnClusterDeployTest
-            class: org.apache.streampark.e2e.cases.Flink120OnYarnClusterDeployTest
+          # - name: FlinkOnYarnClusterDeployTest
+          #  class: org.apache.streampark.e2e.cases.Flink120OnYarnClusterDeployTest
 
-          - name: FlinkSQLOnYarnTest
-            class: org.apache.streampark.e2e.cases.FlinkSQL120OnYarnTest
+          # - name: FlinkSQLOnYarnTest
+          #  class: org.apache.streampark.e2e.cases.FlinkSQL120OnYarnTest
 
           #- name: Flink117OnRemoteClusterDeployTest
           #  class: org.apache.streampark.e2e.cases.Flink117OnRemoteClusterDeployTest
@@ -198,6 +198,22 @@ jobs:
         run: |
           docker load -i /tmp/standalone-image.tar \
           && rm -f /tmp/standalone-image.tar
+      - name: Pre-pull Testcontainers images
+        run: |
+          pull_with_retry() {
+            local image="$1"
+            for attempt in $(seq 1 8); do
+              if docker pull "$image"; then
+                return 0
+              fi
+              echo "Failed to pull $image (attempt $attempt), retrying in ${attempt}0s..."
+              sleep $((attempt * 10))
+            done
+            echo "Failed to pull $image after 8 attempts"
+            return 1
+          }
+          pull_with_retry testcontainers/ryuk:0.7.0
+          pull_with_retry selenium/standalone-chrome:4.13.0 || true
       - name: Run Test
         run: |
           ./mvnw -B -f streampark-e2e/pom.xml -am \

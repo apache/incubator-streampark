@@ -355,8 +355,8 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
                 .filter(report -> report.getName().equals(appName))
                 .collect(Collectors.toList());
         } catch (Exception e) {
-            throw new RuntimeException(
-                "getYarnAppReport failed. Ensure that yarn is running properly. ", e);
+            throw new IllegalStateException(
+                "getYarnAppReport failed. Ensure that yarn is running properly.", e);
         }
     }
 
@@ -370,10 +370,16 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
             "Job deployMode must be kubernetes-session|kubernetes-application.");
 
         CompletableFuture<String> future = CompletableFuture.supplyAsync(
-            () -> KubernetesDeploymentHelper.watchDeploymentLog(
-                application.getK8sNamespace(),
-                application.getJobName(),
-                application.getJobId()));
+            () -> {
+                try {
+                    return KubernetesDeploymentHelper.watchDeploymentLog(
+                        application.getK8sNamespace(),
+                        application.getJobName(),
+                        application.getJobId());
+                } catch (Exception e) {
+                    throw new IllegalStateException("Failed to watch Kubernetes deployment log", e);
+                }
+            });
 
         return future
             .exceptionally(

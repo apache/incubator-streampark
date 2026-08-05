@@ -304,7 +304,7 @@ public class ApplicationBuildPipeline {
                 Step step = new Step()
                     .setSeq(i)
                     .setDesc(stepDesc.getOrDefault(i, "unknown step"))
-                    .setStatus(stepStatus.getOrDefault(i, PipelineStepStatusEnum.unknown).getCode());
+                    .setStatus(stepStatus.getOrDefault(i, PipelineStepStatusEnum.UNKNOWN).getCode());
                 Long st = stepTs.get(i);
                 if (st != null) {
                     step.setTs(new Date(st));

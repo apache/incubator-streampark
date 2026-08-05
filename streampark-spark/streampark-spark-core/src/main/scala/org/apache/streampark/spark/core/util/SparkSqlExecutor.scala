@@ -19,6 +19,7 @@ package org.apache.streampark.spark.core.util
 
 import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.util.{DeflaterUtils, Logger, PropertiesUtils}
+import org.apache.streampark.common.util.Implicits._
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.SparkConf

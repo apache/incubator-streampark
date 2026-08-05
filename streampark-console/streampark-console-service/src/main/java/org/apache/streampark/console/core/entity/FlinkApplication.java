@@ -18,14 +18,12 @@
 package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.common.conf.ConfigKeys;
-import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 import org.apache.streampark.common.enums.StorageType;
-import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.bean.AppControl;
@@ -36,7 +34,6 @@ import org.apache.streampark.console.core.enums.ResourceFromEnum;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
 import org.apache.streampark.console.core.util.YarnQueueLabelExpression;
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates;
-import org.apache.streampark.flink.packer.maven.DependencyInfo;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -47,6 +44,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -63,7 +61,11 @@ import java.util.Optional;
 @Setter
 @TableName("t_flink_app")
 @Slf4j
-public class FlinkApplication extends BaseEntity {
+public class FlinkApplication extends BaseEntity implements ApplicationEntitySupport, ReleaseOutcomeTarget {
+
+    private static final TypeReference<Map<String, Object>> STRING_OBJECT_MAP =
+        new TypeReference<Map<String, Object>>() {
+        };
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -421,30 +423,6 @@ public class FlinkApplication extends BaseEntity {
     }
 
     /**
-     * Local compilation and packaging working directory
-     */
-    @JsonIgnore
-    public String getDistHome() {
-        String path = String.format("%s/%s/%s", Workspace.APP_LOCAL_DIST(), projectId.toString(), getModule());
-        log.info("local distHome:{}", path);
-        return path;
-    }
-
-    @JsonIgnore
-    public String getLocalAppHome() {
-        String path = String.format("%s/%s", Workspace.local().APP_WORKSPACE(), id.toString());
-        log.info("local appHome:{}", path);
-        return path;
-    }
-
-    @JsonIgnore
-    public String getRemoteAppHome() {
-        String path = String.format("%s/%s", Workspace.remote().APP_WORKSPACE(), id.toString());
-        log.info("remote appHome:{}", path);
-        return path;
-    }
-
-    /**
      * Automatically identify remoteAppHome or localAppHome based on app FlinkDeployMode
      */
     @JsonIgnore
@@ -492,12 +470,11 @@ public class FlinkApplication extends BaseEntity {
 
     @JsonIgnore
     @SneakyThrows
-    @SuppressWarnings("unchecked")
     public Map<String, Object> getOptionMap() {
         if (StringUtils.isBlank(this.options)) {
             return new HashMap<>();
         }
-        Map<String, Object> optionMap = JacksonUtils.read(this.options, Map.class);
+        Map<String, Object> optionMap = JacksonUtils.read(this.options, STRING_OBJECT_MAP);
         optionMap.entrySet().removeIf(entry -> entry.getValue() == null);
         return optionMap;
     }
@@ -541,26 +518,8 @@ public class FlinkApplication extends BaseEntity {
     }
 
     @JsonIgnore
-    public DependencyInfo getDependencyInfo() {
-        return Dependency.toDependency(getDependency()).toJarPackDeps();
-    }
-
-    @JsonIgnore
     public boolean isRunning() {
         return FlinkAppStateEnum.RUNNING.getValue() == this.getState();
-    }
-
-    @JsonIgnore
-    public boolean isNeedRollback() {
-        return ReleaseStateEnum.NEED_ROLLBACK.get() == this.getRelease();
-    }
-
-    @JsonIgnore
-    public boolean isNeedRestartOnFailed() {
-        if (this.restartSize != null && this.restartCount != null) {
-            return this.restartSize > 0 && this.restartCount <= this.restartSize;
-        }
-        return false;
     }
 
     @JsonIgnore
@@ -585,21 +544,10 @@ public class FlinkApplication extends BaseEntity {
     }
 
     @JsonIgnore
-    public FsOperator getFsOperator() {
-        return FsOperator.of(getStorageType());
-    }
-
-    @JsonIgnore
-    public Workspace getWorkspace() {
-        return Workspace.of(getStorageType());
-    }
-
-    @JsonIgnore
     @SneakyThrows
-    @SuppressWarnings("unchecked")
     public Map<String, Object> getHotParamsMap() {
         if (this.hotParams != null) {
-            Map<String, Object> map = JacksonUtils.read(this.hotParams, Map.class);
+            Map<String, Object> map = JacksonUtils.read(this.hotParams, STRING_OBJECT_MAP);
             map.entrySet().removeIf(entry -> entry.getValue() == null);
             return map;
         }

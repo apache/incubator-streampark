@@ -21,18 +21,12 @@ import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.SparkDeployMode;
-import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.AssertUtils;
-import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.base.util.JacksonUtils;
-import org.apache.streampark.console.base.util.WebUtils;
-import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.bean.DockerConfig;
 import org.apache.streampark.console.core.entity.ApplicationBuildPipeline;
 import org.apache.streampark.console.core.entity.ApplicationLog;
-import org.apache.streampark.console.core.entity.Message;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.entity.SparkApplicationConfig;
@@ -40,11 +34,8 @@ import org.apache.streampark.console.core.entity.SparkEnv;
 import org.apache.streampark.console.core.entity.SparkSql;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
 import org.apache.streampark.console.core.enums.EngineTypeEnum;
-import org.apache.streampark.console.core.enums.NoticeTypeEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
-import org.apache.streampark.console.core.enums.ResourceTypeEnum;
-import org.apache.streampark.console.core.mapper.ApplicationBuildPipelineMapper;
 import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SettingService;
@@ -55,26 +46,22 @@ import org.apache.streampark.console.core.service.application.SparkAplicationBui
 import org.apache.streampark.console.core.service.application.SparkApplicationConfigService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
+import org.apache.streampark.console.core.util.ApplicationBuildPipelineUtils;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.SparkAppHttpWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
-import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.PipeWatcher;
 import org.apache.streampark.flink.packer.pipeline.PipelineSnapshot;
-import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
 import org.apache.streampark.flink.packer.pipeline.SparkK8sApplicationBuildRequest;
 import org.apache.streampark.flink.packer.pipeline.SparkYarnBuildRequest;
 import org.apache.streampark.flink.packer.pipeline.impl.SparkK8sApplicationBuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.impl.SparkYarnBuildPipeline;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -84,25 +71,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
-
-import static org.apache.streampark.console.core.enums.OperationEnum.RELEASE;
 
 @Service
 @Slf4j
 @Transactional(propagation = Propagation.SUPPORTS, rollbackFor = Exception.class)
 public class SparkApplicationBuildPipelineServiceImpl
     extends
-        ServiceImpl<ApplicationBuildPipelineMapper, ApplicationBuildPipeline>
+        AbstractApplicationBuildPipelineService
     implements
         SparkAplicationBuildPipelineService {
 
@@ -153,12 +129,8 @@ public class SparkApplicationBuildPipelineServiceImpl
         checkBuildEnv(appId, forceBuild);
 
         SparkApplication app = applicationManageService.getById(appId);
-        ApplicationLog applicationLog = new ApplicationLog();
-        applicationLog.setJobType(EngineTypeEnum.SPARK.getCode());
-        applicationLog.setOptionName(RELEASE.getValue());
-        applicationLog.setAppId(app.getId());
-        applicationLog.setCreateTime(new Date());
-        applicationLog.setUserId(ServiceHelper.getUserId());
+        ApplicationLog applicationLog =
+            ApplicationBuildPipelineUtils.createReleaseLog(app.getId(), EngineTypeEnum.SPARK.getCode());
 
         // check if you need to go through the build process (if the jar and pom have changed,
         // you need to go through the build process, if other common parameters are modified,
@@ -192,9 +164,7 @@ public class SparkApplicationBuildPipelineServiceImpl
 
                 @Override
                 public void onStart(PipelineSnapshot snapshot) {
-                    ApplicationBuildPipeline buildPipeline = ApplicationBuildPipeline.fromPipeSnapshot(snapshot)
-                        .setAppId(app.getId());
-                    saveEntity(buildPipeline);
+                    saveEntity(ApplicationBuildPipelineUtils.fromSnapshot(snapshot, app.getId()));
 
                     app.setRelease(ReleaseStateEnum.RELEASING.get());
                     applicationManageService.updateRelease(app);
@@ -203,134 +173,68 @@ public class SparkApplicationBuildPipelineServiceImpl
                         sparkAppHttpWatcher.init();
                     }
 
-                    // 1) checkEnv
                     applicationInfoService.checkEnv(app);
 
-                    // 2) some preparatory work
                     String appUploads = app.getWorkspace().APP_UPLOADS();
-
-                    if (app.isSparkJarOrPySparkJob()) {
-                        // spark jar and pyspark upload resource to appHome...
-                        String appHome = app.getAppHome();
-                        FsOperator fsOperator = app.getFsOperator();
-                        fsOperator.delete(appHome);
-                        if (app.isFromUploadJob()) {
-                            String uploadJar = appUploads.concat("/").concat(app.getJar());
-                            File localJar = new File(
-                                String.format(
-                                    "%s/%d/%s",
-                                    Workspace.local().APP_UPLOADS(),
-                                    app.getTeamId(),
-                                    app.getJar()));
-                            if (!localJar.exists()) {
-                                Resource resource = resourceService.findByResourceName(app.getTeamId(),
-                                    app.getJar());
-                                if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
-                                    localJar = new File(resource.getFilePath());
-                                    uploadJar = appUploads.concat("/").concat(localJar.getName());
-                                }
-                            }
-                            // upload jar copy to appHome
-                            checkOrElseUploadJar(app.getFsOperator(), localJar, uploadJar, appUploads);
-
-                            switch (app.getApplicationType()) {
-                                case STREAMPARK_SPARK:
-                                    fsOperator.mkdirs(app.getAppLib());
-                                    fsOperator.copy(uploadJar, app.getAppLib(), false, true);
-                                    break;
-                                case APACHE_SPARK:
-                                    fsOperator.mkdirs(appHome);
-                                    fsOperator.copy(uploadJar, appHome, false, true);
-                                    break;
-                                default:
-                                    throw new IllegalArgumentException(
-                                        "[StreamPark] unsupported ApplicationType of FlinkJar: "
-                                            + app.getApplicationType());
-                            }
-                        } else {
-                            fsOperator.upload(app.getDistHome(), appHome);
-                        }
-                    } else {
-                        if (!app.getDependencyObject().getJar().isEmpty()) {
-                            String localUploads = Workspace.local().APP_UPLOADS();
-                            // copy jar to local upload dir
-                            for (String jar : app.getDependencyObject().getJar()) {
-                                File localJar = new File(WebUtils.getAppTempDir(), jar);
-                                File uploadJar = new File(localUploads, jar);
-                                if (!localJar.exists() && !uploadJar.exists()) {
-                                    throw new ApiAlertException(
-                                        "Missing file: " + jar + ", please upload again");
-                                }
-                                if (localJar.exists()) {
-                                    checkOrElseUploadJar(
-                                        FsOperator.lfs(), localJar, uploadJar.getAbsolutePath(),
-                                        localUploads);
-                                }
-                            }
-                        }
-                    }
+                    ApplicationBuildPipelineUtils.prepareBuildResources(
+                        app.isSparkJarOrPySparkJob(),
+                        () -> ApplicationBuildPipelineUtils.prepareJarJobHome(
+                            app.getTeamId(),
+                            app.getJar(),
+                            app.getAppHome(),
+                            app.getAppLib(),
+                            app.getDistHome(),
+                            app.getFsOperator(),
+                            appUploads,
+                            app.isFromUploadJob(),
+                            app.getApplicationType(),
+                            resourceService,
+                            false),
+                        app.getDependencyObject(),
+                        resourceService);
                 }
 
                 @Override
                 public void onStepStateChange(PipelineSnapshot snapshot) {
-                    ApplicationBuildPipeline buildPipeline = ApplicationBuildPipeline.fromPipeSnapshot(snapshot)
-                        .setAppId(app.getId());
-                    saveEntity(buildPipeline);
+                    saveEntity(ApplicationBuildPipelineUtils.fromSnapshot(snapshot, app.getId()));
                 }
 
                 @Override
                 public void onFinish(PipelineSnapshot snapshot, BuildResult result) {
-                    ApplicationBuildPipeline buildPipeline = ApplicationBuildPipeline.fromPipeSnapshot(snapshot)
-                        .setAppId(app.getId())
-                        .setBuildResult(result);
-                    saveEntity(buildPipeline);
+                    saveEntity(ApplicationBuildPipelineUtils.finishedSnapshot(snapshot, result, app.getId()));
                     if (result.pass()) {
-                        // running job ...
-                        if (app.isRunning()) {
-                            app.setRelease(ReleaseStateEnum.NEED_RESTART.get());
-                        } else {
-                            app.setOptionState(OptionStateEnum.NONE.getValue());
-                            app.setRelease(ReleaseStateEnum.DONE.get());
-                            // If the current task is not running, or the task has just been added, directly
-                            // set
-                            // the candidate version to the official version
-                            if (app.isSparkOnYarnJob()) {
-                                applicationManageService.toEffective(app);
-                            } else {
-                                if (app.isStreamParkJob()) {
+                        ApplicationBuildPipelineUtils.applySuccessfulRelease(
+                            app,
+                            () -> {
+                                if (app.isSparkOnYarnJob()) {
+                                    applicationManageService.toEffective(app);
+                                } else if (app.isStreamParkJob()) {
                                     SparkApplicationConfig config =
                                         applicationConfigService.getLatest(app.getId());
                                     if (config != null) {
                                         config.setToApplication(app);
-                                        applicationConfigService.toEffective(app.getId(),
-                                            app.getConfigId());
+                                        applicationConfigService.toEffective(
+                                            app.getId(), app.getConfigId());
                                     }
                                 }
-                            }
-                        }
+                            });
                         applicationLog.setSuccess(true);
-                        app.setBuild(false);
-
                     } else {
-                        Message message = new Message(
-                            ServiceHelper.getUserId(),
-                            app.getId(),
-                            app.getAppName().concat(" release failed"),
-                            ExceptionUtils.stringifyException(snapshot.error().exception()),
-                            NoticeTypeEnum.EXCEPTION);
-                        messageService.push(message);
+                        ApplicationBuildPipelineUtils.recordReleaseFailure(
+                            app.getId(), app.getAppName(), snapshot, applicationLog, messageService);
                         app.setRelease(ReleaseStateEnum.FAILED.get());
                         app.setOptionState(OptionStateEnum.NONE.getValue());
                         app.setBuild(true);
-                        applicationLog.setException(
-                            ExceptionUtils.stringifyException(snapshot.error().exception()));
-                        applicationLog.setSuccess(false);
                     }
-                    applicationManageService.updateRelease(app);
-                    applicationLogService.save(applicationLog);
-                    if (sparkAppHttpWatcher.isWatchingApp(app.getId())) {
-                        sparkAppHttpWatcher.init();
-                    }
+                    ApplicationBuildPipelineUtils.finalizeRelease(
+                        () -> applicationManageService.updateRelease(app),
+                        applicationLog,
+                        applicationLogService,
+                        () -> {
+                            if (sparkAppHttpWatcher.isWatchingApp(app.getId())) {
+                                sparkAppHttpWatcher.init();
+                            }
+                        });
                 }
             });
         // save pipeline instance snapshot to db before release it.
@@ -471,143 +375,12 @@ public class SparkApplicationBuildPipelineServiceImpl
         }
     }
 
-    @Override
-    public Optional<ApplicationBuildPipeline> getCurrentBuildPipeline(@Nonnull Long appId) {
-        return Optional.ofNullable(getById(appId));
-    }
-
-    @Override
-    public boolean allowToBuildNow(@Nonnull Long appId) {
-        return getCurrentBuildPipeline(appId)
-            .map(pipeline -> PipelineStatusEnum.running != pipeline.getPipelineStatus())
-            .orElse(true);
-    }
-
-    @Override
-    public Map<Long, PipelineStatusEnum> listAppIdPipelineStatusMap(List<Long> appIds) {
-        if (CollectionUtils.isEmpty(appIds)) {
-            return new HashMap<>();
-        }
-        List<ApplicationBuildPipeline> appBuildPipelines =
-            this.lambdaQuery().in(ApplicationBuildPipeline::getAppId, appIds).list();
-        if (CollectionUtils.isEmpty(appBuildPipelines)) {
-            return new HashMap<>();
-        }
-        return appBuildPipelines.stream()
-            .collect(Collectors.toMap(ApplicationBuildPipeline::getAppId, ApplicationBuildPipeline::getPipelineStatus));
-    }
-
-    @Override
-    public void removeByAppId(Long appId) {
-        this.lambdaUpdate().eq(ApplicationBuildPipeline::getAppId, appId).remove();
-    }
-
-    /**
-     * save or update build pipeline
-     *
-     * @param pipe application build pipeline
-     * @return value after the save or update
-     */
-    public boolean saveEntity(ApplicationBuildPipeline pipe) {
-        ApplicationBuildPipeline old = getById(pipe.getAppId());
-        if (old == null) {
-            return save(pipe);
-        }
-        return updateById(pipe);
-    }
-
-    /**
-     * Check if the jar exists, and upload a copy if it does not exist
-     *
-     * @param fsOperator
-     * @param localJar
-     * @param targetJar
-     * @param targetDir
-     */
-    private void checkOrElseUploadJar(
-                                      FsOperator fsOperator, File localJar, String targetJar, String targetDir) {
-        if (!fsOperator.exists(targetJar)) {
-            fsOperator.upload(localJar.getAbsolutePath(), targetDir, false, true);
-        } else {
-            // The file exists to check whether it is consistent, and if it is inconsistent, re-upload it
-            if (!FileUtils.equals(localJar, new File(targetJar))) {
-                fsOperator.upload(localJar.getAbsolutePath(), targetDir, false, true);
-            }
-        }
-    }
-
-    /**
-     * Gets and parses dependencies on the application
-     *
-     * @param application
-     * @return DependencyInfo
-     */
     private DependencyInfo getMergedDependencyInfo(SparkApplication application) {
-        DependencyInfo dependencyInfo = application.getDependencyInfo();
-        if (StringUtils.isBlank(application.getTeamResource())) {
-            return dependencyInfo;
-        }
-
-        try {
-            String[] resourceIds = JacksonUtils.read(application.getTeamResource(), String[].class);
-
-            List<Artifact> mvnArtifacts = new ArrayList<Artifact>();
-            List<String> jarLibs = new ArrayList<String>();
-
-            Arrays.stream(resourceIds)
-                .forEach(
-                    resourceId -> {
-                        Resource resource = resourceService.getById(resourceId);
-
-                        if (resource.getResourceType() != ResourceTypeEnum.GROUP) {
-                            mergeDependency(application, mvnArtifacts, jarLibs, resource);
-                        } else {
-                            try {
-                                String[] groupElements =
-                                    JacksonUtils.read(resource.getResource(),
-                                        String[].class);
-                                Arrays.stream(groupElements)
-                                    .forEach(
-                                        resourceIdInGroup -> mergeDependency(
-                                            application,
-                                            mvnArtifacts,
-                                            jarLibs,
-                                            resourceService.getById(
-                                                resourceIdInGroup)));
-                            } catch (JsonProcessingException e) {
-                                throw new ApiAlertException("Parse resource group failed.", e);
-                            }
-                        }
-                    });
-            return dependencyInfo.merge(mvnArtifacts, jarLibs);
-        } catch (Exception e) {
-            log.warn("Merge team dependency failed.", e);
-            return dependencyInfo;
-        }
-    }
-
-    private static void mergeDependency(
-                                        SparkApplication application,
-                                        List<Artifact> mvnArtifacts,
-                                        List<String> jarLibs,
-                                        Resource resource) {
-        Dependency dependency = Dependency.toDependency(resource.getResource());
-        dependency
-            .getPom()
-            .forEach(
-                pom -> mvnArtifacts.add(
-                    new Artifact(
-                        pom.getGroupId(),
-                        pom.getArtifactId(),
-                        pom.getVersion(),
-                        pom.getClassifier())));
-        dependency
-            .getJar()
-            .forEach(
-                jar -> jarLibs.add(
-                    String.format(
-                        "%s/%d/%s",
-                        Workspace.local().APP_UPLOADS(),
-                        application.getTeamId(), jar)));
+        return ApplicationBuildPipelineUtils.getMergedDependencyInfo(
+            application.getDependencyInfo(),
+            application.getTeamResource(),
+            application.getTeamId(),
+            resourceService,
+            log);
     }
 }

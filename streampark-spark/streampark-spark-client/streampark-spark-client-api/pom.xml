@@ -31,7 +31,7 @@
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-common_${scala.binary.version}</artifactId>
+            <artifactId>streampark-common</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -50,7 +50,7 @@
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-packer_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-packer</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
