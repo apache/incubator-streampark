@@ -145,6 +145,7 @@ function buildLegacyPathRedirectRoutes(): AppRoute.Route[] {
         redirect: targetPath,
         component: Layout,
         meta: {
+            title: legacyPath,
             hide: true,
             requiresAuth: true,
         },
