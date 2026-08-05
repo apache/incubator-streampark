@@ -736,6 +736,7 @@
                                 </goals>
                                 <phase>generate-resources</phase>
                                 <configuration>
+                                    <!-- Vite 8 rolldown needs postinstall native bindings (v1 Vite 4 used ignore-scripts) -->
                                     <arguments>install --frozen-lockfile</arguments>
                                 </configuration>
                             </execution>
