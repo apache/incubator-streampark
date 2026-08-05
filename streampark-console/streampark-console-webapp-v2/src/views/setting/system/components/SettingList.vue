@@ -18,6 +18,7 @@
 import type { SystemSetting } from '@/types/api/setting/types/setting.type'
 import { fetchSystemSettingUpdate } from '@/service'
 import { SvgIcon } from '@/components/Icon'
+import HelpInfo from '@/components/common/HelpInfo.vue'
 
 const props = defineProps<{
     data: SystemSetting[]
@@ -90,16 +91,15 @@ const visibleItems = computed(() => props.data.filter((item) => avatarMap[item.s
     <n-list>
         <n-list-item v-for="item in visibleItems" :key="item.settingKey">
             <div class="setting-row">
-                <n-thing
-                    :title="settingTitles[item.settingKey]"
-                    :description="settingDesc[item.settingKey]"
-                >
-                    <template #avatar>
-                        <div class="avatar">
-                            <SvgIcon :name="avatarMap[item.settingKey]" />
-                        </div>
-                    </template>
-                </n-thing>
+                <div class="setting-meta">
+                    <div class="avatar">
+                        <SvgIcon :name="avatarMap[item.settingKey]" />
+                    </div>
+                    <span class="setting-title inline-flex items-center gap-4px">
+                        {{ settingTitles[item.settingKey] }}
+                        <HelpInfo :message="settingDesc[item.settingKey]" />
+                    </span>
+                </div>
                 <div class="setting-value">
                     <template v-if="item.type === 1">
                         <n-input
@@ -145,6 +145,20 @@ const visibleItems = computed(() => props.data.filter((item) => avatarMap[item.s
     align-items: center;
     gap: 16px;
     width: 100%;
+}
+
+.setting-meta {
+    display: flex;
+    flex: 0 0 50%;
+    align-items: center;
+    gap: 16px;
+    max-width: 50%;
+}
+
+.setting-title {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
 }
 
 .setting-value {

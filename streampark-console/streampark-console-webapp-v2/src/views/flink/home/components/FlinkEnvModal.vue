@@ -176,9 +176,9 @@ async function handleSubmit() {
                     :placeholder="t('setting.flinkHome.flinkNamePlaceholder')"
                     clearable
                 />
-                <n-text depth="3" class="mt-4px text-12px">
+                <span class="tip-info">
                     {{ t('setting.flinkHome.operateMessage.flinkNameTips') }}
-                </n-text>
+                </span>
             </n-form-item>
             <n-form-item :label="t('setting.flinkHome.flinkHome')" path="flinkHome">
                 <n-input
@@ -186,9 +186,9 @@ async function handleSubmit() {
                     :placeholder="t('setting.flinkHome.flinkHomePlaceholder')"
                     clearable
                 />
-                <n-text depth="3" class="mt-4px text-12px">
+                <span class="tip-info">
                     {{ t('setting.flinkHome.operateMessage.flinkHomeTips') }}
-                </n-text>
+                </span>
             </n-form-item>
             <n-form-item :label="t('setting.flinkHome.description')" path="description">
                 <n-input

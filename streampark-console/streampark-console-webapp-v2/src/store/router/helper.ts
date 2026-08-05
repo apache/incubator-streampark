@@ -26,13 +26,30 @@ const metaFields: AppRoute.MetaKeys[] = [
 
 const nativeViewModules = import.meta.glob('/src/views/**/*.vue')
 
+/** Backend menu path aliases (historical paths -> canonical paths). */
+const PATH_ALIASES: Record<string, string> = {
+    '/setting/FlinkGateway': '/setting/flink-gateway',
+}
+
 /** Backend menu component path aliases (historical paths -> current views). */
 const COMPONENT_ALIASES: Record<string, string> = {
+    'setting/FlinkGateway/index.vue': 'flink/gateway/index.vue',
     'spark/app/create.vue': 'spark/app/Add.vue',
     'spark/app/edit.vue': 'spark/app/Edit.vue',
     'base/redirect/index.vue': 'build-in/redirect/index.vue',
     'base/lock/index.vue': 'build-in/lock/index.vue',
     'base/error-log/index.vue': 'build-in/error-log/index.vue',
+}
+
+function normalizeRoutePath(path: string): string {
+    return PATH_ALIASES[path] ?? path
+}
+
+function normalizeRowRoutes(routes: AppRoute.RowRoute[]): AppRoute.RowRoute[] {
+    return routes.map((route) => ({
+        ...route,
+        path: normalizeRoutePath(route.path),
+    }))
 }
 
 function normalizeComponentRel(componentPath: string): string {
@@ -106,7 +123,7 @@ function buildDirectoryRedirectRoutes(rowRoutes: AppRoute.RowRoute[]): AppRoute.
             pid: null,
             name: `dir_redirect_${String(dir.name).replace(/\W+/g, '_')}`,
             path: dir.path,
-            redirect: target.path,
+            redirect: normalizeRoutePath(target.path),
             component: Layout,
             meta: {
                 title: dir.title,
@@ -118,10 +135,27 @@ function buildDirectoryRedirectRoutes(rowRoutes: AppRoute.RowRoute[]): AppRoute.
     return redirects
 }
 
+/** Legacy menu paths redirect to canonical kebab-case routes. */
+function buildLegacyPathRedirectRoutes(): AppRoute.Route[] {
+    return Object.entries(PATH_ALIASES).map(([legacyPath, targetPath], index) => ({
+        id: -900000 - index,
+        pid: null,
+        name: `legacy_redirect_${legacyPath.replace(/\W+/g, '_')}`,
+        path: legacyPath,
+        redirect: targetPath,
+        component: Layout,
+        meta: {
+            hide: true,
+            requiresAuth: true,
+        },
+    }))
+}
+
 export function createRoutes(routes: AppRoute.RowRoute[]) {
     const { hasPermission } = usePermission()
 
-    let resultRouter = standardizedRoutes(routes)
+    const normalizedRoutes = normalizeRowRoutes(routes)
+    let resultRouter = standardizedRoutes(normalizedRoutes)
     resultRouter = resultRouter.filter((i) => hasPermission(i.meta.roles))
 
     resultRouter = resultRouter.map((item: AppRoute.Route) => {
@@ -137,7 +171,11 @@ export function createRoutes(routes: AppRoute.RowRoute[]) {
 
     setRedirect(resultRouter)
     resultRouter = flattenAuthRoutes(resultRouter)
-    resultRouter = [...buildDirectoryRedirectRoutes(routes), ...resultRouter]
+    resultRouter = [
+        ...buildDirectoryRedirectRoutes(normalizedRoutes),
+        ...buildLegacyPathRedirectRoutes(),
+        ...resultRouter,
+    ]
 
     const appRootRoute: RouteRecordRaw = {
         path: '/appRoot',
@@ -179,7 +217,7 @@ function setRedirect(routes: AppRoute.Route[]) {
 }
 
 export function createMenus(userRoutes: AppRoute.RowRoute[]) {
-    const resultMenus = standardizedRoutes(userRoutes)
+    const resultMenus = standardizedRoutes(normalizeRowRoutes(userRoutes))
     const visibleMenus = resultMenus.filter((route) => !route.meta.hide)
     return arrayToTree(transformAuthRoutesToMenus(visibleMenus))
 }

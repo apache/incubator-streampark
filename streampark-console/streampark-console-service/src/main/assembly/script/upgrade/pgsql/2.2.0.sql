@@ -84,10 +84,10 @@ insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 120403);
 alter table "public"."t_user" alter column "password" TYPE varchar(64) collate "pg_catalog"."default";
 comment on column "public"."t_user"."login_type" is 'login type 0:password 1:ldap 2:sso';
 
-insert into "public"."t_menu" values (120500, 130000, 'setting.flinkGateway', '/setting/FlinkGateway', 'setting/FlinkGateway/index', null, 'apartment', '0', '1', 3, now(), now());
-insert into "public"."t_menu" values (110501, 110500, 'add', null, null, 'gateway:add', null, '1', '1', null, now(), now());
-insert into "public"."t_menu" values (110502, 110500, 'update', null, null, 'gateway:update', null, '1', '1', null, now(), now());
-insert into "public"."t_menu" values (110503, 110500, 'delete', null, null, 'gateway:delete', null, '1', '1', null, now(), now());
+insert into "public"."t_menu" values (120500, 130000, 'setting.flinkGateway', '/setting/flink-gateway', 'setting/FlinkGateway/index', null, 'apartment', '0', '1', 3, now(), now());
+insert into "public"."t_menu" values (120501, 120500, 'add', null, null, 'gateway:add', null, '1', '1', null, now(), now());
+insert into "public"."t_menu" values (120502, 120500, 'update', null, null, 'gateway:update', null, '1', '1', null, now(), now());
+insert into "public"."t_menu" values (120503, 120500, 'delete', null, null, 'gateway:delete', null, '1', '1', null, now(), now());
 
 insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120500);
 insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 120501);

@@ -174,9 +174,9 @@ async function handleSubmit() {
                     :placeholder="t('spark.home.placeholder.sparkName')"
                     clearable
                 />
-                <n-text depth="3" class="mt-4px text-12px">
+                <span class="tip-info">
                     {{ t('spark.home.tips.sparkName') }}
-                </n-text>
+                </span>
             </n-form-item>
             <n-form-item :label="t('spark.home.form.sparkHome')" path="sparkHome">
                 <n-input
@@ -184,9 +184,9 @@ async function handleSubmit() {
                     :placeholder="t('spark.home.placeholder.sparkHome')"
                     clearable
                 />
-                <n-text depth="3" class="mt-4px text-12px">
+                <span class="tip-info">
                     {{ t('spark.home.tips.sparkHome') }}
-                </n-text>
+                </span>
             </n-form-item>
             <n-form-item :label="t('spark.home.form.description')" path="description">
                 <n-input

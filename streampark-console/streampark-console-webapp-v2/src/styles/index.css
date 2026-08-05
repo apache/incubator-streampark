@@ -18,3 +18,11 @@ body,
 .drag-handle {
     cursor: move;
 }
+
+.tip-info {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--n-text-color-3);
+}

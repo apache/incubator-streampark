@@ -25,6 +25,7 @@ import {
     fetchVerifyEmail,
 } from '@/service'
 import { SvgIcon } from '@/components/Icon'
+import HelpInfo from '@/components/common/HelpInfo.vue'
 
 export type SettingFormType = 'docker' | 'email'
 
@@ -244,34 +245,49 @@ async function handleSubmit() {
                 label-width="140"
                 class="mt-16px"
             >
-                <n-form-item :label="t('setting.system.docker.address.label')" path="address">
+                <n-form-item path="address">
+                    <template #label>
+                        <span class="inline-flex items-center gap-4px">
+                            {{ t('setting.system.docker.address.label') }}
+                            <HelpInfo :message="t('setting.system.docker.address.desc')" />
+                        </span>
+                    </template>
                     <n-input
                         v-model:value="dockerModel.address"
                         :placeholder="t('setting.system.docker.address.label')"
                     />
-                    <template #feedback>
-                        {{ t('setting.system.docker.address.desc') }}
-                    </template>
                 </n-form-item>
-                <n-form-item :label="t('setting.system.docker.namespace.label')" path="namespace">
+                <n-form-item path="namespace">
+                    <template #label>
+                        <span class="inline-flex items-center gap-4px">
+                            {{ t('setting.system.docker.namespace.label') }}
+                            <HelpInfo :message="t('setting.system.docker.namespace.desc')" />
+                        </span>
+                    </template>
                     <n-input
                         v-model:value="dockerModel.namespace"
                         :placeholder="t('setting.system.docker.namespace.label')"
                     />
-                    <template #feedback>
-                        {{ t('setting.system.docker.namespace.desc') }}
-                    </template>
                 </n-form-item>
-                <n-form-item :label="t('setting.system.docker.username.label')" path="username">
+                <n-form-item path="username">
+                    <template #label>
+                        <span class="inline-flex items-center gap-4px">
+                            {{ t('setting.system.docker.username.label') }}
+                            <HelpInfo :message="t('setting.system.docker.username.desc')" />
+                        </span>
+                    </template>
                     <n-input
                         v-model:value="dockerModel.username"
                         :placeholder="t('setting.system.docker.username.label')"
                     />
-                    <template #feedback>
-                        {{ t('setting.system.docker.username.desc') }}
-                    </template>
                 </n-form-item>
-                <n-form-item :label="t('setting.system.docker.password.label')" path="password">
+                <n-form-item path="password">
+                    <template #label>
+                        <span class="inline-flex items-center gap-4px">
+                            {{ t('setting.system.docker.password.label') }}
+                            <HelpInfo :message="t('setting.system.docker.password.desc')" />
+                        </span>
+                    </template>
                     <n-input
                         v-model:value="dockerModel.password"
                         type="password"
@@ -279,9 +295,6 @@ async function handleSubmit() {
                         autocomplete="new-password"
                         :placeholder="t('setting.system.docker.password.label')"
                     />
-                    <template #feedback>
-                        {{ t('setting.system.docker.password.desc') }}
-                    </template>
                 </n-form-item>
             </n-form>
 
@@ -294,16 +307,25 @@ async function handleSubmit() {
                 label-width="140"
                 class="mt-16px"
             >
-                <n-form-item :label="t('setting.system.email.host.label')" path="host">
+                <n-form-item path="host">
+                    <template #label>
+                        <span class="inline-flex items-center gap-4px">
+                            {{ t('setting.system.email.host.label') }}
+                            <HelpInfo :message="t('setting.system.email.host.desc')" />
+                        </span>
+                    </template>
                     <n-input
                         v-model:value="emailModel.host"
                         :placeholder="t('setting.system.email.host.label')"
                     />
-                    <template #feedback>
-                        {{ t('setting.system.email.host.desc') }}
-                    </template>
                 </n-form-item>
-                <n-form-item :label="t('setting.system.email.port.label')" path="port">
+                <n-form-item path="port">
+                    <template #label>
+                        <span class="inline-flex items-center gap-4px">
+                            {{ t('setting.system.email.port.label') }}
+                            <HelpInfo :message="t('setting.system.email.port.desc')" />
+                        </span>
+                    </template>
                     <n-input-number
                         v-model:value="emailModel.port"
                         :style="{ width: '100%' }"
@@ -312,29 +334,38 @@ async function handleSubmit() {
                         :show-button="false"
                         :placeholder="t('setting.system.email.port.label')"
                     />
-                    <template #feedback>
-                        {{ t('setting.system.email.port.desc') }}
-                    </template>
                 </n-form-item>
-                <n-form-item :label="t('setting.system.email.from.label')" path="from">
+                <n-form-item path="from">
+                    <template #label>
+                        <span class="inline-flex items-center gap-4px">
+                            {{ t('setting.system.email.from.label') }}
+                            <HelpInfo :message="t('setting.system.email.from.desc')" />
+                        </span>
+                    </template>
                     <n-input
                         v-model:value="emailModel.from"
                         :placeholder="t('setting.system.email.from.label')"
                     />
-                    <template #feedback>
-                        {{ t('setting.system.email.from.desc') }}
-                    </template>
                 </n-form-item>
-                <n-form-item :label="t('setting.system.email.userName.label')" path="userName">
+                <n-form-item path="userName">
+                    <template #label>
+                        <span class="inline-flex items-center gap-4px">
+                            {{ t('setting.system.email.userName.label') }}
+                            <HelpInfo :message="t('setting.system.email.userName.desc')" />
+                        </span>
+                    </template>
                     <n-input
                         v-model:value="emailModel.userName"
                         :placeholder="t('setting.system.email.userName.label')"
                     />
-                    <template #feedback>
-                        {{ t('setting.system.email.userName.desc') }}
-                    </template>
                 </n-form-item>
-                <n-form-item :label="t('setting.system.email.password.label')" path="password">
+                <n-form-item path="password">
+                    <template #label>
+                        <span class="inline-flex items-center gap-4px">
+                            {{ t('setting.system.email.password.label') }}
+                            <HelpInfo :message="t('setting.system.email.password.desc')" />
+                        </span>
+                    </template>
                     <n-input
                         v-model:value="emailModel.password"
                         type="password"
@@ -343,7 +374,13 @@ async function handleSubmit() {
                         :placeholder="t('setting.system.email.password.label')"
                     />
                 </n-form-item>
-                <n-form-item :label="t('setting.system.email.ssl.label')" path="ssl">
+                <n-form-item path="ssl">
+                    <template #label>
+                        <span class="inline-flex items-center gap-4px">
+                            {{ t('setting.system.email.ssl.label') }}
+                            <HelpInfo :message="t('setting.system.email.ssl.desc')" />
+                        </span>
+                    </template>
                     <n-switch v-model:value="emailModel.ssl">
                         <template #checked>ON</template>
                         <template #unchecked>OFF</template>

@@ -17,6 +17,7 @@
 
 /** Maps view path (under views/) to Vue component `name` for keep-alive. */
 const VIEW_ALIASES: Record<string, string> = {
+    'setting/FlinkGateway/index.vue': 'flink/gateway/index.vue',
     'spark/app/create.vue': 'spark/app/Add.vue',
     'spark/app/edit.vue': 'spark/app/Edit.vue',
 }
