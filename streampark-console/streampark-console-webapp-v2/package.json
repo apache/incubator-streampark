@@ -29,7 +29,7 @@
     "check:routes": "node scripts/check-routes.mjs",
     "check:login": "node scripts/check-login.mjs",
     "clean:cache": "rm -rf node_modules/.vite dist",
-    "build:no-cache": "pnpm run clean:cache && pnpm run build",
+    "build:no-cache": "rm -rf node_modules/.vite dist && vite build --mode production",
     "lint:eslint": "eslint --cache --max-warnings 0 \"src/**/*.{vue,ts,tsx}\" --fix",
     "lint:prettier": "prettier --write \"src/**/*.{js,json,ts,tsx,css,scss,vue,html,md}\""
   },
