@@ -24,6 +24,7 @@ import org.apache.streampark.console.core.assembler.SparkPipelineAssembler;
 import org.apache.streampark.console.core.entity.ApplicationBuildPipeline;
 import org.apache.streampark.console.core.request.spark.SparkPipelineBuildRequest;
 import org.apache.streampark.console.core.request.spark.SparkPipelineDetailRequest;
+import org.apache.streampark.console.core.response.spark.SparkPipelineDetailResponse;
 import org.apache.streampark.console.core.service.application.SparkAplicationBuildPipelineService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -57,7 +58,7 @@ public class SparkPipelineController {
     @PostMapping("build")
     @RequiresPermissions("app:create")
     @Permission(app = "#request.appId")
-    public RestResponseBody<?> buildApplication(@Valid @FormOrJson SparkPipelineBuildRequest request) {
+    public RestResponseBody<Boolean> buildApplication(@Valid @FormOrJson SparkPipelineBuildRequest request) {
         try {
             boolean actionResult = appBuildPipeService.buildApplication(request.getAppId(), request.isForceBuild());
             return RestResponseBody.success(actionResult);
@@ -75,7 +76,7 @@ public class SparkPipelineController {
     @PostMapping("/detail")
     @RequiresPermissions("app:view")
     @Permission(app = "#request.appId")
-    public RestResponseBody<?> getBuildProgressDetail(@Valid SparkPipelineDetailRequest request) {
+    public RestResponseBody<SparkPipelineDetailResponse> getBuildProgressDetail(@Valid SparkPipelineDetailRequest request) {
         Optional<ApplicationBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(request.getAppId());
         return RestResponseBody.success(
             SparkPipelineAssembler.toDetailResponse(pipeline.map(ApplicationBuildPipeline::toView).orElse(null)));

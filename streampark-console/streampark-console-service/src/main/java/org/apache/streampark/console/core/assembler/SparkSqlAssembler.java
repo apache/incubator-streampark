@@ -56,7 +56,7 @@ public final class SparkSqlAssembler {
 
     public static SparkSqlResponse[] toResponseArray(SparkSql[] sparkSqls) {
         if (sparkSqls == null) {
-            return null;
+            return new SparkSqlResponse[0];
         }
         SparkSqlResponse[] responses = new SparkSqlResponse[sparkSqls.length];
         for (int i = 0; i < sparkSqls.length; i++) {

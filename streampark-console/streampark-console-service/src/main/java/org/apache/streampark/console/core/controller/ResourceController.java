@@ -27,6 +27,9 @@ import org.apache.streampark.console.core.request.common.TeamScopedIdRequest;
 import org.apache.streampark.console.core.request.resource.ResourceCreateRequest;
 import org.apache.streampark.console.core.request.resource.ResourcePageQueryRequest;
 import org.apache.streampark.console.core.request.resource.ResourceUpdateRequest;
+import org.apache.streampark.console.core.response.resource.ResourceCheckResponse;
+import org.apache.streampark.console.core.response.resource.ResourceResponse;
+import org.apache.streampark.console.core.response.resource.ResourceUploadResponse;
 import org.apache.streampark.console.core.service.ResourceService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -44,6 +47,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -57,18 +61,18 @@ public class ResourceController {
 
     @PostMapping("add")
     @RequiresPermissions("resource:add")
-    public RestResponseBody<?> addResource(@Valid @FormOrJson ResourceCreateRequest request) throws Exception {
+    public RestResponseBody<Void> addResource(@Valid @FormOrJson ResourceCreateRequest request) throws Exception {
         this.resourceService.addResource(ResourceAssembler.toEntity(request));
         return RestResponseBody.success();
     }
 
     @PostMapping("check")
-    public RestResponseBody<?> checkResource(@Valid ResourceCreateRequest request) throws Exception {
+    public RestResponseBody<ResourceCheckResponse> checkResource(@Valid ResourceCreateRequest request) throws Exception {
         return resourceService.checkResource(ResourceAssembler.toEntity(request));
     }
 
     @PostMapping("page")
-    public RestResponseBody<?> page(RestRequest restRequest, ResourcePageQueryRequest query) {
+    public RestResponseBody<IPage<ResourceResponse>> page(RestRequest restRequest, ResourcePageQueryRequest query) {
         IPage<Resource> page =
             resourceService.getPage(ResourceAssembler.toEntity(query), restRequest);
         return RestResponseBody.success(ResourceAssembler.toPageResponse(page));
@@ -76,32 +80,32 @@ public class ResourceController {
 
     @PutMapping("update")
     @RequiresPermissions("resource:update")
-    public RestResponseBody<?> updateResource(@Valid @FormOrJson ResourceUpdateRequest request) {
+    public RestResponseBody<Void> updateResource(@Valid @FormOrJson ResourceUpdateRequest request) {
         resourceService.updateResource(ResourceAssembler.toEntity(request));
         return RestResponseBody.success();
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("resource:delete")
-    public RestResponseBody<?> deleteResource(@Valid @FormOrJson TeamScopedIdRequest request) {
+    public RestResponseBody<Void> deleteResource(@Valid @FormOrJson TeamScopedIdRequest request) {
         this.resourceService.remove(request.getId());
         return RestResponseBody.success();
     }
 
     @PostMapping("list")
-    public RestResponseBody<?> listResource(TeamIdRequest request) {
+    public RestResponseBody<List<ResourceResponse>> listResource(TeamIdRequest request) {
         List<Resource> resourceList = resourceService.listByTeamId(request.getTeamId());
         return RestResponseBody.success(ResourceAssembler.toListResponse(resourceList));
     }
 
     @PostMapping("upload")
     @RequiresPermissions("resource:add")
-    public RestResponseBody<?> upload(MultipartFile file) throws Exception {
+    public RestResponseBody<ResourceUploadResponse> upload(MultipartFile file) throws IOException {
         return RestResponseBody.success(ResourceAssembler.toUploadResponse(resourceService.upload(file)));
     }
 
     @PostMapping("upload_jars")
-    public RestResponseBody<?> listUploadJars() {
+    public RestResponseBody<Object> listUploadJars() {
         List<String> jars = resourceService.listHistoryUploadJars();
         return RestResponseBody.success(jars);
     }

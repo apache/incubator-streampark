@@ -44,6 +44,9 @@ import org.apache.streampark.console.core.request.spark.SparkAppListQueryRequest
 import org.apache.streampark.console.core.request.spark.SparkAppMappingRequest;
 import org.apache.streampark.console.core.request.spark.SparkAppStartRequest;
 import org.apache.streampark.console.core.request.spark.SparkAppUpdateRequest;
+import org.apache.streampark.console.core.response.app.AppBackupResponse;
+import org.apache.streampark.console.core.response.app.AppOptLogResponse;
+import org.apache.streampark.console.core.response.spark.SparkAppDashboardResponse;
 import org.apache.streampark.console.core.response.spark.SparkAppResponse;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.application.ApplicationLogService;
@@ -106,7 +109,7 @@ public class SparkApplicationController {
     @Permission(team = "#request.teamId")
     @PostMapping("create")
     @RequiresPermissions("app:create")
-    public RestResponseBody<?> create(@Valid @FormOrJson SparkAppCreateRequest request) throws IOException {
+    public RestResponseBody<Boolean> create(@Valid @FormOrJson SparkAppCreateRequest request) throws IOException {
         SparkApplication app = SparkApplicationAssembler.toEntity(request);
         boolean saved = applicationManageService.create(app);
         return RestResponseBody.success(saved);
@@ -115,7 +118,7 @@ public class SparkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("copy")
     @RequiresPermissions("app:copy")
-    public RestResponseBody<?> copy(@Valid @FormOrJson SparkAppCopyRequest request) throws IOException {
+    public RestResponseBody<Void> copy(@Valid @FormOrJson SparkAppCopyRequest request) throws IOException {
         applicationManageService.copy(SparkApplicationAssembler.toEntity(request));
         return RestResponseBody.success();
     }
@@ -124,14 +127,14 @@ public class SparkApplicationController {
     @Permission(app = "#request.id")
     @PostMapping("update")
     @RequiresPermissions("app:update")
-    public RestResponseBody<?> update(@Valid @FormOrJson SparkAppUpdateRequest request) {
+    public RestResponseBody<Boolean> update(@Valid @FormOrJson SparkAppUpdateRequest request) {
         applicationManageService.update(SparkApplicationAssembler.toEntity(request));
         return RestResponseBody.success(true);
     }
 
     @PostMapping("dashboard")
     @Permission(team = "#request.teamId")
-    public RestResponseBody<?> dashboard(@Valid TeamIdRequest request) {
+    public RestResponseBody<SparkAppDashboardResponse> dashboard(@Valid TeamIdRequest request) {
         Map<String, Serializable> dashboardMap = applicationInfoService.getDashboardDataMap(request.getTeamId());
         return RestResponseBody.success(SparkApplicationAssembler.toDashboardResponse(dashboardMap));
     }
@@ -139,7 +142,7 @@ public class SparkApplicationController {
     @PostMapping("list")
     @Permission(team = "#query.teamId")
     @RequiresPermissions("app:view")
-    public RestResponseBody<?> list(@Valid SparkAppListQueryRequest query, RestRequest request) {
+    public RestResponseBody<IPage<SparkAppResponse>> list(@Valid SparkAppListQueryRequest query, RestRequest request) {
         SparkApplication appParam = SparkApplicationAssembler.toEntity(query);
         IPage<SparkApplication> applicationList = applicationManageService.page(appParam, request);
         return RestResponseBody.success(SparkApplicationAssembler.toPageResponse(applicationList));
@@ -149,7 +152,7 @@ public class SparkApplicationController {
     @PostMapping("mapping")
     @Permission(app = "#request.id")
     @RequiresPermissions("app:mapping")
-    public RestResponseBody<?> mapping(@Valid @FormOrJson SparkAppMappingRequest request) {
+    public RestResponseBody<Boolean> mapping(@Valid @FormOrJson SparkAppMappingRequest request) {
         boolean flag = applicationManageService.mapping(SparkApplicationAssembler.toEntity(request));
         return RestResponseBody.success(flag);
     }
@@ -158,7 +161,7 @@ public class SparkApplicationController {
     @Permission(app = "#request.id")
     @PostMapping("revoke")
     @RequiresPermissions("app:release")
-    public RestResponseBody<?> revoke(@Valid @FormOrJson SparkAppIdRequest request) {
+    public RestResponseBody<Void> revoke(@Valid @FormOrJson SparkAppIdRequest request) {
         applicationActionService.revoke(request.getId());
         return RestResponseBody.success();
     }
@@ -166,7 +169,7 @@ public class SparkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("check/start")
     @RequiresPermissions("app:start")
-    public RestResponseBody<?> checkStart(@Valid SparkAppIdRequest request) {
+    public RestResponseBody<Object> checkStart(@Valid SparkAppIdRequest request) {
         AppExistsStateEnum stateEnum = applicationInfoService.checkStart(request.getId());
         return RestResponseBody.success(stateEnum.get());
     }
@@ -174,7 +177,7 @@ public class SparkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("start")
     @RequiresPermissions("app:start")
-    public RestResponseBody<?> start(@Valid @FormOrJson SparkAppStartRequest request) {
+    public RestResponseBody<Boolean> start(@Valid @FormOrJson SparkAppStartRequest request) {
         try {
             applicationActionService.start(SparkApplicationAssembler.toEntity(request), false);
             return RestResponseBody.success(true);
@@ -186,7 +189,7 @@ public class SparkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("cancel")
     @RequiresPermissions("app:cancel")
-    public RestResponseBody<?> cancel(@Valid @FormOrJson SparkAppCancelRequest request) throws Exception {
+    public RestResponseBody<Void> cancel(@Valid @FormOrJson SparkAppCancelRequest request) throws Exception {
         applicationActionService.cancel(SparkApplicationAssembler.toEntity(request));
         return RestResponseBody.success();
     }
@@ -195,7 +198,7 @@ public class SparkApplicationController {
     @Permission(app = "#request.id")
     @PostMapping("clean")
     @RequiresPermissions("app:clean")
-    public RestResponseBody<?> clean(@Valid @FormOrJson SparkAppIdRequest request) {
+    public RestResponseBody<Boolean> clean(@Valid @FormOrJson SparkAppIdRequest request) {
         applicationManageService.clean(SparkApplicationAssembler.toCleanEntity(request));
         return RestResponseBody.success(true);
     }
@@ -203,53 +206,53 @@ public class SparkApplicationController {
     @Permission(app = "#request.id")
     @PostMapping("forcedStop")
     @RequiresPermissions("app:cancel")
-    public RestResponseBody<?> forcedStop(@Valid @FormOrJson SparkAppIdRequest request) {
+    public RestResponseBody<Void> forcedStop(@Valid @FormOrJson SparkAppIdRequest request) {
         applicationActionService.forcedStop(request.getId());
         return RestResponseBody.success();
     }
 
     @PostMapping("yarn")
-    public RestResponseBody<?> yarn() {
+    public RestResponseBody<String> yarn() {
         return RestResponseBody.success(YarnUtils.getRMWebAppProxyURL());
     }
 
     @PostMapping("name")
     @Permission(app = "#request.id", team = "#request.teamId")
-    public RestResponseBody<?> yarnName(SparkAppConfigRequest request) {
+    public RestResponseBody<String> yarnName(SparkAppConfigRequest request) {
         String yarnName = applicationInfoService.getYarnName(request.getConfig());
         return RestResponseBody.success(yarnName);
     }
 
     @PostMapping("check/name")
     @Permission(app = "#request.id", team = "#request.teamId")
-    public RestResponseBody<?> checkName(@Valid SparkAppCheckNameRequest request) {
+    public RestResponseBody<Object> checkName(@Valid SparkAppCheckNameRequest request) {
         AppExistsStateEnum exists = applicationInfoService.checkExists(SparkApplicationAssembler.toEntity(request));
         return RestResponseBody.success(exists.get());
     }
 
     @PostMapping("read_conf")
-    public RestResponseBody<?> readConf(SparkAppConfigRequest request) throws IOException {
+    public RestResponseBody<String> readConf(SparkAppConfigRequest request) throws IOException {
         String config = applicationInfoService.readConf(request.getConfig());
         return RestResponseBody.success(config);
     }
 
     @PostMapping("backups")
     @Permission(app = "#query.appId", team = "#query.teamId")
-    public RestResponseBody<?> backups(AppBackupQueryRequest query, RestRequest request) {
+    public RestResponseBody<IPage<AppBackupResponse>> backups(AppBackupQueryRequest query, RestRequest request) {
         return RestResponseBody.success(
             AppLogAssembler.toBackupPage(backUpService.getPage(AppLogAssembler.toEntity(query), request)));
     }
 
     @PostMapping("opt_log")
     @Permission(app = "#query.appId", team = "#query.teamId")
-    public RestResponseBody<?> optionlog(AppOptLogQueryRequest query, RestRequest request) {
+    public RestResponseBody<IPage<AppOptLogResponse>> optionlog(AppOptLogQueryRequest query, RestRequest request) {
         return RestResponseBody.success(
             AppLogAssembler.toOptLogPage(applicationLogService.getPage(AppLogAssembler.toEntity(query), request)));
     }
 
     @PostMapping("delete/opt_log")
     @RequiresPermissions("app:delete")
-    public RestResponseBody<?> deleteOperationLog(@Valid @FormOrJson IdRequest request) {
+    public RestResponseBody<Boolean> deleteOperationLog(@Valid @FormOrJson IdRequest request) {
         Boolean deleted = applicationLogService.removeById(request.getId());
         return RestResponseBody.success(deleted);
     }
@@ -257,31 +260,32 @@ public class SparkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("delete")
     @RequiresPermissions("app:delete")
-    public RestResponseBody<?> delete(@Valid @FormOrJson SparkAppIdRequest request) throws InternalException {
+    public RestResponseBody<Boolean> delete(@Valid @FormOrJson SparkAppIdRequest request) throws InternalException {
         Boolean deleted = applicationManageService.remove(request.getId());
         return RestResponseBody.success(deleted);
     }
 
     @Permission(app = "#request.appId")
     @PostMapping("delete/bak")
-    public RestResponseBody<?> deleteBak(@Valid @FormOrJson AppBackupDeleteRequest request) throws InternalException {
+    public RestResponseBody<Boolean> deleteBak(@Valid @FormOrJson AppBackupDeleteRequest request) throws InternalException {
         Boolean deleted = backUpService.removeById(request.getId());
         return RestResponseBody.success(deleted);
     }
 
     @PostMapping("check/jar")
-    public RestResponseBody<?> checkjar(String jar) {
+    public RestResponseBody<Object> checkjar(String jar) {
         File file = new File(jar);
         try {
             Utils.requireCheckJarFile(file.toURI().toURL());
             return RestResponseBody.success(true);
         } catch (IOException e) {
-            return RestResponseBody.success(file).message(e.getLocalizedMessage());
+            RestResponseBody<Object> response = RestResponseBody.success((Object) file);
+            return response.message(e.getLocalizedMessage());
         }
     }
 
     @PostMapping("verify_schema")
-    public RestResponseBody<?> verifySchema(String path) {
+    public RestResponseBody<Boolean> verifySchema(String path) {
         final URI uri = URI.create(path);
         final String scheme = uri.getScheme();
         final String pathPart = uri.getPath();

@@ -47,6 +47,9 @@ import org.apache.streampark.console.core.request.flink.FlinkAppListQueryRequest
 import org.apache.streampark.console.core.request.flink.FlinkAppMappingRequest;
 import org.apache.streampark.console.core.request.flink.FlinkAppStartRequest;
 import org.apache.streampark.console.core.request.flink.FlinkAppUpdateRequest;
+import org.apache.streampark.console.core.response.app.AppBackupResponse;
+import org.apache.streampark.console.core.response.app.AppOptLogResponse;
+import org.apache.streampark.console.core.response.flink.FlinkAppDashboardResponse;
 import org.apache.streampark.console.core.response.flink.FlinkAppResponse;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.application.ApplicationLogService;
@@ -109,7 +112,7 @@ public class FlinkApplicationController {
     @Permission(team = "#request.teamId")
     @PostMapping("create")
     @RequiresPermissions("app:create")
-    public RestResponseBody<?> create(@Valid @FormOrJson FlinkAppCreateRequest request) throws IOException {
+    public RestResponseBody<Boolean> create(@Valid @FormOrJson FlinkAppCreateRequest request) throws IOException {
         FlinkApplication app = FlinkApplicationAssembler.toEntity(request);
         boolean saved = applicationManageService.create(app);
         return RestResponseBody.success(saved);
@@ -118,7 +121,7 @@ public class FlinkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("copy")
     @RequiresPermissions("app:copy")
-    public RestResponseBody<?> copy(@Valid @FormOrJson FlinkAppCopyRequest request) throws IOException {
+    public RestResponseBody<Void> copy(@Valid @FormOrJson FlinkAppCopyRequest request) throws IOException {
         applicationManageService.copy(FlinkApplicationAssembler.toEntity(request));
         return RestResponseBody.success();
     }
@@ -127,14 +130,14 @@ public class FlinkApplicationController {
     @Permission(app = "#request.id")
     @PostMapping("update")
     @RequiresPermissions("app:update")
-    public RestResponseBody<?> update(@Valid @FormOrJson FlinkAppUpdateRequest request) {
+    public RestResponseBody<Boolean> update(@Valid @FormOrJson FlinkAppUpdateRequest request) {
         applicationManageService.update(FlinkApplicationAssembler.toEntity(request));
         return RestResponseBody.success(true);
     }
 
     @PostMapping("dashboard")
     @Permission(team = "#request.teamId")
-    public RestResponseBody<?> dashboard(@Valid TeamIdRequest request) {
+    public RestResponseBody<FlinkAppDashboardResponse> dashboard(@Valid TeamIdRequest request) {
         Map<String, Serializable> dashboardMap = applicationInfoService.getDashboardDataMap(request.getTeamId());
         return RestResponseBody.success(FlinkApplicationAssembler.toDashboardResponse(dashboardMap));
     }
@@ -142,7 +145,7 @@ public class FlinkApplicationController {
     @PostMapping("list")
     @Permission(team = "#query.teamId")
     @RequiresPermissions("app:view")
-    public RestResponseBody<?> list(@Valid FlinkAppListQueryRequest query, RestRequest request) {
+    public RestResponseBody<IPage<FlinkAppResponse>> list(@Valid FlinkAppListQueryRequest query, RestRequest request) {
         FlinkApplication appParam = FlinkApplicationAssembler.toEntity(query);
         IPage<FlinkApplication> applicationList = applicationManageService.page(appParam, request);
         return RestResponseBody.success(FlinkApplicationAssembler.toPageResponse(applicationList));
@@ -152,7 +155,7 @@ public class FlinkApplicationController {
     @PostMapping("mapping")
     @Permission(app = "#request.id")
     @RequiresPermissions("app:mapping")
-    public RestResponseBody<?> mapping(@Valid @FormOrJson FlinkAppMappingRequest request) {
+    public RestResponseBody<Boolean> mapping(@Valid @FormOrJson FlinkAppMappingRequest request) {
         boolean flag = applicationManageService.mapping(FlinkApplicationAssembler.toEntity(request));
         return RestResponseBody.success(flag);
     }
@@ -161,7 +164,7 @@ public class FlinkApplicationController {
     @Permission(app = "#request.id")
     @PostMapping("revoke")
     @RequiresPermissions("app:release")
-    public RestResponseBody<?> revoke(@Valid @FormOrJson FlinkAppIdRequest request) {
+    public RestResponseBody<Void> revoke(@Valid @FormOrJson FlinkAppIdRequest request) {
         applicationActionService.revoke(request.getId());
         return RestResponseBody.success();
     }
@@ -169,7 +172,7 @@ public class FlinkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("check/start")
     @RequiresPermissions("app:start")
-    public RestResponseBody<?> checkStart(@Valid FlinkAppIdRequest request) {
+    public RestResponseBody<Object> checkStart(@Valid FlinkAppIdRequest request) {
         AppExistsStateEnum stateEnum = applicationInfoService.checkStart(request.getId());
         return RestResponseBody.success(stateEnum.get());
     }
@@ -177,7 +180,7 @@ public class FlinkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("start")
     @RequiresPermissions("app:start")
-    public RestResponseBody<?> start(@Valid @FormOrJson FlinkAppStartRequest request) throws Exception {
+    public RestResponseBody<Boolean> start(@Valid @FormOrJson FlinkAppStartRequest request) throws Exception {
         applicationActionService.start(FlinkApplicationAssembler.toEntity(request), false);
         return RestResponseBody.success(true);
     }
@@ -185,7 +188,7 @@ public class FlinkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("cancel")
     @RequiresPermissions("app:cancel")
-    public RestResponseBody<?> cancel(@Valid @FormOrJson FlinkAppCancelRequest request) throws Exception {
+    public RestResponseBody<Void> cancel(@Valid @FormOrJson FlinkAppCancelRequest request) throws Exception {
         applicationActionService.cancel(FlinkApplicationAssembler.toEntity(request));
         return RestResponseBody.success();
     }
@@ -194,53 +197,53 @@ public class FlinkApplicationController {
     @Permission(app = "#request.id")
     @PostMapping("abort")
     @RequiresPermissions("app:cancel")
-    public RestResponseBody<?> abort(@Valid @FormOrJson FlinkAppIdRequest request) {
+    public RestResponseBody<Void> abort(@Valid @FormOrJson FlinkAppIdRequest request) {
         applicationActionService.abort(request.getId());
         return RestResponseBody.success();
     }
 
     @PostMapping("yarn")
-    public RestResponseBody<?> yarn() {
+    public RestResponseBody<String> yarn() {
         return RestResponseBody.success(YarnUtils.getRMWebAppProxyURL());
     }
 
     @PostMapping("name")
     @Permission(app = "#request.id", team = "#request.teamId")
-    public RestResponseBody<?> yarnName(FlinkAppConfigRequest request) {
+    public RestResponseBody<String> yarnName(FlinkAppConfigRequest request) {
         String yarnName = applicationInfoService.getYarnName(request.getConfig());
         return RestResponseBody.success(yarnName);
     }
 
     @PostMapping("check/name")
     @Permission(app = "#request.id", team = "#request.teamId")
-    public RestResponseBody<?> checkName(@Valid FlinkAppCheckNameRequest request) {
+    public RestResponseBody<Object> checkName(@Valid FlinkAppCheckNameRequest request) {
         AppExistsStateEnum exists = applicationInfoService.checkExists(FlinkApplicationAssembler.toEntity(request));
         return RestResponseBody.success(exists.get());
     }
 
     @PostMapping("read_conf")
-    public RestResponseBody<?> readConf(FlinkAppConfigRequest request) throws IOException {
+    public RestResponseBody<String> readConf(FlinkAppConfigRequest request) throws IOException {
         String config = applicationInfoService.readConf(request.getConfig());
         return RestResponseBody.success(config);
     }
 
     @PostMapping("main")
     @Permission(app = "#request.id", team = "#request.teamId")
-    public RestResponseBody<?> getMain(FlinkAppGetMainRequest request) {
+    public RestResponseBody<String> getMain(FlinkAppGetMainRequest request) {
         String mainClass = applicationInfoService.getMain(FlinkApplicationAssembler.toEntity(request));
         return RestResponseBody.success(mainClass);
     }
 
     @PostMapping("backups")
     @Permission(app = "#query.appId", team = "#query.teamId")
-    public RestResponseBody<?> backups(AppBackupQueryRequest query, RestRequest request) {
+    public RestResponseBody<IPage<AppBackupResponse>> backups(AppBackupQueryRequest query, RestRequest request) {
         return RestResponseBody.success(
             AppLogAssembler.toBackupPage(backUpService.getPage(AppLogAssembler.toEntity(query), request)));
     }
 
     @PostMapping("opt_log")
     @Permission(app = "#query.appId", team = "#query.teamId")
-    public RestResponseBody<?> log(AppOptLogQueryRequest query, RestRequest request) {
+    public RestResponseBody<IPage<AppOptLogResponse>> log(AppOptLogQueryRequest query, RestRequest request) {
         return RestResponseBody.success(
             AppLogAssembler.toOptLogPage(applicationLogService.getPage(AppLogAssembler.toEntity(query), request)));
     }
@@ -248,7 +251,7 @@ public class FlinkApplicationController {
     @Permission(app = "#request.appId", team = "#request.teamId")
     @PostMapping("delete/opt_log")
     @RequiresPermissions("app:delete")
-    public RestResponseBody<?> deleteLog(@Valid @FormOrJson AppOptLogDeleteRequest request) {
+    public RestResponseBody<Boolean> deleteLog(@Valid @FormOrJson AppOptLogDeleteRequest request) {
         Boolean deleted = applicationLogService.delete(AppLogAssembler.toEntity(request));
         return RestResponseBody.success(deleted);
     }
@@ -256,26 +259,26 @@ public class FlinkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("delete")
     @RequiresPermissions("app:delete")
-    public RestResponseBody<?> delete(@Valid @FormOrJson FlinkAppIdRequest request) throws InternalException {
+    public RestResponseBody<Boolean> delete(@Valid @FormOrJson FlinkAppIdRequest request) throws InternalException {
         Boolean deleted = applicationManageService.remove(request.getId());
         return RestResponseBody.success(deleted);
     }
 
     @Permission(app = "#request.appId")
     @PostMapping("delete/backup")
-    public RestResponseBody<?> deleteBackup(@Valid @FormOrJson AppBackupDeleteRequest request) throws InternalException {
+    public RestResponseBody<Boolean> deleteBackup(@Valid @FormOrJson AppBackupDeleteRequest request) throws InternalException {
         Boolean deleted = backUpService.removeById(request.getId());
         return RestResponseBody.success(deleted);
     }
 
     @PostMapping("check/jar")
-    public RestResponseBody<?> checkJar(String jar) throws IOException {
+    public RestResponseBody<Boolean> checkJar(String jar) throws IOException {
         Utils.requireCheckJarFile(new File(jar).toURI().toURL());
         return RestResponseBody.success(true);
     }
 
     @PostMapping("verify_schema")
-    public RestResponseBody<?> verifySchema(String path) {
+    public RestResponseBody<Boolean> verifySchema(String path) {
         final URI uri = URI.create(path);
         final String scheme = uri.getScheme();
         final String pathPart = uri.getPath();
@@ -298,7 +301,7 @@ public class FlinkApplicationController {
 
     @PostMapping("check/savepoint_path")
     @Permission(app = "#request.id", team = "#request.teamId")
-    public RestResponseBody<?> checkSavepointPath(FlinkAppCheckSavepointPathRequest request) throws Exception {
+    public RestResponseBody<Boolean> checkSavepointPath(FlinkAppCheckSavepointPathRequest request) throws Exception {
         String error = applicationInfoService.checkSavepointPath(FlinkApplicationAssembler.toEntity(request));
         if (error == null) {
             return RestResponseBody.success(true);
@@ -308,7 +311,7 @@ public class FlinkApplicationController {
 
     @Permission(app = "#request.id")
     @PostMapping("k8s_log")
-    public RestResponseBody<?> k8sStartLog(FlinkAppK8sLogRequest request) throws Exception {
+    public RestResponseBody<String> k8sStartLog(FlinkAppK8sLogRequest request) throws Exception {
         String resp = applicationInfoService.k8sStartLog(request.getId(), request.getOffset(), request.getLimit());
         return RestResponseBody.success(resp);
     }

@@ -28,6 +28,7 @@ import org.apache.streampark.console.core.entity.FlinkSavepoint;
 import org.apache.streampark.console.core.request.flink.SavepointDeleteRequest;
 import org.apache.streampark.console.core.request.flink.SavepointHistoryQueryRequest;
 import org.apache.streampark.console.core.request.flink.SavepointTriggerRequest;
+import org.apache.streampark.console.core.response.flink.SavepointResponse;
 import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 
@@ -57,7 +58,7 @@ public class SavepointController {
 
     @PostMapping("history")
     @Permission(app = "#query.appId", team = "#query.teamId")
-    public RestResponseBody<?> history(SavepointHistoryQueryRequest query, RestRequest request) {
+    public RestResponseBody<IPage<SavepointResponse>> history(SavepointHistoryQueryRequest query, RestRequest request) {
         FlinkSavepoint sp = SavepointAssembler.toEntity(query);
         IPage<FlinkSavepoint> page = savepointService.getPage(sp, request);
         return RestResponseBody.success(SavepointAssembler.toPageResponse(page));
@@ -66,7 +67,7 @@ public class SavepointController {
     @PostMapping("delete")
     @RequiresPermissions("savepoint:delete")
     @Permission(app = "#request.appId", team = "#request.teamId")
-    public RestResponseBody<?> delete(@Valid @FormOrJson SavepointDeleteRequest request) throws InternalException {
+    public RestResponseBody<Boolean> delete(@Valid @FormOrJson SavepointDeleteRequest request) throws InternalException {
         FlinkSavepoint savepoint = savepointService.getById(request.getId());
         FlinkApplication application = applicationManageService.getById(savepoint.getAppId());
         Boolean deleted = savepointService.remove(request.getId(), application);
@@ -76,7 +77,7 @@ public class SavepointController {
     @PostMapping("trigger")
     @Permission(app = "#request.appId", team = "#request.teamId")
     @RequiresPermissions("savepoint:trigger")
-    public RestResponseBody<?> trigger(@Valid @FormOrJson SavepointTriggerRequest request) {
+    public RestResponseBody<Boolean> trigger(@Valid @FormOrJson SavepointTriggerRequest request) {
         savepointService.trigger(request.getAppId(), request.getSavepointPath(), request.getNativeFormat());
         return RestResponseBody.success(true);
     }

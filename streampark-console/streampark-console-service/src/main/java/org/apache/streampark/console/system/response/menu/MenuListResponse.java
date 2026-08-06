@@ -28,6 +28,7 @@ import java.util.List;
 /** Response for {@code POST /menu/list}. */
 @Getter
 @Setter
+@SuppressWarnings("java:S1948")
 public class MenuListResponse implements Serializable {
 
     private static final long serialVersionUID = 1L;

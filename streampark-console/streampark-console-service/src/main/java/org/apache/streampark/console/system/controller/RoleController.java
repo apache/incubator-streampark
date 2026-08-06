@@ -99,7 +99,7 @@ public class RoleController {
 
     @PutMapping("update")
     @RequiresPermissions("role:update")
-    public RestResponseBody<Void> updateRole(@Valid @FormOrJson RoleUpdateRequest request) throws Exception {
+    public RestResponseBody<Void> updateRole(@Valid @FormOrJson RoleUpdateRequest request) {
         this.roleService.updateRole(RoleAssembler.toEntity(request));
         return RestResponseBody.success();
     }

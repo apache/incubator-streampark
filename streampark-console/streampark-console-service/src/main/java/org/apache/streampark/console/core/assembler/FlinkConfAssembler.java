@@ -27,6 +27,7 @@ import org.apache.streampark.console.core.response.flink.FlinkConfResponse;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.BeanUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -72,7 +73,7 @@ public final class FlinkConfAssembler {
 
     public static List<FlinkConfResponse> toListResponse(List<FlinkApplicationConfig> configs) {
         if (configs == null) {
-            return null;
+            return Collections.emptyList();
         }
         return configs.stream().map(FlinkConfAssembler::toResponse).collect(Collectors.toList());
     }

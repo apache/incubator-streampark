@@ -27,6 +27,7 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
+@SuppressWarnings("java:S1948")
 public class SparkPipelineDetailResponse implements Serializable {
 
     private static final long serialVersionUID = 1L;

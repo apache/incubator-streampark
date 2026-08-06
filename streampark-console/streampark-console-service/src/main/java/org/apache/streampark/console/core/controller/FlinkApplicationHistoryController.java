@@ -45,14 +45,14 @@ public class FlinkApplicationHistoryController {
 
     @PostMapping("k8s_namespaces")
     @RequiresPermissions("app:create")
-    public RestResponseBody<?> listK8sNamespace() {
+    public RestResponseBody<Object> listK8sNamespace() {
         List<String> namespaces = applicationInfoService.listRecentK8sNamespace();
         return RestResponseBody.success(namespaces);
     }
 
     @PostMapping("session_cluster_ids")
     @RequiresPermissions("app:create")
-    public RestResponseBody<?> listSessionClusterId(FlinkHistoryDeployModeRequest request) {
+    public RestResponseBody<Object> listSessionClusterId(FlinkHistoryDeployModeRequest request) {
         List<String> clusterIds;
         switch (FlinkDeployMode.of(request.getDeployMode())) {
             case KUBERNETES_NATIVE_SESSION:
@@ -69,28 +69,28 @@ public class FlinkApplicationHistoryController {
 
     @PostMapping("flink_base_images")
     @RequiresPermissions("app:create")
-    public RestResponseBody<?> listFlinkBaseImage() {
+    public RestResponseBody<Object> listFlinkBaseImage() {
         List<String> images = applicationInfoService.listRecentFlinkBaseImage();
         return RestResponseBody.success(images);
     }
 
     @PostMapping("flink_pod_templates")
     @RequiresPermissions("app:create")
-    public RestResponseBody<?> listPodTemplate() {
+    public RestResponseBody<Object> listPodTemplate() {
         List<String> templates = applicationInfoService.listRecentK8sPodTemplate();
         return RestResponseBody.success(templates);
     }
 
     @PostMapping("flink_jm_pod_templates")
     @RequiresPermissions("app:create")
-    public RestResponseBody<?> listJmPodTemplate() {
+    public RestResponseBody<Object> listJmPodTemplate() {
         List<String> templates = applicationInfoService.listRecentK8sJmPodTemplate();
         return RestResponseBody.success(templates);
     }
 
     @PostMapping("flink_tm_pod_templates")
     @RequiresPermissions("app:create")
-    public RestResponseBody<?> listTmPodTemplate() {
+    public RestResponseBody<Object> listTmPodTemplate() {
         List<String> templates = applicationInfoService.listRecentK8sTmPodTemplate();
         return RestResponseBody.success(templates);
     }

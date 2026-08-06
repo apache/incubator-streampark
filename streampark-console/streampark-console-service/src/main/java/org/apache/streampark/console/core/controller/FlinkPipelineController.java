@@ -25,6 +25,7 @@ import org.apache.streampark.console.core.bean.AppBuildDockerResolvedDetail;
 import org.apache.streampark.console.core.entity.ApplicationBuildPipeline;
 import org.apache.streampark.console.core.request.flink.FlinkPipelineBuildRequest;
 import org.apache.streampark.console.core.request.flink.FlinkPipelineDetailRequest;
+import org.apache.streampark.console.core.response.flink.FlinkPipelineDetailResponse;
 import org.apache.streampark.console.core.service.application.FlinkApplicationBuildPipelineService;
 import org.apache.streampark.flink.packer.pipeline.DockerResolvedSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
@@ -54,7 +55,7 @@ public class FlinkPipelineController {
     @Permission(app = "#request.appId")
     @PostMapping("build")
     @RequiresPermissions("app:create")
-    public RestResponseBody<?> buildApplication(@Valid @FormOrJson FlinkPipelineBuildRequest request) throws Exception {
+    public RestResponseBody<Boolean> buildApplication(@Valid @FormOrJson FlinkPipelineBuildRequest request) throws Exception {
         boolean actionResult = appBuildPipeService.buildApplication(request.getAppId(), request.isForceBuild());
         return RestResponseBody.success(actionResult);
     }
@@ -68,7 +69,7 @@ public class FlinkPipelineController {
     @PostMapping("/detail")
     @Permission(app = "#request.appId")
     @RequiresPermissions("app:view")
-    public RestResponseBody<?> getBuildProgressDetail(@Valid FlinkPipelineDetailRequest request) {
+    public RestResponseBody<FlinkPipelineDetailResponse> getBuildProgressDetail(@Valid FlinkPipelineDetailRequest request) {
         Long appId = request.getAppId();
         Optional<ApplicationBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
         ApplicationBuildPipeline.View pipelineView =

@@ -31,6 +31,7 @@ import org.apache.streampark.console.core.response.setting.SettingResponse;
 
 import org.springframework.beans.BeanUtils;
 
+import java.io.Serializable;
 import java.util.List;
 
 /** Converts between setting entities/beans and API request/response contracts. */
@@ -79,7 +80,7 @@ public final class SettingAssembler {
         SettingCheckResponse response = new SettingCheckResponse();
         response.setStatus(result.getStatus());
         response.setMsg(result.getMsg());
-        response.setResult(result.getResult());
+        response.setResult((Serializable) result.getResult());
         return response;
     }
 }

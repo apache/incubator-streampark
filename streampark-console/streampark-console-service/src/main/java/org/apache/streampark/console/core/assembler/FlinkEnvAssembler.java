@@ -28,6 +28,7 @@ import org.apache.streampark.console.core.response.flink.FlinkEnvResponse;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.BeanUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -97,7 +98,7 @@ public final class FlinkEnvAssembler {
 
     public static List<FlinkEnvResponse> toListResponse(List<FlinkEnv> envs) {
         if (envs == null) {
-            return null;
+            return Collections.emptyList();
         }
         return envs.stream().map(FlinkEnvAssembler::toResponse).collect(Collectors.toList());
     }

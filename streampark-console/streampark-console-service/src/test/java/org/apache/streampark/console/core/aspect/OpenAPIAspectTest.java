@@ -79,7 +79,7 @@ class OpenAPIAspectTest {
     @Test
     void shouldBindOpenApiAliasFieldWhenApiTokenPresent() throws Throwable {
         FlinkAppStartRequest request = new FlinkAppStartRequest();
-        RestResponseBody<?> expected = RestResponseBody.success(true);
+        RestResponseBody<Boolean> expected = RestResponseBody.success(true);
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         MethodSignature signature = mock(MethodSignature.class);
         Method method = OpenAPIController.class.getMethod("flinkStart", FlinkAppStartRequest.class);

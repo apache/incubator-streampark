@@ -28,6 +28,8 @@ import java.util.Map;
 /** Generates TypeScript interfaces from exported API contract metadata. */
 public final class ApiTypeScriptGenerator {
 
+    private static final String TS_TYPE_NUMBER = "number";
+
     private ApiTypeScriptGenerator() {
     }
 
@@ -36,7 +38,7 @@ public final class ApiTypeScriptGenerator {
         builder.append("// Auto-generated from console API contract export. Do not edit manually.\n\n");
         builder.append("export interface RestResponseBody<T> {\n");
         builder.append("  status: 'success' | 'error';\n");
-        builder.append("  code: number;\n");
+        builder.append("  code: ").append(TS_TYPE_NUMBER).append(";\n");
         builder.append("  message?: string;\n");
         builder.append("  data?: T;\n");
         builder.append("}\n\n");
@@ -87,10 +89,10 @@ public final class ApiTypeScriptGenerator {
             return "unknown";
         }
         if (openApiType.startsWith("integer")) {
-            return "number";
+            return TS_TYPE_NUMBER;
         }
         if (openApiType.startsWith("number")) {
-            return "number";
+            return TS_TYPE_NUMBER;
         }
         if ("boolean".equals(openApiType)) {
             return "boolean";

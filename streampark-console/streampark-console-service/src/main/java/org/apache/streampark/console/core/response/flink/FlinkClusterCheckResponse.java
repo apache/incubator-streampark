@@ -35,5 +35,5 @@ public class FlinkClusterCheckResponse implements Serializable {
 
     private String msg;
 
-    private Object result;
+    private Serializable result;
 }

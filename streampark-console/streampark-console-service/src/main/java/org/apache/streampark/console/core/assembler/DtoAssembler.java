@@ -21,6 +21,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.BeanUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -50,7 +51,7 @@ public final class DtoAssembler {
 
     public static <S, T> List<T> toList(List<S> sources, Function<S, T> mapper) {
         if (sources == null) {
-            return null;
+            return Collections.emptyList();
         }
         return sources.stream().map(mapper).collect(Collectors.toList());
     }

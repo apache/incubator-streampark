@@ -26,6 +26,7 @@ import org.apache.streampark.console.core.entity.SparkApplicationConfig;
 import org.apache.streampark.console.core.request.common.IdRequest;
 import org.apache.streampark.console.core.request.spark.SparkConfHistoryRequest;
 import org.apache.streampark.console.core.request.spark.SparkConfListQueryRequest;
+import org.apache.streampark.console.core.response.spark.SparkConfResponse;
 import org.apache.streampark.console.core.service.application.SparkApplicationConfigService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -54,40 +55,40 @@ public class SparkConfigController {
     private SparkApplicationConfigService applicationConfigService;
 
     @PostMapping("get")
-    public RestResponseBody<?> get(@Valid IdRequest request) {
+    public RestResponseBody<SparkConfResponse> get(@Valid IdRequest request) {
         SparkApplicationConfig config = applicationConfigService.get(request.getId());
         return RestResponseBody.success(SparkConfigAssembler.toResponse(config));
     }
 
     @PostMapping("template")
-    public RestResponseBody<?> template() {
+    public RestResponseBody<String> template() {
         String config = applicationConfigService.readTemplate();
         return RestResponseBody.success(config);
     }
 
     @PostMapping("list")
-    public RestResponseBody<?> list(SparkConfListQueryRequest query, RestRequest request) {
+    public RestResponseBody<IPage<SparkConfResponse>> list(SparkConfListQueryRequest query, RestRequest request) {
         SparkApplicationConfig configParam = SparkConfigAssembler.toEntity(query);
         IPage<SparkApplicationConfig> page = applicationConfigService.getPage(configParam, request);
         return RestResponseBody.success(SparkConfigAssembler.toPageResponse(page));
     }
 
     @PostMapping("history")
-    public RestResponseBody<?> history(@Valid SparkConfHistoryRequest request) {
+    public RestResponseBody<List<SparkConfResponse>> history(@Valid SparkConfHistoryRequest request) {
         List<SparkApplicationConfig> history = applicationConfigService.list(request.getId());
         return RestResponseBody.success(SparkConfigAssembler.toListResponse(history));
     }
 
     @PostMapping("delete")
     @RequiresPermissions("conf:delete")
-    public RestResponseBody<?> delete(@Valid @FormOrJson IdRequest request) {
+    public RestResponseBody<Boolean> delete(@Valid @FormOrJson IdRequest request) {
         Boolean deleted = applicationConfigService.removeById(request.getId());
         return RestResponseBody.success(deleted);
     }
 
     @PostMapping("sysHadoopConf")
     @RequiresPermissions("app:create")
-    public RestResponseBody<?> getSystemHadoopConfig() {
+    public RestResponseBody<Object> getSystemHadoopConfig() {
         Map<String, Map<String, String>> result = ImmutableMap.of(
             "hadoop", HadoopConfigUtils.readSystemHadoopConf(),
             "hive", HadoopConfigUtils.readSystemHiveConf());

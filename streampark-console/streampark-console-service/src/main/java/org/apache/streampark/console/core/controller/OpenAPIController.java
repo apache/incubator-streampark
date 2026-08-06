@@ -70,7 +70,7 @@ public class OpenAPIController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("app/start")
     @RequiresPermissions("app:start")
-    public RestResponseBody<?> flinkStart(@Valid @FormOrJson FlinkAppStartRequest request) throws Exception {
+    public RestResponseBody<Boolean> flinkStart(@Valid @FormOrJson FlinkAppStartRequest request) throws Exception {
         applicationActionService.start(FlinkApplicationAssembler.toEntity(request), false);
         return RestResponseBody.success(true);
     }
@@ -87,13 +87,13 @@ public class OpenAPIController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("app/cancel")
     @RequiresPermissions("app:cancel")
-    public RestResponseBody<?> flinkCancel(@Valid @FormOrJson FlinkAppCancelRequest request) throws Exception {
+    public RestResponseBody<Void> flinkCancel(@Valid @FormOrJson FlinkAppCancelRequest request) throws Exception {
         applicationActionService.cancel(FlinkApplicationAssembler.toEntity(request));
         return RestResponseBody.success();
     }
 
     @PostMapping("curl")
-    public RestResponseBody<?> copyOpenApiCurl(OpenAPICurlRequest request) {
+    public RestResponseBody<String> copyOpenApiCurl(OpenAPICurlRequest request) {
         String url = openAPIComponent.getOpenApiCUrl(
             request.getName(), request.getBaseUrl(), request.getAppId(), request.getTeamId());
         return RestResponseBody.success(url);

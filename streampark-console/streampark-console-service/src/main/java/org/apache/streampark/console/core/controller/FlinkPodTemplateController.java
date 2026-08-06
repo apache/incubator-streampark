@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 public class FlinkPodTemplateController {
 
     @PostMapping("sys_hosts")
-    public RestResponseBody<?> getHosts() {
+    public RestResponseBody<Object> getHosts() {
         Map<String, String> hostMap = HostsUtils.getSystemHostsAsJava(true);
         List<String> friendlyHosts = hostMap.entrySet().stream()
             .map(e -> e.getKey() + ":" + e.getValue())
@@ -56,13 +56,13 @@ public class FlinkPodTemplateController {
     }
 
     @PostMapping("init")
-    public RestResponseBody<?> getInitContent() {
+    public RestResponseBody<Object> getInitContent() {
         return RestResponseBody.success(PodTemplateParser.getInitPodTemplateContent());
     }
 
     /** @param request hosts hostname:ipv4,hostname:ipv4,hostname:ipv4... */
     @PostMapping("comp_host_alias")
-    public RestResponseBody<?> completeHostAlias(@Valid FlinkPodTemplateHostAliasRequest request) {
+    public RestResponseBody<String> completeHostAlias(@Valid FlinkPodTemplateHostAliasRequest request) {
         Map<String, String> hostMap = covertHostsParamToMap(request.getHosts());
         String completedPodTemplate =
             PodTemplateParser.completeHostAliasSpec(hostMap, request.getPodTemplate());
@@ -84,7 +84,7 @@ public class FlinkPodTemplateController {
     }
 
     @PostMapping("extract_host_alias")
-    public RestResponseBody<?> extractHostAlias(@Valid FlinkPodTemplateExtractRequest request) {
+    public RestResponseBody<Object> extractHostAlias(@Valid FlinkPodTemplateExtractRequest request) {
         Map<String, String> hosts = PodTemplateParser.extractHostAliasMap(request.getPodTemplate());
         List<String> friendlyHosts = hosts.entrySet().stream()
             .map(e -> e.getKey() + ":" + e.getValue())
@@ -94,7 +94,7 @@ public class FlinkPodTemplateController {
 
     /** @param request hosts hostname:ipv4,hostname:ipv4,hostname:ipv4... */
     @PostMapping("preview_host_alias")
-    public RestResponseBody<?> previewHostAlias(@Valid FlinkPodTemplatePreviewRequest request) {
+    public RestResponseBody<String> previewHostAlias(@Valid FlinkPodTemplatePreviewRequest request) {
         Map<String, String> hostMap = covertHostsParamToMap(request.getHosts());
         String podTemplate = PodTemplateParser.previewHostAliasSpec(hostMap);
         return RestResponseBody.success(podTemplate);

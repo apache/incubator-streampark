@@ -31,6 +31,7 @@ import org.apache.streampark.console.core.request.spark.SparkSqlGetRequest;
 import org.apache.streampark.console.core.request.spark.SparkSqlHistoryRequest;
 import org.apache.streampark.console.core.request.spark.SparkSqlListQueryRequest;
 import org.apache.streampark.console.core.request.spark.SparkSqlVerifyRequest;
+import org.apache.streampark.console.core.response.spark.SparkSqlResponse;
 import org.apache.streampark.console.core.service.SparkSqlService;
 import org.apache.streampark.console.core.service.SqlCompleteService;
 import org.apache.streampark.console.core.service.VariableService;
@@ -70,7 +71,7 @@ public class SparkSqlController {
     private SqlCompleteService sqlComplete;
 
     @PostMapping("verify")
-    public RestResponseBody<?> verify(@Valid SparkSqlVerifyRequest request) {
+    public RestResponseBody<Boolean> verify(@Valid SparkSqlVerifyRequest request) {
         String sql = variableService.replaceVariable(request.getTeamId(), request.getSql());
         SparkSqlValidationResult sparkSqlValidationResult = sparkSqlService.verifySql(sql, request.getVersionId());
         if (!sparkSqlValidationResult.success()) {
@@ -90,7 +91,8 @@ public class SparkSqlController {
 
     @PostMapping("list")
     @Permission(app = "#request.appId", team = "#request.teamId")
-    public RestResponseBody<?> list(@Valid SparkSqlListQueryRequest request, RestRequest restRequest) {
+    public RestResponseBody<IPage<SparkSqlResponse>> list(@Valid SparkSqlListQueryRequest request,
+                                                          RestRequest restRequest) {
         IPage<SparkSql> page = sparkSqlService.getPage(request.getAppId(), restRequest);
         return RestResponseBody.success(SparkSqlAssembler.toPageResponse(page));
     }
@@ -98,7 +100,7 @@ public class SparkSqlController {
     @PostMapping("delete")
     @RequiresPermissions("sql:delete")
     @Permission(app = "#request.appId", team = "#request.teamId")
-    public RestResponseBody<?> delete(@Valid @FormOrJson SparkSqlDeleteRequest request) {
+    public RestResponseBody<Boolean> delete(@Valid @FormOrJson SparkSqlDeleteRequest request) {
         SparkSql sparkSql = SparkSqlAssembler.toDeleteEntity(request);
         ApiAlertException.throwIfNull(sparkSql, "Spark SQL delete request cannot be null.");
         Boolean deleted = sparkSqlService.removeById(sparkSql.getSql());
@@ -107,7 +109,7 @@ public class SparkSqlController {
 
     @PostMapping("get")
     @Permission(app = "#request.appId", team = "#request.teamId")
-    public RestResponseBody<?> get(@Valid SparkSqlGetRequest request) throws InternalException {
+    public RestResponseBody<Object> get(@Valid SparkSqlGetRequest request) throws InternalException {
         ApiAlertException.throwIfTrue(
             request.getAppId() == null || request.getTeamId() == null,
             "Permission denied, appId and teamId cannot be null");
@@ -126,13 +128,13 @@ public class SparkSqlController {
 
     @PostMapping("history")
     @Permission(app = "#request.id", team = "#request.teamId")
-    public RestResponseBody<?> history(@Valid SparkSqlHistoryRequest request) {
+    public RestResponseBody<List<SparkSqlResponse>> history(@Valid SparkSqlHistoryRequest request) {
         List<SparkSql> sqlList = sparkSqlService.listSparkSqlHistory(request.getId());
         return RestResponseBody.success(SparkSqlAssembler.toListResponse(sqlList));
     }
 
     @PostMapping("sqlComplete")
-    public RestResponseBody<?> getSqlComplete(@Valid SparkSqlCompleteRequest request) {
+    public RestResponseBody<Object> getSqlComplete(@Valid SparkSqlCompleteRequest request) {
         return RestResponseBody.success(
             java.util.Collections.singletonMap("word", sqlComplete.getComplete(request.getSql())));
     }

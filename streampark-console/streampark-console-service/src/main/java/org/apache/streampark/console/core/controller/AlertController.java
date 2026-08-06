@@ -29,6 +29,7 @@ import org.apache.streampark.console.core.request.alert.AlertConfigPageRequest;
 import org.apache.streampark.console.core.request.alert.AlertConfigRequest;
 import org.apache.streampark.console.core.request.alert.AlertSendRequest;
 import org.apache.streampark.console.core.request.common.IdRequest;
+import org.apache.streampark.console.core.response.alert.AlertConfigResponse;
 import org.apache.streampark.console.core.service.alert.AlertConfigService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
@@ -46,6 +47,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 @Slf4j
@@ -60,49 +62,50 @@ public class AlertController {
     private final AlertService alertService;
 
     @PostMapping("/add")
-    public RestResponseBody<?> createAlertConfig(@Valid @RequestBody AlertConfigRequest request) {
+    public RestResponseBody<Boolean> createAlertConfig(@Valid @RequestBody AlertConfigRequest request) {
         boolean save = alertConfigService.save(AlertAssembler.toEntity(request));
         return RestResponseBody.success(save);
     }
 
     @PostMapping("/exists")
-    public RestResponseBody<?> verifyAlertConfig(@Valid @RequestBody AlertConfigRequest request) {
+    public RestResponseBody<Boolean> verifyAlertConfig(@Valid @RequestBody AlertConfigRequest request) {
         boolean exist = alertConfigService.exist(AlertAssembler.toEntity(request));
         return RestResponseBody.success(exist);
     }
 
     @PostMapping("/update")
-    public RestResponseBody<?> updateAlertConfig(@Valid @RequestBody AlertConfigRequest request) {
+    public RestResponseBody<Boolean> updateAlertConfig(@Valid @RequestBody AlertConfigRequest request) {
         boolean update = alertConfigService.updateById(AlertAssembler.toEntity(request));
         return RestResponseBody.success(update);
     }
 
     @PostMapping("/get")
-    public RestResponseBody<?> getAlertConfig(@Valid @RequestBody AlertConfigIdRequest request) {
+    public RestResponseBody<AlertConfigResponse> getAlertConfig(@Valid @RequestBody AlertConfigIdRequest request) {
         AlertConfig alertConfig = alertConfigService.getById(request.getId());
         return RestResponseBody.success(AlertAssembler.toResponse(alertConfig));
     }
 
     @PostMapping("/page")
-    public RestResponseBody<?> pageAlertConfig(
-                                               @RequestBody AlertConfigPageRequest request, RestRequest restRequest) {
+    public RestResponseBody<IPage<AlertConfigResponse>> pageAlertConfig(
+                                                                        @RequestBody AlertConfigPageRequest request,
+                                                                        RestRequest restRequest) {
         IPage<AlertConfig> page = alertConfigService.pageEntities(request.getUserId(), restRequest);
         return RestResponseBody.success(AlertAssembler.toPageResponse(page));
     }
 
     @PostMapping("/list")
-    public RestResponseBody<?> listAlertConfig() {
+    public RestResponseBody<List<AlertConfigResponse>> listAlertConfig() {
         return RestResponseBody.success(AlertAssembler.toListResponse(alertConfigService.list()));
     }
 
     @DeleteMapping("/delete")
-    public RestResponseBody<?> deleteAlertConfig(@NotNull(message = "{required}") @Valid IdRequest request) {
+    public RestResponseBody<Boolean> deleteAlertConfig(@NotNull(message = "{required}") @Valid IdRequest request) {
         boolean result = alertConfigService.removeById(request.getId());
         return RestResponseBody.success(result);
     }
 
     @PostMapping("/send")
-    public RestResponseBody<?> sendAlert(@Valid AlertSendRequest request) throws AlertException {
+    public RestResponseBody<Object> sendAlert(@Valid AlertSendRequest request) throws AlertException {
         AlertTemplate alertTemplate = new AlertTemplate();
         alertTemplate.setTitle("Notify: StreamPark alert job for test");
         alertTemplate.setJobName("StreamPark alert job for test");

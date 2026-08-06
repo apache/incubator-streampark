@@ -26,6 +26,7 @@ import org.apache.streampark.console.core.request.yarn.YarnQueueCreateRequest;
 import org.apache.streampark.console.core.request.yarn.YarnQueueDeleteRequest;
 import org.apache.streampark.console.core.request.yarn.YarnQueueListQueryRequest;
 import org.apache.streampark.console.core.request.yarn.YarnQueueUpdateRequest;
+import org.apache.streampark.console.core.response.yarn.YarnQueueResponse;
 import org.apache.streampark.console.core.service.YarnQueueService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -50,33 +51,33 @@ public class YarnQueueController {
     private YarnQueueService yarnQueueService;
 
     @PostMapping("list")
-    public RestResponseBody<?> list(RestRequest restRequest, YarnQueueListQueryRequest query) {
+    public RestResponseBody<IPage<YarnQueueResponse>> list(RestRequest restRequest, YarnQueueListQueryRequest query) {
         IPage<YarnQueue> queuePage =
             yarnQueueService.getPage(YarnQueueAssembler.toEntity(query), restRequest);
         return RestResponseBody.success(YarnQueueAssembler.toPageResponse(queuePage));
     }
 
     @PostMapping("check")
-    public RestResponseBody<?> check(@Valid YarnQueueCreateRequest request) {
+    public RestResponseBody<Object> check(@Valid YarnQueueCreateRequest request) {
         return RestResponseBody.success(yarnQueueService.checkYarnQueue(YarnQueueAssembler.toEntity(request)));
     }
 
     @PostMapping("create")
     @RequiresPermissions("yarnQueue:create")
-    public RestResponseBody<?> create(@Valid @FormOrJson YarnQueueCreateRequest request) {
+    public RestResponseBody<Object> create(@Valid @FormOrJson YarnQueueCreateRequest request) {
         return RestResponseBody.success(yarnQueueService.createYarnQueue(YarnQueueAssembler.toEntity(request)));
     }
 
     @PostMapping("update")
     @RequiresPermissions("yarnQueue:update")
-    public RestResponseBody<?> update(@Valid @FormOrJson YarnQueueUpdateRequest request) {
+    public RestResponseBody<Void> update(@Valid @FormOrJson YarnQueueUpdateRequest request) {
         yarnQueueService.updateYarnQueue(YarnQueueAssembler.toEntity(request));
         return RestResponseBody.success();
     }
 
     @PostMapping("delete")
     @RequiresPermissions("yarnQueue:delete")
-    public RestResponseBody<?> delete(@Valid @FormOrJson YarnQueueDeleteRequest request) {
+    public RestResponseBody<Void> delete(@Valid @FormOrJson YarnQueueDeleteRequest request) {
         yarnQueueService.remove(YarnQueueAssembler.toEntity(request));
         return RestResponseBody.success();
     }

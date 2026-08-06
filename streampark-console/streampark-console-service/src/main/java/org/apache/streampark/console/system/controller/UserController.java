@@ -37,6 +37,8 @@ import org.apache.streampark.console.system.request.user.UserResetPasswordReques
 import org.apache.streampark.console.system.request.user.UserTeamIdRequest;
 import org.apache.streampark.console.system.request.user.UserTransferResourceRequest;
 import org.apache.streampark.console.system.request.user.UserUpdateRequest;
+import org.apache.streampark.console.system.response.user.UserResponse;
+import org.apache.streampark.console.system.response.user.UserSessionResponse;
 import org.apache.streampark.console.system.response.user.UserUpdateResponse;
 import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
@@ -72,7 +74,7 @@ public class UserController {
 
     @PostMapping("list")
     @RequiresPermissions(value = {"user:view", "app:view"}, logical = Logical.OR)
-    public RestResponseBody<?> userList(RestRequest restRequest, UserListQueryRequest query) {
+    public RestResponseBody<IPage<UserResponse>> userList(RestRequest restRequest, UserListQueryRequest query) {
         IPage<User> userList = userService.getPage(UserAssembler.toEntity(query), restRequest);
         return RestResponseBody.success(UserAssembler.toPageResponse(userList));
     }
@@ -110,12 +112,12 @@ public class UserController {
     }
 
     @PostMapping("getNoTokenUser")
-    public RestResponseBody<?> getNoTokenUser() {
+    public RestResponseBody<List<UserResponse>> getNoTokenUser() {
         return RestResponseBody.success(UserAssembler.toResponseList(this.userService.listNoTokenUser()));
     }
 
     @PostMapping("check/name")
-    public RestResponseBody<?> checkUserName(@Valid UserCheckNameRequest request) {
+    public RestResponseBody<Boolean> checkUserName(@Valid UserCheckNameRequest request) {
         boolean result = this.userService.getByUsername(request.getUsername()) == null;
         return RestResponseBody.success(result);
     }
@@ -135,7 +137,7 @@ public class UserController {
     }
 
     @PostMapping("set_team")
-    public RestResponseBody<?> setTeam(@Valid UserTeamIdRequest request) {
+    public RestResponseBody<UserSessionResponse> setTeam(@Valid UserTeamIdRequest request) {
         Team team = teamService.getById(request.getTeamId());
         if (team == null) {
             return RestResponseBody.fail(ResponseCode.CODE_FAIL_ALERT, "TeamId is invalid, set team failed.");
@@ -152,7 +154,7 @@ public class UserController {
     }
 
     @PostMapping("appOwners")
-    public RestResponseBody<?> appOwners(@Valid UserTeamIdRequest request) {
+    public RestResponseBody<List<UserResponse>> appOwners(@Valid UserTeamIdRequest request) {
         List<User> userList = userService.listByTeamId(request.getTeamId());
         userList.forEach(User::dataMasking);
         return RestResponseBody.success(UserAssembler.toResponseList(userList));

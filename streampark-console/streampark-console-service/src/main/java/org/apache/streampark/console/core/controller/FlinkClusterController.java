@@ -30,6 +30,7 @@ import org.apache.streampark.console.core.request.flink.FlinkClusterCheckRequest
 import org.apache.streampark.console.core.request.flink.FlinkClusterCreateRequest;
 import org.apache.streampark.console.core.request.flink.FlinkClusterPageQueryRequest;
 import org.apache.streampark.console.core.request.flink.FlinkClusterUpdateRequest;
+import org.apache.streampark.console.core.response.flink.FlinkClusterCheckResponse;
 import org.apache.streampark.console.core.response.flink.FlinkClusterResponse;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.util.ServiceHelper;
@@ -58,14 +59,15 @@ public class FlinkClusterController {
     private FlinkClusterService flinkClusterService;
 
     @PostMapping("page")
-    public RestResponseBody<?> findPage(FlinkClusterPageQueryRequest query, RestRequest restRequest) {
+    public RestResponseBody<IPage<FlinkClusterResponse>> findPage(FlinkClusterPageQueryRequest query,
+                                                                  RestRequest restRequest) {
         FlinkCluster flinkCluster = FlinkClusterAssembler.toEntity(query);
         IPage<FlinkCluster> flinkClusters = flinkClusterService.findPage(flinkCluster, restRequest);
         return RestResponseBody.success(FlinkClusterAssembler.toPageResponse(flinkClusters));
     }
 
     @PostMapping("alive")
-    public RestResponseBody<?> listAvailableCluster() {
+    public RestResponseBody<List<FlinkClusterResponse>> listAvailableCluster() {
         List<FlinkCluster> flinkClusters = flinkClusterService.listAvailableCluster();
         return RestResponseBody.success(FlinkClusterAssembler.toListResponse(flinkClusters));
     }
@@ -77,20 +79,20 @@ public class FlinkClusterController {
     }
 
     @PostMapping("remote_url")
-    public RestResponseBody<?> remoteUrl(@Valid IdRequest request) {
+    public RestResponseBody<Object> remoteUrl(@Valid IdRequest request) {
         FlinkCluster cluster = flinkClusterService.getById(request.getId());
         return RestResponseBody.success(cluster.getAddress());
     }
 
     @PostMapping("check")
-    public RestResponseBody<?> check(FlinkClusterCheckRequest request) {
+    public RestResponseBody<FlinkClusterCheckResponse> check(FlinkClusterCheckRequest request) {
         ResponseResult checkResult = flinkClusterService.check(FlinkClusterAssembler.toEntity(request));
         return RestResponseBody.success(FlinkClusterAssembler.toCheckResponse(checkResult));
     }
 
     @PostMapping("create")
     @RequiresPermissions("cluster:create")
-    public RestResponseBody<?> create(@Valid @FormOrJson FlinkClusterCreateRequest request) {
+    public RestResponseBody<Boolean> create(@Valid @FormOrJson FlinkClusterCreateRequest request) {
         Long userId = ServiceHelper.getUserId();
         Boolean success = flinkClusterService.create(FlinkClusterAssembler.toEntity(request), userId);
         return RestResponseBody.success(success);
@@ -98,7 +100,7 @@ public class FlinkClusterController {
 
     @PostMapping("update")
     @RequiresPermissions("cluster:update")
-    public RestResponseBody<?> update(@Valid @FormOrJson FlinkClusterUpdateRequest request) {
+    public RestResponseBody<Void> update(@Valid @FormOrJson FlinkClusterUpdateRequest request) {
         flinkClusterService.update(FlinkClusterAssembler.toEntity(request));
         return RestResponseBody.success();
     }
@@ -110,14 +112,14 @@ public class FlinkClusterController {
     }
 
     @PostMapping("start")
-    public RestResponseBody<?> start(@Valid @FormOrJson IdRequest request) {
+    public RestResponseBody<Void> start(@Valid @FormOrJson IdRequest request) {
         flinkClusterService.updateClusterState(request.getId(), ClusterState.STARTING);
         flinkClusterService.start(FlinkClusterAssembler.toEntity(request));
         return RestResponseBody.success();
     }
 
     @PostMapping("shutdown")
-    public RestResponseBody<?> shutdown(@Valid @FormOrJson IdRequest request) {
+    public RestResponseBody<Void> shutdown(@Valid @FormOrJson IdRequest request) {
         FlinkCluster cluster = FlinkClusterAssembler.toEntity(request);
         if (cluster != null && flinkClusterService.allowShutdownCluster(cluster)) {
             flinkClusterService.updateClusterState(cluster.getId(), ClusterState.CANCELLING);
@@ -127,7 +129,7 @@ public class FlinkClusterController {
     }
 
     @PostMapping("delete")
-    public RestResponseBody<?> delete(@Valid @FormOrJson IdRequest request) {
+    public RestResponseBody<Void> delete(@Valid @FormOrJson IdRequest request) {
         flinkClusterService.remove(request.getId());
         return RestResponseBody.success();
     }

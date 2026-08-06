@@ -35,6 +35,8 @@ import org.apache.streampark.console.core.request.project.ProjectGitRequest;
 import org.apache.streampark.console.core.request.project.ProjectListQueryRequest;
 import org.apache.streampark.console.core.request.project.ProjectModuleRequest;
 import org.apache.streampark.console.core.request.project.ProjectUpdateRequest;
+import org.apache.streampark.console.core.response.project.ProjectBranchesResponse;
+import org.apache.streampark.console.core.response.project.ProjectResponse;
 import org.apache.streampark.console.core.service.ProjectService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -65,7 +67,7 @@ public class ProjectController {
     @PostMapping("create")
     @Permission(team = "#request.teamId")
     @RequiresPermissions("project:create")
-    public RestResponseBody<?> create(@Valid @FormOrJson ProjectCreateRequest request) {
+    public RestResponseBody<Boolean> create(@Valid @FormOrJson ProjectCreateRequest request) {
         ApiAlertException.throwIfNull(
             request.getTeamId(), "The teamId can't be null. Create team failed.");
         return projectService.create(ProjectAssembler.toEntity(request));
@@ -82,7 +84,7 @@ public class ProjectController {
 
     @PostMapping("get")
     @Permission(team = "#request.teamId")
-    public RestResponseBody<?> get(@Valid TeamScopedIdRequest request) {
+    public RestResponseBody<ProjectResponse> get(@Valid TeamScopedIdRequest request) {
         return RestResponseBody.success(ProjectAssembler.toResponse(projectService.getById(request.getId())));
     }
 
@@ -97,14 +99,14 @@ public class ProjectController {
     @PostMapping("build_log")
     @RequiresPermissions("project:build")
     @Permission(team = "#request.teamId")
-    public RestResponseBody<?> buildLog(ProjectBuildLogRequest request) {
+    public RestResponseBody<String> buildLog(ProjectBuildLogRequest request) {
         return projectService.getBuildLog(request.getId(), request.getStartOffset());
     }
 
     @PostMapping("list")
     @RequiresPermissions("project:view")
     @Permission(team = "#query.teamId")
-    public RestResponseBody<?> list(ProjectListQueryRequest query, RestRequest restRequest) {
+    public RestResponseBody<Object> list(ProjectListQueryRequest query, RestRequest restRequest) {
         if (query.getTeamId() == null) {
             return RestResponseBody.success(Collections.emptyList());
         }
@@ -114,7 +116,7 @@ public class ProjectController {
 
     @PostMapping("branches")
     @Permission(team = "#request.teamId")
-    public RestResponseBody<?> branches(ProjectGitRequest request) {
+    public RestResponseBody<ProjectBranchesResponse> branches(ProjectGitRequest request) {
         Project project = ProjectAssembler.toEntity(request);
         List<String> branches = projectService.getAllBranches(project);
         List<String> tags = projectService.getAllTags(project);
@@ -167,7 +169,7 @@ public class ProjectController {
 
     @PostMapping("select")
     @Permission(team = "#request.teamId")
-    public RestResponseBody<?> select(@Valid TeamIdRequest request) {
+    public RestResponseBody<List<ProjectResponse>> select(@Valid TeamIdRequest request) {
         List<Project> list = projectService.listByTeamId(request.getTeamId());
         return RestResponseBody.success(ProjectAssembler.toListResponse(list));
     }

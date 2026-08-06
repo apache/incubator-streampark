@@ -31,6 +31,7 @@ import java.util.Date;
  */
 @Getter
 @Setter
+@SuppressWarnings("java:S1948")
 public class FlinkAppResponse implements Serializable {
 
     private static final long serialVersionUID = 1L;

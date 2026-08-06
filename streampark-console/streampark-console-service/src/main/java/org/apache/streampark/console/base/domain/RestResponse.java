@@ -29,7 +29,8 @@ import java.util.HashMap;
  *
  * @deprecated Use {@link RestResponseBody} for controller return types.
  */
-@Deprecated
+@Deprecated(since = "3.0.0")
+@SuppressWarnings("java:S1133")
 public class RestResponse extends HashMap<String, Object> {
 
     public static final String STATUS_SUCCESS = "success";
@@ -62,7 +63,7 @@ public class RestResponse extends HashMap<String, Object> {
     /**
      * Wraps this response in a typed {@link RestResponseBody}.
      */
-    public <T> RestResponseBody<T> asBody(Class<T> dataType) {
+    public <T> RestResponseBody<T> asBody() {
         return RestResponseBody.from(this);
     }
 

@@ -29,6 +29,7 @@ import org.apache.streampark.console.core.request.flink.FlinkEnvCheckRequest;
 import org.apache.streampark.console.core.request.flink.FlinkEnvCreateRequest;
 import org.apache.streampark.console.core.request.flink.FlinkEnvPageQueryRequest;
 import org.apache.streampark.console.core.request.flink.FlinkEnvUpdateRequest;
+import org.apache.streampark.console.core.response.flink.FlinkEnvResponse;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -53,32 +54,32 @@ public class FlinkEnvController {
     private FlinkEnvService flinkEnvService;
 
     @PostMapping("page")
-    public RestResponseBody<?> findPage(FlinkEnvPageQueryRequest query, RestRequest restRequest) {
+    public RestResponseBody<IPage<FlinkEnvResponse>> findPage(FlinkEnvPageQueryRequest query, RestRequest restRequest) {
         FlinkEnv flinkEnv = FlinkEnvAssembler.toEntity(query);
         IPage<FlinkEnv> envs = flinkEnvService.findPage(flinkEnv, restRequest);
         return RestResponseBody.success(FlinkEnvAssembler.toPageResponse(envs));
     }
 
     @PostMapping("list")
-    public RestResponseBody<?> list() {
+    public RestResponseBody<List<FlinkEnvResponse>> list() {
         List<FlinkEnv> flinkEnvList = flinkEnvService.list();
         return RestResponseBody.success(FlinkEnvAssembler.toListResponse(flinkEnvList));
     }
 
     @PostMapping("check")
-    public RestResponseBody<?> check(FlinkEnvCheckRequest request) {
+    public RestResponseBody<Object> check(FlinkEnvCheckRequest request) {
         FlinkEnvCheckEnum checkResp = flinkEnvService.check(FlinkEnvAssembler.toEntity(request));
         return RestResponseBody.success(checkResp.getCode());
     }
 
     @PostMapping("create")
-    public RestResponseBody<?> create(@Valid @FormOrJson FlinkEnvCreateRequest request) throws Exception {
+    public RestResponseBody<Boolean> create(@Valid @FormOrJson FlinkEnvCreateRequest request) {
         flinkEnvService.create(FlinkEnvAssembler.toEntity(request));
         return RestResponseBody.success(true);
     }
 
     @PostMapping("get")
-    public RestResponseBody<?> get(@Valid IdRequest request) throws Exception {
+    public RestResponseBody<FlinkEnvResponse> get(@Valid IdRequest request) throws Exception {
         FlinkEnv flinkEnv = flinkEnvService.getById(request.getId());
         ApiAlertException.throwIfNull(flinkEnv, "Flink environment not found.");
         flinkEnv.unzipFlinkConf();
@@ -86,31 +87,31 @@ public class FlinkEnvController {
     }
 
     @PostMapping("sync")
-    public RestResponseBody<?> sync(@Valid @FormOrJson IdRequest request) throws Exception {
+    public RestResponseBody<Void> sync(@Valid @FormOrJson IdRequest request) throws Exception {
         flinkEnvService.syncConf(request.getId());
         return RestResponseBody.success();
     }
 
     @PostMapping("update")
-    public RestResponseBody<?> update(@Valid @FormOrJson FlinkEnvUpdateRequest request) {
+    public RestResponseBody<Boolean> update(@Valid @FormOrJson FlinkEnvUpdateRequest request) {
         flinkEnvService.update(FlinkEnvAssembler.toEntity(request));
         return RestResponseBody.success(true);
     }
 
     @PostMapping("delete")
-    public RestResponseBody<?> delete(@Valid @FormOrJson IdRequest request) {
+    public RestResponseBody<Void> delete(@Valid @FormOrJson IdRequest request) {
         flinkEnvService.removeById(request.getId());
         return RestResponseBody.success();
     }
 
     @PostMapping("validity")
-    public RestResponseBody<?> validity(FlinkEnvCheckRequest request) {
+    public RestResponseBody<Boolean> validity(FlinkEnvCheckRequest request) {
         flinkEnvService.validity(request.getId());
         return RestResponseBody.success(true);
     }
 
     @PostMapping("default")
-    public RestResponseBody<?> setDefault(@Valid @FormOrJson IdRequest request) {
+    public RestResponseBody<Void> setDefault(@Valid @FormOrJson IdRequest request) {
         flinkEnvService.setDefault(request.getId());
         return RestResponseBody.success();
     }

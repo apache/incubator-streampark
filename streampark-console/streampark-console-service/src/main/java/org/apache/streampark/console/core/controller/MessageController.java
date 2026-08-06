@@ -25,6 +25,7 @@ import org.apache.streampark.console.core.entity.Message;
 import org.apache.streampark.console.core.enums.NoticeTypeEnum;
 import org.apache.streampark.console.core.request.message.MessageDeleteRequest;
 import org.apache.streampark.console.core.request.message.MessageNoticeRequest;
+import org.apache.streampark.console.core.response.message.MessageResponse;
 import org.apache.streampark.console.core.service.MessageService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -47,14 +48,15 @@ public class MessageController {
     private MessageService messageService;
 
     @PostMapping("notice")
-    public RestResponseBody<?> notice(@Valid MessageNoticeRequest request, RestRequest restRequest) {
+    public RestResponseBody<IPage<MessageResponse>> notice(@Valid MessageNoticeRequest request,
+                                                           RestRequest restRequest) {
         NoticeTypeEnum noticeTypeEnum = NoticeTypeEnum.of(request.getType());
         IPage<Message> pages = messageService.getUnReadPage(noticeTypeEnum, restRequest);
         return RestResponseBody.success(MessageAssembler.toPageResponse(pages));
     }
 
     @PostMapping("delete")
-    public RestResponseBody<?> delete(@Valid @FormOrJson MessageDeleteRequest request) {
+    public RestResponseBody<Object> delete(@Valid @FormOrJson MessageDeleteRequest request) {
         return RestResponseBody.success(messageService.removeById(request.getId()));
     }
 }

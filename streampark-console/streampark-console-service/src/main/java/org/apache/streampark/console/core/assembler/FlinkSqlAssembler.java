@@ -26,6 +26,7 @@ import org.apache.streampark.console.core.response.flink.FlinkSqlResponse;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.BeanUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -73,7 +74,7 @@ public final class FlinkSqlAssembler {
 
     public static FlinkSqlResponse[] toArrayResponse(FlinkSql[] flinkSqls) {
         if (flinkSqls == null) {
-            return null;
+            return new FlinkSqlResponse[0];
         }
         FlinkSqlResponse[] responses = new FlinkSqlResponse[flinkSqls.length];
         for (int i = 0; i < flinkSqls.length; i++) {
@@ -84,7 +85,7 @@ public final class FlinkSqlAssembler {
 
     public static List<FlinkSqlResponse> toListResponse(List<FlinkSql> flinkSqls) {
         if (flinkSqls == null) {
-            return null;
+            return Collections.emptyList();
         }
         return flinkSqls.stream().map(FlinkSqlAssembler::toResponse).collect(Collectors.toList());
     }

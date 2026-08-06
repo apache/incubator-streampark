@@ -73,7 +73,8 @@ class FormOrJsonArgumentResolverTest {
         assertEquals("demo", dto.getTeamName());
     }
 
+    @SuppressWarnings({"java:S1144", "java:S1172"})
     private void sample(@FormOrJson TeamCreateRequest request) {
-        // sample endpoint
+        // referenced reflectively by resolveArgument tests
     }
 }

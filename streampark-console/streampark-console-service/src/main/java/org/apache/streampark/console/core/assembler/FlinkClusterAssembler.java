@@ -30,6 +30,8 @@ import org.apache.streampark.console.core.response.flink.FlinkClusterResponse;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.BeanUtils;
 
+import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -97,7 +99,7 @@ public final class FlinkClusterAssembler {
 
     public static List<FlinkClusterResponse> toListResponse(List<FlinkCluster> clusters) {
         if (clusters == null) {
-            return null;
+            return Collections.emptyList();
         }
         return clusters.stream().map(FlinkClusterAssembler::toResponse).collect(Collectors.toList());
     }
@@ -113,7 +115,7 @@ public final class FlinkClusterAssembler {
         FlinkClusterCheckResponse response = new FlinkClusterCheckResponse();
         response.setStatus(checkResult.getStatus());
         response.setMsg(checkResult.getMsg());
-        response.setResult(checkResult.getResult());
+        response.setResult((Serializable) checkResult.getResult());
         return response;
     }
 }
