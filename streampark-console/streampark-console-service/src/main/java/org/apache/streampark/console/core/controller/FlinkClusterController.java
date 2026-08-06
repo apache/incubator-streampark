@@ -75,7 +75,7 @@ public class FlinkClusterController {
     }
 
     @PostMapping("remote_url")
-    public RestResponse remoteUrl(IdRequest request) {
+    public RestResponse remoteUrl(@Valid IdRequest request) {
         FlinkCluster cluster = flinkClusterService.getById(request.getId());
         return RestResponse.success(cluster.getAddress());
     }

@@ -33,6 +33,8 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+
+import javax.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,7 +53,7 @@ public class FlinkPipelineController {
     @Permission(app = "#request.appId")
     @PostMapping("build")
     @RequiresPermissions("app:create")
-    public RestResponse buildApplication(FlinkPipelineBuildRequest request) throws Exception {
+    public RestResponse buildApplication(@Valid FlinkPipelineBuildRequest request) throws Exception {
         boolean actionResult = appBuildPipeService.buildApplication(request.getAppId(), request.isForceBuild());
         return RestResponse.success(actionResult);
     }
@@ -65,7 +67,7 @@ public class FlinkPipelineController {
     @PostMapping("/detail")
     @Permission(app = "#request.appId")
     @RequiresPermissions("app:view")
-    public RestResponse getBuildProgressDetail(FlinkPipelineDetailRequest request) {
+    public RestResponse getBuildProgressDetail(@Valid FlinkPipelineDetailRequest request) {
         Long appId = request.getAppId();
         Optional<ApplicationBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
         ApplicationBuildPipeline.View pipelineView =

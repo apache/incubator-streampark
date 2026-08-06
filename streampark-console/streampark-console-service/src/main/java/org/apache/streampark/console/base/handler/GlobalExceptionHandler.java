@@ -80,6 +80,14 @@ public class GlobalExceptionHandler {
             ResponseCode.CODE_FAIL, "internal server error: " + ExceptionUtils.stringifyException(e));
     }
 
+    private static String formatFieldErrors(List<FieldError> fieldErrors) {
+        StringBuilder message = new StringBuilder();
+        for (FieldError error : fieldErrors) {
+            message.append(error.getField()).append(error.getDefaultMessage()).append(StringPool.COMMA);
+        }
+        return message.substring(0, message.length() - 1);
+    }
+
     /**
      * Unified processing of request parameter verification (entity object parameter transfer)
      *
@@ -90,13 +98,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public RestResponse validExceptionHandler(BindException e) {
         log.error("bind exception:", e);
-        StringBuilder message = new StringBuilder();
-        List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
-        for (FieldError error : fieldErrors) {
-            message.append(error.getField()).append(error.getDefaultMessage()).append(StringPool.COMMA);
-        }
-        message = new StringBuilder(message.substring(0, message.length() - 1));
-        return RestResponse.fail(ResponseCode.CODE_FAIL, message.toString());
+        return RestResponse.fail(ResponseCode.CODE_FAIL, formatFieldErrors(e.getBindingResult().getFieldErrors()));
     }
 
     /**
@@ -109,13 +111,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public RestResponse methodArgumentNotValidHandler(MethodArgumentNotValidException e) {
         log.error("method argument not valid exception:", e);
-        StringBuilder message = new StringBuilder();
-        List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
-        for (FieldError error : fieldErrors) {
-            message.append(error.getField()).append(error.getDefaultMessage()).append(StringPool.COMMA);
-        }
-        message = new StringBuilder(message.substring(0, message.length() - 1));
-        return RestResponse.fail(ResponseCode.CODE_FAIL, message.toString());
+        return RestResponse.fail(ResponseCode.CODE_FAIL, formatFieldErrors(e.getBindingResult().getFieldErrors()));
     }
 
     /**

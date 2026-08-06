@@ -81,7 +81,7 @@ public class ProjectController {
 
     @PostMapping("get")
     @Permission(team = "#request.teamId")
-    public RestResponse get(TeamScopedIdRequest request) {
+    public RestResponse get(@Valid TeamScopedIdRequest request) {
         return RestResponse.success()
             .data(ProjectAssembler.toResponse(projectService.getById(request.getId())));
     }
@@ -89,7 +89,7 @@ public class ProjectController {
     @PostMapping("build")
     @RequiresPermissions("project:build")
     @Permission(team = "#request.teamId")
-    public RestResponse build(TeamScopedIdRequest request) throws Exception {
+    public RestResponse build(@Valid TeamScopedIdRequest request) throws Exception {
         projectService.build(request.getId());
         return RestResponse.success();
     }
@@ -124,7 +124,7 @@ public class ProjectController {
     @PostMapping("delete")
     @RequiresPermissions("project:delete")
     @Permission(team = "#request.teamId")
-    public RestResponse delete(TeamScopedIdRequest request) {
+    public RestResponse delete(@Valid TeamScopedIdRequest request) {
         Boolean deleted = projectService.removeById(request.getId());
         return RestResponse.success().data(deleted);
     }
@@ -145,7 +145,7 @@ public class ProjectController {
 
     @PostMapping("modules")
     @Permission(team = "#request.teamId")
-    public RestResponse modules(TeamScopedIdRequest request) {
+    public RestResponse modules(@Valid TeamScopedIdRequest request) {
         List<String> result = projectService.listModules(request.getId());
         return RestResponse.success().data(result);
     }
@@ -167,7 +167,7 @@ public class ProjectController {
 
     @PostMapping("select")
     @Permission(team = "#request.teamId")
-    public RestResponse select(TeamIdRequest request) {
+    public RestResponse select(@Valid TeamIdRequest request) {
         List<Project> list = projectService.listByTeamId(request.getTeamId());
         return RestResponse.success().data(ProjectAssembler.toListResponse(list));
     }

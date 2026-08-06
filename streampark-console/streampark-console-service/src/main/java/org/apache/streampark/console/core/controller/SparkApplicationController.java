@@ -96,7 +96,7 @@ public class SparkApplicationController {
     @PostMapping("get")
     @Permission(app = "#request.id")
     @RequiresPermissions("app:detail")
-    public RestResponse get(SparkAppIdRequest request) {
+    public RestResponse get(@Valid SparkAppIdRequest request) {
         SparkApplication application = applicationManageService.getApp(request.getId());
         SparkAppResponse response = SparkApplicationAssembler.toResponse(application);
         return RestResponse.success(response);
@@ -148,7 +148,7 @@ public class SparkApplicationController {
     @PostMapping("mapping")
     @Permission(app = "#request.id")
     @RequiresPermissions("app:mapping")
-    public RestResponse mapping(SparkAppMappingRequest request) {
+    public RestResponse mapping(@Valid SparkAppMappingRequest request) {
         boolean flag = applicationManageService.mapping(SparkApplicationAssembler.toEntity(request));
         return RestResponse.success(flag);
     }
@@ -157,7 +157,7 @@ public class SparkApplicationController {
     @Permission(app = "#request.id")
     @PostMapping("revoke")
     @RequiresPermissions("app:release")
-    public RestResponse revoke(SparkAppIdRequest request) {
+    public RestResponse revoke(@Valid SparkAppIdRequest request) {
         applicationActionService.revoke(request.getId());
         return RestResponse.success();
     }
@@ -165,7 +165,7 @@ public class SparkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("check/start")
     @RequiresPermissions("app:start")
-    public RestResponse checkStart(SparkAppIdRequest request) {
+    public RestResponse checkStart(@Valid SparkAppIdRequest request) {
         AppExistsStateEnum stateEnum = applicationInfoService.checkStart(request.getId());
         return RestResponse.success(stateEnum.get());
     }
@@ -194,7 +194,7 @@ public class SparkApplicationController {
     @Permission(app = "#request.id")
     @PostMapping("clean")
     @RequiresPermissions("app:clean")
-    public RestResponse clean(SparkAppIdRequest request) {
+    public RestResponse clean(@Valid SparkAppIdRequest request) {
         applicationManageService.clean(SparkApplicationAssembler.toCleanEntity(request));
         return RestResponse.success(true);
     }
@@ -202,7 +202,7 @@ public class SparkApplicationController {
     @Permission(app = "#request.id")
     @PostMapping("forcedStop")
     @RequiresPermissions("app:cancel")
-    public RestResponse forcedStop(SparkAppIdRequest request) {
+    public RestResponse forcedStop(@Valid SparkAppIdRequest request) {
         applicationActionService.forcedStop(request.getId());
         return RestResponse.success();
     }
@@ -256,7 +256,7 @@ public class SparkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("delete")
     @RequiresPermissions("app:delete")
-    public RestResponse delete(SparkAppIdRequest request) throws InternalException {
+    public RestResponse delete(@Valid SparkAppIdRequest request) throws InternalException {
         Boolean deleted = applicationManageService.remove(request.getId());
         return RestResponse.success(deleted);
     }

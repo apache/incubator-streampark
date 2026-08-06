@@ -17,17 +17,15 @@
 
 package org.apache.streampark.console.system.request.user;
 
+import org.apache.streampark.console.core.request.common.TeamIdRequest;
+
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serializable;
 
 /** Request body for {@code POST /user/set_team} and {@code POST /user/appOwners}. */
 @Getter
 @Setter
-public class UserTeamIdRequest implements Serializable {
+public class UserTeamIdRequest extends TeamIdRequest {
 
     private static final long serialVersionUID = 1L;
-
-    private Long teamId;
 }

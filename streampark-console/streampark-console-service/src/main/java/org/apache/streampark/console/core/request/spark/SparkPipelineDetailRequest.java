@@ -20,6 +20,8 @@ package org.apache.streampark.console.core.request.spark;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotNull;
+
 import java.io.Serializable;
 
 /**
@@ -31,5 +33,6 @@ public class SparkPipelineDetailRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
     private Long appId;
 }

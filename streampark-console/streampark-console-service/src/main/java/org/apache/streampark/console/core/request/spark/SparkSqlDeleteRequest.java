@@ -17,24 +17,23 @@
 
 package org.apache.streampark.console.core.request.spark;
 
+import org.apache.streampark.console.core.request.common.AppTeamQueryRequest;
+
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
+import javax.validation.constraints.NotBlank;
 
 /**
  * Request body for {@code POST /spark/sql/delete}.
  */
 @Getter
 @Setter
-public class SparkSqlDeleteRequest implements Serializable {
+public class SparkSqlDeleteRequest extends AppTeamQueryRequest {
 
     private static final long serialVersionUID = 1L;
 
-    private Long appId;
-
-    private Long teamId;
-
     /** Record id passed via the legacy {@code sql} form field. */
+    @NotBlank
     private String sql;
 }

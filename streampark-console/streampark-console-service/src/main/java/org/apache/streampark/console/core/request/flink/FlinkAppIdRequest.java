@@ -17,21 +17,17 @@
 
 package org.apache.streampark.console.core.request.flink;
 
+import org.apache.streampark.console.core.request.common.AppScopedIdRequest;
+
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serializable;
 
 /**
  * Minimal request carrying a Flink application id (and optional team id for permission checks).
  */
 @Getter
 @Setter
-public class FlinkAppIdRequest implements Serializable {
+public class FlinkAppIdRequest extends AppScopedIdRequest {
 
     private static final long serialVersionUID = 1L;
-
-    private Long id;
-
-    private Long teamId;
 }

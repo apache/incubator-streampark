@@ -93,7 +93,7 @@ public class SparkSqlController {
 
     @PostMapping("list")
     @Permission(app = "#request.appId", team = "#request.teamId")
-    public RestResponse list(SparkSqlListQueryRequest request, RestRequest restRequest) {
+    public RestResponse list(@Valid SparkSqlListQueryRequest request, RestRequest restRequest) {
         IPage<SparkSql> page = sparkSqlService.getPage(request.getAppId(), restRequest);
         return RestResponse.success(SparkSqlAssembler.toPageResponse(page));
     }
@@ -101,7 +101,7 @@ public class SparkSqlController {
     @PostMapping("delete")
     @RequiresPermissions("sql:delete")
     @Permission(app = "#request.appId", team = "#request.teamId")
-    public RestResponse delete(SparkSqlDeleteRequest request) {
+    public RestResponse delete(@Valid SparkSqlDeleteRequest request) {
         SparkSql sparkSql = SparkSqlAssembler.toDeleteEntity(request);
         ApiAlertException.throwIfNull(sparkSql, "Spark SQL delete request cannot be null.");
         Boolean deleted = sparkSqlService.removeById(sparkSql.getSql());
@@ -110,24 +110,26 @@ public class SparkSqlController {
 
     @PostMapping("get")
     @Permission(app = "#request.appId", team = "#request.teamId")
-    public RestResponse get(SparkSqlGetRequest request) throws InternalException {
+    public RestResponse get(@Valid SparkSqlGetRequest request) throws InternalException {
         ApiAlertException.throwIfTrue(
             request.getAppId() == null || request.getTeamId() == null,
             "Permission denied, appId and teamId cannot be null");
         String[] array = request.getId().split(",");
         SparkSql sparkSql1 = sparkSqlService.getById(array[0]);
+        ApiAlertException.throwIfNull(sparkSql1, "Spark SQL not found.");
         sparkSql1.base64Encode();
         if (array.length == 1) {
             return RestResponse.success(SparkSqlAssembler.toResponse(sparkSql1));
         }
         SparkSql sparkSql2 = sparkSqlService.getById(array[1]);
+        ApiAlertException.throwIfNull(sparkSql2, "Spark SQL not found.");
         sparkSql2.base64Encode();
         return RestResponse.success(SparkSqlAssembler.toResponseArray(new SparkSql[]{sparkSql1, sparkSql2}));
     }
 
     @PostMapping("history")
     @Permission(app = "#request.id", team = "#request.teamId")
-    public RestResponse history(SparkSqlHistoryRequest request) {
+    public RestResponse history(@Valid SparkSqlHistoryRequest request) {
         List<SparkSql> sqlList = sparkSqlService.listSparkSqlHistory(request.getId());
         return RestResponse.success(SparkSqlAssembler.toListResponse(sqlList));
     }

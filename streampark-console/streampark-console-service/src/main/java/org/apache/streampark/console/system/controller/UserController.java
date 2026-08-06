@@ -94,7 +94,7 @@ public class UserController {
 
     @PutMapping("transferResource")
     @RequiresPermissions("user:update")
-    public RestResponse transferResource(UserTransferResourceRequest request) {
+    public RestResponse transferResource(@Valid UserTransferResourceRequest request) {
         this.userService.transferResource(request.getUserId(), request.getTargetUserId());
         return RestResponse.success();
     }
@@ -102,7 +102,7 @@ public class UserController {
     @DeleteMapping("delete")
     @Permission(user = "#request.userId")
     @RequiresPermissions("user:delete")
-    public RestResponse deleteUser(UserDeleteRequest request) throws Exception {
+    public RestResponse deleteUser(@Valid UserDeleteRequest request) throws Exception {
         this.userService.deleteUser(request.getUserId());
         return RestResponse.success();
     }
@@ -120,7 +120,7 @@ public class UserController {
 
     @PutMapping("password")
     @Permission(user = "#request.userId")
-    public RestResponse updatePassword(UserPasswordUpdateRequest request) throws Exception {
+    public RestResponse updatePassword(@Valid UserPasswordUpdateRequest request) throws Exception {
         userService.updatePassword(UserAssembler.toEntity(request));
         return RestResponse.success();
     }
@@ -133,7 +133,7 @@ public class UserController {
     }
 
     @PostMapping("set_team")
-    public RestResponse setTeam(UserTeamIdRequest request) {
+    public RestResponse setTeam(@Valid UserTeamIdRequest request) {
         Team team = teamService.getById(request.getTeamId());
         if (team == null) {
             return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "TeamId is invalid, set team failed.");
@@ -150,7 +150,7 @@ public class UserController {
     }
 
     @PostMapping("appOwners")
-    public RestResponse appOwners(UserTeamIdRequest request) {
+    public RestResponse appOwners(@Valid UserTeamIdRequest request) {
         List<User> userList = userService.listByTeamId(request.getTeamId());
         userList.forEach(User::dataMasking);
         return RestResponse.success(UserAssembler.toResponseList(userList));

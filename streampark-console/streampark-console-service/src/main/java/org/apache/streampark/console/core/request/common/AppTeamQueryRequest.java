@@ -15,24 +15,22 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.request.flink;
+package org.apache.streampark.console.core.request.common;
 
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.NotBlank;
-
-import java.io.Serializable;
+import javax.validation.constraints.NotNull;
 
 /**
- * Request body for {@code POST /flink/podtmpl/extract_host_alias}.
+ * Team-scoped query carrying an explicit {@code appId} (distinct from {@link IdRequest#id}).
  */
 @Getter
 @Setter
-public class FlinkPodTemplateExtractRequest implements Serializable {
+public class AppTeamQueryRequest extends TeamIdRequest {
 
     private static final long serialVersionUID = 1L;
 
-    @NotBlank
-    private String podTemplate;
+    @NotNull
+    private Long appId;
 }

@@ -30,6 +30,8 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+
+import javax.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -54,7 +56,7 @@ public class SparkPipelineController {
     @PostMapping("build")
     @RequiresPermissions("app:create")
     @Permission(app = "#request.appId")
-    public RestResponse buildApplication(SparkPipelineBuildRequest request) {
+    public RestResponse buildApplication(@Valid SparkPipelineBuildRequest request) {
         try {
             boolean actionResult = appBuildPipeService.buildApplication(request.getAppId(), request.isForceBuild());
             return RestResponse.success(actionResult);
@@ -72,7 +74,7 @@ public class SparkPipelineController {
     @PostMapping("/detail")
     @RequiresPermissions("app:view")
     @Permission(app = "#request.appId")
-    public RestResponse getBuildProgressDetail(SparkPipelineDetailRequest request) {
+    public RestResponse getBuildProgressDetail(@Valid SparkPipelineDetailRequest request) {
         Optional<ApplicationBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(request.getAppId());
         return RestResponse.success(
             SparkPipelineAssembler.toDetailResponse(pipeline.map(ApplicationBuildPipeline::toView).orElse(null)));

@@ -33,6 +33,7 @@ import org.apache.streampark.console.core.request.app.AppOptLogDeleteRequest;
 import org.apache.streampark.console.core.request.app.AppOptLogQueryRequest;
 import org.apache.streampark.console.core.enums.AppExistsStateEnum;
 import org.apache.streampark.console.core.request.flink.FlinkAppCancelRequest;
+import org.apache.streampark.console.core.request.common.TeamIdRequest;
 import org.apache.streampark.console.core.request.flink.FlinkAppCheckNameRequest;
 import org.apache.streampark.console.core.request.flink.FlinkAppCheckSavepointPathRequest;
 import org.apache.streampark.console.core.request.flink.FlinkAppConfigRequest;
@@ -98,7 +99,7 @@ public class FlinkApplicationController {
     @PostMapping("get")
     @Permission(app = "#request.id")
     @RequiresPermissions("app:detail")
-    public RestResponse get(FlinkAppIdRequest request) {
+    public RestResponse get(@Valid FlinkAppIdRequest request) {
         FlinkApplication application = applicationManageService.getApp(request.getId());
         FlinkAppResponse response = FlinkApplicationAssembler.toResponse(application);
         return RestResponse.success(response);
@@ -132,7 +133,7 @@ public class FlinkApplicationController {
 
     @PostMapping("dashboard")
     @Permission(team = "#request.teamId")
-    public RestResponse dashboard(FlinkAppIdRequest request) {
+    public RestResponse dashboard(@Valid TeamIdRequest request) {
         Map<String, Serializable> dashboardMap = applicationInfoService.getDashboardDataMap(request.getTeamId());
         return RestResponse.success(FlinkApplicationAssembler.toDashboardResponse(dashboardMap));
     }
@@ -150,7 +151,7 @@ public class FlinkApplicationController {
     @PostMapping("mapping")
     @Permission(app = "#request.id")
     @RequiresPermissions("app:mapping")
-    public RestResponse mapping(FlinkAppMappingRequest request) {
+    public RestResponse mapping(@Valid FlinkAppMappingRequest request) {
         boolean flag = applicationManageService.mapping(FlinkApplicationAssembler.toEntity(request));
         return RestResponse.success(flag);
     }
@@ -159,7 +160,7 @@ public class FlinkApplicationController {
     @Permission(app = "#request.id")
     @PostMapping("revoke")
     @RequiresPermissions("app:release")
-    public RestResponse revoke(FlinkAppIdRequest request) {
+    public RestResponse revoke(@Valid FlinkAppIdRequest request) {
         applicationActionService.revoke(request.getId());
         return RestResponse.success();
     }
@@ -167,7 +168,7 @@ public class FlinkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("check/start")
     @RequiresPermissions("app:start")
-    public RestResponse checkStart(FlinkAppIdRequest request) {
+    public RestResponse checkStart(@Valid FlinkAppIdRequest request) {
         AppExistsStateEnum stateEnum = applicationInfoService.checkStart(request.getId());
         return RestResponse.success(stateEnum.get());
     }
@@ -192,7 +193,7 @@ public class FlinkApplicationController {
     @Permission(app = "#request.id")
     @PostMapping("abort")
     @RequiresPermissions("app:cancel")
-    public RestResponse abort(FlinkAppIdRequest request) {
+    public RestResponse abort(@Valid FlinkAppIdRequest request) {
         applicationActionService.abort(request.getId());
         return RestResponse.success();
     }
@@ -254,7 +255,7 @@ public class FlinkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("delete")
     @RequiresPermissions("app:delete")
-    public RestResponse delete(FlinkAppIdRequest request) throws InternalException {
+    public RestResponse delete(@Valid FlinkAppIdRequest request) throws InternalException {
         Boolean deleted = applicationManageService.remove(request.getId());
         return RestResponse.success(deleted);
     }

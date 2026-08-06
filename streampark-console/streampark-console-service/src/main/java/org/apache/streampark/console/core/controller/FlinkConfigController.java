@@ -72,7 +72,7 @@ public class FlinkConfigController {
     }
 
     @PostMapping("history")
-    public RestResponse history(FlinkAppIdRequest request) {
+    public RestResponse history(@Valid FlinkAppIdRequest request) {
         List<FlinkApplicationConfig> history =
             applicationConfigService.list(FlinkConfAssembler.toAppId(request));
         return RestResponse.success(FlinkConfAssembler.toListResponse(history));

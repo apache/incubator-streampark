@@ -17,21 +17,17 @@
 
 package org.apache.streampark.console.core.request.spark;
 
+import org.apache.streampark.console.core.request.common.AppScopedIdRequest;
+
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serializable;
 
 /**
  * Minimal request carrying a Spark application id (and optional team id for permission checks).
  */
 @Getter
 @Setter
-public class SparkAppIdRequest implements Serializable {
+public class SparkAppIdRequest extends AppScopedIdRequest {
 
     private static final long serialVersionUID = 1L;
-
-    private Long id;
-
-    private Long teamId;
 }

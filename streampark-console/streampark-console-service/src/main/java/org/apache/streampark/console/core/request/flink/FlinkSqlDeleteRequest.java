@@ -17,23 +17,22 @@
 
 package org.apache.streampark.console.core.request.flink;
 
+import org.apache.streampark.console.core.request.common.AppTeamQueryRequest;
+
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
+import javax.validation.constraints.NotNull;
 
 /**
  * Request body for {@code POST /flink/sql/delete}.
  */
 @Getter
 @Setter
-public class FlinkSqlDeleteRequest implements Serializable {
+public class FlinkSqlDeleteRequest extends AppTeamQueryRequest {
 
     private static final long serialVersionUID = 1L;
 
-    private Long appId;
-
-    private Long teamId;
-
+    @NotNull
     private Long id;
 }

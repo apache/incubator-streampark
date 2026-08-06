@@ -17,21 +17,19 @@
 
 package org.apache.streampark.console.core.request.spark;
 
+import org.apache.streampark.console.core.request.common.IdRequest;
+
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serializable;
 
 /**
  * Request body for {@code POST /spark/app/mapping}.
  */
 @Getter
 @Setter
-public class SparkAppMappingRequest implements Serializable {
+public class SparkAppMappingRequest extends IdRequest {
 
     private static final long serialVersionUID = 1L;
-
-    private Long id;
 
     private String clusterId;
 }

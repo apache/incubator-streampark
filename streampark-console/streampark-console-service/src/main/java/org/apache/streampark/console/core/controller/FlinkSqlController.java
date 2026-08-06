@@ -94,7 +94,7 @@ public class FlinkSqlController {
 
     @PostMapping("list")
     @Permission(app = "#query.appId", team = "#query.teamId")
-    public RestResponse list(FlinkSqlListQueryRequest query, RestRequest request) {
+    public RestResponse list(@Valid FlinkSqlListQueryRequest query, RestRequest request) {
         IPage<FlinkSql> page = flinkSqlService.getPage(query.getAppId(), request);
         return RestResponse.success(FlinkSqlAssembler.toPageResponse(page));
     }
@@ -102,24 +102,26 @@ public class FlinkSqlController {
     @PostMapping("delete")
     @RequiresPermissions("sql:delete")
     @Permission(app = "#request.appId", team = "#request.teamId")
-    public RestResponse delete(FlinkSqlDeleteRequest request) {
+    public RestResponse delete(@Valid FlinkSqlDeleteRequest request) {
         Boolean deleted = flinkSqlService.removeById(request.getId());
         return RestResponse.success(deleted);
     }
 
     @PostMapping("get")
     @Permission(app = "#request.appId", team = "#request.teamId")
-    public RestResponse get(FlinkSqlGetRequest request) throws InternalException {
+    public RestResponse get(@Valid FlinkSqlGetRequest request) throws InternalException {
         ApiAlertException.throwIfTrue(
             request.getAppId() == null || request.getTeamId() == null,
             "Permission denied, appId and teamId cannot be null");
         String[] array = request.getId().split(",");
         FlinkSql flinkSql1 = flinkSqlService.getById(array[0]);
+        ApiAlertException.throwIfNull(flinkSql1, "Flink SQL not found.");
         flinkSql1.base64Encode();
         if (array.length == 1) {
             return RestResponse.success(FlinkSqlAssembler.toResponse(flinkSql1));
         }
         FlinkSql flinkSql2 = flinkSqlService.getById(array[1]);
+        ApiAlertException.throwIfNull(flinkSql2, "Flink SQL not found.");
         flinkSql2.base64Encode();
         return RestResponse.success(
             FlinkSqlAssembler.toArrayResponse(new FlinkSql[]{flinkSql1, flinkSql2}));
@@ -127,7 +129,7 @@ public class FlinkSqlController {
 
     @PostMapping("history")
     @Permission(app = "#request.id", team = "#request.teamId")
-    public RestResponse history(FlinkAppIdRequest request) {
+    public RestResponse history(@Valid FlinkAppIdRequest request) {
         List<FlinkSql> sqlList = flinkSqlService.listFlinkSqlHistory(request.getId());
         return RestResponse.success(FlinkSqlAssembler.toListResponse(sqlList));
     }

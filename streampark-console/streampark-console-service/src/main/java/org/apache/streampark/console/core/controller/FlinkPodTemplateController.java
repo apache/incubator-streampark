@@ -28,6 +28,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
+
+import javax.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -60,7 +62,7 @@ public class FlinkPodTemplateController {
 
     /** @param request hosts hostname:ipv4,hostname:ipv4,hostname:ipv4... */
     @PostMapping("comp_host_alias")
-    public RestResponse completeHostAlias(FlinkPodTemplateHostAliasRequest request) {
+    public RestResponse completeHostAlias(@Valid FlinkPodTemplateHostAliasRequest request) {
         Map<String, String> hostMap = covertHostsParamToMap(request.getHosts());
         String completedPodTemplate =
             PodTemplateParser.completeHostAliasSpec(hostMap, request.getPodTemplate());
@@ -82,7 +84,7 @@ public class FlinkPodTemplateController {
     }
 
     @PostMapping("extract_host_alias")
-    public RestResponse extractHostAlias(FlinkPodTemplateExtractRequest request) {
+    public RestResponse extractHostAlias(@Valid FlinkPodTemplateExtractRequest request) {
         Map<String, String> hosts = PodTemplateParser.extractHostAliasMap(request.getPodTemplate());
         List<String> friendlyHosts = hosts.entrySet().stream()
             .map(e -> e.getKey() + ":" + e.getValue())
@@ -92,7 +94,7 @@ public class FlinkPodTemplateController {
 
     /** @param request hosts hostname:ipv4,hostname:ipv4,hostname:ipv4... */
     @PostMapping("preview_host_alias")
-    public RestResponse previewHostAlias(FlinkPodTemplatePreviewRequest request) {
+    public RestResponse previewHostAlias(@Valid FlinkPodTemplatePreviewRequest request) {
         Map<String, String> hostMap = covertHostsParamToMap(request.getHosts());
         String podTemplate = PodTemplateParser.previewHostAliasSpec(hostMap);
         return RestResponse.success(podTemplate);

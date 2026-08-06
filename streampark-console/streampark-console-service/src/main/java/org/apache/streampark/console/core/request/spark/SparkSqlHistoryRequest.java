@@ -17,21 +17,17 @@
 
 package org.apache.streampark.console.core.request.spark;
 
+import org.apache.streampark.console.core.request.common.AppScopedIdRequest;
+
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serializable;
 
 /**
  * Request body for {@code POST /spark/sql/history}.
  */
 @Getter
 @Setter
-public class SparkSqlHistoryRequest implements Serializable {
+public class SparkSqlHistoryRequest extends AppScopedIdRequest {
 
     private static final long serialVersionUID = 1L;
-
-    private Long id;
-
-    private Long teamId;
 }

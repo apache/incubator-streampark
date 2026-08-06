@@ -17,21 +17,17 @@
 
 package org.apache.streampark.console.core.request.spark;
 
+import org.apache.streampark.console.core.request.common.AppTeamQueryRequest;
+
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serializable;
 
 /**
  * Query filters for {@code POST /spark/sql/list}.
  */
 @Getter
 @Setter
-public class SparkSqlListQueryRequest implements Serializable {
+public class SparkSqlListQueryRequest extends AppTeamQueryRequest {
 
     private static final long serialVersionUID = 1L;
-
-    private Long appId;
-
-    private Long teamId;
 }

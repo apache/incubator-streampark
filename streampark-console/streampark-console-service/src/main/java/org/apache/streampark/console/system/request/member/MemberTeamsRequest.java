@@ -20,6 +20,8 @@ package org.apache.streampark.console.system.request.member;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotNull;
+
 import java.io.Serializable;
 
 /** Request body for {@code POST /member/teams}. */
@@ -29,5 +31,6 @@ public class MemberTeamsRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
     private Long userId;
 }

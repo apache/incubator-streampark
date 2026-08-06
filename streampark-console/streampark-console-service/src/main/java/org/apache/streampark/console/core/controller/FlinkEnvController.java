@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.assembler.FlinkEnvAssembler;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.enums.FlinkEnvCheckEnum;
@@ -76,14 +77,15 @@ public class FlinkEnvController {
     }
 
     @PostMapping("get")
-    public RestResponse get(IdRequest request) throws Exception {
+    public RestResponse get(@Valid IdRequest request) throws Exception {
         FlinkEnv flinkEnv = flinkEnvService.getById(request.getId());
+        ApiAlertException.throwIfNull(flinkEnv, "Flink environment not found.");
         flinkEnv.unzipFlinkConf();
         return RestResponse.success(FlinkEnvAssembler.toResponse(flinkEnv));
     }
 
     @PostMapping("sync")
-    public RestResponse sync(IdRequest request) throws Exception {
+    public RestResponse sync(@Valid IdRequest request) throws Exception {
         flinkEnvService.syncConf(request.getId());
         return RestResponse.success();
     }
@@ -95,7 +97,7 @@ public class FlinkEnvController {
     }
 
     @PostMapping("delete")
-    public RestResponse delete(IdRequest request) {
+    public RestResponse delete(@Valid IdRequest request) {
         flinkEnvService.removeById(request.getId());
         return RestResponse.success();
     }
@@ -107,7 +109,7 @@ public class FlinkEnvController {
     }
 
     @PostMapping("default")
-    public RestResponse setDefault(IdRequest request) {
+    public RestResponse setDefault(@Valid IdRequest request) {
         flinkEnvService.setDefault(request.getId());
         return RestResponse.success();
     }

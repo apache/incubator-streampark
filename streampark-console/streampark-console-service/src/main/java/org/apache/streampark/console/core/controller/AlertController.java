@@ -102,7 +102,7 @@ public class AlertController {
     }
 
     @PostMapping("/send")
-    public RestResponse sendAlert(AlertSendRequest request) throws AlertException {
+    public RestResponse sendAlert(@Valid AlertSendRequest request) throws AlertException {
         AlertTemplate alertTemplate = new AlertTemplate();
         alertTemplate.setTitle("Notify: StreamPark alert job for test");
         alertTemplate.setJobName("StreamPark alert job for test");

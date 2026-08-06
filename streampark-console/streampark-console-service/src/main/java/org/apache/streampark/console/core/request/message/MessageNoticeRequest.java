@@ -20,6 +20,8 @@ package org.apache.streampark.console.core.request.message;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotNull;
+
 import java.io.Serializable;
 
 /** Request body for {@code POST /message/notice}. */
@@ -29,5 +31,6 @@ public class MessageNoticeRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
     private Integer type;
 }

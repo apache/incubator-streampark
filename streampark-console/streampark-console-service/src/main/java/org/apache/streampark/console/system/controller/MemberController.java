@@ -65,13 +65,13 @@ public class MemberController {
     }
 
     @PostMapping("candidateUsers")
-    public RestResponse candidateUsers(MemberCandidateUsersRequest request) {
+    public RestResponse candidateUsers(@Valid MemberCandidateUsersRequest request) {
         return RestResponse.success(
             UserAssembler.toResponseList(memberService.listUsersNotInTeam(request.getTeamId())));
     }
 
     @PostMapping("teams")
-    public RestResponse listTeams(MemberTeamsRequest request) {
+    public RestResponse listTeams(@Valid MemberTeamsRequest request) {
         return RestResponse.success(
             memberService.listTeamsByUserId(request.getUserId()).stream()
                 .map(TeamAssembler::toResponse)

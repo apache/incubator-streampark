@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.core.assembler.SparkEnvAssembler;
 import org.apache.streampark.console.core.entity.SparkEnv;
@@ -73,15 +74,16 @@ public class SparkEnvController {
     }
 
     @PostMapping("get")
-    public RestResponse get(IdRequest request) throws Exception {
+    public RestResponse get(@Valid IdRequest request) throws Exception {
         SparkEnv sparkEnv = sparkEnvService.getById(request.getId());
+        ApiAlertException.throwIfNull(sparkEnv, "Spark environment not found.");
         sparkEnv.unzipSparkConf();
         SparkEnvResponse response = SparkEnvAssembler.toResponse(sparkEnv);
         return RestResponse.success(response);
     }
 
     @PostMapping("sync")
-    public RestResponse sync(IdRequest request) throws Exception {
+    public RestResponse sync(@Valid IdRequest request) throws Exception {
         sparkEnvService.syncConf(request.getId());
         return RestResponse.success();
     }
@@ -97,19 +99,19 @@ public class SparkEnvController {
     }
 
     @PostMapping("delete")
-    public RestResponse delete(IdRequest request) {
+    public RestResponse delete(@Valid IdRequest request) {
         sparkEnvService.removeById(request.getId());
         return RestResponse.success();
     }
 
     @PostMapping("validity")
-    public RestResponse validity(SparkEnvValidityRequest request) {
+    public RestResponse validity(@Valid SparkEnvValidityRequest request) {
         sparkEnvService.validity(request.getId());
         return RestResponse.success(true);
     }
 
     @PostMapping("default")
-    public RestResponse setDefault(IdRequest request) {
+    public RestResponse setDefault(@Valid IdRequest request) {
         sparkEnvService.setDefault(request.getId());
         return RestResponse.success();
     }

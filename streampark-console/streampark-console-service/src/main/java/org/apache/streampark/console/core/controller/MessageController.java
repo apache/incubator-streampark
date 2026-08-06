@@ -30,6 +30,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+
+import javax.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,14 +46,14 @@ public class MessageController {
     private MessageService messageService;
 
     @PostMapping("notice")
-    public RestResponse notice(MessageNoticeRequest request, RestRequest restRequest) {
+    public RestResponse notice(@Valid MessageNoticeRequest request, RestRequest restRequest) {
         NoticeTypeEnum noticeTypeEnum = NoticeTypeEnum.of(request.getType());
         IPage<Message> pages = messageService.getUnReadPage(noticeTypeEnum, restRequest);
         return RestResponse.success(MessageAssembler.toPageResponse(pages));
     }
 
     @PostMapping("delete")
-    public RestResponse delete(MessageDeleteRequest request) {
+    public RestResponse delete(@Valid MessageDeleteRequest request) {
         return RestResponse.success(messageService.removeById(request.getId()));
     }
 }

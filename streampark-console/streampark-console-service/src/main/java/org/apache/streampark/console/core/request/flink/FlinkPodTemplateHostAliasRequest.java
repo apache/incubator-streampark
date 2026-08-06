@@ -20,6 +20,8 @@ package org.apache.streampark.console.core.request.flink;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+
 import java.io.Serializable;
 
 /**
@@ -33,5 +35,6 @@ public class FlinkPodTemplateHostAliasRequest implements Serializable {
 
     private String hosts;
 
+    @NotBlank
     private String podTemplate;
 }

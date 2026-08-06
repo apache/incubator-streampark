@@ -17,21 +17,19 @@
 
 package org.apache.streampark.console.core.request.flink;
 
+import org.apache.streampark.console.core.request.common.IdRequest;
+
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serializable;
 
 /**
  * Request body for {@code POST /flink/app/mapping}.
  */
 @Getter
 @Setter
-public class FlinkAppMappingRequest implements Serializable {
+public class FlinkAppMappingRequest extends IdRequest {
 
     private static final long serialVersionUID = 1L;
-
-    private Long id;
 
     private String clusterId;
 
