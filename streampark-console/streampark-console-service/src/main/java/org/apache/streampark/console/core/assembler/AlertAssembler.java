@@ -81,9 +81,18 @@ public final class AlertAssembler {
             return null;
         }
         AlertConfigResponse response = new AlertConfigResponse();
+        BeanUtils.copyProperties(config, response);
+        return response;
+    }
+
+    public static AlertConfigRequest toRequest(AlertConfig config) {
+        if (config == null) {
+            return null;
+        }
+        AlertConfigRequest request = new AlertConfigRequest();
         BeanUtils.copyProperties(
             config,
-            response,
+            request,
             "emailParams",
             "dingTalkParams",
             "weComParams",
@@ -91,35 +100,25 @@ public final class AlertAssembler {
             "larkParams");
         try {
             if (StringUtils.isNotBlank(config.getEmailParams())) {
-                response.setEmailParams(JacksonUtils.read(config.getEmailParams(), AlertEmailParams.class));
+                request.setEmailParams(JacksonUtils.read(config.getEmailParams(), AlertEmailParams.class));
             }
             if (StringUtils.isNotBlank(config.getDingTalkParams())) {
-                response.setDingTalkParams(
+                request.setDingTalkParams(
                     JacksonUtils.read(config.getDingTalkParams(), AlertDingTalkParams.class));
             }
             if (StringUtils.isNotBlank(config.getWeComParams())) {
-                response.setWeComParams(JacksonUtils.read(config.getWeComParams(), AlertWeComParams.class));
+                request.setWeComParams(JacksonUtils.read(config.getWeComParams(), AlertWeComParams.class));
             }
             if (StringUtils.isNotBlank(config.getHttpCallbackParams())) {
-                response.setHttpCallbackParams(
+                request.setHttpCallbackParams(
                     JacksonUtils.read(config.getHttpCallbackParams(), AlertHttpCallbackParams.class));
             }
             if (StringUtils.isNotBlank(config.getLarkParams())) {
-                response.setLarkParams(JacksonUtils.read(config.getLarkParams(), AlertLarkParams.class));
+                request.setLarkParams(JacksonUtils.read(config.getLarkParams(), AlertLarkParams.class));
             }
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Failed to deserialize alert config params", e);
         }
-        return response;
-    }
-
-    public static AlertConfigRequest toRequest(AlertConfig config) {
-        AlertConfigResponse response = toResponse(config);
-        if (response == null) {
-            return null;
-        }
-        AlertConfigRequest request = new AlertConfigRequest();
-        BeanUtils.copyProperties(response, request);
         return request;
     }
 

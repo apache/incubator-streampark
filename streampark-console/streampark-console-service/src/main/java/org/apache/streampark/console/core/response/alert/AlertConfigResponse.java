@@ -17,12 +17,6 @@
 
 package org.apache.streampark.console.core.response.alert;
 
-import org.apache.streampark.console.core.bean.AlertDingTalkParams;
-import org.apache.streampark.console.core.bean.AlertEmailParams;
-import org.apache.streampark.console.core.bean.AlertHttpCallbackParams;
-import org.apache.streampark.console.core.bean.AlertLarkParams;
-import org.apache.streampark.console.core.bean.AlertWeComParams;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -44,15 +38,20 @@ public class AlertConfigResponse implements Serializable {
 
     private Integer alertType;
 
-    private AlertEmailParams emailParams;
+    /** JSON string, aligned with legacy {@code AlertConfig} wire format. */
+    private String emailParams;
 
-    private AlertDingTalkParams dingTalkParams;
+    /** JSON string, aligned with legacy {@code AlertConfig} wire format. */
+    private String dingTalkParams;
 
-    private AlertWeComParams weComParams;
+    /** JSON string, aligned with legacy {@code AlertConfig} wire format. */
+    private String weComParams;
 
-    private AlertHttpCallbackParams httpCallbackParams;
+    /** JSON string, aligned with legacy {@code AlertConfig} wire format. */
+    private String httpCallbackParams;
 
-    private AlertLarkParams larkParams;
+    /** JSON string, aligned with legacy {@code AlertConfig} wire format. */
+    private String larkParams;
 
     private Date createTime;
 
