@@ -18,6 +18,7 @@
 package org.apache.streampark.console.base.handler;
 
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.core.request.alert.AlertConfigRequest;
 
 import org.junit.jupiter.api.Assertions;
@@ -37,9 +38,9 @@ class GlobalExceptionHandlerValidationTest {
         bindingResult.addError(new FieldError("request", "alertName", "must not be blank"));
         BindException exception = new BindException(bindingResult);
 
-        RestResponse response = handler.validExceptionHandler(exception);
+        RestResponseBody<Void> response = handler.validExceptionHandler(exception);
 
-        Assertions.assertEquals(RestResponse.STATUS_FAIL, response.get(RestResponse.STATUS_KEY));
-        Assertions.assertTrue(response.get(RestResponse.MESSAGE_KEY).toString().contains("alertName"));
+        Assertions.assertEquals(RestResponse.STATUS_FAIL, response.getStatus());
+        Assertions.assertTrue(response.getMessage().contains("alertName"));
     }
 }

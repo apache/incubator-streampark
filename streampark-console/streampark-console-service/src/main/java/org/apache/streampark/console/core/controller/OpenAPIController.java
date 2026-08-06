@@ -18,10 +18,14 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.core.annotation.OpenAPI;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.assembler.FlinkApplicationAssembler;
+import org.apache.streampark.console.core.bean.ApiContractDocument;
 import org.apache.streampark.console.core.bean.OpenAPISchema;
+import org.apache.streampark.console.core.component.ApiContractExportService;
+import org.apache.streampark.console.core.component.ApiTypeScriptGenerator;
 import org.apache.streampark.console.core.component.OpenAPIComponent;
 import org.apache.streampark.console.core.request.flink.FlinkAppCancelRequest;
 import org.apache.streampark.console.core.request.flink.FlinkAppStartRequest;
@@ -46,6 +50,9 @@ public class OpenAPIController {
 
     @Autowired
     private OpenAPIComponent openAPIComponent;
+
+    @Autowired
+    private ApiContractExportService apiContractExportService;
 
     @Autowired
     private FlinkApplicationActionService applicationActionService;
@@ -93,9 +100,20 @@ public class OpenAPIController {
     }
 
     @PostMapping("schema")
-    public RestResponse schema(@Valid OpenAPISchemaRequest request) {
+    public RestResponseBody<OpenAPISchema> schema(@Valid OpenAPISchemaRequest request) {
         OpenAPISchema openAPISchema = openAPIComponent.getOpenAPISchema(request.getName());
-        return RestResponse.success(openAPISchema);
+        return RestResponseBody.success(openAPISchema);
+    }
+
+    @PostMapping("contracts")
+    public RestResponseBody<ApiContractDocument> exportContracts() {
+        return RestResponseBody.success(apiContractExportService.exportContracts());
+    }
+
+    @PostMapping("contracts/typescript")
+    public RestResponseBody<String> exportTypeScript() {
+        ApiContractDocument document = apiContractExportService.exportContracts();
+        return RestResponseBody.success(ApiTypeScriptGenerator.generate(document));
     }
 
 }

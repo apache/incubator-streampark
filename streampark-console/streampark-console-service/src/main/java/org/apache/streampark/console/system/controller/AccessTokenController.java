@@ -18,7 +18,7 @@
 package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.core.enums.AccessTokenStateEnum;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.system.assembler.AccessTokenAssembler;
@@ -28,6 +28,7 @@ import org.apache.streampark.console.system.request.token.TokenCreateRequest;
 import org.apache.streampark.console.system.request.token.TokenDeleteRequest;
 import org.apache.streampark.console.system.request.token.TokenListQueryRequest;
 import org.apache.streampark.console.system.request.token.TokenToggleRequest;
+import org.apache.streampark.console.system.response.token.AccessTokenResponse;
 import org.apache.streampark.console.system.service.AccessTokenService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -52,43 +53,46 @@ public class AccessTokenController {
 
     @PostMapping(value = "create")
     @RequiresPermissions("token:add")
-    public RestResponse createToken(@Valid TokenCreateRequest request) throws Exception {
-        return accessTokenService.create(request.getUserId(), request.getDescription());
+    public RestResponseBody<Object> createToken(@Valid TokenCreateRequest request) throws Exception {
+        return RestResponseBody.from(accessTokenService.create(request.getUserId(), request.getDescription()));
     }
 
     @PostMapping(value = "check")
-    public RestResponse verifyToken() {
+    public RestResponseBody<Integer> verifyToken() {
         Long userId = ServiceHelper.getUserId();
-        RestResponse restResponse = RestResponse.success();
         AccessToken accessToken = accessTokenService.getByUserId(userId);
         if (accessToken == null) {
-            restResponse.data(AccessTokenStateEnum.NULL.get());
-        } else if (AccessToken.STATUS_DISABLE.equals(accessToken.getStatus())) {
-            restResponse.data(AccessTokenStateEnum.INVALID_TOKEN.get());
-        } else if (User.STATUS_LOCK.equals(accessToken.getUserStatus())) {
-            restResponse.data(AccessTokenStateEnum.LOCKED_USER.get());
+            return RestResponseBody.success(AccessTokenStateEnum.NULL.get());
         }
-        return restResponse;
+        if (AccessToken.STATUS_DISABLE.equals(accessToken.getStatus())) {
+            return RestResponseBody.success(AccessTokenStateEnum.INVALID_TOKEN.get());
+        }
+        if (User.STATUS_LOCK.equals(accessToken.getUserStatus())) {
+            return RestResponseBody.success(AccessTokenStateEnum.LOCKED_USER.get());
+        }
+        return RestResponseBody.success(null);
     }
 
     @PostMapping(value = "list")
     @RequiresPermissions("token:view")
-    public RestResponse tokensList(RestRequest restRequest, TokenListQueryRequest query) {
+    public RestResponseBody<IPage<AccessTokenResponse>> tokensList(
+                                                                   RestRequest restRequest,
+                                                                   TokenListQueryRequest query) {
         IPage<AccessToken> accessTokens =
             accessTokenService.getPage(AccessTokenAssembler.toEntity(query), restRequest);
-        return RestResponse.success(AccessTokenAssembler.toPageResponse(accessTokens));
+        return RestResponseBody.success(AccessTokenAssembler.toPageResponse(accessTokens));
     }
 
     @PostMapping("toggle")
     @RequiresPermissions("token:add")
-    public RestResponse toggleToken(@Valid TokenToggleRequest request) {
-        return accessTokenService.toggle(request.getTokenId());
+    public RestResponseBody<Object> toggleToken(@Valid TokenToggleRequest request) {
+        return RestResponseBody.from(accessTokenService.toggle(request.getTokenId()));
     }
 
     @DeleteMapping(value = "delete")
     @RequiresPermissions("token:delete")
-    public RestResponse deleteToken(@Valid TokenDeleteRequest request) {
+    public RestResponseBody<Boolean> deleteToken(@Valid TokenDeleteRequest request) {
         boolean res = accessTokenService.removeById(request.getTokenId());
-        return RestResponse.success(res);
+        return RestResponseBody.success(res);
     }
 }

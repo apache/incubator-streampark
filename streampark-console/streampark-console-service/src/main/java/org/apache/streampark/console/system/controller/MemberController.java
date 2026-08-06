@@ -18,7 +18,7 @@
 package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.system.assembler.MemberAssembler;
 import org.apache.streampark.console.system.assembler.TeamAssembler;
@@ -31,6 +31,9 @@ import org.apache.streampark.console.system.request.member.MemberDeleteRequest;
 import org.apache.streampark.console.system.request.member.MemberListQueryRequest;
 import org.apache.streampark.console.system.request.member.MemberTeamsRequest;
 import org.apache.streampark.console.system.request.member.MemberUpdateRequest;
+import org.apache.streampark.console.system.response.member.MemberResponse;
+import org.apache.streampark.console.system.response.team.TeamResponse;
+import org.apache.streampark.console.system.response.user.UserResponse;
 import org.apache.streampark.console.system.service.MemberService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -59,52 +62,52 @@ public class MemberController {
     private MemberService memberService;
 
     @PostMapping("list")
-    public RestResponse memberList(RestRequest restRequest, MemberListQueryRequest query) {
+    public RestResponseBody<IPage<MemberResponse>> memberList(RestRequest restRequest, MemberListQueryRequest query) {
         IPage<Member> userList = memberService.getPage(MemberAssembler.toEntity(query), restRequest);
-        return RestResponse.success(MemberAssembler.toPageResponse(userList));
+        return RestResponseBody.success(MemberAssembler.toPageResponse(userList));
     }
 
     @PostMapping("candidateUsers")
-    public RestResponse candidateUsers(@Valid MemberCandidateUsersRequest request) {
-        return RestResponse.success(
+    public RestResponseBody<java.util.List<UserResponse>> candidateUsers(@Valid MemberCandidateUsersRequest request) {
+        return RestResponseBody.success(
             UserAssembler.toResponseList(memberService.listUsersNotInTeam(request.getTeamId())));
     }
 
     @PostMapping("teams")
-    public RestResponse listTeams(@Valid MemberTeamsRequest request) {
-        return RestResponse.success(
+    public RestResponseBody<java.util.List<TeamResponse>> listTeams(@Valid MemberTeamsRequest request) {
+        return RestResponseBody.success(
             memberService.listTeamsByUserId(request.getUserId()).stream()
                 .map(TeamAssembler::toResponse)
                 .collect(Collectors.toList()));
     }
 
     @PostMapping("check/user")
-    public RestResponse check(@Valid MemberCheckUserRequest request) {
+    public RestResponseBody<Boolean> check(@Valid MemberCheckUserRequest request) {
         Member result = this.memberService.getByTeamIdUserName(request.getTeamId(), request.getUserName());
-        return RestResponse.success(result == null);
+        return RestResponseBody.success(result == null);
     }
 
     @PostMapping("post")
     @Permission(team = "#request.teamId")
     @RequiresPermissions("member:add")
-    public RestResponse create(@Valid MemberCreateRequest request) {
+    public RestResponseBody<Void> create(@Valid MemberCreateRequest request) {
         this.memberService.createMember(MemberAssembler.toEntity(request));
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 
     @DeleteMapping("delete")
     @Permission(team = "#request.teamId")
     @RequiresPermissions("member:delete")
-    public RestResponse delete(@Valid MemberDeleteRequest request) {
+    public RestResponseBody<Void> delete(@Valid MemberDeleteRequest request) {
         this.memberService.remove(request.getId());
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 
     @PutMapping("update")
     @Permission(team = "#request.teamId")
     @RequiresPermissions("member:update")
-    public RestResponse update(@Valid MemberUpdateRequest request) {
+    public RestResponseBody<Void> update(@Valid MemberUpdateRequest request) {
         this.memberService.updateMember(MemberAssembler.toEntity(request));
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 }

@@ -18,7 +18,7 @@
 package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.system.assembler.RoleAssembler;
 import org.apache.streampark.console.system.entity.Role;
 import org.apache.streampark.console.system.entity.RoleMenu;
@@ -28,6 +28,7 @@ import org.apache.streampark.console.system.request.role.RoleDeleteRequest;
 import org.apache.streampark.console.system.request.role.RoleListQueryRequest;
 import org.apache.streampark.console.system.request.role.RoleMenuQueryRequest;
 import org.apache.streampark.console.system.request.role.RoleUpdateRequest;
+import org.apache.streampark.console.system.response.role.RoleResponse;
 import org.apache.streampark.console.system.service.RoleMenuService;
 import org.apache.streampark.console.system.service.RoleService;
 
@@ -61,44 +62,44 @@ public class RoleController {
 
     @PostMapping("list")
     @RequiresPermissions("role:view")
-    public RestResponse roleList(RestRequest restRequest, RoleListQueryRequest query) {
+    public RestResponseBody<IPage<RoleResponse>> roleList(RestRequest restRequest, RoleListQueryRequest query) {
         IPage<Role> roleList = roleService.getPage(RoleAssembler.toEntity(query), restRequest);
-        return RestResponse.success(RoleAssembler.toPageResponse(roleList));
+        return RestResponseBody.success(RoleAssembler.toPageResponse(roleList));
     }
 
     @PostMapping("check/name")
-    public RestResponse checkRoleName(@Valid RoleCheckNameRequest request) {
+    public RestResponseBody<Boolean> checkRoleName(@Valid RoleCheckNameRequest request) {
         Role result = this.roleService.getByName(request.getRoleName());
-        return RestResponse.success(result == null);
+        return RestResponseBody.success(result == null);
     }
 
     @PostMapping("menu")
-    public RestResponse getRoleMenus(@Valid RoleMenuQueryRequest request) {
+    public RestResponseBody<List<String>> getRoleMenus(@Valid RoleMenuQueryRequest request) {
         List<RoleMenu> roleMenuList = this.roleMenuService.listByRoleId(request.getRoleId());
         List<String> menuIdList = roleMenuList.stream()
             .map(roleMenu -> String.valueOf(roleMenu.getMenuId()))
             .collect(Collectors.toList());
-        return RestResponse.success(menuIdList);
+        return RestResponseBody.success(menuIdList);
     }
 
     @PostMapping("post")
     @RequiresPermissions("role:add")
-    public RestResponse addRole(@Valid RoleCreateRequest request) {
+    public RestResponseBody<Void> addRole(@Valid RoleCreateRequest request) {
         this.roleService.createRole(RoleAssembler.toEntity(request));
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("role:delete")
-    public RestResponse deleteRole(@Valid RoleDeleteRequest request) {
+    public RestResponseBody<Void> deleteRole(@Valid RoleDeleteRequest request) {
         this.roleService.removeById(request.getRoleId());
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("role:update")
-    public RestResponse updateRole(@Valid RoleUpdateRequest request) throws Exception {
+    public RestResponseBody<Void> updateRole(@Valid RoleUpdateRequest request) throws Exception {
         this.roleService.updateRole(RoleAssembler.toEntity(request));
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 }

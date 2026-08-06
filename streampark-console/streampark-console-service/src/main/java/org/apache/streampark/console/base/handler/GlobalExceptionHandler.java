@@ -19,7 +19,7 @@ package org.apache.streampark.console.base.handler;
 
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.console.base.domain.ResponseCode;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.AbstractApiException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -52,31 +52,31 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = UnauthenticatedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public RestResponse handelUnauthenticatedException(UnauthenticatedException e) {
+    public RestResponseBody<Void> handelUnauthenticatedException(UnauthenticatedException e) {
         log.error("Unauthenticated.", e);
-        return RestResponse.fail(ResponseCode.CODE_UNAUTHORIZED, "Unauthenticated.");
+        return RestResponseBody.fail(ResponseCode.CODE_UNAUTHORIZED, "Unauthenticated.");
     }
 
     @ExceptionHandler(value = AuthenticationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public RestResponse handelUnauthenticatedException(AuthenticationException e) {
+    public RestResponseBody<Void> handelUnauthenticatedException(AuthenticationException e) {
         log.error("Permission denied.", e);
-        return RestResponse.fail(ResponseCode.CODE_UNAUTHORIZED, "Permission denied.");
+        return RestResponseBody.fail(ResponseCode.CODE_UNAUTHORIZED, "Permission denied.");
     }
 
     @ExceptionHandler(value = AbstractApiException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public RestResponse handleException(AbstractApiException e) {
+    public RestResponseBody<Void> handleException(AbstractApiException e) {
         log.error("api exception:", e);
-        return RestResponse.fail(e.getResponseCode(), e.getMessage());
+        return RestResponseBody.fail(e.getResponseCode(), e.getMessage());
     }
 
     @ExceptionHandler(value = Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @Order(value = Ordered.HIGHEST_PRECEDENCE)
-    public RestResponse handleException(Exception e) {
+    public RestResponseBody<Void> handleException(Exception e) {
         log.error("internal server error:", e);
-        return RestResponse.fail(
+        return RestResponseBody.fail(
             ResponseCode.CODE_FAIL, "internal server error: " + ExceptionUtils.stringifyException(e));
     }
 
@@ -99,42 +99,43 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public RestResponse validExceptionHandler(BindException e) {
+    public RestResponseBody<Void> validExceptionHandler(BindException e) {
         log.error("bind exception:", e);
-        return RestResponse.fail(ResponseCode.CODE_FAIL, formatFieldErrors(e.getBindingResult().getFieldErrors()));
+        return RestResponseBody.fail(ResponseCode.CODE_FAIL, formatFieldErrors(e.getBindingResult().getFieldErrors()));
     }
 
     /**
      * Unified processing of request parameter verification ({@code @RequestBody} JSON).
      *
      * @param e MethodArgumentNotValidException
-     * @return RestResponse
+     * @return RestResponseBody
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public RestResponse methodArgumentNotValidHandler(MethodArgumentNotValidException e) {
+    public RestResponseBody<Void> methodArgumentNotValidHandler(MethodArgumentNotValidException e) {
         log.error("method argument not valid exception:", e);
-        return RestResponse.fail(ResponseCode.CODE_FAIL, formatFieldErrors(e.getBindingResult().getFieldErrors()));
+        return RestResponseBody.fail(ResponseCode.CODE_FAIL, formatFieldErrors(e.getBindingResult().getFieldErrors()));
     }
 
     /**
      * Unified processing of request parameter verification (ordinary parameter transfer)
      *
      * @param e ConstraintViolationException
-     * @return RestResponse
+     * @return RestResponseBody
      */
     @ExceptionHandler(value = ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public RestResponse handleConstraintViolationException(ConstraintViolationException e) {
+    public RestResponseBody<Void> handleConstraintViolationException(ConstraintViolationException e) {
         log.error("constraint violation exception:", e);
         StringBuilder message = new StringBuilder();
         Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
         for (ConstraintViolation<?> violation : violations) {
             Path path = violation.getPropertyPath();
             String[] pathArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(path.toString(), StringPool.DOT);
-            message.append(pathArr[1]).append(violation.getMessage()).append(StringPool.COMMA);
+            String field = pathArr.length > 1 ? pathArr[pathArr.length - 1] : pathArr[0];
+            message.append(field).append(violation.getMessage()).append(StringPool.COMMA);
         }
         message = new StringBuilder(message.substring(0, message.length() - 1));
-        return RestResponse.fail(ResponseCode.CODE_FAIL, message.toString());
+        return RestResponseBody.fail(ResponseCode.CODE_FAIL, message.toString());
     }
 }

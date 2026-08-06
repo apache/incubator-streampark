@@ -19,13 +19,17 @@ package org.apache.streampark.console.base.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.helpers.MessageFormatter;
 
 import java.io.Serializable;
 
 /**
- * Typed view of {@link RestResponse} for safer access to the {@code data} payload.
+ * Typed REST envelope replacing raw {@link RestResponse} at controller boundaries.
  *
- * @param <T> deserialized data type
+ * <p>Wire JSON shape is unchanged: {@code status}, {@code code}, optional {@code message}, optional
+ * {@code data}.
+ *
+ * @param <T> payload type
  */
 @Getter
 @Setter
@@ -41,6 +45,37 @@ public class RestResponseBody<T> implements Serializable {
 
     private T data;
 
+    public static <T> RestResponseBody<T> success(T data) {
+        RestResponseBody<T> body = new RestResponseBody<>();
+        body.setStatus(RestResponse.STATUS_SUCCESS);
+        body.setCode(ResponseCode.CODE_SUCCESS);
+        body.setData(data);
+        return body;
+    }
+
+    public static RestResponseBody<Void> success() {
+        return success(null);
+    }
+
+    public static <T> RestResponseBody<T> fail(Long code, String format, Object... args) {
+        String message = MessageFormatter.arrayFormat(format, args).getMessage();
+        return fail(code, message);
+    }
+
+    public static <T> RestResponseBody<T> fail(Long code, String message) {
+        RestResponseBody<T> body = new RestResponseBody<>();
+        body.setStatus(RestResponse.STATUS_FAIL);
+        body.setCode(code);
+        body.setMessage(message);
+        body.setData(null);
+        return body;
+    }
+
+    public RestResponseBody<T> message(String message) {
+        this.message = message;
+        return this;
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> RestResponseBody<T> from(RestResponse response) {
         RestResponseBody<T> body = new RestResponseBody<>();
@@ -55,10 +90,13 @@ public class RestResponseBody<T> implements Serializable {
     }
 
     public RestResponse toRestResponse() {
-        RestResponse response = data != null ? RestResponse.success(data) : RestResponse.success();
+        RestResponse response = new RestResponse();
+        response.put(RestResponse.STATUS_KEY, status);
+        response.put(RestResponse.CODE_KEY, code);
         if (message != null) {
-            response.message(message);
+            response.put(RestResponse.MESSAGE_KEY, message);
         }
+        response.put(RestResponse.DATA_KEY, data);
         return response;
     }
 }

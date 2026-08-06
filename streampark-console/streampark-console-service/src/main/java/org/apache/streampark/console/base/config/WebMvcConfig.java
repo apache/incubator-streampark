@@ -18,6 +18,7 @@
 package org.apache.streampark.console.base.config;
 
 import org.apache.streampark.console.base.interceptor.UploadFileTypeInterceptor;
+import org.apache.streampark.console.base.web.FormOrJsonArgumentResolver;
 
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -31,6 +32,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -43,6 +45,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Autowired
     private UploadFileTypeInterceptor uploadFileTypeInterceptor;
+
+    @Autowired
+    private FormOrJsonArgumentResolver formOrJsonArgumentResolver;
 
     private static final String[] CORS_MAPPINGS_ALLOWED_METHODS = {
             HttpMethod.POST.name(),
@@ -94,5 +99,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry
             .addInterceptor(uploadFileTypeInterceptor)
             .addPathPatterns("/flink/app/upload", "/resource/upload");
+    }
+
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        resolvers.add(formOrJsonArgumentResolver);
     }
 }

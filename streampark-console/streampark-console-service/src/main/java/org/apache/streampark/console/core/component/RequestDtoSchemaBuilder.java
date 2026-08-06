@@ -89,6 +89,10 @@ public final class RequestDtoSchemaBuilder {
         return field.getAnnotation(NotNull.class) != null || field.getAnnotation(NotBlank.class) != null;
     }
 
+    public static String resolveTypeName(String simpleName, Map<String, String> typeNames) {
+        return resolveType(simpleName, typeNames);
+    }
+
     private static String resolveType(String simpleName, Map<String, String> typeNames) {
         String mapped = typeNames.get(simpleName);
         if (mapped != null) {

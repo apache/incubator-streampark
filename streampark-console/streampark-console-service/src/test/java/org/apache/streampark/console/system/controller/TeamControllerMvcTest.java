@@ -18,6 +18,7 @@
 package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.console.base.handler.GlobalExceptionHandler;
+import org.apache.streampark.console.base.web.FormOrJsonArgumentResolver;
 import org.apache.streampark.console.system.service.TeamService;
 
 import org.junit.jupiter.api.Test;
@@ -29,13 +30,15 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TeamController.class)
 @AutoConfigureMockMvc(addFilters = false)
-@Import(GlobalExceptionHandler.class)
+@Import({GlobalExceptionHandler.class, FormOrJsonArgumentResolver.class, TeamControllerMvcTest.MvcTestConfig.class})
 class TeamControllerMvcTest {
 
     @Autowired
@@ -44,12 +47,37 @@ class TeamControllerMvcTest {
     @MockBean
     private TeamService teamService;
 
+    @org.springframework.boot.test.context.TestConfiguration
+    static class MvcTestConfig implements org.springframework.web.servlet.config.annotation.WebMvcConfigurer {
+
+        @Autowired
+        private FormOrJsonArgumentResolver formOrJsonArgumentResolver;
+
+        @Override
+        public void addArgumentResolvers(
+                                         java.util.List<org.springframework.web.method.support.HandlerMethodArgumentResolver> resolvers) {
+            resolvers.add(formOrJsonArgumentResolver);
+        }
+    }
+
     @Test
-    void checkTeamNameShouldRejectBlankName() throws Exception {
+    void addTeamShouldAcceptJsonBody() throws Exception {
+        doNothing().when(teamService).createTeam(any());
+
         mockMvc.perform(
-            post("/team/check/name")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .param("teamName", ""))
+            post("/team/post")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"teamName\":\"demo\",\"description\":\"test\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("success"));
+    }
+
+    @Test
+    void addTeamShouldRejectBlankTeamNameJson() throws Exception {
+        mockMvc.perform(
+            post("/team/post")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"teamName\":\"\",\"description\":\"test\"}"))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.status").value("error"));
     }
