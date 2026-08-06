@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.system.assembler;
 
+import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.core.assembler.DtoAssembler;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.request.user.UserCreateRequest;
@@ -26,6 +28,9 @@ import org.apache.streampark.console.system.request.user.UserUpdateRequest;
 import org.apache.streampark.console.system.response.user.UserBriefResponse;
 import org.apache.streampark.console.system.response.user.UserResponse;
 import org.apache.streampark.console.system.response.user.UserSessionResponse;
+import org.apache.streampark.console.system.response.user.UserUpdateResponse;
+import org.apache.streampark.console.system.service.result.UserLoginResult;
+import org.apache.streampark.console.system.service.result.UserUpdateResult;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
@@ -116,5 +121,24 @@ public final class UserAssembler {
             response.setPermissions((Set<String>) permissions);
         }
         return response;
+    }
+
+    public static UserUpdateResponse toUpdateResponse(UserUpdateResult result) {
+        UserUpdateResponse response = new UserUpdateResponse();
+        if (result != null) {
+            response.setNeedTransferResource(result.isNeedTransferResource());
+        }
+        return response;
+    }
+
+    public static RestResponseBody<UserSessionResponse> toLoginResponse(UserLoginResult result) {
+        if (result == null) {
+            return RestResponseBody.success(null);
+        }
+        if (result.getLoginCode() != null) {
+            return RestResponseBody.<UserSessionResponse>success(null)
+                .extra(RestResponse.CODE_KEY, result.getLoginCode());
+        }
+        return RestResponseBody.success(toSessionResponse(result.getUserInfo()));
     }
 }

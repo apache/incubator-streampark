@@ -31,6 +31,7 @@ import org.apache.streampark.console.system.request.token.TokenListQueryRequest;
 import org.apache.streampark.console.system.request.token.TokenToggleRequest;
 import org.apache.streampark.console.system.response.token.AccessTokenResponse;
 import org.apache.streampark.console.system.service.AccessTokenService;
+import org.apache.streampark.console.system.service.result.AccessTokenCreateResult;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -55,7 +56,14 @@ public class AccessTokenController {
     @PostMapping(value = "create")
     @RequiresPermissions("token:add")
     public RestResponseBody<AccessToken> createToken(@Valid @FormOrJson TokenCreateRequest request) throws Exception {
-        return accessTokenService.create(request.getUserId(), request.getDescription());
+        AccessTokenCreateResult result =
+            accessTokenService.create(request.getUserId(), request.getDescription());
+        if (!result.isCreated()) {
+            return RestResponseBody.<AccessToken>success(null)
+                .extra("code", 0)
+                .message(result.getMessage());
+        }
+        return RestResponseBody.success(result.getAccessToken());
     }
 
     @PostMapping(value = "check")
@@ -87,7 +95,7 @@ public class AccessTokenController {
     @PostMapping("toggle")
     @RequiresPermissions("token:add")
     public RestResponseBody<Boolean> toggleToken(@Valid @FormOrJson TokenToggleRequest request) {
-        return accessTokenService.toggle(request.getTokenId());
+        return RestResponseBody.success(accessTokenService.toggle(request.getTokenId()));
     }
 
     @DeleteMapping(value = "delete")

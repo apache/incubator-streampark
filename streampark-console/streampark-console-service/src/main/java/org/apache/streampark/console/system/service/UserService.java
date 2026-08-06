@@ -18,11 +18,10 @@
 package org.apache.streampark.console.system.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.entity.User;
-import org.apache.streampark.console.system.response.user.UserSessionResponse;
-import org.apache.streampark.console.system.response.user.UserUpdateResponse;
+import org.apache.streampark.console.system.service.result.UserLoginResult;
+import org.apache.streampark.console.system.service.result.UserUpdateResult;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -72,7 +71,7 @@ public interface UserService extends IService<User> {
      * @param user user
      * @return
      */
-    RestResponseBody<UserUpdateResponse> updateUser(User user) throws Exception;
+    UserUpdateResult updateUser(User user) throws Exception;
 
     /**
      * update password
@@ -157,9 +156,9 @@ public interface UserService extends IService<User> {
      * Get login user information
      *
      * @param user User
-     * @return RestResponse
+     * @return login session result with optional loginCode for legacy wire format
      */
-    RestResponseBody<UserSessionResponse> getLoginUserInfo(User user) throws Exception;
+    UserLoginResult getLoginUserInfo(User user) throws Exception;
 
     void deleteUser(Long userId);
 }

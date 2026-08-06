@@ -20,8 +20,6 @@ package org.apache.streampark.console.system.service.impl;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.ShaHashUtils;
@@ -30,7 +28,6 @@ import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
-import org.apache.streampark.console.system.assembler.UserAssembler;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.Member;
@@ -38,13 +35,13 @@ import org.apache.streampark.console.system.entity.Role;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.UserMapper;
-import org.apache.streampark.console.system.response.user.UserSessionResponse;
-import org.apache.streampark.console.system.response.user.UserUpdateResponse;
 import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.console.system.service.MenuService;
 import org.apache.streampark.console.system.service.RoleService;
 import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
+import org.apache.streampark.console.system.service.result.UserLoginResult;
+import org.apache.streampark.console.system.service.result.UserUpdateResult;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -138,17 +135,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public RestResponseBody<UserUpdateResponse> updateUser(User user) {
+    public UserUpdateResult updateUser(User user) {
         User existsUser = getById(user.getUserId());
         user.setLoginType(null);
         user.setPassword(null);
+        UserUpdateResult result = new UserUpdateResult();
         if (needTransferResource(existsUser, user)) {
-            UserUpdateResponse response = new UserUpdateResponse();
-            response.setNeedTransferResource(true);
-            return RestResponseBody.success(response);
+            result.setNeedTransferResource(true);
+            return result;
         }
         updateById(user);
-        return RestResponseBody.success(new UserUpdateResponse());
+        return result;
     }
 
     private boolean needTransferResource(User existsUser, User user) {
@@ -247,13 +244,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public RestResponseBody<UserSessionResponse> getLoginUserInfo(User user) throws Exception {
+    public UserLoginResult getLoginUserInfo(User user) throws Exception {
+        UserLoginResult result = new UserLoginResult();
         if (user == null) {
-            return RestResponseBody.<UserSessionResponse>success(null).extra(RestResponse.CODE_KEY, 0);
+            result.setLoginCode(0);
+            return result;
         }
 
         if (User.STATUS_LOCK.equals(user.getStatus())) {
-            return RestResponseBody.<UserSessionResponse>success(null).extra(RestResponse.CODE_KEY, 1);
+            result.setLoginCode(1);
+            return result;
         }
 
         this.updateLoginTime(user.getUsername());
@@ -265,9 +265,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String userId = RandomStringUtils.randomAlphanumeric(20);
         user.setId(userId);
         JWTToken jwtToken = new JWTToken(token, ttl);
-        Map<String, Object> userInfo = generateFrontendUserInfo(user, jwtToken);
-
-        return RestResponseBody.success(UserAssembler.toSessionResponse(userInfo));
+        result.setUserInfo(generateFrontendUserInfo(user, jwtToken));
+        return result;
     }
 
     @Override

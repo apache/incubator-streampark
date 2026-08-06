@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.controller;
 
+import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -38,6 +39,7 @@ import org.apache.streampark.console.core.request.project.ProjectUpdateRequest;
 import org.apache.streampark.console.core.response.project.ProjectBranchesResponse;
 import org.apache.streampark.console.core.response.project.ProjectResponse;
 import org.apache.streampark.console.core.service.ProjectService;
+import org.apache.streampark.console.core.service.result.ProjectBuildLogResult;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -71,7 +73,11 @@ public class ProjectController {
     public RestResponseBody<Boolean> create(@Valid @FormOrJson ProjectCreateRequest request) {
         ApiAlertException.throwIfNull(
             request.getTeamId(), "The teamId can't be null. Create team failed.");
-        return projectService.create(ProjectAssembler.toEntity(request));
+        boolean status = projectService.create(ProjectAssembler.toEntity(request));
+        if (status) {
+            return RestResponseBody.success(true).message("Add project successfully");
+        }
+        return RestResponseBody.success(false).message("Add project failed");
     }
 
     @AppChangeEvent
@@ -101,7 +107,18 @@ public class ProjectController {
     @RequiresPermissions("project:build")
     @Permission(team = "#request.teamId")
     public RestResponseBody<String> buildLog(ProjectBuildLogRequest request) {
-        return projectService.getBuildLog(request.getId(), request.getStartOffset());
+        ProjectBuildLogResult result = projectService.getBuildLog(request.getId(), request.getStartOffset());
+        if (result.isFailed()) {
+            return RestResponseBody.fail(ResponseCode.CODE_FAIL, result.getContent());
+        }
+        RestResponseBody<String> response = RestResponseBody.success(result.getContent());
+        if (result.getOffset() != null) {
+            response.extra("offset", result.getOffset());
+        }
+        if (result.getReadFinished() != null) {
+            response.extra("readFinished", result.getReadFinished());
+        }
+        return response;
     }
 
     @PostMapping("list")

@@ -18,10 +18,9 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.core.bean.UploadResponse;
 import org.apache.streampark.console.core.entity.Resource;
-import org.apache.streampark.console.core.response.resource.ResourceCheckResponse;
+import org.apache.streampark.console.core.service.result.ResourceCheckResult;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -95,7 +94,7 @@ public interface ResourceService extends IService<Resource> {
 
     UploadResponse upload(MultipartFile file) throws IOException;
 
-    RestResponseBody<ResourceCheckResponse> checkResource(Resource resource) throws Exception;
+    ResourceCheckResult checkResource(Resource resource) throws Exception;
 
     /**
      * Uploads a list of jars to the server for historical reference.

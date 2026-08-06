@@ -24,9 +24,7 @@ import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.FileUtils;
-import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -40,6 +38,7 @@ import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
+import org.apache.streampark.console.core.service.result.ProjectBuildLogResult;
 import org.apache.streampark.console.core.task.ProjectBuildTask;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 
@@ -98,18 +97,14 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     private Long maxProjectBuildNum;
 
     @Override
-    public RestResponseBody<Boolean> create(Project project) {
+    public boolean create(Project project) {
         project.setId(null);
         ApiAlertException.throwIfTrue(
             checkExists(project), "project name already exists, add project failed");
         Date date = new Date();
         project.setCreateTime(date);
         project.setModifyTime(date);
-        boolean status = save(project);
-        if (status) {
-            return RestResponseBody.success(true).message("Add project successfully");
-        }
-        return RestResponseBody.success(false).message("Add project failed");
+        return save(project);
     }
 
     @Override
@@ -362,17 +357,19 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
-    public RestResponseBody<String> getBuildLog(Long id, Long startOffset) {
+    public ProjectBuildLogResult getBuildLog(Long id, Long startOffset) {
         File logFile = Paths.get(getBuildLogPath(id)).toFile();
+        ProjectBuildLogResult result = new ProjectBuildLogResult();
         if (!logFile.exists()) {
             String errorMsg = String.format("Build log file(fileName=%s) not found, please build first.", logFile);
             log.warn(errorMsg);
-            return RestResponseBody.success(errorMsg);
+            result.setContent(errorMsg);
+            return result;
         }
         boolean isBuilding = this.getById(id).getBuildState() == 0;
         byte[] fileContent;
-        long endOffset = 0L;
-        boolean readFinished = true;
+        Long endOffset = null;
+        Boolean readFinished = null;
         if (startOffset == null && isBuilding) {
             startOffset = 0L;
         }
@@ -385,13 +382,16 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 endOffset = startOffset + fileContent.length;
                 readFinished = logFile.length() == endOffset && !isBuilding;
             }
-            return RestResponseBody.success(new String(fileContent, StandardCharsets.UTF_8))
-                .extra("offset", endOffset)
-                .extra("readFinished", readFinished);
+            result.setContent(new String(fileContent, StandardCharsets.UTF_8));
+            result.setOffset(endOffset);
+            result.setReadFinished(readFinished);
+            return result;
         } catch (IOException e) {
             String error = String.format("Read build log file(fileName=%s) caused an exception: ", logFile);
             log.error(error, e);
-            return RestResponseBody.fail(ResponseCode.CODE_FAIL, error + e.getMessage());
+            result.setFailed(true);
+            result.setContent(error + e.getMessage());
+            return result;
         }
     }
 

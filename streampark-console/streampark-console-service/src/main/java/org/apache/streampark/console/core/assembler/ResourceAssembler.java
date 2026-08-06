@@ -25,8 +25,10 @@ import org.apache.streampark.console.core.request.common.TeamScopedIdRequest;
 import org.apache.streampark.console.core.request.resource.ResourceCreateRequest;
 import org.apache.streampark.console.core.request.resource.ResourcePageQueryRequest;
 import org.apache.streampark.console.core.request.resource.ResourceUpdateRequest;
+import org.apache.streampark.console.core.response.resource.ResourceCheckResponse;
 import org.apache.streampark.console.core.response.resource.ResourceResponse;
 import org.apache.streampark.console.core.response.resource.ResourceUploadResponse;
+import org.apache.streampark.console.core.service.result.ResourceCheckResult;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -107,6 +109,17 @@ public final class ResourceAssembler {
 
     public static ResourceUploadResponse toUploadResponse(UploadResponse upload) {
         return DtoAssembler.toDto(upload, ResourceUploadResponse.class);
+    }
+
+    public static ResourceCheckResponse toCheckResponse(ResourceCheckResult result) {
+        if (result == null) {
+            return null;
+        }
+        ResourceCheckResponse response = new ResourceCheckResponse();
+        response.setState(result.getState());
+        response.setException(result.getException());
+        response.setConnector(result.getConnector());
+        return response;
     }
 
     private static ResourceTypeEnum parseResourceType(String value) {

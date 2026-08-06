@@ -93,7 +93,8 @@ public class UserController {
     @Permission(user = "#request.userId")
     @RequiresPermissions("user:update")
     public RestResponseBody<UserUpdateResponse> updateUser(@Valid @FormOrJson UserUpdateRequest request) throws Exception {
-        return this.userService.updateUser(UserAssembler.toEntity(request));
+        return RestResponseBody.success(
+            UserAssembler.toUpdateResponse(this.userService.updateUser(UserAssembler.toEntity(request))));
     }
 
     @PutMapping("transferResource")

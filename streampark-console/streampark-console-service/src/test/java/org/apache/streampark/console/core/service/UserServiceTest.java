@@ -26,8 +26,8 @@ import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.system.entity.User;
-import org.apache.streampark.console.system.response.user.UserUpdateResponse;
 import org.apache.streampark.console.system.service.UserService;
+import org.apache.streampark.console.system.service.result.UserUpdateResult;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -58,12 +58,12 @@ class UserServiceTest extends SpringUnitTestBase {
         userService.createUser(user);
         // lock user
         user.setStatus(User.STATUS_LOCK);
-        UserUpdateResponse data = userService.updateUser(user).getData();
-        Assertions.assertNotEquals(Boolean.TRUE, data == null ? null : data.getNeedTransferResource());
+        UserUpdateResult data = userService.updateUser(user);
+        Assertions.assertNotEquals(Boolean.TRUE, data == null ? null : data.isNeedTransferResource());
         // unlock user
         user.setStatus(User.STATUS_VALID);
-        UserUpdateResponse data1 = userService.updateUser(user).getData();
-        Assertions.assertNotEquals(Boolean.TRUE, data1 == null ? null : data1.getNeedTransferResource());
+        UserUpdateResult data1 = userService.updateUser(user);
+        Assertions.assertNotEquals(Boolean.TRUE, data1 == null ? null : data1.isNeedTransferResource());
 
         Resource resource = new Resource();
         resource.setResourceName("test");
@@ -74,8 +74,8 @@ class UserServiceTest extends SpringUnitTestBase {
         resourceService.save(resource);
         // lock user when has resource
         user.setStatus(User.STATUS_LOCK);
-        UserUpdateResponse data2 = userService.updateUser(user).getData();
-        Assertions.assertEquals(Boolean.TRUE, data2.getNeedTransferResource());
+        UserUpdateResult data2 = userService.updateUser(user);
+        Assertions.assertEquals(Boolean.TRUE, data2.isNeedTransferResource());
     }
 
     @Test

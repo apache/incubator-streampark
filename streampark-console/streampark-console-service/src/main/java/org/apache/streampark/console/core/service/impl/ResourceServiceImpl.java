@@ -24,7 +24,6 @@ import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -39,10 +38,10 @@ import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.ResourceTypeEnum;
 import org.apache.streampark.console.core.mapper.ResourceMapper;
-import org.apache.streampark.console.core.response.resource.ResourceCheckResponse;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
+import org.apache.streampark.console.core.service.result.ResourceCheckResult;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
@@ -287,7 +286,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     }
 
     @Override
-    public RestResponseBody<ResourceCheckResponse> checkResource(Resource resourceParam) throws JsonProcessingException {
+    public ResourceCheckResult checkResource(Resource resourceParam) throws JsonProcessingException {
         ResourceTypeEnum type = resourceParam.getResourceType();
         switch (type) {
             case APP:
@@ -309,7 +308,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             .collect(Collectors.toList());
     }
 
-    private RestResponseBody<ResourceCheckResponse> checkConnector(Resource resourceParam) throws JsonProcessingException {
+    private ResourceCheckResult checkConnector(Resource resourceParam) throws JsonProcessingException {
         // 1) get connector jar
         FlinkConnector connectorResource;
         List<File> jars;
@@ -355,11 +354,11 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         return okCheck(0, null, JacksonUtils.write(connectorResource));
     }
 
-    private static RestResponseBody<ResourceCheckResponse> buildExceptResponse(Exception e, int code) {
+    private static ResourceCheckResult buildExceptResponse(Exception e, int code) {
         return okCheck(code, ExceptionUtils.stringifyException(e), null);
     }
 
-    private RestResponseBody<ResourceCheckResponse> checkFlinkApp(Resource resourceParam) {
+    private ResourceCheckResult checkFlinkApp(Resource resourceParam) {
         // check main.
         File jarFile;
         try {
@@ -373,15 +372,15 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         return okCheck(0, null, null);
     }
 
-    private static RestResponseBody<ResourceCheckResponse> okCheck(
-                                                                   Integer state,
-                                                                   String exception,
-                                                                   String connector) {
-        ResourceCheckResponse payload = new ResourceCheckResponse();
-        payload.setState(state);
-        payload.setException(exception);
-        payload.setConnector(connector);
-        return RestResponseBody.success(payload);
+    private static ResourceCheckResult okCheck(
+                                               Integer state,
+                                               String exception,
+                                               String connector) {
+        ResourceCheckResult result = new ResourceCheckResult();
+        result.setState(state);
+        result.setException(exception);
+        result.setConnector(connector);
+        return result;
     }
 
     private boolean existsFlinkConnector(Long id, String connectorId) {

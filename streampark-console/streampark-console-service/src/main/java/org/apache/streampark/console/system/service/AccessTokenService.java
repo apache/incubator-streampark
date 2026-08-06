@@ -18,9 +18,9 @@
 package org.apache.streampark.console.system.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.system.entity.AccessToken;
+import org.apache.streampark.console.system.service.result.AccessTokenCreateResult;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -33,10 +33,10 @@ public interface AccessTokenService extends IService<AccessToken> {
      *
      * @param userId User id
      * @param description more description
-     * @return RestResponse
+     * @return create result with token entity or legacy failure metadata
      * @throws InternalException
      */
-    RestResponseBody<AccessToken> create(Long userId, String description) throws Exception;
+    AccessTokenCreateResult create(Long userId, String description) throws Exception;
 
     /**
      * Retrieves a page of {@link AccessToken} objects based on the provided parameters.
@@ -51,9 +51,9 @@ public interface AccessTokenService extends IService<AccessToken> {
      * Update information in token
      *
      * @param tokenId AccessToken id
-     * @return RestResponse
+     * @return whether the toggle is successful
      */
-    RestResponseBody<Boolean> toggle(Long tokenId);
+    boolean toggle(Long tokenId);
 
     /**
      * Get the corresponding AccessToken based on the user ID
