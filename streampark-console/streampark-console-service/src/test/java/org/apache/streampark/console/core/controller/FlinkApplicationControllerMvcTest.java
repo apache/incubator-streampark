@@ -70,9 +70,9 @@ class FlinkApplicationControllerMvcTest {
     @Test
     void checkNameShouldRejectBlankJobName() throws Exception {
         mockMvc.perform(
-                post("/flink/app/check/name")
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .param("teamId", "100000"))
+            post("/flink/app/check/name")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("teamId", "100000"))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.status").value("error"));
     }
@@ -82,10 +82,10 @@ class FlinkApplicationControllerMvcTest {
         when(applicationInfoService.checkExists(any())).thenReturn(AppExistsStateEnum.IN_DB);
 
         mockMvc.perform(
-                post("/flink/app/check/name")
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .param("jobName", "demo")
-                    .param("teamId", "100000"))
+            post("/flink/app/check/name")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("jobName", "demo")
+                .param("teamId", "100000"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("success"))
             .andExpect(jsonPath("$.data").value(AppExistsStateEnum.IN_DB.get()));

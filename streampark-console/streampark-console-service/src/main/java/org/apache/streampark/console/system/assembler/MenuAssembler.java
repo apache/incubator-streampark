@@ -49,7 +49,8 @@ public final class MenuAssembler {
         } else if (total instanceof Long) {
             response.setTotal(((Long) total).intValue());
         }
-        response.setRows((org.apache.streampark.console.base.domain.router.RouterTree<?>) menuMap.get(MenuServiceImpl.ROWS));
+        response.setRows(
+            (org.apache.streampark.console.base.domain.router.RouterTree<?>) menuMap.get(MenuServiceImpl.ROWS));
         return response;
     }
 }

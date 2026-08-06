@@ -75,7 +75,8 @@ public class AlertServiceImpl implements AlertService {
     @Nonnull
     private Tuple2<Boolean, AlertException> triggerAlert(
                                                          AlertTemplate alertTemplate,
-                                                         List<AlertTypeEnum> alertTypeEnums, AlertConfigRequest params) {
+                                                         List<AlertTypeEnum> alertTypeEnums,
+                                                         AlertConfigRequest params) {
         return alertTypeEnums.stream()
             .map(
                 alertTypeEnum -> {

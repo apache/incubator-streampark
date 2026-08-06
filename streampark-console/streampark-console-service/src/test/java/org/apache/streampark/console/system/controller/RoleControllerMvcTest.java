@@ -51,9 +51,9 @@ class RoleControllerMvcTest {
     @Test
     void checkRoleNameShouldRejectBlankName() throws Exception {
         mockMvc.perform(
-                post("/role/check/name")
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .param("roleName", ""))
+            post("/role/check/name")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("roleName", ""))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.status").value("error"));
     }

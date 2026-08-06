@@ -47,9 +47,9 @@ class TeamControllerMvcTest {
     @Test
     void checkTeamNameShouldRejectBlankName() throws Exception {
         mockMvc.perform(
-                post("/team/check/name")
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .param("teamName", ""))
+            post("/team/check/name")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("teamName", ""))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.status").value("error"));
     }

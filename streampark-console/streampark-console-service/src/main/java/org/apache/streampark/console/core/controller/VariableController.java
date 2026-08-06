@@ -116,8 +116,7 @@ public class VariableController {
     @PostMapping("check/code")
     public RestResponse checkVariableCode(@Valid VariableCheckCodeRequest request) {
         boolean result =
-            this.variableService.findByVariableCode(request.getTeamId(), request.getVariableCode())
-                == null;
+            this.variableService.findByVariableCode(request.getTeamId(), request.getVariableCode()) == null;
         return RestResponse.success(result);
     }
 }

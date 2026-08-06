@@ -47,9 +47,9 @@ class FlinkClusterControllerMvcTest {
     @Test
     void createShouldRejectMissingClusterName() throws Exception {
         mockMvc.perform(
-                post("/flink/cluster/create")
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .param("deployMode", "1"))
+            post("/flink/cluster/create")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("deployMode", "1"))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.status").value("error"));
     }

@@ -43,8 +43,7 @@ public class FlinkAppStartRequest implements Serializable {
     @ApiParam(description = "Team id", required = true)
     private Long teamId;
 
-    @ApiParam(name = "restoreFromSavepoint", description = "Restore from savepoint or checkpoint",
-        defaultValue = "false")
+    @ApiParam(name = "restoreFromSavepoint", description = "Restore from savepoint or checkpoint", defaultValue = "false")
     private Boolean restoreOrTriggerSavepoint;
 
     @ApiParam(description = "Savepoint or checkpoint path")

@@ -43,8 +43,7 @@ public class FlinkAppCancelRequest implements Serializable {
     @ApiParam(description = "Team id", required = true)
     private Long teamId;
 
-    @ApiParam(name = "triggerSavepoint", description = "Trigger savepoint before stopping",
-        defaultValue = "false")
+    @ApiParam(name = "triggerSavepoint", description = "Trigger savepoint before stopping", defaultValue = "false")
     private Boolean restoreOrTriggerSavepoint;
 
     @ApiParam(description = "Drain pipeline before canceling", defaultValue = "false")

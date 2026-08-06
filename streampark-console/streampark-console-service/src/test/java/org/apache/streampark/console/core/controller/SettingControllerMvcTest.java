@@ -47,9 +47,9 @@ class SettingControllerMvcTest {
     @Test
     void getShouldRejectBlankKey() throws Exception {
         mockMvc.perform(
-                post("/setting/get")
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .param("key", ""))
+            post("/setting/get")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("key", ""))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.status").value("error"));
     }

@@ -30,8 +30,8 @@ public final class FlinkPipelineAssembler {
     }
 
     public static FlinkPipelineDetailResponse toDetailResponse(
-                                                                  ApplicationBuildPipeline.View pipeline,
-                                                                  AppBuildDockerResolvedDetail docker) {
+                                                               ApplicationBuildPipeline.View pipeline,
+                                                               AppBuildDockerResolvedDetail docker) {
         FlinkPipelineDetailResponse response = new FlinkPipelineDetailResponse();
         response.setPipeline(pipeline);
         response.setDocker(docker);

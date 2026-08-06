@@ -20,9 +20,9 @@ package org.apache.streampark.console.core.request.externallink;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
-
 import javax.validation.constraints.NotNull;
+
+import java.io.Serializable;
 
 /** Request body for {@code POST /flink/externalLink/render}. */
 @Getter

@@ -18,8 +18,8 @@
 package org.apache.streampark.console.core.service.alert;
 
 import org.apache.streampark.console.base.exception.AlertException;
-import org.apache.streampark.console.core.request.alert.AlertConfigRequest;
 import org.apache.streampark.console.core.bean.AlertTemplate;
+import org.apache.streampark.console.core.request.alert.AlertConfigRequest;
 
 /**
  * This interface defines a service for sending alert notifications, it has multiple

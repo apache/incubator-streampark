@@ -51,9 +51,9 @@ class UserControllerMvcTest {
     @Test
     void checkUserNameShouldRejectBlankUsername() throws Exception {
         mockMvc.perform(
-                post("/user/check/name")
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .param("username", ""))
+            post("/user/check/name")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("username", ""))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.status").value("error"));
     }

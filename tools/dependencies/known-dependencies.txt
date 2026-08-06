@@ -36,6 +36,7 @@ caffeine-2.8.6.jar
 checker-qual-3.5.0.jar
 chill-java-0.9.5.jar
 chill_2.12-0.9.5.jar
+classmate-1.5.1.jar
 commons-beanutils-1.9.3.jar
 commons-cli-1.5.0.jar
 commons-codec-1.15.jar
@@ -107,6 +108,7 @@ hadoop-mapreduce-client-jobclient-3.2.0.jar
 hadoop-yarn-api-3.2.0.jar
 hadoop-yarn-client-3.2.0.jar
 hadoop-yarn-common-3.2.0.jar
+hibernate-validator-6.2.5.Final.jar
 hive-storage-api-2.7.2.jar
 hk2-api-2.6.1.jar
 hk2-locator-2.6.1.jar
@@ -349,6 +351,7 @@ spring-boot-starter-aop-2.7.11.jar
 spring-boot-starter-jdbc-2.7.11.jar
 spring-boot-starter-json-2.7.11.jar
 spring-boot-starter-quartz-2.7.11.jar
+spring-boot-starter-validation-2.7.11.jar
 spring-boot-starter-undertow-2.7.11.jar
 spring-boot-starter-web-2.7.11.jar
 spring-boot-starter-websocket-2.7.11.jar

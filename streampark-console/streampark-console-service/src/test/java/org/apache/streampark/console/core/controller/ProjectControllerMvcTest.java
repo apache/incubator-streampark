@@ -47,9 +47,9 @@ class ProjectControllerMvcTest {
     @Test
     void getShouldRejectMissingTeamId() throws Exception {
         mockMvc.perform(
-                post("/project/get")
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .param("id", "1"))
+            post("/project/get")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("id", "1"))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.status").value("error"));
     }

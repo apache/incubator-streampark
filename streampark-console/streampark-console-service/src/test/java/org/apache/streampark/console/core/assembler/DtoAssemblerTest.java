@@ -21,10 +21,9 @@ import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.request.flink.FlinkAppCreateRequest;
 import org.apache.streampark.console.core.response.flink.FlinkAppResponse;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 class DtoAssemblerTest {
 

@@ -19,9 +19,9 @@ package org.apache.streampark.console.core.service.alert.impl;
 
 import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.util.FreemarkerUtils;
-import org.apache.streampark.console.core.request.alert.AlertConfigRequest;
 import org.apache.streampark.console.core.bean.AlertHttpCallbackParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
+import org.apache.streampark.console.core.request.alert.AlertConfigRequest;
 import org.apache.streampark.console.core.service.alert.AlertNotifyService;
 
 import com.fasterxml.jackson.core.type.TypeReference;

@@ -23,7 +23,6 @@ import org.apache.streampark.console.base.util.Tuple2;
 import org.apache.streampark.console.core.annotation.OpenAPI;
 import org.apache.streampark.console.core.bean.OpenAPISchema;
 import org.apache.streampark.console.core.controller.OpenAPIController;
-import org.apache.streampark.console.core.component.RequestDtoSchemaBuilder;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.system.service.AccessTokenService;
 
