@@ -17,23 +17,10 @@
 
 package org.apache.streampark.console.core.request.spark;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.apache.streampark.console.core.request.common.SqlVerifyRequest;
 
-import java.io.Serializable;
-
-/**
- * Request body for {@code POST /spark/sql/verify}.
- */
-@Getter
-@Setter
-public class SparkSqlVerifyRequest implements Serializable {
+/** Request body for {@code POST /spark/sql/verify}. */
+public class SparkSqlVerifyRequest extends SqlVerifyRequest {
 
     private static final long serialVersionUID = 1L;
-
-    private String sql;
-
-    private Long versionId;
-
-    private Long teamId;
 }

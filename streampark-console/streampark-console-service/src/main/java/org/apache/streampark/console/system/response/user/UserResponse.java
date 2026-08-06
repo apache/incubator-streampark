@@ -39,8 +39,6 @@ public class UserResponse implements Serializable {
 
     private String username;
 
-    private String password;
-
     private String email;
 
     private UserTypeEnum userType;
@@ -58,8 +56,6 @@ public class UserResponse implements Serializable {
     private String sex;
 
     private String description;
-
-    private String salt;
 
     private String nickName;
 

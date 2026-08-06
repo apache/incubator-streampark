@@ -61,6 +61,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -103,7 +105,7 @@ public class SparkApplicationController {
     @Permission(team = "#request.teamId")
     @PostMapping("create")
     @RequiresPermissions("app:create")
-    public RestResponse create(SparkAppCreateRequest request) throws IOException {
+    public RestResponse create(@Valid SparkAppCreateRequest request) throws IOException {
         SparkApplication app = SparkApplicationAssembler.toEntity(request);
         boolean saved = applicationManageService.create(app);
         return RestResponse.success(saved);
@@ -136,7 +138,7 @@ public class SparkApplicationController {
     @PostMapping("list")
     @Permission(team = "#query.teamId")
     @RequiresPermissions("app:view")
-    public RestResponse list(SparkAppListQueryRequest query, RestRequest request) {
+    public RestResponse list(@Valid SparkAppListQueryRequest query, RestRequest request) {
         SparkApplication appParam = SparkApplicationAssembler.toEntity(query);
         IPage<SparkApplication> applicationList = applicationManageService.page(appParam, request);
         return RestResponse.success(SparkApplicationAssembler.toPageResponse(applicationList));

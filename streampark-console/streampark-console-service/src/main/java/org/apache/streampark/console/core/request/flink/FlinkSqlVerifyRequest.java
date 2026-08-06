@@ -17,23 +17,10 @@
 
 package org.apache.streampark.console.core.request.flink;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.apache.streampark.console.core.request.common.SqlVerifyRequest;
 
-import java.io.Serializable;
-
-/**
- * Request body for {@code POST /flink/sql/verify}.
- */
-@Getter
-@Setter
-public class FlinkSqlVerifyRequest implements Serializable {
+/** Request body for {@code POST /flink/sql/verify}. */
+public class FlinkSqlVerifyRequest extends SqlVerifyRequest {
 
     private static final long serialVersionUID = 1L;
-
-    private String sql;
-
-    private Long versionId;
-
-    private Long teamId;
 }

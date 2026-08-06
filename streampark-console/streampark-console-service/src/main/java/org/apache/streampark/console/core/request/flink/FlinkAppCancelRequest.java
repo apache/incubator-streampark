@@ -17,8 +17,12 @@
 
 package org.apache.streampark.console.core.request.flink;
 
+import org.apache.streampark.console.core.annotation.ApiParam;
+
 import lombok.Getter;
 import lombok.Setter;
+
+import javax.validation.constraints.NotNull;
 
 import java.io.Serializable;
 
@@ -31,15 +35,23 @@ public class FlinkAppCancelRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
+    @ApiParam(description = "Application id", required = true)
     private Long id;
 
+    @NotNull
+    @ApiParam(description = "Team id", required = true)
     private Long teamId;
 
+    @ApiParam(name = "triggerSavepoint", description = "Trigger savepoint before stopping",
+        defaultValue = "false")
     private Boolean restoreOrTriggerSavepoint;
 
+    @ApiParam(description = "Drain pipeline before canceling", defaultValue = "false")
     private Boolean drain;
 
     private Boolean nativeFormat;
 
+    @ApiParam(description = "Savepoint path")
     private String savepointPath;
 }

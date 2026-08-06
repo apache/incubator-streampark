@@ -17,8 +17,12 @@
 
 package org.apache.streampark.console.core.request.flink;
 
+import org.apache.streampark.console.core.annotation.ApiParam;
+
 import lombok.Getter;
 import lombok.Setter;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * Request body for {@code POST /flink/app/update}.
@@ -29,5 +33,7 @@ public class FlinkAppUpdateRequest extends FlinkAppCreateRequest {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
+    @ApiParam(description = "Application id", required = true)
     private Long id;
 }

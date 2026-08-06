@@ -17,8 +17,12 @@
 
 package org.apache.streampark.console.core.request.flink;
 
+import org.apache.streampark.console.core.annotation.ApiParam;
+
 import lombok.Getter;
 import lombok.Setter;
+
+import javax.validation.constraints.NotNull;
 
 import java.io.Serializable;
 
@@ -31,13 +35,21 @@ public class FlinkAppStartRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
+    @ApiParam(description = "Application id", required = true)
     private Long id;
 
+    @NotNull
+    @ApiParam(description = "Team id", required = true)
     private Long teamId;
 
+    @ApiParam(name = "restoreFromSavepoint", description = "Restore from savepoint or checkpoint",
+        defaultValue = "false")
     private Boolean restoreOrTriggerSavepoint;
 
+    @ApiParam(description = "Savepoint or checkpoint path")
     private String savepointPath;
 
+    @ApiParam(description = "Allow non restored state", defaultValue = "false")
     private Boolean allowNonRestored;
 }

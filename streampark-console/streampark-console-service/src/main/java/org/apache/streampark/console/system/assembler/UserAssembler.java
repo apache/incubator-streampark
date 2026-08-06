@@ -56,7 +56,25 @@ public final class UserAssembler {
     }
 
     public static UserResponse toResponse(User user) {
-        return DtoAssembler.toDto(user, UserResponse.class);
+        if (user == null) {
+            return null;
+        }
+        UserResponse response = new UserResponse();
+        response.setUserId(user.getUserId());
+        response.setUsername(user.getUsername());
+        response.setEmail(user.getEmail());
+        response.setUserType(user.getUserType());
+        response.setLoginType(user.getLoginType());
+        response.setStatus(user.getStatus());
+        response.setCreateTime(user.getCreateTime());
+        response.setModifyTime(user.getModifyTime());
+        response.setLastLoginTime(user.getLastLoginTime());
+        response.setSex(user.getSex());
+        response.setDescription(user.getDescription());
+        response.setNickName(user.getNickName());
+        response.setLastTeamId(user.getLastTeamId());
+        response.setId(user.getId());
+        return response;
     }
 
     public static List<UserResponse> toResponseList(List<User> users) {

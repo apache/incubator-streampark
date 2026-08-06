@@ -20,6 +20,9 @@ package org.apache.streampark.console.core.request.spark;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 import java.io.Serializable;
 
 /**
@@ -31,16 +34,22 @@ public class SparkAppCreateRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
     private Long teamId;
 
+    @NotNull
     private Integer jobType;
 
+    @NotNull
     private Integer appType;
 
+    @NotNull
     private Long versionId;
 
+    @NotBlank
     private String appName;
 
+    @NotNull
     private Integer deployMode;
 
     private Integer resourceFrom;

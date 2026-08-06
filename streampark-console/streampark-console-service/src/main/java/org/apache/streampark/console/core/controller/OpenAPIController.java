@@ -63,7 +63,7 @@ public class OpenAPIController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("app/start")
     @RequiresPermissions("app:start")
-    public RestResponse flinkStart(FlinkAppStartRequest request) throws Exception {
+    public RestResponse flinkStart(@Valid FlinkAppStartRequest request) throws Exception {
         applicationActionService.start(FlinkApplicationAssembler.toEntity(request), false);
         return RestResponse.success(true);
     }
@@ -80,7 +80,7 @@ public class OpenAPIController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("app/cancel")
     @RequiresPermissions("app:cancel")
-    public RestResponse flinkCancel(FlinkAppCancelRequest request) throws Exception {
+    public RestResponse flinkCancel(@Valid FlinkAppCancelRequest request) throws Exception {
         applicationActionService.cancel(FlinkApplicationAssembler.toEntity(request));
         return RestResponse.success();
     }

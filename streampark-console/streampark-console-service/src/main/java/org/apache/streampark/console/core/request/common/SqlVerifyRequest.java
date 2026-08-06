@@ -15,28 +15,34 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.request.flink;
+package org.apache.streampark.console.core.request.common;
+
+import org.apache.streampark.console.core.annotation.ApiParam;
 
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import java.io.Serializable;
 
-/**
- * Request body for {@code POST /flink/app/check/name}.
- */
+/** Shared SQL verify request for Flink and Spark SQL controllers. */
 @Getter
 @Setter
-public class FlinkAppCheckNameRequest implements Serializable {
+public class SqlVerifyRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Long id;
-
-    private Long teamId;
-
     @NotBlank
-    private String jobName;
+    @ApiParam(description = "SQL statement to validate", required = true)
+    private String sql;
+
+    @NotNull
+    @ApiParam(description = "Engine version id", required = true)
+    private Long versionId;
+
+    @NotNull
+    @ApiParam(description = "Team id", required = true)
+    private Long teamId;
 }

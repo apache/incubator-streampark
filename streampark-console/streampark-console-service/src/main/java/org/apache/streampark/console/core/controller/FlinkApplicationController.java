@@ -63,6 +63,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -105,7 +107,7 @@ public class FlinkApplicationController {
     @Permission(team = "#request.teamId")
     @PostMapping("create")
     @RequiresPermissions("app:create")
-    public RestResponse create(FlinkAppCreateRequest request) throws IOException {
+    public RestResponse create(@Valid FlinkAppCreateRequest request) throws IOException {
         FlinkApplication app = FlinkApplicationAssembler.toEntity(request);
         boolean saved = applicationManageService.create(app);
         return RestResponse.success(saved);
@@ -114,7 +116,7 @@ public class FlinkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("copy")
     @RequiresPermissions("app:copy")
-    public RestResponse copy(FlinkAppCopyRequest request) throws IOException {
+    public RestResponse copy(@Valid FlinkAppCopyRequest request) throws IOException {
         applicationManageService.copy(FlinkApplicationAssembler.toEntity(request));
         return RestResponse.success();
     }
@@ -123,7 +125,7 @@ public class FlinkApplicationController {
     @Permission(app = "#request.id")
     @PostMapping("update")
     @RequiresPermissions("app:update")
-    public RestResponse update(FlinkAppUpdateRequest request) {
+    public RestResponse update(@Valid FlinkAppUpdateRequest request) {
         applicationManageService.update(FlinkApplicationAssembler.toEntity(request));
         return RestResponse.success(true);
     }
@@ -138,7 +140,7 @@ public class FlinkApplicationController {
     @PostMapping("list")
     @Permission(team = "#query.teamId")
     @RequiresPermissions("app:view")
-    public RestResponse list(FlinkAppListQueryRequest query, RestRequest request) {
+    public RestResponse list(@Valid FlinkAppListQueryRequest query, RestRequest request) {
         FlinkApplication appParam = FlinkApplicationAssembler.toEntity(query);
         IPage<FlinkApplication> applicationList = applicationManageService.page(appParam, request);
         return RestResponse.success(FlinkApplicationAssembler.toPageResponse(applicationList));
@@ -173,7 +175,7 @@ public class FlinkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("start")
     @RequiresPermissions("app:start")
-    public RestResponse start(FlinkAppStartRequest request) throws Exception {
+    public RestResponse start(@Valid FlinkAppStartRequest request) throws Exception {
         applicationActionService.start(FlinkApplicationAssembler.toEntity(request), false);
         return RestResponse.success(true);
     }
@@ -181,7 +183,7 @@ public class FlinkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("cancel")
     @RequiresPermissions("app:cancel")
-    public RestResponse cancel(FlinkAppCancelRequest request) throws Exception {
+    public RestResponse cancel(@Valid FlinkAppCancelRequest request) throws Exception {
         applicationActionService.cancel(FlinkApplicationAssembler.toEntity(request));
         return RestResponse.success();
     }
@@ -209,7 +211,7 @@ public class FlinkApplicationController {
 
     @PostMapping("check/name")
     @Permission(app = "#request.id", team = "#request.teamId")
-    public RestResponse checkName(FlinkAppCheckNameRequest request) {
+    public RestResponse checkName(@Valid FlinkAppCheckNameRequest request) {
         AppExistsStateEnum exists = applicationInfoService.checkExists(FlinkApplicationAssembler.toEntity(request));
         return RestResponse.success(exists.get());
     }

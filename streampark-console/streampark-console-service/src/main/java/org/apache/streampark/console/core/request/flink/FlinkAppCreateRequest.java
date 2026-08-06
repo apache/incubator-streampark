@@ -17,8 +17,13 @@
 
 package org.apache.streampark.console.core.request.flink;
 
+import org.apache.streampark.console.core.annotation.ApiParam;
+
 import lombok.Getter;
 import lombok.Setter;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import java.io.Serializable;
 
@@ -31,22 +36,34 @@ public class FlinkAppCreateRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
+    @ApiParam(description = "Team id", required = true)
     private Long teamId;
 
+    @NotNull
+    @ApiParam(description = "Job type", required = true)
     private Integer jobType;
 
+    @NotNull
+    @ApiParam(description = "Deploy mode", required = true)
     private Integer deployMode;
 
+    @NotNull
+    @ApiParam(description = "Flink version id", required = true)
     private Long versionId;
 
     private String flinkSql;
 
+    @NotNull
+    @ApiParam(description = "Application type", required = true)
     private Integer appType;
 
     private String config;
 
     private Integer format;
 
+    @NotBlank
+    @ApiParam(description = "Job name", required = true)
     private String jobName;
 
     private String tags;
