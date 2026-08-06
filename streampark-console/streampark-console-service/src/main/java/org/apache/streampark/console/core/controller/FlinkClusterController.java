@@ -19,8 +19,9 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.InternalException;
+import org.apache.streampark.console.base.web.FormOrJson;
 import org.apache.streampark.console.core.assembler.FlinkClusterAssembler;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.FlinkCluster;
@@ -56,77 +57,77 @@ public class FlinkClusterController {
     private FlinkClusterService flinkClusterService;
 
     @PostMapping("page")
-    public RestResponse findPage(FlinkClusterPageQueryRequest query, RestRequest restRequest) {
+    public RestResponseBody<?> findPage(FlinkClusterPageQueryRequest query, RestRequest restRequest) {
         FlinkCluster flinkCluster = FlinkClusterAssembler.toEntity(query);
         IPage<FlinkCluster> flinkClusters = flinkClusterService.findPage(flinkCluster, restRequest);
-        return RestResponse.success(FlinkClusterAssembler.toPageResponse(flinkClusters));
+        return RestResponseBody.success(FlinkClusterAssembler.toPageResponse(flinkClusters));
     }
 
     @PostMapping("alive")
-    public RestResponse listAvailableCluster() {
+    public RestResponseBody<?> listAvailableCluster() {
         List<FlinkCluster> flinkClusters = flinkClusterService.listAvailableCluster();
-        return RestResponse.success(FlinkClusterAssembler.toListResponse(flinkClusters));
+        return RestResponseBody.success(FlinkClusterAssembler.toListResponse(flinkClusters));
     }
 
     @PostMapping("list")
-    public RestResponse list() {
+    public RestResponseBody<?> list() {
         List<FlinkCluster> flinkClusters = flinkClusterService.list();
-        return RestResponse.success(FlinkClusterAssembler.toListResponse(flinkClusters));
+        return RestResponseBody.success(FlinkClusterAssembler.toListResponse(flinkClusters));
     }
 
     @PostMapping("remote_url")
-    public RestResponse remoteUrl(@Valid IdRequest request) {
+    public RestResponseBody<?> remoteUrl(@Valid IdRequest request) {
         FlinkCluster cluster = flinkClusterService.getById(request.getId());
-        return RestResponse.success(cluster.getAddress());
+        return RestResponseBody.success(cluster.getAddress());
     }
 
     @PostMapping("check")
-    public RestResponse check(FlinkClusterCheckRequest request) {
+    public RestResponseBody<?> check(FlinkClusterCheckRequest request) {
         ResponseResult checkResult = flinkClusterService.check(FlinkClusterAssembler.toEntity(request));
-        return RestResponse.success(FlinkClusterAssembler.toCheckResponse(checkResult));
+        return RestResponseBody.success(FlinkClusterAssembler.toCheckResponse(checkResult));
     }
 
     @PostMapping("create")
     @RequiresPermissions("cluster:create")
-    public RestResponse create(@Valid FlinkClusterCreateRequest request) {
+    public RestResponseBody<?> create(@Valid @FormOrJson FlinkClusterCreateRequest request) {
         Long userId = ServiceHelper.getUserId();
         Boolean success = flinkClusterService.create(FlinkClusterAssembler.toEntity(request), userId);
-        return RestResponse.success(success);
+        return RestResponseBody.success(success);
     }
 
     @PostMapping("update")
     @RequiresPermissions("cluster:update")
-    public RestResponse update(@Valid FlinkClusterUpdateRequest request) {
+    public RestResponseBody<?> update(@Valid @FormOrJson FlinkClusterUpdateRequest request) {
         flinkClusterService.update(FlinkClusterAssembler.toEntity(request));
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 
     @PostMapping("get")
-    public RestResponse get(@Valid IdRequest request) throws InternalException {
+    public RestResponseBody<?> get(@Valid IdRequest request) throws InternalException {
         FlinkCluster cluster = flinkClusterService.getById(request.getId());
-        return RestResponse.success(FlinkClusterAssembler.toResponse(cluster));
+        return RestResponseBody.success(FlinkClusterAssembler.toResponse(cluster));
     }
 
     @PostMapping("start")
-    public RestResponse start(@Valid IdRequest request) {
+    public RestResponseBody<?> start(@Valid @FormOrJson IdRequest request) {
         flinkClusterService.updateClusterState(request.getId(), ClusterState.STARTING);
         flinkClusterService.start(FlinkClusterAssembler.toEntity(request));
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 
     @PostMapping("shutdown")
-    public RestResponse shutdown(@Valid IdRequest request) {
+    public RestResponseBody<?> shutdown(@Valid @FormOrJson IdRequest request) {
         FlinkCluster cluster = FlinkClusterAssembler.toEntity(request);
         if (cluster != null && flinkClusterService.allowShutdownCluster(cluster)) {
             flinkClusterService.updateClusterState(cluster.getId(), ClusterState.CANCELLING);
             flinkClusterService.shutdown(cluster);
         }
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 
     @PostMapping("delete")
-    public RestResponse delete(@Valid IdRequest request) {
+    public RestResponseBody<?> delete(@Valid @FormOrJson IdRequest request) {
         flinkClusterService.remove(request.getId());
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 }

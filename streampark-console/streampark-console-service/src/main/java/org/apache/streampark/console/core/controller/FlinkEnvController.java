@@ -18,8 +18,9 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.web.FormOrJson;
 import org.apache.streampark.console.core.assembler.FlinkEnvAssembler;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.enums.FlinkEnvCheckEnum;
@@ -52,65 +53,65 @@ public class FlinkEnvController {
     private FlinkEnvService flinkEnvService;
 
     @PostMapping("page")
-    public RestResponse findPage(FlinkEnvPageQueryRequest query, RestRequest restRequest) {
+    public RestResponseBody<?> findPage(FlinkEnvPageQueryRequest query, RestRequest restRequest) {
         FlinkEnv flinkEnv = FlinkEnvAssembler.toEntity(query);
         IPage<FlinkEnv> envs = flinkEnvService.findPage(flinkEnv, restRequest);
-        return RestResponse.success(FlinkEnvAssembler.toPageResponse(envs));
+        return RestResponseBody.success(FlinkEnvAssembler.toPageResponse(envs));
     }
 
     @PostMapping("list")
-    public RestResponse list() {
+    public RestResponseBody<?> list() {
         List<FlinkEnv> flinkEnvList = flinkEnvService.list();
-        return RestResponse.success(FlinkEnvAssembler.toListResponse(flinkEnvList));
+        return RestResponseBody.success(FlinkEnvAssembler.toListResponse(flinkEnvList));
     }
 
     @PostMapping("check")
-    public RestResponse check(FlinkEnvCheckRequest request) {
+    public RestResponseBody<?> check(FlinkEnvCheckRequest request) {
         FlinkEnvCheckEnum checkResp = flinkEnvService.check(FlinkEnvAssembler.toEntity(request));
-        return RestResponse.success(checkResp.getCode());
+        return RestResponseBody.success(checkResp.getCode());
     }
 
     @PostMapping("create")
-    public RestResponse create(@Valid FlinkEnvCreateRequest request) throws Exception {
+    public RestResponseBody<?> create(@Valid @FormOrJson FlinkEnvCreateRequest request) throws Exception {
         flinkEnvService.create(FlinkEnvAssembler.toEntity(request));
-        return RestResponse.success(true);
+        return RestResponseBody.success(true);
     }
 
     @PostMapping("get")
-    public RestResponse get(@Valid IdRequest request) throws Exception {
+    public RestResponseBody<?> get(@Valid IdRequest request) throws Exception {
         FlinkEnv flinkEnv = flinkEnvService.getById(request.getId());
         ApiAlertException.throwIfNull(flinkEnv, "Flink environment not found.");
         flinkEnv.unzipFlinkConf();
-        return RestResponse.success(FlinkEnvAssembler.toResponse(flinkEnv));
+        return RestResponseBody.success(FlinkEnvAssembler.toResponse(flinkEnv));
     }
 
     @PostMapping("sync")
-    public RestResponse sync(@Valid IdRequest request) throws Exception {
+    public RestResponseBody<?> sync(@Valid @FormOrJson IdRequest request) throws Exception {
         flinkEnvService.syncConf(request.getId());
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 
     @PostMapping("update")
-    public RestResponse update(@Valid FlinkEnvUpdateRequest request) {
+    public RestResponseBody<?> update(@Valid @FormOrJson FlinkEnvUpdateRequest request) {
         flinkEnvService.update(FlinkEnvAssembler.toEntity(request));
-        return RestResponse.success(true);
+        return RestResponseBody.success(true);
     }
 
     @PostMapping("delete")
-    public RestResponse delete(@Valid IdRequest request) {
+    public RestResponseBody<?> delete(@Valid @FormOrJson IdRequest request) {
         flinkEnvService.removeById(request.getId());
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 
     @PostMapping("validity")
-    public RestResponse validity(FlinkEnvCheckRequest request) {
+    public RestResponseBody<?> validity(FlinkEnvCheckRequest request) {
         flinkEnvService.validity(request.getId());
-        return RestResponse.success(true);
+        return RestResponseBody.success(true);
     }
 
     @PostMapping("default")
-    public RestResponse setDefault(@Valid IdRequest request) {
+    public RestResponseBody<?> setDefault(@Valid @FormOrJson IdRequest request) {
         flinkEnvService.setDefault(request.getId());
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 }

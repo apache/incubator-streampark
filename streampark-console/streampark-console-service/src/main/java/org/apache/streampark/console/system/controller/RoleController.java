@@ -19,6 +19,7 @@ package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponseBody;
+import org.apache.streampark.console.base.web.FormOrJson;
 import org.apache.streampark.console.system.assembler.RoleAssembler;
 import org.apache.streampark.console.system.entity.Role;
 import org.apache.streampark.console.system.entity.RoleMenu;
@@ -84,21 +85,21 @@ public class RoleController {
 
     @PostMapping("post")
     @RequiresPermissions("role:add")
-    public RestResponseBody<Void> addRole(@Valid RoleCreateRequest request) {
+    public RestResponseBody<Void> addRole(@Valid @FormOrJson RoleCreateRequest request) {
         this.roleService.createRole(RoleAssembler.toEntity(request));
         return RestResponseBody.success();
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("role:delete")
-    public RestResponseBody<Void> deleteRole(@Valid RoleDeleteRequest request) {
+    public RestResponseBody<Void> deleteRole(@Valid @FormOrJson RoleDeleteRequest request) {
         this.roleService.removeById(request.getRoleId());
         return RestResponseBody.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("role:update")
-    public RestResponseBody<Void> updateRole(@Valid RoleUpdateRequest request) throws Exception {
+    public RestResponseBody<Void> updateRole(@Valid @FormOrJson RoleUpdateRequest request) throws Exception {
         this.roleService.updateRole(RoleAssembler.toEntity(request));
         return RestResponseBody.success();
     }

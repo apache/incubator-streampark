@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.domain.RestResponseBody;
+import org.apache.streampark.console.base.web.FormOrJson;
 import org.apache.streampark.console.core.annotation.OpenAPI;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.assembler.FlinkApplicationAssembler;
@@ -70,9 +70,9 @@ public class OpenAPIController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("app/start")
     @RequiresPermissions("app:start")
-    public RestResponse flinkStart(@Valid FlinkAppStartRequest request) throws Exception {
+    public RestResponseBody<?> flinkStart(@Valid @FormOrJson FlinkAppStartRequest request) throws Exception {
         applicationActionService.start(FlinkApplicationAssembler.toEntity(request), false);
-        return RestResponse.success(true);
+        return RestResponseBody.success(true);
     }
 
     @OpenAPI(name = "flinkCancel", header = {
@@ -87,16 +87,16 @@ public class OpenAPIController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("app/cancel")
     @RequiresPermissions("app:cancel")
-    public RestResponse flinkCancel(@Valid FlinkAppCancelRequest request) throws Exception {
+    public RestResponseBody<?> flinkCancel(@Valid @FormOrJson FlinkAppCancelRequest request) throws Exception {
         applicationActionService.cancel(FlinkApplicationAssembler.toEntity(request));
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 
     @PostMapping("curl")
-    public RestResponse copyOpenApiCurl(OpenAPICurlRequest request) {
+    public RestResponseBody<?> copyOpenApiCurl(OpenAPICurlRequest request) {
         String url = openAPIComponent.getOpenApiCUrl(
             request.getName(), request.getBaseUrl(), request.getAppId(), request.getTeamId());
-        return RestResponse.success(url);
+        return RestResponseBody.success(url);
     }
 
     @PostMapping("schema")

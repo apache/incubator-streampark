@@ -53,7 +53,7 @@ public class AccessTokenController {
 
     @PostMapping(value = "create")
     @RequiresPermissions("token:add")
-    public RestResponseBody<Object> createToken(@Valid TokenCreateRequest request) throws Exception {
+    public RestResponseBody<?> createToken(@Valid TokenCreateRequest request) throws Exception {
         return RestResponseBody.from(accessTokenService.create(request.getUserId(), request.getDescription()));
     }
 
@@ -85,7 +85,7 @@ public class AccessTokenController {
 
     @PostMapping("toggle")
     @RequiresPermissions("token:add")
-    public RestResponseBody<Object> toggleToken(@Valid TokenToggleRequest request) {
+    public RestResponseBody<?> toggleToken(@Valid TokenToggleRequest request) {
         return RestResponseBody.from(accessTokenService.toggle(request.getTokenId()));
     }
 

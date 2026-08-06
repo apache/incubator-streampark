@@ -19,8 +19,10 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
+import org.apache.streampark.console.base.web.FormOrJson;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.assembler.FlinkSqlAssembler;
 import org.apache.streampark.console.core.entity.FlinkSql;
@@ -69,7 +71,7 @@ public class FlinkSqlController {
     private SqlCompleteService sqlComplete;
 
     @PostMapping("verify")
-    public RestResponse verify(@Valid FlinkSqlVerifyRequest request) {
+    public RestResponseBody<?> verify(@Valid FlinkSqlVerifyRequest request) {
         String sql = variableService.replaceVariable(request.getTeamId(), request.getSql());
         FlinkSqlValidationResult flinkSqlValidationResult =
             flinkSqlService.verifySql(sql, request.getVersionId());
@@ -87,29 +89,29 @@ public class FlinkSqlController {
                     .put(START, flinkSqlValidationResult.errorLine())
                     .put(END, flinkSqlValidationResult.errorLine() + 1);
             }
-            return response;
+            return RestResponseBody.from(response);
         }
-        return RestResponse.success(true);
+        return RestResponseBody.success(true);
     }
 
     @PostMapping("list")
     @Permission(app = "#query.appId", team = "#query.teamId")
-    public RestResponse list(@Valid FlinkSqlListQueryRequest query, RestRequest request) {
+    public RestResponseBody<?> list(@Valid FlinkSqlListQueryRequest query, RestRequest request) {
         IPage<FlinkSql> page = flinkSqlService.getPage(query.getAppId(), request);
-        return RestResponse.success(FlinkSqlAssembler.toPageResponse(page));
+        return RestResponseBody.success(FlinkSqlAssembler.toPageResponse(page));
     }
 
     @PostMapping("delete")
     @RequiresPermissions("sql:delete")
     @Permission(app = "#request.appId", team = "#request.teamId")
-    public RestResponse delete(@Valid FlinkSqlDeleteRequest request) {
+    public RestResponseBody<?> delete(@Valid @FormOrJson FlinkSqlDeleteRequest request) {
         Boolean deleted = flinkSqlService.removeById(request.getId());
-        return RestResponse.success(deleted);
+        return RestResponseBody.success(deleted);
     }
 
     @PostMapping("get")
     @Permission(app = "#request.appId", team = "#request.teamId")
-    public RestResponse get(@Valid FlinkSqlGetRequest request) throws InternalException {
+    public RestResponseBody<?> get(@Valid FlinkSqlGetRequest request) throws InternalException {
         ApiAlertException.throwIfTrue(
             request.getAppId() == null || request.getTeamId() == null,
             "Permission denied, appId and teamId cannot be null");
@@ -118,24 +120,25 @@ public class FlinkSqlController {
         ApiAlertException.throwIfNull(flinkSql1, "Flink SQL not found.");
         flinkSql1.base64Encode();
         if (array.length == 1) {
-            return RestResponse.success(FlinkSqlAssembler.toResponse(flinkSql1));
+            return RestResponseBody.success(FlinkSqlAssembler.toResponse(flinkSql1));
         }
         FlinkSql flinkSql2 = flinkSqlService.getById(array[1]);
         ApiAlertException.throwIfNull(flinkSql2, "Flink SQL not found.");
         flinkSql2.base64Encode();
-        return RestResponse.success(
+        return RestResponseBody.success(
             FlinkSqlAssembler.toArrayResponse(new FlinkSql[]{flinkSql1, flinkSql2}));
     }
 
     @PostMapping("history")
     @Permission(app = "#request.id", team = "#request.teamId")
-    public RestResponse history(@Valid FlinkAppIdRequest request) {
+    public RestResponseBody<?> history(@Valid FlinkAppIdRequest request) {
         List<FlinkSql> sqlList = flinkSqlService.listFlinkSqlHistory(request.getId());
-        return RestResponse.success(FlinkSqlAssembler.toListResponse(sqlList));
+        return RestResponseBody.success(FlinkSqlAssembler.toListResponse(sqlList));
     }
 
     @PostMapping("sql_complete")
-    public RestResponse getSqlComplete(@Valid FlinkSqlCompleteRequest request) {
-        return RestResponse.success().put("word", sqlComplete.getComplete(request.getSql()));
+    public RestResponseBody<?> getSqlComplete(@Valid FlinkSqlCompleteRequest request) {
+        return RestResponseBody.success(
+            java.util.Collections.singletonMap("word", sqlComplete.getComplete(request.getSql())));
     }
 }

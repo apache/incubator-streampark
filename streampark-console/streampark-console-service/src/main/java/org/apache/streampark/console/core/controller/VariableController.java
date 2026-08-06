@@ -18,7 +18,8 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
+import org.apache.streampark.console.base.web.FormOrJson;
 import org.apache.streampark.console.core.assembler.FlinkApplicationAssembler;
 import org.apache.streampark.console.core.assembler.VariableAssembler;
 import org.apache.streampark.console.core.entity.FlinkApplication;
@@ -58,65 +59,65 @@ public class VariableController {
 
     @PostMapping("page")
     @RequiresPermissions("variable:view")
-    public RestResponse page(RestRequest restRequest, VariablePageQueryRequest query) {
+    public RestResponseBody<?> page(RestRequest restRequest, VariablePageQueryRequest query) {
         IPage<Variable> page =
             variableService.getPage(VariableAssembler.toEntity(query), restRequest);
         for (Variable v : page.getRecords()) {
             v.dataMasking();
         }
-        return RestResponse.success(VariableAssembler.toPageResponse(page));
+        return RestResponseBody.success(VariableAssembler.toPageResponse(page));
     }
 
     @PostMapping("list")
-    public RestResponse variableList(VariableListRequest request) {
+    public RestResponseBody<?> variableList(VariableListRequest request) {
         List<Variable> variableList =
             variableService.listByTeamId(request.getTeamId(), request.getKeyword());
         for (Variable v : variableList) {
             v.dataMasking();
         }
-        return RestResponse.success(VariableAssembler.toListResponse(variableList));
+        return RestResponseBody.success(VariableAssembler.toListResponse(variableList));
     }
 
     @PostMapping("depend_apps")
     @RequiresPermissions("variable:depend_apps")
-    public RestResponse dependApps(RestRequest restRequest, TeamScopedIdRequest request) {
+    public RestResponseBody<?> dependApps(RestRequest restRequest, TeamScopedIdRequest request) {
         IPage<FlinkApplication> dependApps =
             variableService.getDependAppsPage(VariableAssembler.toEntity(request), restRequest);
-        return RestResponse.success(FlinkApplicationAssembler.toPageResponse(dependApps));
+        return RestResponseBody.success(FlinkApplicationAssembler.toPageResponse(dependApps));
     }
 
     @PostMapping("post")
     @RequiresPermissions("variable:add")
-    public RestResponse addVariable(@Valid VariableCreateRequest request) {
+    public RestResponseBody<?> addVariable(@Valid @FormOrJson VariableCreateRequest request) {
         this.variableService.createVariable(VariableAssembler.toEntity(request));
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("variable:update")
-    public RestResponse updateVariable(@Valid VariableUpdateRequest request) {
+    public RestResponseBody<?> updateVariable(@Valid @FormOrJson VariableUpdateRequest request) {
         variableService.updateVariable(VariableAssembler.toEntity(request));
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 
     @PostMapping("show_original")
     @RequiresPermissions("variable:show_original")
-    public RestResponse showOriginal(TeamScopedIdRequest request) {
+    public RestResponseBody<?> showOriginal(TeamScopedIdRequest request) {
         Variable v = this.variableService.getById(request.getId());
-        return RestResponse.success(VariableAssembler.toResponse(v));
+        return RestResponseBody.success(VariableAssembler.toResponse(v));
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("variable:delete")
-    public RestResponse deleteVariable(@Valid TeamScopedIdRequest request) {
+    public RestResponseBody<?> deleteVariable(@Valid @FormOrJson TeamScopedIdRequest request) {
         this.variableService.remove(VariableAssembler.toEntity(request));
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 
     @PostMapping("check/code")
-    public RestResponse checkVariableCode(@Valid VariableCheckCodeRequest request) {
+    public RestResponseBody<?> checkVariableCode(@Valid VariableCheckCodeRequest request) {
         boolean result =
             this.variableService.findByVariableCode(request.getTeamId(), request.getVariableCode()) == null;
-        return RestResponse.success(result);
+        return RestResponseBody.success(result);
     }
 }

@@ -76,6 +76,11 @@ public class RestResponseBody<T> implements Serializable {
         return this;
     }
 
+    public RestResponseBody<T> data(T data) {
+        this.data = data;
+        return this;
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> RestResponseBody<T> from(RestResponse response) {
         RestResponseBody<T> body = new RestResponseBody<>();

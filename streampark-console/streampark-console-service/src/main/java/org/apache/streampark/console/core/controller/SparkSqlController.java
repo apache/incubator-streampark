@@ -19,8 +19,10 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
+import org.apache.streampark.console.base.web.FormOrJson;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.assembler.SparkSqlAssembler;
 import org.apache.streampark.console.core.entity.SparkSql;
@@ -69,7 +71,7 @@ public class SparkSqlController {
     private SqlCompleteService sqlComplete;
 
     @PostMapping("verify")
-    public RestResponse verify(@Valid SparkSqlVerifyRequest request) {
+    public RestResponseBody<?> verify(@Valid SparkSqlVerifyRequest request) {
         String sql = variableService.replaceVariable(request.getTeamId(), request.getSql());
         SparkSqlValidationResult sparkSqlValidationResult = sparkSqlService.verifySql(sql, request.getVersionId());
         if (!sparkSqlValidationResult.success()) {
@@ -86,31 +88,31 @@ public class SparkSqlController {
                     .put(START, sparkSqlValidationResult.errorLine())
                     .put(END, sparkSqlValidationResult.errorLine() + 1);
             }
-            return response;
+            return RestResponseBody.from(response);
         }
-        return RestResponse.success(true);
+        return RestResponseBody.success(true);
     }
 
     @PostMapping("list")
     @Permission(app = "#request.appId", team = "#request.teamId")
-    public RestResponse list(@Valid SparkSqlListQueryRequest request, RestRequest restRequest) {
+    public RestResponseBody<?> list(@Valid SparkSqlListQueryRequest request, RestRequest restRequest) {
         IPage<SparkSql> page = sparkSqlService.getPage(request.getAppId(), restRequest);
-        return RestResponse.success(SparkSqlAssembler.toPageResponse(page));
+        return RestResponseBody.success(SparkSqlAssembler.toPageResponse(page));
     }
 
     @PostMapping("delete")
     @RequiresPermissions("sql:delete")
     @Permission(app = "#request.appId", team = "#request.teamId")
-    public RestResponse delete(@Valid SparkSqlDeleteRequest request) {
+    public RestResponseBody<?> delete(@Valid @FormOrJson SparkSqlDeleteRequest request) {
         SparkSql sparkSql = SparkSqlAssembler.toDeleteEntity(request);
         ApiAlertException.throwIfNull(sparkSql, "Spark SQL delete request cannot be null.");
         Boolean deleted = sparkSqlService.removeById(sparkSql.getSql());
-        return RestResponse.success(deleted);
+        return RestResponseBody.success(deleted);
     }
 
     @PostMapping("get")
     @Permission(app = "#request.appId", team = "#request.teamId")
-    public RestResponse get(@Valid SparkSqlGetRequest request) throws InternalException {
+    public RestResponseBody<?> get(@Valid SparkSqlGetRequest request) throws InternalException {
         ApiAlertException.throwIfTrue(
             request.getAppId() == null || request.getTeamId() == null,
             "Permission denied, appId and teamId cannot be null");
@@ -119,23 +121,24 @@ public class SparkSqlController {
         ApiAlertException.throwIfNull(sparkSql1, "Spark SQL not found.");
         sparkSql1.base64Encode();
         if (array.length == 1) {
-            return RestResponse.success(SparkSqlAssembler.toResponse(sparkSql1));
+            return RestResponseBody.success(SparkSqlAssembler.toResponse(sparkSql1));
         }
         SparkSql sparkSql2 = sparkSqlService.getById(array[1]);
         ApiAlertException.throwIfNull(sparkSql2, "Spark SQL not found.");
         sparkSql2.base64Encode();
-        return RestResponse.success(SparkSqlAssembler.toResponseArray(new SparkSql[]{sparkSql1, sparkSql2}));
+        return RestResponseBody.success(SparkSqlAssembler.toResponseArray(new SparkSql[]{sparkSql1, sparkSql2}));
     }
 
     @PostMapping("history")
     @Permission(app = "#request.id", team = "#request.teamId")
-    public RestResponse history(@Valid SparkSqlHistoryRequest request) {
+    public RestResponseBody<?> history(@Valid SparkSqlHistoryRequest request) {
         List<SparkSql> sqlList = sparkSqlService.listSparkSqlHistory(request.getId());
-        return RestResponse.success(SparkSqlAssembler.toListResponse(sqlList));
+        return RestResponseBody.success(SparkSqlAssembler.toListResponse(sqlList));
     }
 
     @PostMapping("sqlComplete")
-    public RestResponse getSqlComplete(@Valid SparkSqlCompleteRequest request) {
-        return RestResponse.success().put("word", sqlComplete.getComplete(request.getSql()));
+    public RestResponseBody<?> getSqlComplete(@Valid SparkSqlCompleteRequest request) {
+        return RestResponseBody.success(
+            java.util.Collections.singletonMap("word", sqlComplete.getComplete(request.getSql())));
     }
 }

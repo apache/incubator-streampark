@@ -18,7 +18,8 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.util.AssertUtils;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
+import org.apache.streampark.console.base.web.FormOrJson;
 import org.apache.streampark.console.core.assembler.ExternalLinkAssembler;
 import org.apache.streampark.console.core.request.common.IdRequest;
 import org.apache.streampark.console.core.request.externallink.ExternalLinkCreateRequest;
@@ -49,35 +50,35 @@ public class ExternalLinkController {
 
     @PostMapping("/list")
     @RequiresPermissions("externalLink:view")
-    public RestResponse list() {
-        return RestResponse.success(ExternalLinkAssembler.toListResponse(externalLinkService.list()));
+    public RestResponseBody<?> list() {
+        return RestResponseBody.success(ExternalLinkAssembler.toListResponse(externalLinkService.list()));
     }
 
     @PostMapping("/render")
-    public RestResponse render(@Valid ExternalLinkRenderRequest request) {
-        return RestResponse.success(
+    public RestResponseBody<?> render(@Valid ExternalLinkRenderRequest request) {
+        return RestResponseBody.success(
             ExternalLinkAssembler.toListResponse(externalLinkService.render(request.getAppId())));
     }
 
     @PostMapping("/create")
     @RequiresPermissions("externalLink:create")
-    public RestResponse create(@Valid ExternalLinkCreateRequest request) {
+    public RestResponseBody<?> create(@Valid @FormOrJson ExternalLinkCreateRequest request) {
         externalLinkService.create(ExternalLinkAssembler.toEntity(request));
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 
     @PostMapping("/update")
     @RequiresPermissions("externalLink:update")
-    public RestResponse update(@Valid ExternalLinkUpdateRequest request) {
+    public RestResponseBody<?> update(@Valid @FormOrJson ExternalLinkUpdateRequest request) {
         AssertUtils.notNull(request.getId(), "The link id cannot be null");
         externalLinkService.update(ExternalLinkAssembler.toEntity(request));
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 
     @DeleteMapping("/delete")
     @RequiresPermissions("externalLink:delete")
-    public RestResponse delete(@Valid IdRequest request) {
+    public RestResponseBody<?> delete(@Valid @FormOrJson IdRequest request) {
         externalLinkService.removeById(request.getId());
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 }

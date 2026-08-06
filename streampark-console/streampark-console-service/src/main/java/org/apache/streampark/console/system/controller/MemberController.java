@@ -19,6 +19,7 @@ package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponseBody;
+import org.apache.streampark.console.base.web.FormOrJson;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.system.assembler.MemberAssembler;
 import org.apache.streampark.console.system.assembler.TeamAssembler;
@@ -90,7 +91,7 @@ public class MemberController {
     @PostMapping("post")
     @Permission(team = "#request.teamId")
     @RequiresPermissions("member:add")
-    public RestResponseBody<Void> create(@Valid MemberCreateRequest request) {
+    public RestResponseBody<Void> create(@Valid @FormOrJson MemberCreateRequest request) {
         this.memberService.createMember(MemberAssembler.toEntity(request));
         return RestResponseBody.success();
     }
@@ -98,7 +99,7 @@ public class MemberController {
     @DeleteMapping("delete")
     @Permission(team = "#request.teamId")
     @RequiresPermissions("member:delete")
-    public RestResponseBody<Void> delete(@Valid MemberDeleteRequest request) {
+    public RestResponseBody<Void> delete(@Valid @FormOrJson MemberDeleteRequest request) {
         this.memberService.remove(request.getId());
         return RestResponseBody.success();
     }
@@ -106,7 +107,7 @@ public class MemberController {
     @PutMapping("update")
     @Permission(team = "#request.teamId")
     @RequiresPermissions("member:update")
-    public RestResponseBody<Void> update(@Valid MemberUpdateRequest request) {
+    public RestResponseBody<Void> update(@Valid @FormOrJson MemberUpdateRequest request) {
         this.memberService.updateMember(MemberAssembler.toEntity(request));
         return RestResponseBody.success();
     }

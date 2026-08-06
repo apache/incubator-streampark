@@ -18,7 +18,8 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.util.HadoopUtils;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
+import org.apache.streampark.console.base.web.FormOrJson;
 import org.apache.streampark.console.core.assembler.SettingAssembler;
 import org.apache.streampark.console.core.entity.Setting;
 import org.apache.streampark.console.core.request.setting.SettingDockerRequest;
@@ -53,72 +54,72 @@ public class SettingController {
 
     @PostMapping("all")
     @RequiresPermissions("setting:view")
-    public RestResponse all() {
+    public RestResponseBody<?> all() {
         LambdaQueryWrapper<Setting> query =
             new LambdaQueryWrapper<Setting>().orderByAsc(Setting::getOrderNum);
         List<Setting> setting = settingService.list(query);
-        return RestResponse.success(SettingAssembler.toListResponse(setting));
+        return RestResponseBody.success(SettingAssembler.toListResponse(setting));
     }
 
     @PostMapping("get")
-    public RestResponse get(@Valid SettingGetRequest request) {
+    public RestResponseBody<?> get(@Valid SettingGetRequest request) {
         Setting setting = settingService.get(request.getKey());
-        return RestResponse.success(SettingAssembler.toResponse(setting));
+        return RestResponseBody.success(SettingAssembler.toResponse(setting));
     }
 
     @PostMapping("update")
     @RequiresPermissions("setting:update")
-    public RestResponse update(@Valid SettingUpdateRequest request) {
+    public RestResponseBody<?> update(@Valid @FormOrJson SettingUpdateRequest request) {
         boolean updated = settingService.update(SettingAssembler.toEntity(request));
-        return RestResponse.success(updated);
+        return RestResponseBody.success(updated);
     }
 
     @PostMapping("docker")
     @RequiresPermissions("setting:view")
-    public RestResponse docker() {
-        return RestResponse.success(SettingAssembler.toDockerResponse(settingService.getDockerConfig()));
+    public RestResponseBody<?> docker() {
+        return RestResponseBody.success(SettingAssembler.toDockerResponse(settingService.getDockerConfig()));
     }
 
     @PostMapping("check/docker")
     @RequiresPermissions("setting:view")
-    public RestResponse checkDocker(@Valid SettingDockerRequest request) {
-        return RestResponse.success(
+    public RestResponseBody<?> checkDocker(@Valid SettingDockerRequest request) {
+        return RestResponseBody.success(
             SettingAssembler.toCheckResponse(
                 settingService.checkDocker(SettingAssembler.toDockerConfig(request))));
     }
 
     @PostMapping("update/docker")
     @RequiresPermissions("setting:update")
-    public RestResponse updateDocker(@Valid SettingDockerRequest request) {
+    public RestResponseBody<?> updateDocker(@Valid @FormOrJson SettingDockerRequest request) {
         boolean updated =
             settingService.updateDocker(SettingAssembler.toDockerConfig(request));
-        return RestResponse.success(updated);
+        return RestResponseBody.success(updated);
     }
 
     @PostMapping("email")
     @RequiresPermissions("setting:view")
-    public RestResponse email() {
-        return RestResponse.success(SettingAssembler.toEmailResponse(settingService.getSenderEmail()));
+    public RestResponseBody<?> email() {
+        return RestResponseBody.success(SettingAssembler.toEmailResponse(settingService.getSenderEmail()));
     }
 
     @PostMapping("check/email")
     @RequiresPermissions("setting:view")
-    public RestResponse checkEmail(@Valid SettingEmailRequest request) {
-        return RestResponse.success(
+    public RestResponseBody<?> checkEmail(@Valid SettingEmailRequest request) {
+        return RestResponseBody.success(
             SettingAssembler.toCheckResponse(
                 settingService.checkEmail(SettingAssembler.toSenderEmail(request))));
     }
 
     @PostMapping("update/email")
     @RequiresPermissions("setting:update")
-    public RestResponse updateEmail(@Valid SettingEmailRequest request) {
+    public RestResponseBody<?> updateEmail(@Valid @FormOrJson SettingEmailRequest request) {
         boolean updated = settingService.updateEmail(SettingAssembler.toSenderEmail(request));
-        return RestResponse.success(updated);
+        return RestResponseBody.success(updated);
     }
 
     @PostMapping("check/hadoop")
-    public RestResponse checkHadoop() throws IOException {
+    public RestResponseBody<?> checkHadoop() throws IOException {
         HadoopUtils.hdfs().getStatus();
-        return RestResponse.success(true);
+        return RestResponseBody.success(true);
     }
 }

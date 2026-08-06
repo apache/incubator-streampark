@@ -17,7 +17,8 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
+import org.apache.streampark.console.base.web.FormOrJson;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.assembler.FlinkPipelineAssembler;
 import org.apache.streampark.console.core.bean.AppBuildDockerResolvedDetail;
@@ -53,9 +54,9 @@ public class FlinkPipelineController {
     @Permission(app = "#request.appId")
     @PostMapping("build")
     @RequiresPermissions("app:create")
-    public RestResponse buildApplication(@Valid FlinkPipelineBuildRequest request) throws Exception {
+    public RestResponseBody<?> buildApplication(@Valid @FormOrJson FlinkPipelineBuildRequest request) throws Exception {
         boolean actionResult = appBuildPipeService.buildApplication(request.getAppId(), request.isForceBuild());
-        return RestResponse.success(actionResult);
+        return RestResponseBody.success(actionResult);
     }
 
     /**
@@ -67,7 +68,7 @@ public class FlinkPipelineController {
     @PostMapping("/detail")
     @Permission(app = "#request.appId")
     @RequiresPermissions("app:view")
-    public RestResponse getBuildProgressDetail(@Valid FlinkPipelineDetailRequest request) {
+    public RestResponseBody<?> getBuildProgressDetail(@Valid FlinkPipelineDetailRequest request) {
         Long appId = request.getAppId();
         Optional<ApplicationBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
         ApplicationBuildPipeline.View pipelineView =
@@ -79,6 +80,6 @@ public class FlinkPipelineController {
             DockerResolvedSnapshot dockerProgress = appBuildPipeService.getDockerProgressDetailSnapshot(appId);
             dockerDetail = AppBuildDockerResolvedDetail.of(dockerProgress);
         }
-        return RestResponse.success(FlinkPipelineAssembler.toDetailResponse(pipelineView, dockerDetail));
+        return RestResponseBody.success(FlinkPipelineAssembler.toDetailResponse(pipelineView, dockerDetail));
     }
 }

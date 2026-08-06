@@ -18,7 +18,8 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
+import org.apache.streampark.console.base.web.FormOrJson;
 import org.apache.streampark.console.core.assembler.MessageAssembler;
 import org.apache.streampark.console.core.entity.Message;
 import org.apache.streampark.console.core.enums.NoticeTypeEnum;
@@ -46,14 +47,14 @@ public class MessageController {
     private MessageService messageService;
 
     @PostMapping("notice")
-    public RestResponse notice(@Valid MessageNoticeRequest request, RestRequest restRequest) {
+    public RestResponseBody<?> notice(@Valid MessageNoticeRequest request, RestRequest restRequest) {
         NoticeTypeEnum noticeTypeEnum = NoticeTypeEnum.of(request.getType());
         IPage<Message> pages = messageService.getUnReadPage(noticeTypeEnum, restRequest);
-        return RestResponse.success(MessageAssembler.toPageResponse(pages));
+        return RestResponseBody.success(MessageAssembler.toPageResponse(pages));
     }
 
     @PostMapping("delete")
-    public RestResponse delete(@Valid MessageDeleteRequest request) {
-        return RestResponse.success(messageService.removeById(request.getId()));
+    public RestResponseBody<?> delete(@Valid @FormOrJson MessageDeleteRequest request) {
+        return RestResponseBody.success(messageService.removeById(request.getId()));
     }
 }

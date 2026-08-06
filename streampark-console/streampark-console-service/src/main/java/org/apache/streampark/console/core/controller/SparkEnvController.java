@@ -17,9 +17,10 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
+import org.apache.streampark.console.base.web.FormOrJson;
 import org.apache.streampark.console.core.assembler.SparkEnvAssembler;
 import org.apache.streampark.console.core.entity.SparkEnv;
 import org.apache.streampark.console.core.enums.FlinkEnvCheckEnum;
@@ -52,67 +53,67 @@ public class SparkEnvController {
     private SparkEnvService sparkEnvService;
 
     @PostMapping("list")
-    public RestResponse list() {
+    public RestResponseBody<?> list() {
         List<SparkEnv> sparkEnvList = sparkEnvService.list();
-        return RestResponse.success(SparkEnvAssembler.toListResponse(sparkEnvList));
+        return RestResponseBody.success(SparkEnvAssembler.toListResponse(sparkEnvList));
     }
 
     @PostMapping("check")
-    public RestResponse check(SparkEnvCheckRequest request) {
+    public RestResponseBody<?> check(SparkEnvCheckRequest request) {
         FlinkEnvCheckEnum checkResp = sparkEnvService.check(SparkEnvAssembler.toEntity(request));
-        return RestResponse.success(checkResp.getCode());
+        return RestResponseBody.success(checkResp.getCode());
     }
 
     @PostMapping("create")
-    public RestResponse create(@Valid SparkEnvCreateRequest request) {
+    public RestResponseBody<?> create(@Valid @FormOrJson SparkEnvCreateRequest request) {
         try {
             sparkEnvService.create(SparkEnvAssembler.toEntity(request));
         } catch (Exception e) {
             throw new ApiDetailException(e);
         }
-        return RestResponse.success(true);
+        return RestResponseBody.success(true);
     }
 
     @PostMapping("get")
-    public RestResponse get(@Valid IdRequest request) throws Exception {
+    public RestResponseBody<?> get(@Valid IdRequest request) throws Exception {
         SparkEnv sparkEnv = sparkEnvService.getById(request.getId());
         ApiAlertException.throwIfNull(sparkEnv, "Spark environment not found.");
         sparkEnv.unzipSparkConf();
         SparkEnvResponse response = SparkEnvAssembler.toResponse(sparkEnv);
-        return RestResponse.success(response);
+        return RestResponseBody.success(response);
     }
 
     @PostMapping("sync")
-    public RestResponse sync(@Valid IdRequest request) throws Exception {
+    public RestResponseBody<?> sync(@Valid @FormOrJson IdRequest request) throws Exception {
         sparkEnvService.syncConf(request.getId());
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 
     @PostMapping("update")
-    public RestResponse update(@Valid SparkEnvUpdateRequest request) throws Exception {
+    public RestResponseBody<?> update(@Valid @FormOrJson SparkEnvUpdateRequest request) throws Exception {
         try {
             sparkEnvService.update(SparkEnvAssembler.toEntity(request));
         } catch (Exception e) {
             throw new ApiDetailException(e);
         }
-        return RestResponse.success(true);
+        return RestResponseBody.success(true);
     }
 
     @PostMapping("delete")
-    public RestResponse delete(@Valid IdRequest request) {
+    public RestResponseBody<?> delete(@Valid @FormOrJson IdRequest request) {
         sparkEnvService.removeById(request.getId());
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 
     @PostMapping("validity")
-    public RestResponse validity(@Valid SparkEnvValidityRequest request) {
+    public RestResponseBody<?> validity(@Valid SparkEnvValidityRequest request) {
         sparkEnvService.validity(request.getId());
-        return RestResponse.success(true);
+        return RestResponseBody.success(true);
     }
 
     @PostMapping("default")
-    public RestResponse setDefault(@Valid IdRequest request) {
+    public RestResponseBody<?> setDefault(@Valid @FormOrJson IdRequest request) {
         sparkEnvService.setDefault(request.getId());
-        return RestResponse.success();
+        return RestResponseBody.success();
     }
 }
