@@ -50,6 +50,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -88,8 +89,15 @@ public class ManagedFlinkArtifactServiceImpl implements ManagedFlinkArtifactServ
     @Override
     public List<ManagedFlinkArtifactView> stageApplicationArtifacts(Long teamId, Long appId) {
         ApplicationContext application = requireApplication(teamId, appId);
-        if (!application.getApplication().isFlinkJar()) {
-            return new ArrayList<>();
+        ManagedFlinkReleaseConfig release =
+            readRelease(application.getManaged().getReleaseConfigJson());
+        Set<String> resourceNames = new LinkedHashSet<>();
+        if (application.getApplication().isFlinkJar()) {
+            resourceNames.add(application.getApplication().getJar());
+        }
+        resourceNames.addAll(release.getDependencyResourceNames());
+        if (resourceNames.isEmpty()) {
+            return Collections.emptyList();
         }
         EnvironmentContext environment =
             requireEnvironment(teamId, application.getManaged().getManagedEnvId());
@@ -99,14 +107,9 @@ public class ManagedFlinkArtifactServiceImpl implements ManagedFlinkArtifactServ
                 environment.getEnvironment().getCloudAccountId(),
                 environment.getEnvironment().getProjectId());
         ApiAlertException.throwIfFalse(
-            environment.isDirectUploadSupported(),
+            session.getProvider().getCapability(session.getContext()).isSupportsJarDirectUpload(),
             "Managed Flink environment does not support direct artifact staging.");
 
-        ManagedFlinkReleaseConfig release =
-            readRelease(application.getManaged().getReleaseConfigJson());
-        Set<String> resourceNames = new LinkedHashSet<>();
-        resourceNames.add(application.getApplication().getJar());
-        resourceNames.addAll(release.getDependencyResourceNames());
         List<ResolvedArtifactSource> sources = new ArrayList<>();
         long totalBytes = 0;
         for (String resourceName : resourceNames) {

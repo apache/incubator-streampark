@@ -80,11 +80,17 @@ import com.volcengine.flink20250101.model.SavepointInfoForListGWSSavepointOutput
 import com.volcengine.flink20250101.model.StartApplicationInstanceRequest;
 import com.volcengine.flink20250101.model.StartApplicationInstanceResponse;
 import com.volcengine.model.ResponseMetadata;
+import com.volcengine.tos.TOSV2;
+import com.volcengine.tos.TOSV2ClientBuilder;
+import com.volcengine.tos.TosException;
+import com.volcengine.tos.model.object.PutObjectInput;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -117,6 +123,10 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
     private static final String DRAFT_GET_API_VERSION = "2021-06-01";
     private static final String JOB_GET_ACTION = "GetGWSApplication";
     private static final String JOB_GET_API_VERSION = "2021-06-01";
+    private static final String STOP_WITH_SNAPSHOT_ACTION = "StopGWSApplicationWithSp";
+    private static final String STOP_WITH_SNAPSHOT_API_VERSION = "2021-06-01";
+    private static final String FILE_API_VERSION = "2021-06-01";
+    private static final String ARTIFACT_DIRECTORY_NAME = "streampark-managed";
 
     private final VolcengineOpenApiClient openApiClient;
     private final VolcengineFlinkProperties properties;
@@ -169,16 +179,16 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
             .supportsResourcePoolList(true)
             .supportsSqlDeepCheck(true)
             .supportsSkipPrecheck(false)
-            .supportsStopWithSnapshot(false)
+            .supportsStopWithSnapshot(true)
             .supportsCreateSnapshot(true)
-            .supportsJarDirectUpload(false)
+            .supportsJarDirectUpload(true)
             .supportsCustomEndpoint(false)
             .minCpu(new BigDecimal("0.5"))
             .cpuStep(new BigDecimal("0.5"))
             .memoryPerCpuGiB(new BigDecimal("4"))
             .maxArtifactBytes(500L * 1024 * 1024)
             .customParameterRules(Collections.emptyMap())
-            .capabilityRevision("volcengine-m0-20260728")
+            .capabilityRevision("volcengine-m2-stop-with-snapshot-20260805")
             .expireAt(
                 Instant.now()
                     .plus(Duration.ofMinutes(properties.getCapabilityTtlMinutes())))
@@ -280,13 +290,131 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
     @Override
     public StagedArtifact stageArtifact(
                                         ProviderContext context, ArtifactStageRequest request) {
-        throw artifactStagingUnavailable();
+        requireArtifactRequest(request);
+        StagedArtifact existing =
+            findArtifact(
+                context,
+                ArtifactLookupRequest.builder()
+                    .checksum(request.getChecksum())
+                    .contentAddressedName(request.getContentAddressedName())
+                    .build());
+        if (existing != null) {
+            return existing;
+        }
+
+        String bucket = resolveArtifactBucket(context);
+        String objectKey =
+            "__artifacts/" + context.getProjectId() + "/resources/"
+                + request.getChecksum() + "/" + request.getContentAddressedName();
+        String uri = "tos://" + bucket + "/" + objectKey;
+        String directoryId = requireArtifactDirectory(context);
+        String tosRequestId = uploadArtifact(context, request, bucket, objectKey);
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("DirId", directoryId);
+        body.put("Name", request.getContentAddressedName());
+        body.put("Uri", uri);
+        body.put("Description", "StreamPark managed Flink artifact " + request.getChecksum());
+        body.put("ResourcePermissionType", "PRIVATE");
+        try {
+            openApiClient.postOnce(
+                context,
+                "CreateMetadataResource",
+                FILE_API_VERSION,
+                Collections.singletonMap("ProjectId", context.getProjectId()),
+                body);
+        } catch (ManagedFlinkProviderException exception) {
+            StagedArtifact reconciled =
+                findArtifact(
+                    context,
+                    ArtifactLookupRequest.builder()
+                        .checksum(request.getChecksum())
+                        .contentAddressedName(request.getContentAddressedName())
+                        .build());
+            if (reconciled != null) {
+                return reconciled;
+            }
+            throw exception;
+        }
+        StagedArtifact staged =
+            findArtifact(
+                context,
+                ArtifactLookupRequest.builder()
+                    .checksum(request.getChecksum())
+                    .contentAddressedName(request.getContentAddressedName())
+                    .build());
+        if (staged == null) {
+            throw new ManagedFlinkProviderException(
+                ProviderErrorCategory.TRANSIENT,
+                "ArtifactRegistrationNotVisible",
+                tosRequestId,
+                "Volcengine Flink artifact registration is not visible yet.");
+        }
+        return staged;
+    }
+
+    private String resolveArtifactBucket(ProviderContext context) {
+        Map<String, String> parameters = new LinkedHashMap<>();
+        parameters.put("ProjectId", context.getProjectId());
+        parameters.put("PageNum", "1");
+        parameters.put("PageSize", "1");
+        VolcengineOpenApiResponse response =
+            openApiClient.get(
+                context, "ListGMSMetaResource", FILE_API_VERSION, parameters);
+        String existingBucket = artifactBucket(response.getRoot());
+        if (!isBlank(existingBucket)) {
+            return existingBucket;
+        }
+        String accountId = openApiClient.resolveProviderAccountId(context);
+        return "volc-flink-meta-" + accountId + "-" + context.getRegion();
     }
 
     @Override
     public StagedArtifact findArtifact(
                                        ProviderContext context, ArtifactLookupRequest request) {
-        throw artifactStagingUnavailable();
+        if (request == null || isBlank(request.getContentAddressedName())) {
+            throw new ManagedFlinkProviderException(
+                ProviderErrorCategory.VALIDATION,
+                "ArtifactLookupRequired",
+                null,
+                "Managed Flink artifact lookup is incomplete.");
+        }
+        Map<String, String> parameters = new LinkedHashMap<>();
+        parameters.put("ProjectId", context.getProjectId());
+        parameters.put("NameKey", request.getContentAddressedName());
+        parameters.put("PageNum", "1");
+        parameters.put("PageSize", String.valueOf(PAGE_SIZE));
+        VolcengineOpenApiResponse response =
+            openApiClient.get(
+                context, "ListGMSMetaResource", FILE_API_VERSION, parameters);
+        JsonNode items = fileItems(response.getRoot());
+        if (items == null) {
+            return null;
+        }
+        for (JsonNode item : items) {
+            String name = text(item, "Name", "FileName");
+            if (!request.getContentAddressedName().equals(name)) {
+                continue;
+            }
+            String id = text(item, "Id", "ID", "ResourceId");
+            String uri = text(item, "Uri", "URI", "TosUri", "TOSURI");
+            if (isBlank(id)) {
+                continue;
+            }
+            ArtifactVersion version = latestArtifactVersion(context, id);
+            if (version != null && !isBlank(version.uri)) {
+                uri = version.uri;
+            }
+            if (version == null || version.number <= 0 || isBlank(uri)) {
+                throw invalidResponse(response.getRequestId());
+            }
+            return StagedArtifact.builder()
+                .providerArtifactId(id)
+                .providerArtifactVersion(version.number)
+                .providerUri(uri)
+                .providerRequestId(response.getRequestId())
+                .build();
+        }
+        return null;
     }
 
     @Override
@@ -441,6 +569,28 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
     public ManagedJobActionResult stopJob(
                                           ProviderContext context, ManagedJobStopRequest request) {
         requireStopRequest(request);
+        if (request.isWithSnapshot()) {
+            VolcengineOpenApiResponse stopped =
+                openApiClient.postOnce(
+                    context,
+                    STOP_WITH_SNAPSHOT_ACTION,
+                    STOP_WITH_SNAPSHOT_API_VERSION,
+                    Collections.singletonMap("ProjectId", context.getProjectId()),
+                    stopWithSnapshotRequest(request));
+            JsonNode response = result(stopped.getRoot());
+            if (response.has("Success") && !response.path("Success").asBoolean()) {
+                throw invalidResponse(stopped.getRequestId());
+            }
+            return ManagedJobActionResult.builder()
+                .jobId(firstNonBlank(text(response, "Id", "JobId"), request.getJobId()))
+                .instanceId(
+                    firstNonBlank(
+                        text(response, "InstanceId", "ApplicationInstanceId"),
+                        request.getInstanceId()))
+                .providerRequestId(stopped.getRequestId())
+                .providerState("STOPPING")
+                .build();
+        }
         try (
             VolcengineCredentials credentials = credentialResolver.resolve(context);
             VolcengineSdkClientFactory.Session session =
@@ -787,7 +937,17 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
         body.put("JobName", request.getJobName());
         body.put("JobType", providerJobType(request.getJobType()));
         body.put("EngineVersion", providerEngineVersion(request.getEngineVersion()));
-        body.put("SqlText", request.getSqlText());
+        if ("STREAMING_JAR".equals(request.getJobType())) {
+            body.remove("SqlText");
+            body.put("Jar", request.getJar());
+            body.put("MainClass", request.getMainClass());
+            body.put("Args", request.getArgs() == null ? "" : request.getArgs());
+        } else {
+            body.put("SqlText", request.getSqlText());
+            body.remove("Jar");
+            body.remove("MainClass");
+            body.remove("Args");
+        }
         body.put("Options", "{}");
         body.put("DynamicOptions", dynamicOptions(request));
         if (!isBlank(request.getDependencyJson())) {
@@ -991,6 +1151,10 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
         return body;
     }
 
+    static Map<String, String> stopWithSnapshotRequest(ManagedJobStopRequest request) {
+        return Collections.singletonMap("Id", request.getJobId());
+    }
+
     static RestartGWSApplicationRequest restartRequest(ManagedJobRestartRequest request) {
         RestartGWSApplicationRequest body = new RestartGWSApplicationRequest();
         body.setId(request.getJobId());
@@ -1079,6 +1243,14 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
             || isBlank(request.getDefinitionHash())) {
             throw validation("InvalidDraftRequest");
         }
+        if ("STREAMING_SQL".equals(request.getJobType())
+            && isBlank(request.getSqlText())) {
+            throw validation("InvalidSqlDraftRequest");
+        }
+        if ("STREAMING_JAR".equals(request.getJobType())
+            && (isBlank(request.getJar()) || isBlank(request.getMainClass()))) {
+            throw validation("InvalidJarDraftRequest");
+        }
     }
 
     private static void requireDeployRequest(ManagedDeployRequest request) {
@@ -1117,13 +1289,6 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
             || isBlank(request.getJobId())
             || isBlank(request.getInstanceId())) {
             throw validation("InvalidStopRequest");
-        }
-        if (request.isWithSnapshot()) {
-            throw new ManagedFlinkProviderException(
-                ProviderErrorCategory.PROVIDER_CONFIGURATION,
-                "StopWithSnapshotNotImplemented",
-                null,
-                "Volcengine stop with snapshot is not available in this release.");
         }
     }
 
@@ -1269,12 +1434,276 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
         return value == null || value.trim().isEmpty();
     }
 
-    private static ManagedFlinkProviderException artifactStagingUnavailable() {
+    private static void requireArtifactRequest(ArtifactStageRequest request) {
+        if (request == null
+            || isBlank(request.getChecksum())
+            || isBlank(request.getContentAddressedName())
+            || request.getFileSize() <= 0
+            || request.getContent() == null) {
+            throw new ManagedFlinkProviderException(
+                ProviderErrorCategory.VALIDATION,
+                "InvalidArtifact",
+                null,
+                "Managed Flink artifact request is incomplete.");
+        }
+    }
+
+    private String uploadArtifact(
+                                  ProviderContext context,
+                                  ArtifactStageRequest request,
+                                  String bucket,
+                                  String objectKey) {
+        if (credentialResolver == null) {
+            throw new ManagedFlinkProviderException(
+                ProviderErrorCategory.PROVIDER_CONFIGURATION,
+                "ArtifactTransportNotConfigured",
+                null,
+                "Volcengine artifact transport is not configured.");
+        }
+        String endpoint = "https://tos-" + context.getRegion() + ".volces.com";
+        try (
+            VolcengineCredentials credentials = credentialResolver.resolve(context);
+            InputStream content = request.getContent().open();
+            TOSV2 client =
+                new TOSV2ClientBuilder()
+                    .build(
+                        context.getRegion(),
+                        endpoint,
+                        new String(credentials.accessKey()),
+                        new String(credentials.secretKey()))) {
+            return client.putObject(
+                new PutObjectInput()
+                    .setBucket(bucket)
+                    .setKey(objectKey)
+                    .setContentLength(request.getFileSize())
+                    .setContent(content))
+                .getRequestInfo()
+                .getRequestId();
+        } catch (TosException exception) {
+            throw tosFailure(exception);
+        } catch (Exception exception) {
+            throw new ManagedFlinkProviderException(
+                ProviderErrorCategory.TRANSIENT,
+                "ArtifactUploadFailed",
+                null,
+                "Volcengine artifact upload failed.");
+        }
+    }
+
+    private String requireArtifactDirectory(ProviderContext context) {
+        Map<String, String> parameters =
+            Collections.singletonMap("ProjectId", context.getProjectId());
+        VolcengineOpenApiResponse listed =
+            openApiClient.get(
+                context, "ListMetadataResourceDir", FILE_API_VERSION, parameters);
+        String existing = artifactDirectoryId(listed.getRoot());
+        if (existing != null) {
+            return existing;
+        }
+        VolcengineOpenApiResponse created =
+            openApiClient.postOnce(
+                context,
+                "CreateMetadataResourceDir",
+                FILE_API_VERSION,
+                parameters,
+                Collections.singletonMap("Name", ARTIFACT_DIRECTORY_NAME));
+        String id = text(result(created.getRoot()), "Id", "ID", "DirId", "DirectoryId");
+        if (isBlank(id)) {
+            VolcengineOpenApiResponse reconciled =
+                openApiClient.get(
+                    context, "ListMetadataResourceDir", FILE_API_VERSION, parameters);
+            id = artifactDirectoryId(reconciled.getRoot());
+        }
+        if (isBlank(id)) {
+            throw invalidResponse(created.getRequestId());
+        }
+        return id;
+    }
+
+    private static String artifactDirectoryId(JsonNode root) {
+        JsonNode data = result(root);
+        JsonNode items =
+            data.isArray()
+                ? data
+                : firstArray(
+                    data,
+                    "MetaResourceDirList",
+                    "DirectoryList",
+                    "Directories",
+                    "DataList",
+                    "Items",
+                    "List");
+        if (items == null && data.path("Data").isObject()) {
+            items =
+                firstArray(
+                    data.path("Data"),
+                    "MetaResourceDirList",
+                    "DirectoryList",
+                    "Directories",
+                    "DataList",
+                    "Items",
+                    "List");
+        }
+        if (items == null) {
+            return null;
+        }
+        for (JsonNode item : items) {
+            if (ARTIFACT_DIRECTORY_NAME.equals(text(item, "Name", "DirectoryName"))) {
+                return text(item, "Id", "ID", "DirId", "DirectoryId");
+            }
+        }
+        return null;
+    }
+
+    private ArtifactVersion latestArtifactVersion(ProviderContext context, String artifactId) {
+        Map<String, String> parameters = new LinkedHashMap<>();
+        parameters.put("ProjectId", context.getProjectId());
+        parameters.put("ResourceId", artifactId);
+        parameters.put("PageSize", String.valueOf(PAGE_SIZE));
+        VolcengineOpenApiResponse response =
+            openApiClient.get(
+                context, "ListGWSResourceVersion", FILE_API_VERSION, parameters);
+        JsonNode items = fileVersionItems(response.getRoot());
+        ArtifactVersion latest = null;
+        if (items != null) {
+            for (JsonNode item : items) {
+                int number = integer(item, "VersionNum", "Version");
+                if (latest == null || number > latest.number) {
+                    latest =
+                        new ArtifactVersion(
+                            number,
+                            text(item, "Uri", "URI", "TosUri", "TOSURI"));
+                }
+            }
+        }
+        return latest;
+    }
+
+    private static JsonNode fileItems(JsonNode root) {
+        JsonNode data = result(root);
+        if (data.isArray()) {
+            return data;
+        }
+        JsonNode items = firstArray(
+            data,
+            "MetaResourceList",
+            "Resources",
+            "Records",
+            "DataList",
+            "Items",
+            "List");
+        return items == null && data.path("Data").isObject()
+            ? firstArray(
+                data.path("Data"),
+                "MetaResourceList",
+                "Resources",
+                "Records",
+                "DataList",
+                "Items",
+                "List")
+            : items;
+    }
+
+    static String artifactBucket(JsonNode root) {
+        JsonNode items = fileItems(root);
+        if (items == null) {
+            return null;
+        }
+        for (JsonNode item : items) {
+            String uri = text(item, "Uri", "URI", "TosUri", "TOSURI");
+            if (isBlank(uri)) {
+                continue;
+            }
+            try {
+                URI parsed = URI.create(uri);
+                if ("tos".equalsIgnoreCase(parsed.getScheme())
+                    && !isBlank(parsed.getAuthority())) {
+                    return parsed.getAuthority();
+                }
+            } catch (IllegalArgumentException ignored) {
+                // Ignore malformed provider entries and inspect the next resource.
+            }
+        }
+        return null;
+    }
+
+    private static JsonNode fileVersionItems(JsonNode root) {
+        JsonNode data = result(root);
+        if (data.isArray()) {
+            return data;
+        }
+        JsonNode items = firstArray(
+            data,
+            "ResourceVersionList",
+            "Versions",
+            "Records",
+            "DataList",
+            "Items",
+            "List");
+        return items == null && data.path("Data").isObject()
+            ? firstArray(
+                data.path("Data"),
+                "ResourceVersionList",
+                "Versions",
+                "Records",
+                "DataList",
+                "Items",
+                "List")
+            : items;
+    }
+
+    private static int integer(JsonNode node, String... fields) {
+        for (String field : fields) {
+            JsonNode value = node.get(field);
+            if (value != null && value.canConvertToInt()) {
+                return value.asInt();
+            }
+            if (value != null && value.isTextual()) {
+                try {
+                    return Integer.parseInt(value.asText());
+                } catch (NumberFormatException ignored) {
+                    // Try the next provider field alias.
+                }
+            }
+        }
+        return 0;
+    }
+
+    private static ManagedFlinkProviderException tosFailure(TosException exception) {
+        int status = exception.getStatusCode();
+        ProviderErrorCategory category;
+        if (status == 401) {
+            category = ProviderErrorCategory.AUTHENTICATION;
+        } else if (status == 403) {
+            category = ProviderErrorCategory.AUTHORIZATION;
+        } else if (status == 404) {
+            category = ProviderErrorCategory.NOT_FOUND;
+        } else if (status == 409) {
+            category = ProviderErrorCategory.CONFLICT;
+        } else if (status == 429) {
+            category = ProviderErrorCategory.RATE_LIMIT;
+        } else if (status == 0 || status >= 500) {
+            category = ProviderErrorCategory.TRANSIENT;
+        } else {
+            category = ProviderErrorCategory.UNKNOWN;
+        }
         return new ManagedFlinkProviderException(
-            ProviderErrorCategory.PROVIDER_CONFIGURATION,
-            "ArtifactTransportNotConfigured",
+            category,
+            isBlank(exception.getCode()) ? "TosUploadFailed" : exception.getCode(),
             null,
-            "Volcengine artifact transport is not configured.");
+            "Volcengine artifact upload failed.");
+    }
+
+    private static class ArtifactVersion {
+
+        private final int number;
+
+        private final String uri;
+
+        private ArtifactVersion(int number, String uri) {
+            this.number = number;
+            this.uri = uri;
+        }
     }
 
     private static Map<String, String> projectParameters(

@@ -22,10 +22,13 @@ import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.ManagedFlinkApplication;
 import org.apache.streampark.console.core.entity.ManagedFlinkOperation;
 import org.apache.streampark.console.core.entity.ManagedFlinkStateEvent;
+import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
+import org.apache.streampark.console.core.enums.ResourceTypeEnum;
 import org.apache.streampark.console.core.managed.api.ManagedFlinkProviderRegistry;
 import org.apache.streampark.console.core.managed.api.ManagedFlinkProviderType;
 import org.apache.streampark.console.core.managed.api.ManagedJobRestoreMode;
@@ -42,24 +45,31 @@ import org.apache.streampark.console.core.managed.model.ManagedFlinkEnvironmentC
 import org.apache.streampark.console.core.managed.model.ManagedFlinkLifecycleRequest;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkOperationView;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkReleaseRequest;
+import org.apache.streampark.console.core.managed.model.ManagedFlinkReleaseSnapshot;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkSnapshotCreateRequest;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkStopRequest;
 import org.apache.streampark.console.core.managed.support.FakeManagedFlinkProvider;
 import org.apache.streampark.console.core.mapper.FlinkApplicationMapper;
 import org.apache.streampark.console.core.mapper.ManagedFlinkApplicationMapper;
 import org.apache.streampark.console.core.mapper.ManagedFlinkStateEventMapper;
+import org.apache.streampark.console.core.mapper.ResourceMapper;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Collections;
@@ -145,6 +155,15 @@ class ManagedFlinkReleaseServiceTest extends SpringUnitTestBase {
     @Autowired
     private FlinkSqlService flinkSqlService;
 
+    @Autowired
+    private ResourceMapper resourceMapper;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @TempDir
+    private Path tempDirectory;
+
     @MockBean
     private ManagedFlinkAuditContext auditContext;
 
@@ -215,6 +234,44 @@ class ManagedFlinkReleaseServiceTest extends SpringUnitTestBase {
         assertThat(replay.isIdempotentReplay()).isTrue();
         assertThat(replay.getState()).isEqualTo("SUCCEEDED");
         verify(dispatcher).dispatch(accepted.getOperationId());
+    }
+
+    @Test
+    void shouldReleaseJarWithSeparateMainArtifactAndDependencies() throws Exception {
+        Long environmentId = createEnvironment("release-jar-env");
+        createResource("main-app.jar", "main-content", ResourceTypeEnum.APP);
+        createResource("dependency.jar", "dependency-content", ResourceTypeEnum.JAR_LIBRARY);
+        ManagedFlinkApplicationSaveRequest applicationRequest =
+            ManagedFlinkApplicationValidatorTest.request();
+        applicationRequest.setManagedEnvironmentId(environmentId);
+        applicationRequest.setJobName("release-jar");
+        applicationRequest.setJobType("STREAMING_JAR");
+        applicationRequest.setSql(null);
+        applicationRequest.setJar("main-app.jar");
+        applicationRequest.setMainClass("com.main.Main");
+        applicationRequest.setArgs("--key1 value1 --key2 value2");
+        applicationRequest.getReleaseConfig()
+            .setDependencyResourceNames(Collections.singletonList("dependency.jar"));
+        Long appId = applicationService.create(applicationRequest);
+
+        ManagedFlinkOperationView accepted = releaseService.release(releaseRequest(appId));
+        ManagedFlinkOperation operation = operationService.getRequired(appId, accepted.getOperationId());
+        ManagedFlinkReleaseSnapshot snapshot =
+            objectMapper.readValue(operation.getRequestJson(), ManagedFlinkReleaseSnapshot.class);
+
+        assertThat(snapshot.getJobType()).isEqualTo("STREAMING_JAR");
+        assertThat(snapshot.getSqlText()).isNull();
+        assertThat(snapshot.getSqlCandidateId()).isNull();
+        assertThat(snapshot.getJar()).startsWith("fake-");
+        assertThat(snapshot.getMainClass()).isEqualTo("com.main.Main");
+        assertThat(snapshot.getArgs()).isEqualTo("--key1 value1 --key2 value2");
+        assertThat(snapshot.getDependencyJson())
+            .contains("dependencyVersions", "fake-")
+            .doesNotContain(snapshot.getJar());
+
+        releaseExecutor.execute(accepted.getOperationId());
+        assertThat(operationService.getRequired(appId, accepted.getOperationId()).getState())
+            .isEqualTo("SUCCEEDED");
     }
 
     @Test
@@ -395,14 +452,22 @@ class ManagedFlinkReleaseServiceTest extends SpringUnitTestBase {
         assertThatThrownBy(() -> lifecycleService.start(snapshotRestore))
             .hasMessageContaining("not available for restore");
 
+        ManagedFlinkOperationView firstStart =
+            lifecycleService.start(
+                lifecycleRequest(
+                    appId, "snapshot-stop-first-start", ManagedJobRestoreMode.FRESH));
+        lifecycleExecutor.execute(firstStart.getOperationId());
         setApplicationState(appId, FlinkAppStateEnum.RUNNING);
         ManagedFlinkStopRequest stop = new ManagedFlinkStopRequest();
         stop.setTeamId(TEAM_ID);
         stop.setAppId(appId);
         stop.setIdempotencyKey("snapshot-stop-before-b13");
         stop.setWithSnapshot(true);
-        assertThatThrownBy(() -> lifecycleService.stop(stop))
-            .hasMessageContaining("snapshot lifecycle slice");
+        ManagedFlinkOperationView stopOperation = lifecycleService.stop(stop);
+        lifecycleExecutor.execute(stopOperation.getOperationId());
+        assertThat(operationService.getRequired(appId, stopOperation.getOperationId()).getState())
+            .isEqualTo("SUCCEEDED");
+        assertThat(fakeProvider.getJobAction("STOP", managedJobId(appId))).isNotNull();
     }
 
     @Test
@@ -1007,6 +1072,24 @@ class ManagedFlinkReleaseServiceTest extends SpringUnitTestBase {
         request.setJobName(name);
         request.setSql("SELECT 1");
         return applicationService.create(request);
+    }
+
+    private void createResource(
+                                String name,
+                                String content,
+                                ResourceTypeEnum resourceType) throws Exception {
+        Path file = tempDirectory.resolve(name);
+        Files.writeString(file, content, StandardCharsets.UTF_8);
+        Resource resource = new Resource();
+        resource.setResourceName(name);
+        resource.setResourceType(resourceType);
+        resource.setResourcePath(name + ":" + file);
+        resource.setResource("[\"" + name + ":" + file + "\"]");
+        resource.setEngineType(EngineTypeEnum.FLINK);
+        resource.setMainClass("com.main.Main");
+        resource.setCreatorId(USER_ID);
+        resource.setTeamId(TEAM_ID);
+        assertThat(resourceMapper.insert(resource)).isEqualTo(1);
     }
 
     private Long createEnvironment(String name) {

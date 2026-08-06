@@ -65,6 +65,14 @@
       type: Array as PropType<Array<{ text: string; description: string }>>,
       default: () => [],
     },
+    showVerify: {
+      type: Boolean,
+      default: true,
+    },
+    showPreview: {
+      type: Boolean,
+      default: true,
+    },
   });
   const defaultValue = '';
 
@@ -171,7 +179,7 @@
     }
   });
   const canPreview = computed(() => {
-    return /\${.+}/.test(props.value);
+    return props.showPreview && /\${.+}/.test(props.value);
   });
   const flinkEditorClass = computed(() => {
     return {
@@ -195,7 +203,7 @@
     >
       <div class="flex items-center">
         <SvgIcon name="fql" />
-        <div class="basic-title ml-10px">Flink Sql</div>
+        <div class="basic-title ml-10px">Flink SQL</div>
       </div>
       <Tooltip :title="t('component.modal.restore')" placement="bottom">
         <FullscreenExitOutlined role="full" @click="toggle" style="font-size: 18px" />
@@ -204,7 +212,13 @@
 
     <div ref="flinkSql" class="overflow-hidden w-full mt-5px" :class="flinkEditorClass"></div>
     <ButtonGroup class="flinksql-tool" v-if="!fullScreenStatus">
-      <a-button size="small" class="flinksql-tool-item" type="primary" @click="handleVerifySql">
+      <a-button
+        v-if="showVerify"
+        size="small"
+        class="flinksql-tool-item"
+        type="primary"
+        @click="handleVerifySql"
+      >
         <Icon icon="ant-design:check-outlined" />
         {{ t('flink.app.flinkSql.verify') }}
       </a-button>
@@ -237,7 +251,7 @@
         </div>
       </div>
       <div class="flinksql-tool">
-        <a-button type="primary" @click="handleVerifySql">
+        <a-button v-if="showVerify" type="primary" @click="handleVerifySql">
           <div class="flex items-center">
             <Icon icon="ant-design:check-outlined" />
             {{ t('flink.app.flinkSql.verify') }}

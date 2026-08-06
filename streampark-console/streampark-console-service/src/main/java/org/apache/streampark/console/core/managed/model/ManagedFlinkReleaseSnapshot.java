@@ -55,6 +55,12 @@ public class ManagedFlinkReleaseSnapshot {
 
     private Long sqlCandidateId;
 
+    private String jar;
+
+    private String mainClass;
+
+    private String args;
+
     private String optionsJson;
 
     private String dynamicOptionsJson;

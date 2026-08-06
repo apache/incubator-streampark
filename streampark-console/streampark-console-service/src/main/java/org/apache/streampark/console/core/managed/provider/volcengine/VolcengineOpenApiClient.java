@@ -62,6 +62,8 @@ public class VolcengineOpenApiClient {
 
     private final URI endpoint;
 
+    private final URI iamEndpoint;
+
     private final Clock clock;
 
     private final Sleeper sleeper;
@@ -86,6 +88,7 @@ public class VolcengineOpenApiClient {
                 .followRedirects(HttpClient.Redirect.NEVER)
                 .build(),
             URI.create(properties.getEndpoint()),
+            URI.create(properties.getIamEndpoint()),
             Clock.systemUTC(),
             Thread::sleep,
             new VolcengineApiRateLimiter(
@@ -104,7 +107,34 @@ public class VolcengineOpenApiClient {
                             Clock clock,
                             Sleeper sleeper,
                             VolcengineApiRateLimiter rateLimiter) {
+        this(
+            credentialResolver,
+            signer,
+            errorMapper,
+            objectMapper,
+            properties,
+            httpClient,
+            endpoint,
+            endpoint,
+            clock,
+            sleeper,
+            rateLimiter);
+    }
+
+    private VolcengineOpenApiClient(
+                                    VolcengineCredentialResolver credentialResolver,
+                                    VolcengineRequestSigner signer,
+                                    VolcengineProviderErrorMapper errorMapper,
+                                    ObjectMapper objectMapper,
+                                    VolcengineFlinkProperties properties,
+                                    HttpClient httpClient,
+                                    URI endpoint,
+                                    URI iamEndpoint,
+                                    Clock clock,
+                                    Sleeper sleeper,
+                                    VolcengineApiRateLimiter rateLimiter) {
         validateEndpoint(endpoint);
+        validateEndpoint(iamEndpoint);
         this.credentialResolver = credentialResolver;
         this.signer = signer;
         this.errorMapper = errorMapper;
@@ -112,6 +142,7 @@ public class VolcengineOpenApiClient {
         this.properties = properties;
         this.httpClient = httpClient;
         this.endpoint = endpoint;
+        this.iamEndpoint = iamEndpoint;
         this.clock = clock;
         this.sleeper = sleeper;
         this.rateLimiter = rateLimiter;
@@ -187,6 +218,43 @@ public class VolcengineOpenApiClient {
             0);
     }
 
+    String resolveProviderAccountId(ProviderContext context) {
+        validateContext(context);
+        try (VolcengineCredentials credentials = credentialResolver.resolve(context)) {
+            Map<String, String> query = new LinkedHashMap<>();
+            query.put("Action", "GetUser");
+            query.put("Version", "2018-01-01");
+            query.put("AccessKeyID", new String(credentials.accessKey()));
+            VolcengineOpenApiResponse response =
+                execute(
+                    context,
+                    "GET",
+                    query,
+                    new byte[0],
+                    VolcengineRequestSigner.CONTENT_TYPE,
+                    credentials,
+                    "iam");
+            String accountId =
+                firstNonBlank(
+                    text(response.getRoot(), "AccountId", "AccountID"),
+                    text(response.getRoot().path("User"), "AccountId", "AccountID"),
+                    text(response.getRoot().path("Data"), "AccountId", "AccountID"),
+                    text(response.getRoot().path("Result"), "AccountId", "AccountID"),
+                    text(
+                        response.getRoot().path("Result").path("User"),
+                        "AccountId",
+                        "AccountID"));
+            if (accountId == null) {
+                throw new ManagedFlinkProviderException(
+                    ProviderErrorCategory.UNKNOWN,
+                    "AccountIdMissing",
+                    response.getRequestId(),
+                    "Volcengine IAM response did not include an account id.");
+            }
+            return accountId;
+        }
+    }
+
     private VolcengineOpenApiResponse request(
                                               ProviderContext context,
                                               String method,
@@ -233,19 +301,39 @@ public class VolcengineOpenApiClient {
                                               byte[] body,
                                               String contentType,
                                               VolcengineCredentials credentials) {
+        return execute(
+            context,
+            method,
+            query,
+            body,
+            contentType,
+            credentials,
+            VolcengineRequestSigner.SERVICE);
+    }
+
+    private VolcengineOpenApiResponse execute(
+                                              ProviderContext context,
+                                              String method,
+                                              Map<String, String> query,
+                                              byte[] body,
+                                              String contentType,
+                                              VolcengineCredentials credentials,
+                                              String service) {
+        URI targetEndpoint = "iam".equals(service) ? iamEndpoint : endpoint;
         String requestId = UUID.randomUUID().toString().replace("-", "");
         VolcengineRequestSigner.SignedRequest signed =
             signer.sign(
                 method,
-                endpoint,
+                targetEndpoint,
                 query,
                 body,
                 contentType,
                 context.getRegion(),
                 requestId,
                 clock.instant(),
-                credentials);
-        URI requestUri = URI.create(endpoint.toString() + "?" + signed.getCanonicalQuery());
+                credentials,
+                service);
+        URI requestUri = URI.create(targetEndpoint.toString() + "?" + signed.getCanonicalQuery());
         HttpRequest.Builder request =
             HttpRequest.newBuilder(requestUri)
                 .timeout(Duration.ofMillis(properties.getRequestTimeoutMs()));
@@ -370,7 +458,8 @@ public class VolcengineOpenApiClient {
                 && ("127.0.0.1".equals(host) || "localhost".equalsIgnoreCase(host));
         if (!(localTest
             || ("https".equalsIgnoreCase(scheme)
-                && "open.volcengineapi.com".equalsIgnoreCase(host)))
+                && ("open.volcengineapi.com".equalsIgnoreCase(host)
+                    || "iam.volcengineapi.com".equalsIgnoreCase(host))))
             || (endpoint.getRawPath() != null
                 && !endpoint.getRawPath().isEmpty()
                 && !"/".equals(endpoint.getRawPath()))) {

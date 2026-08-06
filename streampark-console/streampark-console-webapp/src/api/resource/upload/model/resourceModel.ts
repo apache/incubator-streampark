@@ -37,6 +37,8 @@ export interface ResourceParam {
   connector?: string;
   engineType: string;
   description: string;
+  resourceType?: string;
+  resource?: string;
 }
 
 export interface ResourceDeleteParam {

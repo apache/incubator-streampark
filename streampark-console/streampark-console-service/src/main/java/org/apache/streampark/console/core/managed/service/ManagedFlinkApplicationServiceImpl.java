@@ -27,10 +27,13 @@ import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.ManagedFlinkApplication;
 import org.apache.streampark.console.core.entity.ManagedFlinkEnvironment;
+import org.apache.streampark.console.core.entity.Resource;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.ResourceFromEnum;
+import org.apache.streampark.console.core.enums.ResourceTypeEnum;
 import org.apache.streampark.console.core.managed.api.ManagedFlinkProviderType;
 import org.apache.streampark.console.core.managed.api.ManagedJobLookupRequest;
 import org.apache.streampark.console.core.managed.api.ManagedJobStatus;
@@ -92,7 +95,7 @@ public class ManagedFlinkApplicationServiceImpl implements ManagedFlinkApplicati
         EnvironmentContext environment =
             requireEnvironment(request.getTeamId(), request.getManagedEnvironmentId());
         ensureNameUnique(request.getJobName(), null);
-        validateJarResource(request);
+        validateArtifactResources(request);
         validator.validate(request, environment.getCapability());
         String definitionHash = definitionHasher.hash(request);
 
@@ -180,7 +183,7 @@ public class ManagedFlinkApplicationServiceImpl implements ManagedFlinkApplicati
         EnvironmentContext environment =
             requireEnvironment(request.getTeamId(), request.getManagedEnvironmentId());
         ensureNameUnique(request.getJobName(), request.getAppId());
-        validateJarResource(request);
+        validateArtifactResources(request);
         validator.validate(request, environment.getCapability());
         String definitionHash = definitionHasher.hash(request);
 
@@ -395,16 +398,22 @@ public class ManagedFlinkApplicationServiceImpl implements ManagedFlinkApplicati
             count != null && count > 0, "Flink application name already exists.");
     }
 
-    private void validateJarResource(ManagedFlinkApplicationSaveRequest request) {
+    private void validateArtifactResources(ManagedFlinkApplicationSaveRequest request) {
         if ("STREAMING_JAR".equals(request.getJobType())) {
+            Resource applicationJar =
+                resourceService.findByResourceName(request.getTeamId(), request.getJar());
             ApiAlertException.throwIfNull(
-                resourceService.findByResourceName(request.getTeamId(), request.getJar()),
+                applicationJar,
                 "Managed Flink JAR resource does not exist in this Team.");
-            for (String dependency : request.getReleaseConfig().getDependencyResourceNames()) {
-                ApiAlertException.throwIfNull(
-                    resourceService.findByResourceName(request.getTeamId(), dependency),
-                    "Managed Flink dependency resource does not exist in this Team.");
-            }
+            ApiAlertException.throwIfTrue(
+                applicationJar.getResourceType() != ResourceTypeEnum.APP
+                    || applicationJar.getEngineType() != EngineTypeEnum.FLINK,
+                "Managed Flink application JAR must be a Flink APP resource.");
+        }
+        for (String dependency : request.getReleaseConfig().getDependencyResourceNames()) {
+            ApiAlertException.throwIfNull(
+                resourceService.findByResourceName(request.getTeamId(), dependency),
+                "Managed Flink dependency resource does not exist in this Team.");
         }
     }
 

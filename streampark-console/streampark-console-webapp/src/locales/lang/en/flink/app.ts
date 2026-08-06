@@ -319,6 +319,13 @@ export default {
     environment: 'Managed Environment',
     engineVersion: 'Engine Version',
     jar: 'Application JAR',
+    uploadDependency: 'Upload JAR',
+    dependencyPlaceholder: 'Select or upload dependency JARs',
+    dependencyJarOnly: 'Only JAR dependency files can be uploaded.',
+    dependencyAlreadyExists: 'A resource with this file name already exists.',
+    dependencyUploadDescription: 'Managed Flink dependency uploaded from the application form',
+    dependencyUploadSuccess: 'Dependency JAR uploaded',
+    dependencyUploadInvalid: 'The uploaded file is not a valid dependency JAR',
     resourceConfig: 'Resource Configuration',
     taskManagerSlots: 'TaskManager Slots',
     taskManagerCpu: 'TaskManager CPU',
@@ -371,8 +378,6 @@ export default {
     releaseSnapshotNotice:
       'Release uses an immutable snapshot of the current candidate. Changes saved after submission belong to the next release.',
     releaseApplicationUnavailable: 'Managed Flink application details are unavailable.',
-    jarReleaseUnavailable:
-      'Managed Flink JAR release remains disabled until artifact transport is configured.',
     releaseAccepted: 'Managed Flink release accepted',
     releaseFailed: 'Managed Flink release failed',
     candidateHash: 'Candidate Definition Hash',

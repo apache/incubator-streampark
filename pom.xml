@@ -125,6 +125,7 @@
         <enumeratum.version>1.6.1</enumeratum.version>
         <assertj.version>3.23.1</assertj.version>
         <volcengine-java-sdk.version>2.0.20</volcengine-java-sdk.version>
+        <volcengine-tos-java-sdk.version>2.8.8</volcengine-tos-java-sdk.version>
 
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
@@ -315,6 +316,12 @@
                 <groupId>com.volcengine</groupId>
                 <artifactId>volcengine-java-sdk-flink20250101</artifactId>
                 <version>${volcengine-java-sdk.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.volcengine</groupId>
+                <artifactId>ve-tos-java-sdk</artifactId>
+                <version>${volcengine-tos-java-sdk.version}</version>
             </dependency>
 
             <!--apache.commons -->

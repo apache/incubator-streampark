@@ -76,9 +76,7 @@
     await load();
   });
 
-  const canRelease = computed(
-    () => unref(application)?.jobType === 'STREAMING_SQL' && !unref(operation),
-  );
+  const canRelease = computed(() => Boolean(unref(application)) && !unref(operation));
   const operationActive = computed(() =>
     ['ACCEPTED', 'RUNNING'].includes(unref(operation)?.state || ''),
   );
@@ -286,14 +284,7 @@
     <Spin :spinning="loading">
       <template v-if="application">
         <Alert
-          v-if="application.jobType !== 'STREAMING_SQL'"
-          type="warning"
-          show-icon
-          class="mb-16px"
-          :message="t('flink.app.managed.jarReleaseUnavailable')"
-        />
-        <Alert
-          v-else-if="mode === 'release'"
+          v-if="mode === 'release'"
           type="info"
           show-icon
           class="mb-16px"

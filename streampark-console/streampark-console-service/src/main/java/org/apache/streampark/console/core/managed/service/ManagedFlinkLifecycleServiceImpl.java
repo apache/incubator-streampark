@@ -107,9 +107,6 @@ public class ManagedFlinkLifecycleServiceImpl implements ManagedFlinkLifecycleSe
         if (replay != null) {
             return replay;
         }
-        ApiAlertException.throwIfTrue(
-            request.isWithSnapshot(),
-            "Managed Flink stop with snapshot is delivered by the snapshot lifecycle slice.");
         ManagedFlinkLifecycleSnapshot snapshot =
             snapshot(
                 request.getTeamId(),

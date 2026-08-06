@@ -39,6 +39,12 @@ public class ManagedDraftRequest {
 
     String sqlText;
 
+    String jar;
+
+    String mainClass;
+
+    String args;
+
     String optionsJson;
 
     String dynamicOptionsJson;

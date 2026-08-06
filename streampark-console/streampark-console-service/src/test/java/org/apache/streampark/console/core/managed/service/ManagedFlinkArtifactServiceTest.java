@@ -139,6 +139,31 @@ class ManagedFlinkArtifactServiceTest extends SpringUnitTestBase {
     }
 
     @Test
+    void shouldStageSqlDependenciesWithoutMainJar() throws Exception {
+        Long environmentId = createEnvironment("sql-dependency-env");
+        createResource("sql-dependency.jar", "sql-dependency-content");
+        ManagedFlinkApplicationSaveRequest request =
+            ManagedFlinkApplicationValidatorTest.request();
+        request.setManagedEnvironmentId(environmentId);
+        request.setJobName("sql-dependency-app");
+        request.getReleaseConfig()
+            .setDependencyResourceNames(Collections.singletonList("sql-dependency.jar"));
+        Long appId = applicationService.create(request);
+
+        List<ManagedFlinkArtifactView> staged =
+            artifactService.stageApplicationArtifacts(TEAM_ID, appId);
+
+        assertThat(staged).singleElement()
+            .satisfies(
+                artifact -> {
+                    assertThat(artifact.getState()).isEqualTo("READY");
+                    assertThat(artifact.getProviderArtifactId()).isNotBlank();
+                    assertThat(artifact.getProviderArtifactVersion()).isPositive();
+                });
+        assertThat(fakeProvider.getArtifactStageCount()).isEqualTo(1);
+    }
+
+    @Test
     void shouldReconcileProviderReferenceAfterRetryableTimeout() throws Exception {
         Long environmentId = createEnvironment("artifact-reconcile-env");
         createResource("reconcile.jar", "reconcile-content");
@@ -203,7 +228,7 @@ class ManagedFlinkArtifactServiceTest extends SpringUnitTestBase {
         Files.writeString(file, content, StandardCharsets.UTF_8);
         Resource resource = new Resource();
         resource.setResourceName(name);
-        resource.setResourceType(ResourceTypeEnum.APP);
+        resource.setResourceType(ResourceTypeEnum.JAR_LIBRARY);
         resource.setResourcePath(name + ":" + file);
         resource.setResource("[\"" + name + ":" + file + "\"]");
         resource.setEngineType(EngineTypeEnum.FLINK);

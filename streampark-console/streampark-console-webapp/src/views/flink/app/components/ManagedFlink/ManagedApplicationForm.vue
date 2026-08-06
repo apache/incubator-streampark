@@ -16,8 +16,9 @@
 -->
 <script setup lang="ts">
   import { computed, h, nextTick, onMounted, ref, unref } from 'vue';
-  import { Divider } from 'ant-design-vue';
+  import { Divider, Select } from 'ant-design-vue';
   import { BasicForm, useForm } from '/@/components/Form';
+  import { SvgIcon } from '/@/components/Icon';
   import type { FormSchema } from '/@/components/Form';
   import {
     fetchCreateManagedApplication,
@@ -33,10 +34,21 @@
   } from '/@/api/flink/managedFlink.type';
   import { fetchTeamResource } from '/@/api/resource/upload';
   import type { ResourceListRecord } from '/@/api/resource/upload/model/resourceModel';
+  import { EngineTypeEnum, ResourceTypeEnum } from '/@/views/resource/upload/upload.data';
   import { useUserStore } from '/@/store/modules/user';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useGo } from '/@/hooks/web/usePage';
+  import { createAsyncComponent } from '/@/utils/factory/createAsyncComponent';
+
+  const FlinkSqlEditor = createAsyncComponent(() => import('../FlinkSql.vue'), {
+    loading: true,
+  });
+  const ManagedDependencyUpload = createAsyncComponent(
+    () => import('./ManagedDependencyUpload.vue'),
+    { loading: true },
+  );
+  const SelectOption = Select.Option;
 
   const props = defineProps<{
     appId?: string;
@@ -104,14 +116,16 @@
 
   function applicationResourceOptions() {
     return unref(resources)
-      .filter((resource) => resource.resourceType === 'APP')
+      .filter(
+        (resource) =>
+          resource.resourceType === ResourceTypeEnum.APP &&
+          resource.engineType === EngineTypeEnum.FLINK,
+      )
       .map((resource) => ({ label: resource.resourceName, value: resource.resourceName }));
   }
 
-  function dependencyResourceOptions() {
-    return unref(resources)
-      .filter((resource) => resource.resourceType !== 'APP')
-      .map((resource) => ({ label: resource.resourceName, value: resource.resourceName }));
+  async function reloadResources() {
+    resources.value = await fetchTeamResource({});
   }
 
   function numberValue(value: unknown, fallback = 0): number {
@@ -239,14 +253,8 @@
       {
         field: 'jobType',
         label: t('flink.app.jobType'),
-        component: 'Select',
-        componentProps: {
-          disabled: !currentCapability,
-          options: (currentCapability?.jobTypes || []).map((jobType) => ({
-            label: jobType === 'STREAMING_SQL' ? 'Flink SQL' : 'Flink JAR',
-            value: jobType,
-          })),
-        },
+        component: 'Input',
+        slot: 'jobType',
         rules: [{ required: true, message: t('flink.app.managed.required.jobType') }],
       },
       {
@@ -272,8 +280,8 @@
       {
         field: 'sql',
         label: 'Flink SQL',
-        component: 'InputTextArea',
-        componentProps: { rows: 12 },
+        component: 'Input',
+        slot: 'sql',
         ifShow: ({ values }) => values.jobType === 'STREAMING_SQL',
         rules: [{ required: true, message: t('flink.app.managed.required.sql') }],
       },
@@ -304,15 +312,10 @@
       {
         field: 'dependencyResourceNames',
         label: t('flink.app.dependency'),
-        component: 'Select',
-        componentProps: {
-          mode: 'multiple',
-          maxTagCount: 3,
-          showSearch: true,
-          optionFilterProp: 'label',
-          options: dependencyResourceOptions(),
-        },
-        ifShow: ({ values }) => values.jobType === 'STREAMING_JAR',
+        component: 'Input',
+        slot: 'dependency',
+        ifShow: ({ values }) =>
+          values.jobType === 'STREAMING_SQL' || values.jobType === 'STREAMING_JAR',
       },
       {
         field: 'resourceDivider',
@@ -727,7 +730,9 @@
         priority: values.priority,
         schedulingStrategy: values.schedulingStrategy,
         dependencyResourceNames:
-          values.jobType === 'STREAMING_JAR' ? values.dependencyResourceNames || [] : [],
+          values.jobType === 'STREAMING_SQL' || values.jobType === 'STREAMING_JAR'
+            ? values.dependencyResourceNames || []
+            : [],
         customProperties: parseProperties(values.releaseCustomProperties),
       },
     };
@@ -914,6 +919,28 @@
     :schemas="formSchemas"
     class="!my-20px"
   >
+    <template #jobType="{ model, field }">
+      <Select v-model:value="model[field]" class="w-full" :disabled="!capability">
+        <SelectOption v-for="jobType in capability?.jobTypes || []" :key="jobType" :value="jobType">
+          <div class="flex items-center">
+            <SvgIcon :name="jobType === 'STREAMING_SQL' ? 'fql' : 'fjar'" color="#108ee9" />
+            <span class="pl-10px">
+              {{ jobType === 'STREAMING_SQL' ? 'Flink SQL' : 'Flink JAR' }}
+            </span>
+          </div>
+        </SelectOption>
+      </Select>
+    </template>
+    <template #sql="{ model, field }">
+      <FlinkSqlEditor v-model:value="model[field]" :show-verify="false" :show-preview="false" />
+    </template>
+    <template #dependency="{ model, field }">
+      <ManagedDependencyUpload
+        v-model:value="model[field]"
+        :resources="resources"
+        @uploaded="reloadResources"
+      />
+    </template>
     <template #formFooter>
       <div class="flex items-center w-full justify-center">
         <a-button @click="go('/flink/app')">

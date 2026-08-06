@@ -73,7 +73,8 @@ class VolcengineRequestSigner {
             region,
             requestId,
             now,
-            credentials);
+            credentials,
+            SERVICE);
     }
 
     SignedRequest sign(
@@ -86,6 +87,30 @@ class VolcengineRequestSigner {
                        String requestId,
                        Instant now,
                        VolcengineCredentials credentials) {
+        return sign(
+            method,
+            endpoint,
+            query,
+            body,
+            contentType,
+            region,
+            requestId,
+            now,
+            credentials,
+            SERVICE);
+    }
+
+    SignedRequest sign(
+                       String method,
+                       URI endpoint,
+                       Map<String, String> query,
+                       byte[] body,
+                       String contentType,
+                       String region,
+                       String requestId,
+                       Instant now,
+                       VolcengineCredentials credentials,
+                       String service) {
         try {
             String canonicalQuery = canonicalQuery(query);
             String host = endpoint.getRawAuthority();
@@ -109,13 +134,13 @@ class VolcengineRequestSigner {
                     + canonicalHeaders + "\n"
                     + SIGNED_HEADERS + "\n"
                     + payloadHash;
-            String credentialScope = shortDate + "/" + region + "/" + SERVICE + "/request";
+            String credentialScope = shortDate + "/" + region + "/" + service + "/request";
             String stringToSign =
                 "HMAC-SHA256\n"
                     + xDate + "\n"
                     + credentialScope + "\n"
                     + sha256Hex(canonicalRequest.getBytes(StandardCharsets.UTF_8));
-            byte[] signingKey = signingKey(credentials.secretKey(), shortDate, region, SERVICE);
+            byte[] signingKey = signingKey(credentials.secretKey(), shortDate, region, service);
             String signature;
             try {
                 signature = hex(hmac(signingKey, stringToSign));

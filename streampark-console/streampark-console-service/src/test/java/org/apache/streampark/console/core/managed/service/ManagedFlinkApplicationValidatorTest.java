@@ -65,14 +65,13 @@ class ManagedFlinkApplicationValidatorTest {
     }
 
     @Test
-    void shouldRejectDependenciesForSqlApplication() {
+    void shouldAcceptDependenciesForSqlApplication() {
         ManagedFlinkApplicationSaveRequest request = request();
         request.getReleaseConfig()
             .setDependencyResourceNames(Collections.singletonList("dependency.jar"));
 
-        assertThatExceptionOfType(ApiAlertException.class)
-            .isThrownBy(() -> validator.validate(request, capability()))
-            .withMessageContaining("cannot define JAR dependencies");
+        assertThat(validator.validate(request, capability()))
+            .isEqualByComparingTo("97");
     }
 
     @Test

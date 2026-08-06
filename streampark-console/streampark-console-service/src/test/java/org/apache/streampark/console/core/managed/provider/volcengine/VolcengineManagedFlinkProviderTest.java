@@ -43,6 +43,8 @@ import com.volcengine.flink20250101.model.RecordForListApplicationInstanceOutput
 import com.volcengine.flink20250101.model.RecordForListGWSApplicationOutput;
 import com.volcengine.flink20250101.model.RestartGWSApplicationRequest;
 import com.volcengine.flink20250101.model.SavepointInfoForListGWSSavepointOutput;
+import com.volcengine.tos.TOSV2;
+import com.volcengine.tos.TOSV2ClientBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -52,7 +54,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -67,6 +68,20 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
 
     private VolcengineOpenApiClient client;
     private VolcengineManagedFlinkProvider provider;
+
+    @Test
+    void shouldInitializeTosTransportWithCompatibleOkioRuntime() throws Exception {
+        try (
+            TOSV2 tosClient =
+                new TOSV2ClientBuilder()
+                    .build(
+                        "cn-beijing",
+                        "https://tos-cn-beijing.volces.com",
+                        "test-access-key",
+                        "test-secret-key")) {
+            assertThat(tosClient).isNotNull();
+        }
+    }
 
     @BeforeEach
     void setUp() throws Exception {
@@ -108,6 +123,15 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
                             + "\"ResourcePoolName\":\"Pool One\","
                             + "\"Resource\":{\"CapacityCU\":3000,\"UsedCU\":12.5}}]}}",
                         "request-pool"));
+        when(client.get(
+            any(),
+            eq("ListGMSMetaResource"),
+            eq("2021-06-01"),
+            anyMap()))
+                .thenReturn(
+                    response(
+                        "{\"Result\":{\"Total\":0,\"MetaResourceList\":[]}}",
+                        "request-artifact-list"));
         when(client.post(
             any(),
             eq("ListGWSDirectory"),
@@ -201,31 +225,80 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
             .containsExactly("STREAMING_SQL", "STREAMING_JAR");
         assertThat(provider.getCapability(validContext()).isSupportsSkipPrecheck()).isFalse();
         assertThat(provider.getCapability(validContext()).isSupportsCustomEndpoint()).isFalse();
-        assertThat(provider.getCapability(validContext()).isSupportsJarDirectUpload()).isFalse();
-        assertThat(provider.getCapability(validContext()).isSupportsStopWithSnapshot()).isFalse();
+        assertThat(provider.getCapability(validContext()).isSupportsJarDirectUpload()).isTrue();
+        assertThat(provider.getCapability(validContext()).isSupportsStopWithSnapshot()).isTrue();
         assertThat(provider.getCapability(validContext()).getMemoryPerCpuGiB())
             .isEqualByComparingTo("4");
     }
 
     @Test
-    void shouldFailClosedUntilArtifactTransportIsConfigured() {
-        assertThatExceptionOfType(ManagedFlinkProviderException.class)
-            .isThrownBy(
-                () -> provider.findArtifact(
-                    validContext(),
-                    ArtifactLookupRequest.builder()
-                        .checksum(
-                            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                                + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-                        .contentAddressedName("streampark-a.jar")
-                        .build()))
-            .satisfies(
-                failure -> {
-                    assertThat(failure.getCategory())
-                        .isEqualTo(ProviderErrorCategory.PROVIDER_CONFIGURATION);
-                    assertThat(failure.getProviderCode())
-                        .isEqualTo("ArtifactTransportNotConfigured");
-                });
+    void shouldReturnNullWhenArtifactDoesNotExist() {
+        assertThat(
+            provider.findArtifact(
+                validContext(),
+                ArtifactLookupRequest.builder()
+                    .checksum(
+                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                            + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+                    .contentAddressedName("streampark-a.jar")
+                    .build()))
+                        .isNull();
+    }
+
+    @Test
+    void shouldResolveRegisteredArtifactAndLatestVersion() throws Exception {
+        when(client.get(
+            any(),
+            eq("ListGMSMetaResource"),
+            eq("2021-06-01"),
+            anyMap()))
+                .thenReturn(
+                    response(
+                        "{\"Result\":{\"MetaResourceList\":[{"
+                            + "\"Id\":\"resource-1\",\"Name\":\"streampark-a.jar\","
+                            + "\"Uri\":\"tos://bucket/original\"}]}}",
+                        "request-artifact-list"));
+        when(client.get(
+            any(),
+            eq("ListGWSResourceVersion"),
+            eq("2021-06-01"),
+            anyMap()))
+                .thenReturn(
+                    response(
+                        "{\"Result\":{\"ResourceVersionList\":[{"
+                            + "\"VersionNum\":1,\"Uri\":\"tos://bucket/v1\"},{"
+                            + "\"VersionNum\":2,\"Uri\":\"tos://bucket/v2\"}]}}",
+                        "request-artifact-version"));
+
+        assertThat(
+            provider.findArtifact(
+                validContext(),
+                ArtifactLookupRequest.builder()
+                    .checksum(
+                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                            + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+                    .contentAddressedName("streampark-a.jar")
+                    .build()))
+                        .satisfies(
+                            artifact -> {
+                                assertThat(artifact.getProviderArtifactId())
+                                    .isEqualTo("resource-1");
+                                assertThat(artifact.getProviderArtifactVersion()).isEqualTo(2);
+                                assertThat(artifact.getProviderUri())
+                                    .isEqualTo("tos://bucket/v2");
+                            });
+    }
+
+    @Test
+    void shouldResolveArtifactBucketFromExistingFileUri() throws Exception {
+        assertThat(
+            VolcengineManagedFlinkProvider.artifactBucket(
+                new ObjectMapper()
+                    .readTree(
+                        "{\"Result\":{\"MetaResourceList\":[{"
+                            + "\"Uri\":\"tos://volc-flink-meta-2101000277-cn-beijing/"
+                            + "__artifacts/project/resources/resource/file.jar\"}]}}")))
+                                .isEqualTo("volc-flink-meta-2101000277-cn-beijing");
     }
 
     @Test
@@ -372,6 +445,44 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
         assertThat(dynamicOptions.path("restart.attempt.max.count").asText()).isEqualTo("3");
         assertThat(dynamicOptions.path("custom.runtime").asText()).isEqualTo("release");
         assertThat(dynamicOptions.path("paimon.connector.version").asText()).isEqualTo("1.1");
+    }
+
+    @Test
+    void shouldBuildJarDraftUpdateWithMainArtifactAndEntrypoint() throws Exception {
+        JsonNode body =
+            provider.updateRequestBody(
+                objectMapper.readTree(
+                    "{"
+                        + "\"Id\":\"draft-1\","
+                        + "\"ProjectId\":\"project-1\","
+                        + "\"AccountId\":\"account-1\","
+                        + "\"UserId\":\"user-1\","
+                        + "\"Platform\":\"StreamX\","
+                        + "\"JobId\":\"job-uuid-1\","
+                        + "\"State\":\"CREATED\","
+                        + "\"ResourceVersion\":\"0\","
+                        + "\"CreateTime\":\"2026-08-05 19:58:16\""
+                        + "}"),
+                ManagedDraftRequest.builder()
+                    .projectId("project-1")
+                    .jobName("jar-job")
+                    .jobType("STREAMING_JAR")
+                    .engineVersion("FLINK_VERSION_1_17")
+                    .jar("file-resource-id")
+                    .mainClass("com.main.Main")
+                    .args("--key1 value1 --key2 value2")
+                    .optionsJson("{}")
+                    .dynamicOptionsJson("{}")
+                    .dependencyJson("{\"jars\":[]}")
+                    .build());
+
+        assertThat(body.path("JobType").asText()).isEqualTo("FLINK_STREAMING_JAR");
+        assertThat(body.path("ResourceVersion").asText()).isEqualTo("0");
+        assertThat(body.path("Jar").asText()).isEqualTo("file-resource-id");
+        assertThat(body.path("MainClass").asText()).isEqualTo("com.main.Main");
+        assertThat(body.path("Args").asText()).isEqualTo("--key1 value1 --key2 value2");
+        assertThat(body.path("Dependency").asText()).isEqualTo("{\"jars\":[]}");
+        assertThat(body.has("SqlText")).isFalse();
     }
 
     @Test
@@ -627,23 +738,43 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
     }
 
     @Test
-    void shouldRejectStopWithSnapshotUntilSnapshotOrchestrationIsImplemented() {
-        assertThatExceptionOfType(ManagedFlinkProviderException.class)
-            .isThrownBy(
-                () -> provider.stopJob(
-                    validContext(),
-                    ManagedJobStopRequest.builder()
-                        .jobId("job-1")
-                        .instanceId("s-instance-1")
-                        .withSnapshot(true)
-                        .build()))
-            .satisfies(
-                failure -> {
-                    assertThat(failure.getCategory())
-                        .isEqualTo(ProviderErrorCategory.PROVIDER_CONFIGURATION);
-                    assertThat(failure.getProviderCode())
-                        .isEqualTo("StopWithSnapshotNotImplemented");
-                });
+    void shouldStopWithSnapshotThroughLegacyGwsAction() throws Exception {
+        when(client.postOnce(
+            any(),
+            eq("StopGWSApplicationWithSp"),
+            eq("2021-06-01"),
+            anyMap(),
+            any()))
+                .thenReturn(
+                    response(
+                        "{\"Result\":{\"Success\":true,\"Id\":\"job-1\","
+                            + "\"InstanceId\":\"s-instance-1\"}}",
+                        "request-stop-with-sp"));
+
+        assertThat(
+            provider.stopJob(
+                validContext(),
+                ManagedJobStopRequest.builder()
+                    .jobId("job-1")
+                    .instanceId("s-instance-1")
+                    .withSnapshot(true)
+                    .build()))
+                        .satisfies(
+                            result -> {
+                                assertThat(result.getJobId()).isEqualTo("job-1");
+                                assertThat(result.getInstanceId()).isEqualTo("s-instance-1");
+                                assertThat(result.getProviderRequestId())
+                                    .isEqualTo("request-stop-with-sp");
+                                assertThat(result.getProviderState()).isEqualTo("STOPPING");
+                            });
+
+        verify(client)
+            .postOnce(
+                eq(validContext()),
+                eq("StopGWSApplicationWithSp"),
+                eq("2021-06-01"),
+                eq(Map.of("ProjectId", "project-1")),
+                eq(Map.of("Id", "job-1")));
     }
 
     @Test

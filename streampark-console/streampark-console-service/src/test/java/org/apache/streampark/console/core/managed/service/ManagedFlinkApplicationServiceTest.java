@@ -24,7 +24,9 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.ManagedFlinkApplication;
 import org.apache.streampark.console.core.entity.Resource;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
+import org.apache.streampark.console.core.enums.ResourceTypeEnum;
 import org.apache.streampark.console.core.managed.api.ManagedFlinkProviderRegistry;
 import org.apache.streampark.console.core.managed.api.ManagedFlinkProviderType;
 import org.apache.streampark.console.core.managed.model.CloudAccountCreateRequest;
@@ -258,6 +260,8 @@ class ManagedFlinkApplicationServiceTest extends SpringUnitTestBase {
         Resource resource = new Resource();
         resource.setResourceName("managed-test.jar");
         resource.setTeamId(TEAM_ID);
+        resource.setResourceType(ResourceTypeEnum.APP);
+        resource.setEngineType(EngineTypeEnum.FLINK);
         when(resourceService.findByResourceName(TEAM_ID, "managed-test.jar"))
             .thenReturn(resource);
 

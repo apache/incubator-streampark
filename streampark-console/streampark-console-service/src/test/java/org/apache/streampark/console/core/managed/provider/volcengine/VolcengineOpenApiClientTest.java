@@ -234,6 +234,31 @@ class VolcengineOpenApiClientTest {
         assertThat(response.getRequestId()).isEqualTo("request-job");
     }
 
+    @Test
+    void shouldResolveAccountIdThroughIamService() throws Exception {
+        AtomicReference<String> query = new AtomicReference<>();
+        AtomicReference<String> authorization = new AtomicReference<>();
+        server.createContext(
+            "/",
+            exchange -> {
+                query.set(exchange.getRequestURI().getRawQuery());
+                authorization.set(exchange.getRequestHeaders().getFirst("Authorization"));
+                respond(
+                    exchange,
+                    200,
+                    "{\"ResponseMetadata\":{\"RequestId\":\"request-iam\"},"
+                        + "\"Result\":{\"User\":{\"AccountId\":\"2101000277\"}}}");
+            });
+        when(credentialResolver.resolve(context()))
+            .thenReturn(new VolcengineCredentials("AKLT-test", "secret-test"));
+
+        assertThat(client().resolveProviderAccountId(context())).isEqualTo("2101000277");
+        assertThat(query.get())
+            .contains("Action=GetUser", "AccessKeyID=AKLT-test", "Version=2018-01-01");
+        assertThat(authorization.get())
+            .contains("Credential=AKLT-test/20260729/cn-beijing/iam/request");
+    }
+
     private VolcengineOpenApiClient client() {
         return new VolcengineOpenApiClient(
             credentialResolver,

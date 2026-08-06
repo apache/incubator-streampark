@@ -111,11 +111,6 @@ public class ManagedFlinkApplicationValidator {
                 StringUtils.isNotBlank(request.getJar())
                     || StringUtils.isNotBlank(request.getMainClass()),
                 "Managed Flink SQL applications cannot define a JAR or main class.");
-            ApiAlertException.throwIfTrue(
-                request.getReleaseConfig() != null
-                    && request.getReleaseConfig().getDependencyResourceNames() != null
-                    && !request.getReleaseConfig().getDependencyResourceNames().isEmpty(),
-                "Managed Flink SQL applications cannot define JAR dependencies.");
         } else if ("STREAMING_JAR".equals(request.getJobType())) {
             ApiAlertException.throwIfTrue(
                 StringUtils.isBlank(request.getJar())

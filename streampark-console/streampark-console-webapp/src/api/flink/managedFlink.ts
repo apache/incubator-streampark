@@ -27,6 +27,7 @@ import type {
   ManagedFlinkApplication,
   ManagedFlinkApplicationStatistics,
   ManagedFlinkApplicationForm,
+  ManagedFlinkCapability,
   ManagedFlinkLifecycleRequest,
   ManagedFlinkOperation,
   ManagedFlinkSnapshot,
@@ -37,6 +38,7 @@ import type {
 
 enum Api {
   AVAILABLE_ACCOUNTS = '/cloud/account/available',
+  CAPABILITY = '/flink/managed/capability',
   PROJECTS = '/flink/managed/projects',
   RESOURCE_POOLS = '/flink/managed/resource-pools',
   DRAFT_DIRECTORIES = '/flink/managed/draft-directories',
@@ -64,6 +66,13 @@ enum Api {
 
 export function fetchAvailableCloudAccounts(teamId: string): Promise<ManagedCloudAccount[]> {
   return defHttp.post({ url: Api.AVAILABLE_ACCOUNTS, data: { teamId } });
+}
+
+export function fetchManagedCapability(data: {
+  teamId: string;
+  cloudAccountId: string;
+}): Promise<ManagedFlinkCapability> {
+  return defHttp.post({ url: Api.CAPABILITY, data });
 }
 
 export function fetchManagedProjects(data: {

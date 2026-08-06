@@ -420,6 +420,16 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!--
+            Keep the TOS SDK before streampark-spark-sqlclient. The Spark SQL client is an
+            executable shaded jar that contains Okio 1.x, while the TOS SDK requires Okio 2.x.
+            Maven preserves direct dependency order when constructing the console classpath.
+        -->
+        <dependency>
+            <groupId>com.volcengine</groupId>
+            <artifactId>ve-tos-java-sdk</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.streampark</groupId>
             <artifactId>streampark-spark-sqlclient_${scala.binary.version}</artifactId>

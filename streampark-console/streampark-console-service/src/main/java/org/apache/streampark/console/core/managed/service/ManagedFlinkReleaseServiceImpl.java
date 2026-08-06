@@ -21,7 +21,9 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.ManagedFlinkApplication;
 import org.apache.streampark.console.core.entity.ManagedFlinkEnvironment;
+import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkApplicationView;
+import org.apache.streampark.console.core.managed.model.ManagedFlinkArtifactView;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkOperationView;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkReleaseConfig;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkReleaseRequest;
@@ -29,6 +31,7 @@ import org.apache.streampark.console.core.managed.model.ManagedFlinkReleaseSnaps
 import org.apache.streampark.console.core.mapper.ManagedFlinkApplicationMapper;
 import org.apache.streampark.console.core.mapper.ManagedFlinkEnvironmentMapper;
 import org.apache.streampark.console.core.service.FlinkSqlService;
+import org.apache.streampark.console.core.service.ResourceService;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -36,7 +39,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /** Builds a secret-free release snapshot and admits it before asynchronous execution. */
 @Service
@@ -50,6 +57,8 @@ public class ManagedFlinkReleaseServiceImpl implements ManagedFlinkReleaseServic
     private final ManagedFlinkReleaseStateService releaseStateService;
     private final ManagedFlinkReleaseDispatcher dispatcher;
     private final FlinkSqlService flinkSqlService;
+    private final ResourceService resourceService;
+    private final ManagedFlinkArtifactService artifactService;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -93,9 +102,10 @@ public class ManagedFlinkReleaseServiceImpl implements ManagedFlinkReleaseServic
         FlinkSql sqlCandidate = flinkSqlService.getLatestFlinkSql(appId, false);
         ManagedFlinkApplicationView application =
             applicationService.get(teamId, appId);
+        boolean sqlJob = "STREAMING_SQL".equals(application.getJobType());
+        boolean jarJob = "STREAMING_JAR".equals(application.getJobType());
         ApiAlertException.throwIfFalse(
-            "STREAMING_SQL".equals(application.getJobType()),
-            "Managed Flink JAR release is unavailable until artifact transport is configured.");
+            sqlJob || jarJob, "Managed Flink release job type is unsupported.");
         ManagedFlinkApplication managed =
             managedApplicationMapper.selectById(appId);
         ManagedFlinkEnvironment environment =
@@ -103,10 +113,14 @@ public class ManagedFlinkReleaseServiceImpl implements ManagedFlinkReleaseServic
         ApiAlertException.throwIfTrue(
             managed == null || environment == null,
             "Managed Flink release routing is unavailable.");
-        ApiAlertException.throwIfNull(
-            sqlCandidate, "Managed Flink SQL candidate does not exist.");
+        if (sqlJob) {
+            ApiAlertException.throwIfNull(
+                sqlCandidate, "Managed Flink SQL candidate does not exist.");
+        }
 
         ManagedFlinkReleaseConfig release = application.getReleaseConfig();
+        List<ManagedFlinkArtifactView> artifacts =
+            artifactService.stageApplicationArtifacts(teamId, appId);
         ManagedFlinkReleaseSnapshot snapshot = new ManagedFlinkReleaseSnapshot();
         snapshot.setTeamId(teamId);
         snapshot.setAppId(appId);
@@ -123,11 +137,31 @@ public class ManagedFlinkReleaseServiceImpl implements ManagedFlinkReleaseServic
         snapshot.setJobName(application.getJobName());
         snapshot.setJobType(application.getJobType());
         snapshot.setEngineVersion(application.getRuntimeConfig().getEngineVersion());
-        snapshot.setSqlText(application.getSql());
-        snapshot.setSqlCandidateId(sqlCandidate.getId());
+        if (sqlJob) {
+            snapshot.setSqlText(application.getSql());
+            snapshot.setSqlCandidateId(sqlCandidate.getId());
+        } else {
+            Resource applicationJar =
+                resourceService.findByResourceName(teamId, application.getJar());
+            ApiAlertException.throwIfNull(
+                applicationJar, "Managed Flink JAR resource does not exist in this Team.");
+            ManagedFlinkArtifactView mainArtifact =
+                artifacts.stream()
+                    .filter(
+                        artifact -> applicationJar.getId().equals(artifact.getSourceResourceId()))
+                    .findFirst()
+                    .orElseThrow(
+                        () -> new ApiAlertException(
+                            "Managed Flink main JAR was not staged."));
+            snapshot.setJar(mainArtifact.getProviderArtifactId());
+            snapshot.setMainClass(application.getMainClass());
+            snapshot.setArgs(application.getArgs());
+            artifacts = new ArrayList<>(artifacts);
+            artifacts.remove(mainArtifact);
+        }
         snapshot.setOptionsJson(write(application.getRuntimeConfig()));
         snapshot.setDynamicOptionsJson(write(release.getCustomProperties()));
-        snapshot.setDependencyJson(write(Collections.emptyList()));
+        snapshot.setDependencyJson(dependencyJson(artifacts));
         snapshot.setPriority(
             release.getPriority() == null ? null : release.getPriority().toString());
         snapshot.setSchedulePolicy(release.getSchedulingStrategy());
@@ -141,10 +175,34 @@ public class ManagedFlinkReleaseServiceImpl implements ManagedFlinkReleaseServic
                     snapshot.getResourcePoolName(),
                     snapshot.getJobName(),
                     snapshot.getEngineVersion(),
-                    snapshot.getSqlText(),
                     snapshot.getDefinitionHash()),
             "Managed Flink release snapshot is incomplete.");
+        ApiAlertException.throwIfTrue(
+            sqlJob
+                ? StringUtils.isBlank(snapshot.getSqlText())
+                : StringUtils.isAnyBlank(snapshot.getJar(), snapshot.getMainClass()),
+            "Managed Flink release definition is incomplete.");
         return snapshot;
+    }
+
+    private String dependencyJson(List<ManagedFlinkArtifactView> artifacts) {
+        if (artifacts == null || artifacts.isEmpty()) {
+            Map<String, Object> dependency = new LinkedHashMap<>();
+            dependency.put("jars", Collections.emptyList());
+            return write(dependency);
+        }
+        List<String> jars = new ArrayList<>();
+        Map<String, String> versions = new LinkedHashMap<>();
+        for (ManagedFlinkArtifactView artifact : artifacts) {
+            jars.add(artifact.getProviderArtifactId());
+            versions.put(
+                artifact.getProviderArtifactId(),
+                String.valueOf(artifact.getProviderArtifactVersion()));
+        }
+        Map<String, Object> dependency = new LinkedHashMap<>();
+        dependency.put("jars", jars);
+        dependency.put("dependencyVersions", versions);
+        return write(dependency);
     }
 
     private String write(Object value) {

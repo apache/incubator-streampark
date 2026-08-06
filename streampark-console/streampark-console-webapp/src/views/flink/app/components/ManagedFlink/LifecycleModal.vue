@@ -36,6 +36,7 @@
   import {
     fetchCreateManagedSnapshot,
     fetchManagedApplication,
+    fetchManagedCapability,
     fetchManagedEnvironment,
     fetchManagedOperation,
     fetchManagedOperations,
@@ -226,7 +227,15 @@
         teamId: identity.teamId,
         clusterId: managedApplication.managedEnvironmentId,
       });
-      capability.value = parseCapability(environment.capabilityJson);
+      try {
+        capability.value = await fetchManagedCapability({
+          teamId: identity.teamId,
+          cloudAccountId: environment.cloudAccountId,
+        });
+      } catch (error) {
+        console.error(error);
+        capability.value = parseCapability(environment.capabilityJson);
+      }
 
       if (unref(action) === 'PROGRESS') {
         const operations = await fetchManagedOperations(identity);
