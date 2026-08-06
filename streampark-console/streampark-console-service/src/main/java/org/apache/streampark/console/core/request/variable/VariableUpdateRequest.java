@@ -20,6 +20,8 @@ package org.apache.streampark.console.core.request.variable;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotNull;
+
 /** Request body for {@code PUT /variable/update}. */
 @Getter
 @Setter
@@ -27,5 +29,6 @@ public class VariableUpdateRequest extends VariableCreateRequest {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
     private Long id;
 }

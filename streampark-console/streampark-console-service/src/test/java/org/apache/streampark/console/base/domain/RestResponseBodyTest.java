@@ -15,47 +15,22 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.request.project;
+package org.apache.streampark.console.base.domain;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+class RestResponseBodyTest {
 
-import java.io.Serializable;
+    @Test
+    void shouldRoundTripTypedData() {
+        RestResponse response = RestResponse.success("payload");
+        RestResponseBody<String> body = RestResponseBody.from(response);
 
-/** Request body for {@code POST /project/create}. */
-@Getter
-@Setter
-public class ProjectCreateRequest implements Serializable {
+        Assertions.assertEquals(RestResponse.STATUS_SUCCESS, body.getStatus());
+        Assertions.assertEquals("payload", body.getData());
 
-    private static final long serialVersionUID = 1L;
-
-    @NotNull
-    private Long teamId;
-
-    @NotBlank
-    private String name;
-
-    @NotBlank
-    private String url;
-
-    private String refs;
-
-    private String userName;
-
-    private String password;
-
-    private String prvkeyPath;
-
-    private Integer repository;
-
-    private String pom;
-
-    private String buildArgs;
-
-    private String description;
-
-    private Integer type;
+        RestResponse restored = body.toRestResponse();
+        Assertions.assertEquals("payload", restored.getDataAs(String.class));
+    }
 }

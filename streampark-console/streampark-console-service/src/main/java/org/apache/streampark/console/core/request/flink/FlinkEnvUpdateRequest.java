@@ -20,6 +20,8 @@ package org.apache.streampark.console.core.request.flink;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Request body for {@code POST /flink/env/update}.
  */
@@ -29,5 +31,6 @@ public class FlinkEnvUpdateRequest extends FlinkEnvCreateRequest {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
     private Long id;
 }

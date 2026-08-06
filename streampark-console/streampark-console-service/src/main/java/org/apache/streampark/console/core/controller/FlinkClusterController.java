@@ -42,6 +42,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 import java.util.List;
 
 @Slf4j
@@ -86,7 +88,7 @@ public class FlinkClusterController {
 
     @PostMapping("create")
     @RequiresPermissions("cluster:create")
-    public RestResponse create(FlinkClusterCreateRequest request) {
+    public RestResponse create(@Valid FlinkClusterCreateRequest request) {
         Long userId = ServiceHelper.getUserId();
         Boolean success = flinkClusterService.create(FlinkClusterAssembler.toEntity(request), userId);
         return RestResponse.success(success);
@@ -94,7 +96,7 @@ public class FlinkClusterController {
 
     @PostMapping("update")
     @RequiresPermissions("cluster:update")
-    public RestResponse update(FlinkClusterUpdateRequest request) {
+    public RestResponse update(@Valid FlinkClusterUpdateRequest request) {
         flinkClusterService.update(FlinkClusterAssembler.toEntity(request));
         return RestResponse.success();
     }

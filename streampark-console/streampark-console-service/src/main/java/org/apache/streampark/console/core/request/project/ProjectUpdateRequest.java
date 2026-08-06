@@ -20,6 +20,8 @@ package org.apache.streampark.console.core.request.project;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotNull;
+
 /** Request body for {@code POST /project/update}. */
 @Getter
 @Setter
@@ -27,5 +29,6 @@ public class ProjectUpdateRequest extends ProjectCreateRequest {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
     private Long id;
 }

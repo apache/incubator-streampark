@@ -20,6 +20,9 @@ package org.apache.streampark.console.core.request.variable;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 import java.io.Serializable;
 
 /** Request body for {@code POST /variable/post}. */
@@ -29,10 +32,13 @@ public class VariableCreateRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
     private Long teamId;
 
+    @NotBlank
     private String variableCode;
 
+    @NotBlank
     private String variableValue;
 
     private String description;

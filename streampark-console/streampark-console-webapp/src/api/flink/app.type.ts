@@ -55,7 +55,7 @@ export interface AppListRecord {
   jobName: string;
   appId?: string;
   jobId?: string;
-  versionId: string;
+  versionId: number;
   clusterId?: string;
   flinkImage?: string;
   k8sNamespace: string;

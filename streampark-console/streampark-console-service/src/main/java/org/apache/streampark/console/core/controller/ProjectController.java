@@ -46,6 +46,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +64,7 @@ public class ProjectController {
     @PostMapping("create")
     @Permission(team = "#request.teamId")
     @RequiresPermissions("project:create")
-    public RestResponse create(ProjectCreateRequest request) {
+    public RestResponse create(@Valid ProjectCreateRequest request) {
         ApiAlertException.throwIfNull(
             request.getTeamId(), "The teamId can't be null. Create team failed.");
         return projectService.create(ProjectAssembler.toEntity(request));
@@ -72,7 +74,7 @@ public class ProjectController {
     @PostMapping("update")
     @RequiresPermissions("project:update")
     @Permission(team = "#request.teamId")
-    public RestResponse update(ProjectUpdateRequest request) {
+    public RestResponse update(@Valid ProjectUpdateRequest request) {
         boolean update = projectService.update(ProjectAssembler.toEntity(request));
         return RestResponse.success().data(update);
     }

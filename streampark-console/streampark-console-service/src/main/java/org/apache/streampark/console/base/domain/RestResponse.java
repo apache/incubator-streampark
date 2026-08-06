@@ -40,6 +40,25 @@ public class RestResponse extends HashMap<String, Object> {
         return resp;
     }
 
+    /**
+     * Returns the {@code data} payload cast to the requested type.
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getDataAs(Class<T> type) {
+        Object data = get(DATA_KEY);
+        if (data == null) {
+            return null;
+        }
+        return type.cast(data);
+    }
+
+    /**
+     * Wraps this response in a typed {@link RestResponseBody}.
+     */
+    public <T> RestResponseBody<T> asBody(Class<T> dataType) {
+        return RestResponseBody.from(this);
+    }
+
     public static RestResponse success() {
         RestResponse resp = new RestResponse();
         resp.put(STATUS_KEY, STATUS_SUCCESS);

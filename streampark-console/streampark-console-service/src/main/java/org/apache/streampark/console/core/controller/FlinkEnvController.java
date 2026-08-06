@@ -37,6 +37,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 import java.util.List;
 
 @Slf4j
@@ -68,7 +70,7 @@ public class FlinkEnvController {
     }
 
     @PostMapping("create")
-    public RestResponse create(FlinkEnvCreateRequest request) throws Exception {
+    public RestResponse create(@Valid FlinkEnvCreateRequest request) throws Exception {
         flinkEnvService.create(FlinkEnvAssembler.toEntity(request));
         return RestResponse.success(true);
     }
@@ -87,7 +89,7 @@ public class FlinkEnvController {
     }
 
     @PostMapping("update")
-    public RestResponse update(FlinkEnvUpdateRequest request) {
+    public RestResponse update(@Valid FlinkEnvUpdateRequest request) {
         flinkEnvService.update(FlinkEnvAssembler.toEntity(request));
         return RestResponse.success(true);
     }
