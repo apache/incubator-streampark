@@ -20,9 +20,13 @@ package org.apache.streampark.console.core.controller;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.annotation.OpenAPI;
 import org.apache.streampark.console.core.annotation.Permission;
+import org.apache.streampark.console.core.assembler.FlinkApplicationAssembler;
 import org.apache.streampark.console.core.bean.OpenAPISchema;
 import org.apache.streampark.console.core.component.OpenAPIComponent;
-import org.apache.streampark.console.core.entity.FlinkApplication;
+import org.apache.streampark.console.core.request.flink.FlinkAppCancelRequest;
+import org.apache.streampark.console.core.request.flink.FlinkAppStartRequest;
+import org.apache.streampark.console.core.request.flink.OpenAPICurlRequest;
+import org.apache.streampark.console.core.request.flink.OpenAPISchemaRequest;
 import org.apache.streampark.console.core.service.application.FlinkApplicationActionService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -33,8 +37,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.validation.Valid;
 
 @Validated
 @RestController
@@ -57,11 +60,11 @@ public class OpenAPIController {
             @OpenAPI.Param(name = "savepointPath", description = "savepoint or checkpoint path", required = false, type = String.class),
             @OpenAPI.Param(name = "allowNonRestored", description = "ignore savepoint if cannot be restored", required = false, type = Boolean.class, defaultValue = "false"),
     })
-    @Permission(app = "#app.id", team = "#app.teamId")
+    @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("app/start")
     @RequiresPermissions("app:start")
-    public RestResponse flinkStart(FlinkApplication app) throws Exception {
-        applicationActionService.start(app, false);
+    public RestResponse flinkStart(FlinkAppStartRequest request) throws Exception {
+        applicationActionService.start(FlinkApplicationAssembler.toEntity(request), false);
         return RestResponse.success(true);
     }
 
@@ -74,26 +77,24 @@ public class OpenAPIController {
             @OpenAPI.Param(name = "savepointPath", description = "savepoint path", required = false, type = String.class),
             @OpenAPI.Param(name = "drain", description = "send max watermark before canceling", required = false, type = Boolean.class, defaultValue = "false"),
     })
-    @Permission(app = "#app.id", team = "#app.teamId")
+    @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("app/cancel")
     @RequiresPermissions("app:cancel")
-    public RestResponse flinkCancel(FlinkApplication app) throws Exception {
-        applicationActionService.cancel(app);
+    public RestResponse flinkCancel(FlinkAppCancelRequest request) throws Exception {
+        applicationActionService.cancel(FlinkApplicationAssembler.toEntity(request));
         return RestResponse.success();
     }
 
     @PostMapping("curl")
-    public RestResponse copyOpenApiCurl(String name,
-                                        String baseUrl,
-                                        @NotNull Long appId,
-                                        @NotNull Long teamId) {
-        String url = openAPIComponent.getOpenApiCUrl(name, baseUrl, appId, teamId);
+    public RestResponse copyOpenApiCurl(OpenAPICurlRequest request) {
+        String url = openAPIComponent.getOpenApiCUrl(
+            request.getName(), request.getBaseUrl(), request.getAppId(), request.getTeamId());
         return RestResponse.success(url);
     }
 
     @PostMapping("schema")
-    public RestResponse schema(@NotBlank(message = "{required}") String name) {
-        OpenAPISchema openAPISchema = openAPIComponent.getOpenAPISchema(name);
+    public RestResponse schema(@Valid OpenAPISchemaRequest request) {
+        OpenAPISchema openAPISchema = openAPIComponent.getOpenAPISchema(request.getName());
         return RestResponse.success(openAPISchema);
     }
 

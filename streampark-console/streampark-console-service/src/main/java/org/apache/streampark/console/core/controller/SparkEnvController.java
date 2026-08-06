@@ -19,8 +19,15 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiDetailException;
+import org.apache.streampark.console.core.assembler.SparkEnvAssembler;
 import org.apache.streampark.console.core.entity.SparkEnv;
 import org.apache.streampark.console.core.enums.FlinkEnvCheckEnum;
+import org.apache.streampark.console.core.request.common.IdRequest;
+import org.apache.streampark.console.core.request.spark.SparkEnvCheckRequest;
+import org.apache.streampark.console.core.request.spark.SparkEnvCreateRequest;
+import org.apache.streampark.console.core.request.spark.SparkEnvUpdateRequest;
+import org.apache.streampark.console.core.request.spark.SparkEnvValidityRequest;
+import org.apache.streampark.console.core.response.spark.SparkEnvResponse;
 import org.apache.streampark.console.core.service.SparkEnvService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -44,19 +51,19 @@ public class SparkEnvController {
     @PostMapping("list")
     public RestResponse list() {
         List<SparkEnv> sparkEnvList = sparkEnvService.list();
-        return RestResponse.success(sparkEnvList);
+        return RestResponse.success(SparkEnvAssembler.toListResponse(sparkEnvList));
     }
 
     @PostMapping("check")
-    public RestResponse check(SparkEnv version) {
-        FlinkEnvCheckEnum checkResp = sparkEnvService.check(version);
+    public RestResponse check(SparkEnvCheckRequest request) {
+        FlinkEnvCheckEnum checkResp = sparkEnvService.check(SparkEnvAssembler.toEntity(request));
         return RestResponse.success(checkResp.getCode());
     }
 
     @PostMapping("create")
-    public RestResponse create(SparkEnv version) {
+    public RestResponse create(SparkEnvCreateRequest request) {
         try {
-            sparkEnvService.create(version);
+            sparkEnvService.create(SparkEnvAssembler.toEntity(request));
         } catch (Exception e) {
             throw new ApiDetailException(e);
         }
@@ -64,22 +71,23 @@ public class SparkEnvController {
     }
 
     @PostMapping("get")
-    public RestResponse get(Long id) throws Exception {
-        SparkEnv sparkEnv = sparkEnvService.getById(id);
+    public RestResponse get(IdRequest request) throws Exception {
+        SparkEnv sparkEnv = sparkEnvService.getById(request.getId());
         sparkEnv.unzipSparkConf();
-        return RestResponse.success(sparkEnv);
+        SparkEnvResponse response = SparkEnvAssembler.toResponse(sparkEnv);
+        return RestResponse.success(response);
     }
 
     @PostMapping("sync")
-    public RestResponse sync(Long id) throws Exception {
-        sparkEnvService.syncConf(id);
+    public RestResponse sync(IdRequest request) throws Exception {
+        sparkEnvService.syncConf(request.getId());
         return RestResponse.success();
     }
 
     @PostMapping("update")
-    public RestResponse update(SparkEnv version) throws Exception {
+    public RestResponse update(SparkEnvUpdateRequest request) throws Exception {
         try {
-            sparkEnvService.update(version);
+            sparkEnvService.update(SparkEnvAssembler.toEntity(request));
         } catch (Exception e) {
             throw new ApiDetailException(e);
         }
@@ -87,20 +95,20 @@ public class SparkEnvController {
     }
 
     @PostMapping("delete")
-    public RestResponse delete(Long id) {
-        sparkEnvService.removeById(id);
+    public RestResponse delete(IdRequest request) {
+        sparkEnvService.removeById(request.getId());
         return RestResponse.success();
     }
 
     @PostMapping("validity")
-    public RestResponse validity(SparkEnv version) {
-        sparkEnvService.validity(version.getId());
+    public RestResponse validity(SparkEnvValidityRequest request) {
+        sparkEnvService.validity(request.getId());
         return RestResponse.success(true);
     }
 
     @PostMapping("default")
-    public RestResponse setDefault(Long id) {
-        sparkEnvService.setDefault(id);
+    public RestResponse setDefault(IdRequest request) {
+        sparkEnvService.setDefault(request.getId());
         return RestResponse.success();
     }
 }

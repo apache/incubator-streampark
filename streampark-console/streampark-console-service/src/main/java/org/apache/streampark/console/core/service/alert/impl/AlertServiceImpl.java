@@ -19,10 +19,11 @@ package org.apache.streampark.console.core.service.alert.impl;
 
 import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.util.SpringContextUtils;
-import org.apache.streampark.console.core.bean.AlertConfigParams;
+import org.apache.streampark.console.core.assembler.AlertAssembler;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.AlertConfig;
 import org.apache.streampark.console.core.enums.AlertTypeEnum;
+import org.apache.streampark.console.core.request.alert.AlertConfigRequest;
 import org.apache.streampark.console.core.service.alert.AlertConfigService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
@@ -53,7 +54,7 @@ public class AlertServiceImpl implements AlertService {
         }
         AlertConfig alertConfig = alertConfigService.getById(alertConfigId);
         try {
-            AlertConfigParams params = AlertConfigParams.of(alertConfig);
+            AlertConfigRequest params = AlertAssembler.toRequest(alertConfig);
             List<AlertTypeEnum> alertTypeEnums = AlertTypeEnum.decode(params.getAlertType());
             if (CollectionUtils.isEmpty(alertTypeEnums)) {
                 return true;
@@ -74,7 +75,7 @@ public class AlertServiceImpl implements AlertService {
     @Nonnull
     private Tuple2<Boolean, AlertException> triggerAlert(
                                                          AlertTemplate alertTemplate,
-                                                         List<AlertTypeEnum> alertTypeEnums, AlertConfigParams params) {
+                                                         List<AlertTypeEnum> alertTypeEnums, AlertConfigRequest params) {
         return alertTypeEnums.stream()
             .map(
                 alertTypeEnum -> {

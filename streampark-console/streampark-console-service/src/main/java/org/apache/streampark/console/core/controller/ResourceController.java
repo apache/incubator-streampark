@@ -19,8 +19,13 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.bean.UploadResponse;
+import org.apache.streampark.console.core.assembler.ResourceAssembler;
 import org.apache.streampark.console.core.entity.Resource;
+import org.apache.streampark.console.core.request.common.TeamIdRequest;
+import org.apache.streampark.console.core.request.common.TeamScopedIdRequest;
+import org.apache.streampark.console.core.request.resource.ResourceCreateRequest;
+import org.apache.streampark.console.core.request.resource.ResourcePageQueryRequest;
+import org.apache.streampark.console.core.request.resource.ResourceUpdateRequest;
 import org.apache.streampark.console.core.service.ResourceService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -33,7 +38,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -52,47 +56,47 @@ public class ResourceController {
 
     @PostMapping("add")
     @RequiresPermissions("resource:add")
-    public RestResponse addResource(@Valid Resource resource) throws Exception {
-        this.resourceService.addResource(resource);
+    public RestResponse addResource(@Valid ResourceCreateRequest request) throws Exception {
+        this.resourceService.addResource(ResourceAssembler.toEntity(request));
         return RestResponse.success();
     }
 
     @PostMapping("check")
-    public RestResponse checkResource(@Valid Resource resource) throws Exception {
-        return this.resourceService.checkResource(resource);
+    public RestResponse checkResource(@Valid ResourceCreateRequest request) throws Exception {
+        return this.resourceService.checkResource(ResourceAssembler.toEntity(request));
     }
 
     @PostMapping("page")
-    public RestResponse page(RestRequest restRequest, Resource resource) {
-        IPage<Resource> page = resourceService.getPage(resource, restRequest);
-        return RestResponse.success(page);
+    public RestResponse page(RestRequest restRequest, ResourcePageQueryRequest query) {
+        IPage<Resource> page =
+            resourceService.getPage(ResourceAssembler.toEntity(query), restRequest);
+        return RestResponse.success(ResourceAssembler.toPageResponse(page));
     }
 
     @PutMapping("update")
     @RequiresPermissions("resource:update")
-    public RestResponse updateResource(@Valid Resource resource) {
-        resourceService.updateResource(resource);
+    public RestResponse updateResource(@Valid ResourceUpdateRequest request) {
+        resourceService.updateResource(ResourceAssembler.toEntity(request));
         return RestResponse.success();
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("resource:delete")
-    public RestResponse deleteResource(@Valid Resource resource) {
-        this.resourceService.remove(resource.getId());
+    public RestResponse deleteResource(@Valid TeamScopedIdRequest request) {
+        this.resourceService.remove(request.getId());
         return RestResponse.success();
     }
 
     @PostMapping("list")
-    public RestResponse listResource(@RequestParam Long teamId) {
-        List<Resource> resourceList = resourceService.listByTeamId(teamId);
-        return RestResponse.success(resourceList);
+    public RestResponse listResource(TeamIdRequest request) {
+        List<Resource> resourceList = resourceService.listByTeamId(request.getTeamId());
+        return RestResponse.success(ResourceAssembler.toListResponse(resourceList));
     }
 
     @PostMapping("upload")
     @RequiresPermissions("resource:add")
     public RestResponse upload(MultipartFile file) throws Exception {
-        UploadResponse uploadPath = resourceService.upload(file);
-        return RestResponse.success(uploadPath);
+        return RestResponse.success(ResourceAssembler.toUploadResponse(resourceService.upload(file)));
     }
 
     @PostMapping("upload_jars")

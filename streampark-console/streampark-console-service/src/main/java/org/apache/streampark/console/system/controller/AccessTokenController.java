@@ -21,22 +21,28 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.enums.AccessTokenStateEnum;
 import org.apache.streampark.console.core.util.ServiceHelper;
+import org.apache.streampark.console.system.assembler.AccessTokenAssembler;
 import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.entity.User;
+import org.apache.streampark.console.system.request.token.TokenCreateRequest;
+import org.apache.streampark.console.system.request.token.TokenDeleteRequest;
+import org.apache.streampark.console.system.request.token.TokenListQueryRequest;
+import org.apache.streampark.console.system.request.token.TokenToggleRequest;
 import org.apache.streampark.console.system.service.AccessTokenService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.Valid;
 
+@Validated
 @RestController
 @RequestMapping("token")
 public class AccessTokenController {
@@ -46,10 +52,8 @@ public class AccessTokenController {
 
     @PostMapping(value = "create")
     @RequiresPermissions("token:add")
-    public RestResponse createToken(
-                                    @NotNull(message = "{required}") Long userId,
-                                    @RequestParam(required = false) String description) throws Exception {
-        return accessTokenService.create(userId, description);
+    public RestResponse createToken(@Valid TokenCreateRequest request) throws Exception {
+        return accessTokenService.create(request.getUserId(), request.getDescription());
     }
 
     @PostMapping(value = "check")
@@ -69,21 +73,22 @@ public class AccessTokenController {
 
     @PostMapping(value = "list")
     @RequiresPermissions("token:view")
-    public RestResponse tokensList(RestRequest restRequest, AccessToken accessToken) {
-        IPage<AccessToken> accessTokens = accessTokenService.getPage(accessToken, restRequest);
-        return RestResponse.success(accessTokens);
+    public RestResponse tokensList(RestRequest restRequest, TokenListQueryRequest query) {
+        IPage<AccessToken> accessTokens =
+            accessTokenService.getPage(AccessTokenAssembler.toEntity(query), restRequest);
+        return RestResponse.success(AccessTokenAssembler.toPageResponse(accessTokens));
     }
 
     @PostMapping("toggle")
     @RequiresPermissions("token:add")
-    public RestResponse toggleToken(@NotNull(message = "{required}") Long tokenId) {
-        return accessTokenService.toggle(tokenId);
+    public RestResponse toggleToken(@Valid TokenToggleRequest request) {
+        return accessTokenService.toggle(request.getTokenId());
     }
 
     @DeleteMapping(value = "delete")
     @RequiresPermissions("token:delete")
-    public RestResponse deleteToken(@NotNull(message = "{required}") Long tokenId) {
-        boolean res = accessTokenService.removeById(tokenId);
+    public RestResponse deleteToken(@Valid TokenDeleteRequest request) {
+        boolean res = accessTokenService.removeById(request.getTokenId());
         return RestResponse.success(res);
     }
 }

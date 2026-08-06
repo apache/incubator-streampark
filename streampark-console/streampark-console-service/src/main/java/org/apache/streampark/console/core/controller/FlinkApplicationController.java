@@ -24,10 +24,13 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.AppChangeEvent;
 import org.apache.streampark.console.core.annotation.Permission;
+import org.apache.streampark.console.core.assembler.AppLogAssembler;
 import org.apache.streampark.console.core.assembler.FlinkApplicationAssembler;
-import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkApplication;
-import org.apache.streampark.console.core.entity.FlinkApplicationBackup;
+import org.apache.streampark.console.core.request.app.AppBackupDeleteRequest;
+import org.apache.streampark.console.core.request.app.AppBackupQueryRequest;
+import org.apache.streampark.console.core.request.app.AppOptLogDeleteRequest;
+import org.apache.streampark.console.core.request.app.AppOptLogQueryRequest;
 import org.apache.streampark.console.core.enums.AppExistsStateEnum;
 import org.apache.streampark.console.core.request.flink.FlinkAppCancelRequest;
 import org.apache.streampark.console.core.request.flink.FlinkAppCheckNameRequest;
@@ -225,24 +228,24 @@ public class FlinkApplicationController {
     }
 
     @PostMapping("backups")
-    @Permission(app = "#backUp.appId", team = "#backUp.teamId")
-    public RestResponse backups(FlinkApplicationBackup backUp, RestRequest request) {
-        IPage<FlinkApplicationBackup> backups = backUpService.getPage(backUp, request);
-        return RestResponse.success(backups);
+    @Permission(app = "#query.appId", team = "#query.teamId")
+    public RestResponse backups(AppBackupQueryRequest query, RestRequest request) {
+        return RestResponse.success(
+            AppLogAssembler.toBackupPage(backUpService.getPage(AppLogAssembler.toEntity(query), request)));
     }
 
     @PostMapping("opt_log")
-    @Permission(app = "#applicationLog.appId", team = "#applicationLog.teamId")
-    public RestResponse log(ApplicationLog applicationLog, RestRequest request) {
-        IPage<ApplicationLog> applicationList = applicationLogService.getPage(applicationLog, request);
-        return RestResponse.success(applicationList);
+    @Permission(app = "#query.appId", team = "#query.teamId")
+    public RestResponse log(AppOptLogQueryRequest query, RestRequest request) {
+        return RestResponse.success(
+            AppLogAssembler.toOptLogPage(applicationLogService.getPage(AppLogAssembler.toEntity(query), request)));
     }
 
-    @Permission(app = "#applicationLog.appId", team = "#applicationLog.teamId")
+    @Permission(app = "#request.appId", team = "#request.teamId")
     @PostMapping("delete/opt_log")
     @RequiresPermissions("app:delete")
-    public RestResponse deleteLog(ApplicationLog applicationLog) {
-        Boolean deleted = applicationLogService.delete(applicationLog);
+    public RestResponse deleteLog(AppOptLogDeleteRequest request) {
+        Boolean deleted = applicationLogService.delete(AppLogAssembler.toEntity(request));
         return RestResponse.success(deleted);
     }
 
@@ -254,10 +257,10 @@ public class FlinkApplicationController {
         return RestResponse.success(deleted);
     }
 
-    @Permission(app = "#backUp.appId")
+    @Permission(app = "#request.appId")
     @PostMapping("delete/backup")
-    public RestResponse deleteBackup(FlinkApplicationBackup backUp) throws InternalException {
-        Boolean deleted = backUpService.removeById(backUp.getId());
+    public RestResponse deleteBackup(AppBackupDeleteRequest request) throws InternalException {
+        Boolean deleted = backUpService.removeById(request.getId());
         return RestResponse.success(deleted);
     }
 

@@ -18,18 +18,14 @@
 package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
-import org.apache.streampark.console.base.util.JacksonUtils;
-import org.apache.streampark.console.core.bean.AlertConfigParams;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 
 @Getter
 @Setter
@@ -63,39 +59,4 @@ public class AlertConfig extends BaseEntity {
 
     /** lark alert parameters */
     private String larkParams;
-
-    public static AlertConfig of(AlertConfigParams params) {
-        if (params == null) {
-            return null;
-        }
-        AlertConfig alertConfig = new AlertConfig();
-        BeanUtils.copyProperties(
-            params,
-            alertConfig,
-            "emailParams",
-            "dingTalkParams",
-            "weComParams",
-            "httpCallbackParams",
-            "larkParams");
-        try {
-            if (params.getEmailParams() != null) {
-                alertConfig.setEmailParams(JacksonUtils.write(params.getEmailParams()));
-            }
-            if (params.getDingTalkParams() != null) {
-                alertConfig.setDingTalkParams(JacksonUtils.write(params.getDingTalkParams()));
-            }
-            if (params.getWeComParams() != null) {
-                alertConfig.setWeComParams(JacksonUtils.write(params.getWeComParams()));
-            }
-            if (params.getHttpCallbackParams() != null) {
-                alertConfig.setHttpCallbackParams(JacksonUtils.write(params.getHttpCallbackParams()));
-            }
-            if (params.getLarkParams() != null) {
-                alertConfig.setLarkParams(JacksonUtils.write(params.getLarkParams()));
-            }
-        } catch (JsonProcessingException e) {
-            log.error("Json write failed", e);
-        }
-        return alertConfig;
-    }
 }

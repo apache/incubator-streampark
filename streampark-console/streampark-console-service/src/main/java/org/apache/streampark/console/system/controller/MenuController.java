@@ -20,7 +20,10 @@ package org.apache.streampark.console.system.controller;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.domain.router.VueRouter;
 import org.apache.streampark.console.core.util.ServiceHelper;
+import org.apache.streampark.console.system.assembler.MenuAssembler;
 import org.apache.streampark.console.system.entity.Menu;
+import org.apache.streampark.console.system.request.menu.MenuListQueryRequest;
+import org.apache.streampark.console.system.request.menu.MenuRouterRequest;
 import org.apache.streampark.console.system.service.MenuService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -33,7 +36,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Validated
@@ -45,16 +47,16 @@ public class MenuController {
     private MenuService menuService;
 
     @PostMapping("router")
-    public RestResponse getUserRouters(Long teamId) {
+    public RestResponse getUserRouters(MenuRouterRequest request) {
         // TODO The teamId is required, get routers should be called after choose teamId.
-        List<VueRouter<Menu>> routers = this.menuService.listRouters(ServiceHelper.getUserId(), teamId);
+        List<VueRouter<Menu>> routers = this.menuService.listRouters(ServiceHelper.getUserId(), request.getTeamId());
         return RestResponse.success(routers);
     }
 
     @PostMapping("list")
     @RequiresPermissions("menu:view")
-    public RestResponse menuList(Menu menu) {
-        Map<String, Object> menuMap = this.menuService.listMenuMap(menu);
-        return RestResponse.success(menuMap);
+    public RestResponse menuList(MenuListQueryRequest query) {
+        return RestResponse.success(
+            MenuAssembler.toListResponse(this.menuService.listMenuMap(MenuAssembler.toEntity(query))));
     }
 }

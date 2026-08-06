@@ -19,10 +19,12 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.bean.DockerConfig;
-import org.apache.streampark.console.core.bean.ResponseResult;
-import org.apache.streampark.console.core.bean.SenderEmail;
+import org.apache.streampark.console.core.assembler.SettingAssembler;
 import org.apache.streampark.console.core.entity.Setting;
+import org.apache.streampark.console.core.request.setting.SettingDockerRequest;
+import org.apache.streampark.console.core.request.setting.SettingEmailRequest;
+import org.apache.streampark.console.core.request.setting.SettingGetRequest;
+import org.apache.streampark.console.core.request.setting.SettingUpdateRequest;
 import org.apache.streampark.console.core.service.SettingService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -50,63 +52,65 @@ public class SettingController {
     @PostMapping("all")
     @RequiresPermissions("setting:view")
     public RestResponse all() {
-        LambdaQueryWrapper<Setting> query = new LambdaQueryWrapper<Setting>().orderByAsc(Setting::getOrderNum);
+        LambdaQueryWrapper<Setting> query =
+            new LambdaQueryWrapper<Setting>().orderByAsc(Setting::getOrderNum);
         List<Setting> setting = settingService.list(query);
-        return RestResponse.success(setting);
+        return RestResponse.success(SettingAssembler.toListResponse(setting));
     }
 
     @PostMapping("get")
-    public RestResponse get(String key) {
-        Setting setting = settingService.get(key);
-        return RestResponse.success(setting);
+    public RestResponse get(SettingGetRequest request) {
+        Setting setting = settingService.get(request.getKey());
+        return RestResponse.success(SettingAssembler.toResponse(setting));
     }
 
     @PostMapping("update")
     @RequiresPermissions("setting:update")
-    public RestResponse update(Setting setting) {
-        boolean updated = settingService.update(setting);
+    public RestResponse update(SettingUpdateRequest request) {
+        boolean updated = settingService.update(SettingAssembler.toEntity(request));
         return RestResponse.success(updated);
     }
 
     @PostMapping("docker")
     @RequiresPermissions("setting:view")
     public RestResponse docker() {
-        DockerConfig dockerConfig = settingService.getDockerConfig();
-        return RestResponse.success(dockerConfig);
+        return RestResponse.success(SettingAssembler.toDockerResponse(settingService.getDockerConfig()));
     }
 
     @PostMapping("check/docker")
     @RequiresPermissions("setting:view")
-    public RestResponse checkDocker(DockerConfig dockerConfig) {
-        ResponseResult result = settingService.checkDocker(dockerConfig);
-        return RestResponse.success(result);
+    public RestResponse checkDocker(SettingDockerRequest request) {
+        return RestResponse.success(
+            SettingAssembler.toCheckResponse(
+                settingService.checkDocker(SettingAssembler.toDockerConfig(request))));
     }
 
     @PostMapping("update/docker")
     @RequiresPermissions("setting:update")
-    public RestResponse updateDocker(DockerConfig dockerConfig) {
-        boolean updated = settingService.updateDocker(dockerConfig);
+    public RestResponse updateDocker(SettingDockerRequest request) {
+        boolean updated =
+            settingService.updateDocker(SettingAssembler.toDockerConfig(request));
         return RestResponse.success(updated);
     }
 
     @PostMapping("email")
     @RequiresPermissions("setting:view")
     public RestResponse email() {
-        SenderEmail senderEmail = settingService.getSenderEmail();
-        return RestResponse.success(senderEmail);
+        return RestResponse.success(SettingAssembler.toEmailResponse(settingService.getSenderEmail()));
     }
 
     @PostMapping("check/email")
     @RequiresPermissions("setting:view")
-    public RestResponse checkEmail(SenderEmail senderEmail) {
-        ResponseResult result = settingService.checkEmail(senderEmail);
-        return RestResponse.success(result);
+    public RestResponse checkEmail(SettingEmailRequest request) {
+        return RestResponse.success(
+            SettingAssembler.toCheckResponse(
+                settingService.checkEmail(SettingAssembler.toSenderEmail(request))));
     }
 
     @PostMapping("update/email")
     @RequiresPermissions("setting:update")
-    public RestResponse updateEmail(SenderEmail senderEmail) {
-        boolean updated = settingService.updateEmail(senderEmail);
+    public RestResponse updateEmail(SettingEmailRequest request) {
+        boolean updated = settingService.updateEmail(SettingAssembler.toSenderEmail(request));
         return RestResponse.success(updated);
     }
 

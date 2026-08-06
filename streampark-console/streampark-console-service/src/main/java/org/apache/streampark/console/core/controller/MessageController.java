@@ -19,8 +19,11 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.core.assembler.MessageAssembler;
 import org.apache.streampark.console.core.entity.Message;
 import org.apache.streampark.console.core.enums.NoticeTypeEnum;
+import org.apache.streampark.console.core.request.message.MessageDeleteRequest;
+import org.apache.streampark.console.core.request.message.MessageNoticeRequest;
 import org.apache.streampark.console.core.service.MessageService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -41,14 +44,14 @@ public class MessageController {
     private MessageService messageService;
 
     @PostMapping("notice")
-    public RestResponse notice(Integer type, RestRequest request) {
-        NoticeTypeEnum noticeTypeEnum = NoticeTypeEnum.of(type);
-        IPage<Message> pages = messageService.getUnReadPage(noticeTypeEnum, request);
-        return RestResponse.success(pages);
+    public RestResponse notice(MessageNoticeRequest request, RestRequest restRequest) {
+        NoticeTypeEnum noticeTypeEnum = NoticeTypeEnum.of(request.getType());
+        IPage<Message> pages = messageService.getUnReadPage(noticeTypeEnum, restRequest);
+        return RestResponse.success(MessageAssembler.toPageResponse(pages));
     }
 
     @PostMapping("delete")
-    public RestResponse delete(Long id) {
-        return RestResponse.success(messageService.removeById(id));
+    public RestResponse delete(MessageDeleteRequest request) {
+        return RestResponse.success(messageService.removeById(request.getId()));
     }
 }

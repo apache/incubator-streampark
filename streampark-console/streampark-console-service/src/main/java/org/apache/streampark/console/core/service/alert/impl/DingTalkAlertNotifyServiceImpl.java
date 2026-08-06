@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.service.alert.impl;
 
 import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.util.FreemarkerUtils;
-import org.apache.streampark.console.core.bean.AlertConfigParams;
+import org.apache.streampark.console.core.request.alert.AlertConfigRequest;
 import org.apache.streampark.console.core.bean.AlertDingTalkParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.bean.RobotResponse;
@@ -71,7 +71,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
     }
 
     @Override
-    public boolean doAlert(AlertConfigParams alertConfig, AlertTemplate alertTemplate) throws AlertException {
+    public boolean doAlert(AlertConfigRequest alertConfig, AlertTemplate alertTemplate) throws AlertException {
         AlertDingTalkParams dingTalkParams = alertConfig.getDingTalkParams();
         try {
             // handling contacts

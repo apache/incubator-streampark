@@ -21,9 +21,12 @@ import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
+import org.apache.streampark.console.system.assembler.PassportAssembler;
+import org.apache.streampark.console.system.assembler.UserAssembler;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.User;
+import org.apache.streampark.console.system.request.passport.PassportSignInRequest;
 import org.apache.streampark.console.system.security.Authenticator;
 import org.apache.streampark.console.system.service.UserService;
 
@@ -42,7 +45,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Validated
@@ -76,14 +78,14 @@ public class PassportController {
     }
 
     @PostMapping("signin")
-    public RestResponse signin(User loginUser) throws Exception {
+    public RestResponse signin(PassportSignInRequest request) throws Exception {
 
-        if (StringUtils.isEmpty(loginUser.getUsername())) {
+        if (StringUtils.isEmpty(request.getUsername())) {
             return RestResponse.success().put("code", 0);
         }
 
-        User user =
-            authenticator.authenticate(loginUser.getUsername(), loginUser.getPassword(), loginUser.getLoginType());
+        User user = authenticator.authenticate(
+            request.getUsername(), request.getPassword(), PassportAssembler.toLoginType(request));
 
         if (user == null) {
             return RestResponse.success().put("code", 0);
@@ -93,19 +95,18 @@ public class PassportController {
             return RestResponse.success().put("code", 1);
         }
 
-        this.userService.updateLoginTime(loginUser.getUsername());
+        this.userService.updateLoginTime(request.getUsername());
         String token = JWTUtil.sign(user, AuthenticationType.SIGN);
 
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(JWTUtil.getTTLOfSecond());
         String ttl = DateUtils.formatFullTime(expireTime);
 
-        // generate UserInfo
         String userId = RandomStringUtils.randomAlphanumeric(20);
         user.setId(userId);
         JWTToken jwtToken = new JWTToken(token, ttl);
-        Map<String, Object> userInfo = userService.generateFrontendUserInfo(user, jwtToken);
 
-        return new RestResponse().data(userInfo);
+        return new RestResponse().data(
+            UserAssembler.toSessionResponse(userService.generateFrontendUserInfo(user, jwtToken)));
     }
 
     @PostMapping("signout")

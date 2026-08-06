@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.service.alert;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.FreemarkerUtils;
-import org.apache.streampark.console.core.bean.AlertConfigParams;
+import org.apache.streampark.console.core.request.alert.AlertConfigRequest;
 import org.apache.streampark.console.core.bean.AlertDingTalkParams;
 import org.apache.streampark.console.core.bean.AlertLarkParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
@@ -54,7 +54,7 @@ import java.util.TimeZone;
 class AlertServiceTest {
 
     AlertTemplate alertTemplate;
-    AlertConfigParams params = new AlertConfigParams();
+    AlertConfigRequest params = new AlertConfigRequest();
     ObjectMapper mapper = new ObjectMapper();
     RestTemplate restTemplate = new RestTemplate();
     private Template template;

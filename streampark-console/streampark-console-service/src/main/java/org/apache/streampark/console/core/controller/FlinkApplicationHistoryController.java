@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.core.request.flink.FlinkHistoryDeployModeRequest;
 import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -51,13 +52,13 @@ public class FlinkApplicationHistoryController {
 
     @PostMapping("session_cluster_ids")
     @RequiresPermissions("app:create")
-    public RestResponse listSessionClusterId(int deployMode) {
+    public RestResponse listSessionClusterId(FlinkHistoryDeployModeRequest request) {
         List<String> clusterIds;
-        switch (FlinkDeployMode.of(deployMode)) {
+        switch (FlinkDeployMode.of(request.getDeployMode())) {
             case KUBERNETES_NATIVE_SESSION:
             case YARN_SESSION:
             case REMOTE:
-                clusterIds = applicationInfoService.listRecentK8sClusterId(deployMode);
+                clusterIds = applicationInfoService.listRecentK8sClusterId(request.getDeployMode());
                 break;
             default:
                 clusterIds = new ArrayList<>(0);

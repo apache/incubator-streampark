@@ -19,8 +19,16 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.core.assembler.FlinkApplicationAssembler;
+import org.apache.streampark.console.core.assembler.VariableAssembler;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.Variable;
+import org.apache.streampark.console.core.request.common.TeamScopedIdRequest;
+import org.apache.streampark.console.core.request.variable.VariableCheckCodeRequest;
+import org.apache.streampark.console.core.request.variable.VariableCreateRequest;
+import org.apache.streampark.console.core.request.variable.VariableListRequest;
+import org.apache.streampark.console.core.request.variable.VariablePageQueryRequest;
+import org.apache.streampark.console.core.request.variable.VariableUpdateRequest;
 import org.apache.streampark.console.core.service.VariableService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -33,11 +41,9 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 
 import java.util.List;
 
@@ -50,79 +56,68 @@ public class VariableController {
     @Autowired
     private VariableService variableService;
 
-    /**
-     * Get variable list by page.
-     *
-     * @param restRequest
-     * @param variable
-     * @return
-     */
     @PostMapping("page")
     @RequiresPermissions("variable:view")
-    public RestResponse page(RestRequest restRequest, Variable variable) {
-        IPage<Variable> page = variableService.getPage(variable, restRequest);
+    public RestResponse page(RestRequest restRequest, VariablePageQueryRequest query) {
+        IPage<Variable> page =
+            variableService.getPage(VariableAssembler.toEntity(query), restRequest);
         for (Variable v : page.getRecords()) {
             v.dataMasking();
         }
-        return RestResponse.success(page);
+        return RestResponse.success(VariableAssembler.toPageResponse(page));
     }
 
-    /**
-     * Get variables through team and search keywords.
-     *
-     * @param teamId
-     * @param keyword Fuzzy search keywords through variable code or description, Nullable.
-     * @return
-     */
     @PostMapping("list")
-    public RestResponse variableList(@RequestParam Long teamId, String keyword) {
-        List<Variable> variableList = variableService.listByTeamId(teamId, keyword);
+    public RestResponse variableList(VariableListRequest request) {
+        List<Variable> variableList =
+            variableService.listByTeamId(request.getTeamId(), request.getKeyword());
         for (Variable v : variableList) {
             v.dataMasking();
         }
-        return RestResponse.success(variableList);
+        return RestResponse.success(VariableAssembler.toListResponse(variableList));
     }
 
     @PostMapping("depend_apps")
     @RequiresPermissions("variable:depend_apps")
-    public RestResponse dependApps(RestRequest restRequest, Variable variable) {
-        IPage<FlinkApplication> dependApps = variableService.getDependAppsPage(variable, restRequest);
-        return RestResponse.success(dependApps);
+    public RestResponse dependApps(RestRequest restRequest, TeamScopedIdRequest request) {
+        IPage<FlinkApplication> dependApps =
+            variableService.getDependAppsPage(VariableAssembler.toEntity(request), restRequest);
+        return RestResponse.success(FlinkApplicationAssembler.toPageResponse(dependApps));
     }
 
     @PostMapping("post")
     @RequiresPermissions("variable:add")
-    public RestResponse addVariable(@Valid Variable variable) {
-        this.variableService.createVariable(variable);
+    public RestResponse addVariable(@Valid VariableCreateRequest request) {
+        this.variableService.createVariable(VariableAssembler.toEntity(request));
         return RestResponse.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("variable:update")
-    public RestResponse updateVariable(@Valid Variable variable) {
-        variableService.updateVariable(variable);
+    public RestResponse updateVariable(@Valid VariableUpdateRequest request) {
+        variableService.updateVariable(VariableAssembler.toEntity(request));
         return RestResponse.success();
     }
 
     @PostMapping("show_original")
     @RequiresPermissions("variable:show_original")
-    public RestResponse showOriginal(@RequestParam Long id) {
-        Variable v = this.variableService.getById(id);
-        return RestResponse.success(v);
+    public RestResponse showOriginal(TeamScopedIdRequest request) {
+        Variable v = this.variableService.getById(request.getId());
+        return RestResponse.success(VariableAssembler.toResponse(v));
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("variable:delete")
-    public RestResponse deleteVariable(@Valid Variable variable) {
-        this.variableService.remove(variable);
+    public RestResponse deleteVariable(@Valid TeamScopedIdRequest request) {
+        this.variableService.remove(VariableAssembler.toEntity(request));
         return RestResponse.success();
     }
 
     @PostMapping("check/code")
-    public RestResponse checkVariableCode(
-                                          @RequestParam Long teamId,
-                                          @NotBlank(message = "{required}") String variableCode) {
-        boolean result = this.variableService.findByVariableCode(teamId, variableCode) == null;
+    public RestResponse checkVariableCode(@Valid VariableCheckCodeRequest request) {
+        boolean result =
+            this.variableService.findByVariableCode(request.getTeamId(), request.getVariableCode())
+                == null;
         return RestResponse.success(result);
     }
 }

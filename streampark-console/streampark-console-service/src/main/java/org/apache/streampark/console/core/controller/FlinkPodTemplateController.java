@@ -19,6 +19,9 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.util.HostsUtils;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.core.request.flink.FlinkPodTemplateExtractRequest;
+import org.apache.streampark.console.core.request.flink.FlinkPodTemplateHostAliasRequest;
+import org.apache.streampark.console.core.request.flink.FlinkPodTemplatePreviewRequest;
 import org.apache.streampark.flink.kubernetes.PodTemplateParser;
 
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +46,6 @@ public class FlinkPodTemplateController {
 
     @PostMapping("sys_hosts")
     public RestResponse getHosts() {
-        // hostname -> ipv4
         Map<String, String> hostMap = HostsUtils.getSystemHostsAsJava(true);
         List<String> friendlyHosts = hostMap.entrySet().stream()
             .map(e -> e.getKey() + ":" + e.getValue())
@@ -56,11 +58,12 @@ public class FlinkPodTemplateController {
         return RestResponse.success(PodTemplateParser.getInitPodTemplateContent());
     }
 
-    /** @param hosts hostname:ipv4,hostname:ipv4,hostname:ipv4... */
+    /** @param request hosts hostname:ipv4,hostname:ipv4,hostname:ipv4... */
     @PostMapping("comp_host_alias")
-    public RestResponse completeHostAlias(String hosts, String podTemplate) {
-        Map<String, String> hostMap = covertHostsParamToMap(hosts);
-        String completedPodTemplate = PodTemplateParser.completeHostAliasSpec(hostMap, podTemplate);
+    public RestResponse completeHostAlias(FlinkPodTemplateHostAliasRequest request) {
+        Map<String, String> hostMap = covertHostsParamToMap(request.getHosts());
+        String completedPodTemplate =
+            PodTemplateParser.completeHostAliasSpec(hostMap, request.getPodTemplate());
         return RestResponse.success(completedPodTemplate);
     }
 
@@ -79,18 +82,18 @@ public class FlinkPodTemplateController {
     }
 
     @PostMapping("extract_host_alias")
-    public RestResponse extractHostAlias(String podTemplate) {
-        Map<String, String> hosts = PodTemplateParser.extractHostAliasMap(podTemplate);
+    public RestResponse extractHostAlias(FlinkPodTemplateExtractRequest request) {
+        Map<String, String> hosts = PodTemplateParser.extractHostAliasMap(request.getPodTemplate());
         List<String> friendlyHosts = hosts.entrySet().stream()
             .map(e -> e.getKey() + ":" + e.getValue())
             .collect(Collectors.toList());
         return RestResponse.success(friendlyHosts);
     }
 
-    /** @param hosts hostname:ipv4,hostname:ipv4,hostname:ipv4... */
+    /** @param request hosts hostname:ipv4,hostname:ipv4,hostname:ipv4... */
     @PostMapping("preview_host_alias")
-    public RestResponse previewHostAlias(String hosts) {
-        Map<String, String> hostMap = covertHostsParamToMap(hosts);
+    public RestResponse previewHostAlias(FlinkPodTemplatePreviewRequest request) {
+        Map<String, String> hostMap = covertHostsParamToMap(request.getHosts());
         String podTemplate = PodTemplateParser.previewHostAliasSpec(hostMap);
         return RestResponse.success(podTemplate);
     }

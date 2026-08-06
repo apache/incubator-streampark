@@ -20,8 +20,11 @@ package org.apache.streampark.console.core.controller;
 import org.apache.streampark.common.util.HadoopConfigUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.entity.FlinkApplication;
+import org.apache.streampark.console.core.assembler.FlinkConfAssembler;
 import org.apache.streampark.console.core.entity.FlinkApplicationConfig;
+import org.apache.streampark.console.core.request.common.IdRequest;
+import org.apache.streampark.console.core.request.flink.FlinkAppIdRequest;
+import org.apache.streampark.console.core.request.flink.FlinkConfListQueryRequest;
 import org.apache.streampark.console.core.service.application.FlinkApplicationConfigService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -48,9 +51,9 @@ public class FlinkConfigController {
     private FlinkApplicationConfigService applicationConfigService;
 
     @PostMapping("get")
-    public RestResponse get(Long id) {
-        FlinkApplicationConfig config = applicationConfigService.get(id);
-        return RestResponse.success(config);
+    public RestResponse get(IdRequest request) {
+        FlinkApplicationConfig config = applicationConfigService.get(request.getId());
+        return RestResponse.success(FlinkConfAssembler.toResponse(config));
     }
 
     @PostMapping("template")
@@ -60,21 +63,23 @@ public class FlinkConfigController {
     }
 
     @PostMapping("list")
-    public RestResponse list(FlinkApplicationConfig config, RestRequest request) {
+    public RestResponse list(FlinkConfListQueryRequest query, RestRequest request) {
+        FlinkApplicationConfig config = FlinkConfAssembler.toEntity(query);
         IPage<FlinkApplicationConfig> page = applicationConfigService.getPage(config, request);
-        return RestResponse.success(page);
+        return RestResponse.success(FlinkConfAssembler.toPageResponse(page));
     }
 
     @PostMapping("history")
-    public RestResponse history(FlinkApplication application) {
-        List<FlinkApplicationConfig> history = applicationConfigService.list(application.getId());
-        return RestResponse.success(history);
+    public RestResponse history(FlinkAppIdRequest request) {
+        List<FlinkApplicationConfig> history =
+            applicationConfigService.list(FlinkConfAssembler.toAppId(request));
+        return RestResponse.success(FlinkConfAssembler.toListResponse(history));
     }
 
     @PostMapping("delete")
     @RequiresPermissions("conf:delete")
-    public RestResponse delete(Long id) {
-        Boolean deleted = applicationConfigService.removeById(id);
+    public RestResponse delete(IdRequest request) {
+        Boolean deleted = applicationConfigService.removeById(request.getId());
         return RestResponse.success(deleted);
     }
 
@@ -84,6 +89,6 @@ public class FlinkConfigController {
         Map<String, Map<String, String>> result = ImmutableMap.of(
             "hadoop", HadoopConfigUtils.readSystemHadoopConf(),
             "hive", HadoopConfigUtils.readSystemHiveConf());
-        return RestResponse.success(result);
+        return RestResponse.success(FlinkConfAssembler.toHadoopResponse(result));
     }
 }

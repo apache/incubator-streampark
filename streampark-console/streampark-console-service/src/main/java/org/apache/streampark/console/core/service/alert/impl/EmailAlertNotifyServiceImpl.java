@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.service.alert.impl;
 
 import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.util.FreemarkerUtils;
-import org.apache.streampark.console.core.bean.AlertConfigParams;
+import org.apache.streampark.console.core.request.alert.AlertConfigRequest;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.bean.EmailConfig;
 import org.apache.streampark.console.core.service.alert.AlertNotifyService;
@@ -44,7 +44,7 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
     private final Template template = FreemarkerUtils.loadTemplateFile("alert-email.ftl");
 
     @Override
-    public boolean doAlert(AlertConfigParams alertConfig, AlertTemplate template) throws AlertException {
+    public boolean doAlert(AlertConfigRequest alertConfig, AlertTemplate template) throws AlertException {
         EmailConfig emailConfig = Optional.ofNullable(EmailConfig.fromSetting())
             .orElseThrow(() -> new AlertException("Please configure the email sender first"));
         String contacts = alertConfig.getEmailParams() == null ? null : alertConfig.getEmailParams().getContacts();

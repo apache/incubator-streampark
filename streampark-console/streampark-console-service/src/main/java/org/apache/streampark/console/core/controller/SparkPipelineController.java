@@ -19,7 +19,10 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.annotation.Permission;
+import org.apache.streampark.console.core.assembler.SparkPipelineAssembler;
 import org.apache.streampark.console.core.entity.ApplicationBuildPipeline;
+import org.apache.streampark.console.core.request.spark.SparkPipelineBuildRequest;
+import org.apache.streampark.console.core.request.spark.SparkPipelineDetailRequest;
 import org.apache.streampark.console.core.service.application.SparkAplicationBuildPipelineService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -31,8 +34,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -47,16 +48,15 @@ public class SparkPipelineController {
     /**
      * Release application building pipeline.
      *
-     * @param appId application id
-     * @param forceBuild forced start pipeline or not
+     * @param request build request carrying application id and force flag
      * @return Whether the pipeline was successfully started
      */
     @PostMapping("build")
     @RequiresPermissions("app:create")
-    @Permission(app = "#appId")
-    public RestResponse buildApplication(Long appId, boolean forceBuild) {
+    @Permission(app = "#request.appId")
+    public RestResponse buildApplication(SparkPipelineBuildRequest request) {
         try {
-            boolean actionResult = appBuildPipeService.buildApplication(appId, forceBuild);
+            boolean actionResult = appBuildPipeService.buildApplication(request.getAppId(), request.isForceBuild());
             return RestResponse.success(actionResult);
         } catch (Exception e) {
             return RestResponse.success(false).message(e.getMessage());
@@ -66,16 +66,15 @@ public class SparkPipelineController {
     /**
      * Get application building pipeline progress detail.
      *
-     * @param appId application id
-     * @return "pipeline" -> pipeline details, "docker" -> docker resolved snapshot
+     * @param request detail request carrying application id
+     * @return pipeline progress view
      */
     @PostMapping("/detail")
     @RequiresPermissions("app:view")
-    @Permission(app = "#appId")
-    public RestResponse getBuildProgressDetail(Long appId) {
-        Map<String, Object> details = new HashMap<>(0);
-        Optional<ApplicationBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
-        details.put("pipeline", pipeline.map(ApplicationBuildPipeline::toView).orElse(null));
-        return RestResponse.success(details);
+    @Permission(app = "#request.appId")
+    public RestResponse getBuildProgressDetail(SparkPipelineDetailRequest request) {
+        Optional<ApplicationBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(request.getAppId());
+        return RestResponse.success(
+            SparkPipelineAssembler.toDetailResponse(pipeline.map(ApplicationBuildPipeline::toView).orElse(null)));
     }
 }

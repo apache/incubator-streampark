@@ -23,10 +23,27 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.AppChangeEvent;
-import org.apache.streampark.console.core.entity.ApplicationLog;
-import org.apache.streampark.console.core.entity.FlinkApplicationBackup;
+import org.apache.streampark.console.core.annotation.Permission;
+import org.apache.streampark.console.core.assembler.AppLogAssembler;
+import org.apache.streampark.console.core.assembler.SparkApplicationAssembler;
 import org.apache.streampark.console.core.entity.SparkApplication;
+import org.apache.streampark.console.core.request.app.AppBackupDeleteRequest;
+import org.apache.streampark.console.core.request.app.AppBackupQueryRequest;
+import org.apache.streampark.console.core.request.app.AppOptLogQueryRequest;
 import org.apache.streampark.console.core.enums.AppExistsStateEnum;
+import org.apache.streampark.console.core.request.common.IdRequest;
+import org.apache.streampark.console.core.request.common.TeamIdRequest;
+import org.apache.streampark.console.core.request.spark.SparkAppCancelRequest;
+import org.apache.streampark.console.core.request.spark.SparkAppCheckNameRequest;
+import org.apache.streampark.console.core.request.spark.SparkAppConfigRequest;
+import org.apache.streampark.console.core.request.spark.SparkAppCopyRequest;
+import org.apache.streampark.console.core.request.spark.SparkAppCreateRequest;
+import org.apache.streampark.console.core.request.spark.SparkAppIdRequest;
+import org.apache.streampark.console.core.request.spark.SparkAppListQueryRequest;
+import org.apache.streampark.console.core.request.spark.SparkAppMappingRequest;
+import org.apache.streampark.console.core.request.spark.SparkAppStartRequest;
+import org.apache.streampark.console.core.request.spark.SparkAppUpdateRequest;
+import org.apache.streampark.console.core.response.spark.SparkAppResponse;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.application.ApplicationLogService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationBackupService;
@@ -75,100 +92,116 @@ public class SparkApplicationController {
     private ResourceService resourceService;
 
     @PostMapping("get")
+    @Permission(app = "#request.id")
     @RequiresPermissions("app:detail")
-    public RestResponse get(SparkApplication app) {
-        SparkApplication application = applicationManageService.getApp(app.getId());
-        return RestResponse.success(application);
+    public RestResponse get(SparkAppIdRequest request) {
+        SparkApplication application = applicationManageService.getApp(request.getId());
+        SparkAppResponse response = SparkApplicationAssembler.toResponse(application);
+        return RestResponse.success(response);
     }
 
+    @Permission(team = "#request.teamId")
     @PostMapping("create")
     @RequiresPermissions("app:create")
-    public RestResponse create(SparkApplication app) throws IOException {
+    public RestResponse create(SparkAppCreateRequest request) throws IOException {
+        SparkApplication app = SparkApplicationAssembler.toEntity(request);
         boolean saved = applicationManageService.create(app);
         return RestResponse.success(saved);
     }
 
+    @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("copy")
     @RequiresPermissions("app:copy")
-    public RestResponse copy(SparkApplication app) throws IOException {
-        applicationManageService.copy(app);
+    public RestResponse copy(SparkAppCopyRequest request) throws IOException {
+        applicationManageService.copy(SparkApplicationAssembler.toEntity(request));
         return RestResponse.success();
     }
 
     @AppChangeEvent
+    @Permission(app = "#request.id")
     @PostMapping("update")
     @RequiresPermissions("app:update")
-    public RestResponse update(SparkApplication app) {
-        applicationManageService.update(app);
+    public RestResponse update(SparkAppUpdateRequest request) {
+        applicationManageService.update(SparkApplicationAssembler.toEntity(request));
         return RestResponse.success(true);
     }
 
     @PostMapping("dashboard")
-    public RestResponse dashboard(Long teamId) {
-        Map<String, Serializable> dashboardMap = applicationInfoService.getDashboardDataMap(teamId);
-        return RestResponse.success(dashboardMap);
+    @Permission(team = "#request.teamId")
+    public RestResponse dashboard(TeamIdRequest request) {
+        Map<String, Serializable> dashboardMap = applicationInfoService.getDashboardDataMap(request.getTeamId());
+        return RestResponse.success(SparkApplicationAssembler.toDashboardResponse(dashboardMap));
     }
 
     @PostMapping("list")
+    @Permission(team = "#query.teamId")
     @RequiresPermissions("app:view")
-    public RestResponse list(SparkApplication app, RestRequest request) {
-        IPage<SparkApplication> applicationList = applicationManageService.page(app, request);
-        return RestResponse.success(applicationList);
+    public RestResponse list(SparkAppListQueryRequest query, RestRequest request) {
+        SparkApplication appParam = SparkApplicationAssembler.toEntity(query);
+        IPage<SparkApplication> applicationList = applicationManageService.page(appParam, request);
+        return RestResponse.success(SparkApplicationAssembler.toPageResponse(applicationList));
     }
 
     @AppChangeEvent
     @PostMapping("mapping")
+    @Permission(app = "#request.id")
     @RequiresPermissions("app:mapping")
-    public RestResponse mapping(SparkApplication app) {
-        boolean flag = applicationManageService.mapping(app);
+    public RestResponse mapping(SparkAppMappingRequest request) {
+        boolean flag = applicationManageService.mapping(SparkApplicationAssembler.toEntity(request));
         return RestResponse.success(flag);
     }
 
     @AppChangeEvent
+    @Permission(app = "#request.id")
     @PostMapping("revoke")
     @RequiresPermissions("app:release")
-    public RestResponse revoke(SparkApplication app) {
-        applicationActionService.revoke(app.getId());
+    public RestResponse revoke(SparkAppIdRequest request) {
+        applicationActionService.revoke(request.getId());
         return RestResponse.success();
     }
 
+    @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("check/start")
     @RequiresPermissions("app:start")
-    public RestResponse checkStart(SparkApplication app) {
-        AppExistsStateEnum stateEnum = applicationInfoService.checkStart(app.getId());
+    public RestResponse checkStart(SparkAppIdRequest request) {
+        AppExistsStateEnum stateEnum = applicationInfoService.checkStart(request.getId());
         return RestResponse.success(stateEnum.get());
     }
 
+    @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("start")
     @RequiresPermissions("app:start")
-    public RestResponse start(SparkApplication app) {
+    public RestResponse start(SparkAppStartRequest request) {
         try {
-            applicationActionService.start(app, false);
+            applicationActionService.start(SparkApplicationAssembler.toEntity(request), false);
             return RestResponse.success(true);
         } catch (Exception e) {
             return RestResponse.success(false).message(e.getMessage());
         }
     }
 
+    @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("cancel")
     @RequiresPermissions("app:cancel")
-    public RestResponse cancel(SparkApplication app) throws Exception {
-        applicationActionService.cancel(app);
+    public RestResponse cancel(SparkAppCancelRequest request) throws Exception {
+        applicationActionService.cancel(SparkApplicationAssembler.toEntity(request));
         return RestResponse.success();
     }
 
     @AppChangeEvent
+    @Permission(app = "#request.id")
     @PostMapping("clean")
     @RequiresPermissions("app:clean")
-    public RestResponse clean(SparkApplication app) {
-        applicationManageService.clean(app);
+    public RestResponse clean(SparkAppIdRequest request) {
+        applicationManageService.clean(SparkApplicationAssembler.toCleanEntity(request));
         return RestResponse.success(true);
     }
 
+    @Permission(app = "#request.id")
     @PostMapping("forcedStop")
     @RequiresPermissions("app:cancel")
-    public RestResponse forcedStop(SparkApplication app) {
-        applicationActionService.forcedStop(app.getId());
+    public RestResponse forcedStop(SparkAppIdRequest request) {
+        applicationActionService.forcedStop(request.getId());
         return RestResponse.success();
     }
 
@@ -178,52 +211,58 @@ public class SparkApplicationController {
     }
 
     @PostMapping("name")
-    public RestResponse yarnName(SparkApplication app) {
-        String yarnName = applicationInfoService.getYarnName(app.getConfig());
+    @Permission(app = "#request.id", team = "#request.teamId")
+    public RestResponse yarnName(SparkAppConfigRequest request) {
+        String yarnName = applicationInfoService.getYarnName(request.getConfig());
         return RestResponse.success(yarnName);
     }
 
     @PostMapping("check/name")
-    public RestResponse checkName(SparkApplication app) {
-        AppExistsStateEnum exists = applicationInfoService.checkExists(app);
+    @Permission(app = "#request.id", team = "#request.teamId")
+    public RestResponse checkName(SparkAppCheckNameRequest request) {
+        AppExistsStateEnum exists = applicationInfoService.checkExists(SparkApplicationAssembler.toEntity(request));
         return RestResponse.success(exists.get());
     }
 
     @PostMapping("read_conf")
-    public RestResponse readConf(SparkApplication app) throws IOException {
-        String config = applicationInfoService.readConf(app.getConfig());
+    public RestResponse readConf(SparkAppConfigRequest request) throws IOException {
+        String config = applicationInfoService.readConf(request.getConfig());
         return RestResponse.success(config);
     }
 
     @PostMapping("backups")
-    public RestResponse backups(FlinkApplicationBackup backUp, RestRequest request) {
-        IPage<FlinkApplicationBackup> backups = backUpService.getPage(backUp, request);
-        return RestResponse.success(backups);
+    @Permission(app = "#query.appId", team = "#query.teamId")
+    public RestResponse backups(AppBackupQueryRequest query, RestRequest request) {
+        return RestResponse.success(
+            AppLogAssembler.toBackupPage(backUpService.getPage(AppLogAssembler.toEntity(query), request)));
     }
 
     @PostMapping("opt_log")
-    public RestResponse optionlog(ApplicationLog applicationLog, RestRequest request) {
-        IPage<ApplicationLog> applicationList = applicationLogService.getPage(applicationLog, request);
-        return RestResponse.success(applicationList);
+    @Permission(app = "#query.appId", team = "#query.teamId")
+    public RestResponse optionlog(AppOptLogQueryRequest query, RestRequest request) {
+        return RestResponse.success(
+            AppLogAssembler.toOptLogPage(applicationLogService.getPage(AppLogAssembler.toEntity(query), request)));
     }
 
     @PostMapping("delete/opt_log")
     @RequiresPermissions("app:delete")
-    public RestResponse deleteOperationLog(Long id) {
-        Boolean deleted = applicationLogService.removeById(id);
+    public RestResponse deleteOperationLog(IdRequest request) {
+        Boolean deleted = applicationLogService.removeById(request.getId());
         return RestResponse.success(deleted);
     }
 
+    @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("delete")
     @RequiresPermissions("app:delete")
-    public RestResponse delete(SparkApplication app) throws InternalException {
-        Boolean deleted = applicationManageService.remove(app.getId());
+    public RestResponse delete(SparkAppIdRequest request) throws InternalException {
+        Boolean deleted = applicationManageService.remove(request.getId());
         return RestResponse.success(deleted);
     }
 
+    @Permission(app = "#request.appId")
     @PostMapping("delete/bak")
-    public RestResponse deleteBak(FlinkApplicationBackup backUp) throws InternalException {
-        Boolean deleted = backUpService.removeById(backUp.getId());
+    public RestResponse deleteBak(AppBackupDeleteRequest request) throws InternalException {
+        Boolean deleted = backUpService.removeById(request.getId());
         return RestResponse.success(deleted);
     }
 

@@ -1,0 +1,64 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.streampark.console.core.response.resource;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import java.io.Serializable;
+import java.util.Date;
+
+/** API response for a resource, aligned with webapp {@code ResourceListRecord}. */
+@Getter
+@Setter
+public class ResourceResponse implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private Long id;
+
+    private String resourceName;
+
+    private String resourcePath;
+
+    private String resource;
+
+    private String description;
+
+    private Long creatorId;
+
+    private String creatorName;
+
+    private String resourceType;
+
+    private String engineType;
+
+    private String mainClass;
+
+    private String connectorRequiredOptions;
+
+    private String connectorOptionalOptions;
+
+    private Long teamId;
+
+    private Date createTime;
+
+    private Date modifyTime;
+
+    private String connector;
+}
