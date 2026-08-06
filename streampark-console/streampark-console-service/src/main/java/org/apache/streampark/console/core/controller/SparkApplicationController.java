@@ -130,7 +130,7 @@ public class SparkApplicationController {
 
     @PostMapping("dashboard")
     @Permission(team = "#request.teamId")
-    public RestResponse dashboard(TeamIdRequest request) {
+    public RestResponse dashboard(@Valid TeamIdRequest request) {
         Map<String, Serializable> dashboardMap = applicationInfoService.getDashboardDataMap(request.getTeamId());
         return RestResponse.success(SparkApplicationAssembler.toDashboardResponse(dashboardMap));
     }

@@ -23,22 +23,21 @@ import org.apache.streampark.console.core.request.alert.AlertConfigRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 class GlobalExceptionHandlerValidationTest {
 
     private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
 
     @Test
-    void shouldHandleMethodArgumentNotValidException() {
+    void shouldHandleBindException() {
         AlertConfigRequest target = new AlertConfigRequest();
         BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(target, "request");
         bindingResult.addError(new FieldError("request", "alertName", "must not be blank"));
-        MethodArgumentNotValidException exception =
-            new MethodArgumentNotValidException(null, bindingResult);
+        BindException exception = new BindException(bindingResult);
 
-        RestResponse response = handler.methodArgumentNotValidHandler(exception);
+        RestResponse response = handler.validExceptionHandler(exception);
 
         Assertions.assertEquals(RestResponse.STATUS_FAIL, response.get(RestResponse.STATUS_KEY));
         Assertions.assertTrue(response.get(RestResponse.MESSAGE_KEY).toString().contains("alertName"));

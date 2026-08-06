@@ -81,6 +81,9 @@ public class GlobalExceptionHandler {
     }
 
     private static String formatFieldErrors(List<FieldError> fieldErrors) {
+        if (fieldErrors == null || fieldErrors.isEmpty()) {
+            return "";
+        }
         StringBuilder message = new StringBuilder();
         for (FieldError error : fieldErrors) {
             message.append(error.getField()).append(error.getDefaultMessage()).append(StringPool.COMMA);

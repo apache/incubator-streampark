@@ -79,7 +79,7 @@ class FlinkApplicationControllerMvcTest {
 
     @Test
     void checkNameShouldReturnExistsState() throws Exception {
-        when(applicationInfoService.checkExists(any())).thenReturn(AppExistsStateEnum.EXISTS);
+        when(applicationInfoService.checkExists(any())).thenReturn(AppExistsStateEnum.IN_DB);
 
         mockMvc.perform(
                 post("/flink/app/check/name")
@@ -88,6 +88,6 @@ class FlinkApplicationControllerMvcTest {
                     .param("teamId", "100000"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("success"))
-            .andExpect(jsonPath("$.data").value(AppExistsStateEnum.EXISTS.get()));
+            .andExpect(jsonPath("$.data").value(AppExistsStateEnum.IN_DB.get()));
     }
 }

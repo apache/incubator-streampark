@@ -20,6 +20,8 @@ package org.apache.streampark.console.core.request.flink;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 /**
  * Query filters for {@code POST /flink/env/page}.
  */
