@@ -15,23 +15,23 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.web;
+package org.apache.streampark.console.core.response.resource;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import lombok.Getter;
+import lombok.Setter;
 
-/**
- * Binds a request DTO from {@code application/x-www-form-urlencoded} or {@code application/json}
- * depending on the incoming {@code Content-Type}.
- *
- * <p>Does not support {@code multipart/form-data}; file upload endpoints should use dedicated
- * binding. The target DTO must expose a no-arg constructor for form binding.
- */
-@Target(ElementType.PARAMETER)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface FormOrJson {
+import java.io.Serializable;
+
+/** Result of resource validation (connector / application jar check). */
+@Getter
+@Setter
+public class ResourceCheckResponse implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private Integer state;
+
+    private String exception;
+
+    private String connector;
 }

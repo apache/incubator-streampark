@@ -21,6 +21,7 @@ import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.ShaHashUtils;
@@ -29,6 +30,7 @@ import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
+import org.apache.streampark.console.system.assembler.UserAssembler;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.Member;
@@ -36,6 +38,8 @@ import org.apache.streampark.console.system.entity.Role;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.UserMapper;
+import org.apache.streampark.console.system.response.user.UserSessionResponse;
+import org.apache.streampark.console.system.response.user.UserUpdateResponse;
 import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.console.system.service.MenuService;
 import org.apache.streampark.console.system.service.RoleService;
@@ -134,15 +138,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public RestResponse updateUser(User user) {
+    public RestResponseBody<UserUpdateResponse> updateUser(User user) {
         User existsUser = getById(user.getUserId());
         user.setLoginType(null);
         user.setPassword(null);
         if (needTransferResource(existsUser, user)) {
-            return RestResponse.success(Collections.singletonMap("needTransferResource", true));
+            UserUpdateResponse response = new UserUpdateResponse();
+            response.setNeedTransferResource(true);
+            return RestResponseBody.success(response);
         }
         updateById(user);
-        return RestResponse.success();
+        return RestResponseBody.success(new UserUpdateResponse());
     }
 
     private boolean needTransferResource(User existsUser, User user) {
@@ -241,13 +247,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public RestResponse getLoginUserInfo(User user) throws Exception {
+    public RestResponseBody<UserSessionResponse> getLoginUserInfo(User user) throws Exception {
         if (user == null) {
-            return RestResponse.success().put(RestResponse.CODE_KEY, 0);
+            return RestResponseBody.<UserSessionResponse>success(null).extra(RestResponse.CODE_KEY, 0);
         }
 
         if (User.STATUS_LOCK.equals(user.getStatus())) {
-            return RestResponse.success().put(RestResponse.CODE_KEY, 1);
+            return RestResponseBody.<UserSessionResponse>success(null).extra(RestResponse.CODE_KEY, 1);
         }
 
         this.updateLoginTime(user.getUsername());
@@ -256,13 +262,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(JWTUtil.getTTLOfSecond());
         String ttl = DateUtils.formatFullTime(expireTime);
 
-        // generate UserInfo
         String userId = RandomStringUtils.randomAlphanumeric(20);
         user.setId(userId);
         JWTToken jwtToken = new JWTToken(token, ttl);
         Map<String, Object> userInfo = generateFrontendUserInfo(user, jwtToken);
 
-        return RestResponse.success(userInfo);
+        return RestResponseBody.success(UserAssembler.toSessionResponse(userInfo));
     }
 
     @Override

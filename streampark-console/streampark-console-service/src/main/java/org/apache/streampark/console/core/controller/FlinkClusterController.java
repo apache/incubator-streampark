@@ -30,6 +30,7 @@ import org.apache.streampark.console.core.request.flink.FlinkClusterCheckRequest
 import org.apache.streampark.console.core.request.flink.FlinkClusterCreateRequest;
 import org.apache.streampark.console.core.request.flink.FlinkClusterPageQueryRequest;
 import org.apache.streampark.console.core.request.flink.FlinkClusterUpdateRequest;
+import org.apache.streampark.console.core.response.flink.FlinkClusterResponse;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 
@@ -70,7 +71,7 @@ public class FlinkClusterController {
     }
 
     @PostMapping("list")
-    public RestResponseBody<?> list() {
+    public RestResponseBody<java.util.List<FlinkClusterResponse>> list() {
         List<FlinkCluster> flinkClusters = flinkClusterService.list();
         return RestResponseBody.success(FlinkClusterAssembler.toListResponse(flinkClusters));
     }
@@ -103,7 +104,7 @@ public class FlinkClusterController {
     }
 
     @PostMapping("get")
-    public RestResponseBody<?> get(@Valid IdRequest request) throws InternalException {
+    public RestResponseBody<FlinkClusterResponse> get(@Valid IdRequest request) throws InternalException {
         FlinkCluster cluster = flinkClusterService.getById(request.getId());
         return RestResponseBody.success(FlinkClusterAssembler.toResponse(cluster));
     }

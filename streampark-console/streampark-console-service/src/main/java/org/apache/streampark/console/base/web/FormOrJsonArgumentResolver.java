@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.base.web;
 
+import org.apache.streampark.console.base.exception.ApiAlertException;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,7 +67,12 @@ public class FormOrJsonArgumentResolver implements HandlerMethodArgumentResolver
         if (isJsonRequest(request)) {
             target = objectMapper.readValue(request.getInputStream(), targetType);
         } else {
-            target = targetType.getDeclaredConstructor().newInstance();
+            try {
+                target = targetType.getDeclaredConstructor().newInstance();
+            } catch (ReflectiveOperationException e) {
+                throw new ApiAlertException(
+                    "Request DTO must have a no-arg constructor for form binding: " + targetType.getName(), e);
+            }
             ServletRequestDataBinder binder = new ServletRequestDataBinder(target, parameter.getParameterName());
             binder.bind(request);
             if (binder.getBindingResult().hasErrors()) {

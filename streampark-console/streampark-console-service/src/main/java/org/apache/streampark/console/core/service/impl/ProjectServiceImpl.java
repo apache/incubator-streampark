@@ -26,7 +26,7 @@ import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -98,8 +98,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     private Long maxProjectBuildNum;
 
     @Override
-    public RestResponse create(Project project) {
-        RestResponse response = RestResponse.success();
+    public RestResponseBody<Boolean> create(Project project) {
         project.setId(null);
         ApiAlertException.throwIfTrue(
             checkExists(project), "project name already exists, add project failed");
@@ -108,10 +107,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         project.setModifyTime(date);
         boolean status = save(project);
         if (status) {
-            return response.message("Add project successfully").data(true);
-        } else {
-            return response.message("Add project failed").data(false);
+            return RestResponseBody.success(true).message("Add project successfully");
         }
+        return RestResponseBody.success(false).message("Add project failed");
     }
 
     @Override
@@ -364,18 +362,17 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
-    public RestResponse getBuildLog(Long id, Long startOffset) {
+    public RestResponseBody<String> getBuildLog(Long id, Long startOffset) {
         File logFile = Paths.get(getBuildLogPath(id)).toFile();
         if (!logFile.exists()) {
             String errorMsg = String.format("Build log file(fileName=%s) not found, please build first.", logFile);
             log.warn(errorMsg);
-            return RestResponse.success().data(errorMsg);
+            return RestResponseBody.success(errorMsg);
         }
         boolean isBuilding = this.getById(id).getBuildState() == 0;
         byte[] fileContent;
         long endOffset = 0L;
         boolean readFinished = true;
-        // Read log from earliest when project is building
         if (startOffset == null && isBuilding) {
             startOffset = 0L;
         }
@@ -388,14 +385,13 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 endOffset = startOffset + fileContent.length;
                 readFinished = logFile.length() == endOffset && !isBuilding;
             }
-            return RestResponse.success()
-                .data(new String(fileContent, StandardCharsets.UTF_8))
-                .put("offset", endOffset)
-                .put("readFinished", readFinished);
+            return RestResponseBody.success(new String(fileContent, StandardCharsets.UTF_8))
+                .extra("offset", endOffset)
+                .extra("readFinished", readFinished);
         } catch (IOException e) {
             String error = String.format("Read build log file(fileName=%s) caused an exception: ", logFile);
             log.error(error, e);
-            return RestResponse.fail(ResponseCode.CODE_FAIL, error + e.getMessage());
+            return RestResponseBody.fail(ResponseCode.CODE_FAIL, error + e.getMessage());
         }
     }
 

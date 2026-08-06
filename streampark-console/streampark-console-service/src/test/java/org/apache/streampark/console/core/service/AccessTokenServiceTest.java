@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.AccessToken;
@@ -43,12 +43,12 @@ public class AccessTokenServiceTest extends SpringUnitTestBase {
     @Test
     void testCrudToken() throws Exception {
         Long mockUserId = 100000L;
-        RestResponse restResponse = accessTokenService.create(mockUserId, "");
+        RestResponseBody<AccessToken> restResponse = accessTokenService.create(mockUserId, "");
         Assertions.assertNotNull(restResponse);
-        Assertions.assertInstanceOf(AccessToken.class, restResponse.get("data"));
+        Assertions.assertInstanceOf(AccessToken.class, restResponse.getData());
 
         // verify
-        AccessToken accessToken = (AccessToken) restResponse.get("data");
+        AccessToken accessToken = restResponse.getData();
         LOG.info(accessToken.getToken());
         JWTToken jwtToken = new JWTToken(JWTUtil.decrypt(accessToken.getToken()));
         LOG.info(jwtToken.getToken());
@@ -71,9 +71,9 @@ public class AccessTokenServiceTest extends SpringUnitTestBase {
 
         // toggle
         Long tokenId = accessToken.getId();
-        RestResponse toggleTokenResp = accessTokenService.toggle(tokenId);
+        RestResponseBody<Boolean> toggleTokenResp = accessTokenService.toggle(tokenId);
         Assertions.assertNotNull(toggleTokenResp);
-        Assertions.assertTrue((Boolean) toggleTokenResp.get("data"));
+        Assertions.assertTrue(toggleTokenResp.getData());
 
         // get
         AccessToken afterToggle = accessTokenService.getByUserId(mockUserId);

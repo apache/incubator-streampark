@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.GitAuthorizedErrorEnum;
@@ -35,9 +35,9 @@ public interface ProjectService extends IService<Project> {
      * Create a new instance.
      *
      * @param project Project to be created
-     * @return RestResponse
+     * @return typed create result
      */
-    RestResponse create(Project project);
+    RestResponseBody<Boolean> create(Project project);
 
     boolean checkExists(Project project);
 
@@ -96,9 +96,9 @@ public interface ProjectService extends IService<Project> {
      *
      * @param id Project id
      * @param startOffset startOffset
-     * @return RestResponse
+     * @return build log payload with optional offset/readFinished extensions
      */
-    RestResponse getBuildLog(Long id, Long startOffset);
+    RestResponseBody<String> getBuildLog(Long id, Long startOffset);
 
     /**
      * List all modules of the specified project

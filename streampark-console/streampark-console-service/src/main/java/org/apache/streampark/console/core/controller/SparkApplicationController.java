@@ -97,7 +97,7 @@ public class SparkApplicationController {
     @PostMapping("get")
     @Permission(app = "#request.id")
     @RequiresPermissions("app:detail")
-    public RestResponseBody<?> get(@Valid SparkAppIdRequest request) {
+    public RestResponseBody<SparkAppResponse> get(@Valid SparkAppIdRequest request) {
         SparkApplication application = applicationManageService.getApp(request.getId());
         SparkAppResponse response = SparkApplicationAssembler.toResponse(application);
         return RestResponseBody.success(response);
@@ -249,7 +249,7 @@ public class SparkApplicationController {
 
     @PostMapping("delete/opt_log")
     @RequiresPermissions("app:delete")
-    public RestResponseBody<?> deleteOperationLog(IdRequest request) {
+    public RestResponseBody<?> deleteOperationLog(@Valid @FormOrJson IdRequest request) {
         Boolean deleted = applicationLogService.removeById(request.getId());
         return RestResponseBody.success(deleted);
     }
@@ -264,7 +264,7 @@ public class SparkApplicationController {
 
     @Permission(app = "#request.appId")
     @PostMapping("delete/bak")
-    public RestResponseBody<?> deleteBak(AppBackupDeleteRequest request) throws InternalException {
+    public RestResponseBody<?> deleteBak(@Valid @FormOrJson AppBackupDeleteRequest request) throws InternalException {
         Boolean deleted = backUpService.removeById(request.getId());
         return RestResponseBody.success(deleted);
     }

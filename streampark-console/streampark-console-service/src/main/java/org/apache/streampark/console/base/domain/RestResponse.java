@@ -23,6 +23,13 @@ import javax.validation.constraints.NotNull;
 
 import java.util.HashMap;
 
+/**
+ * Legacy REST envelope based on a {@link HashMap}. Prefer {@link RestResponseBody} at controller
+ * boundaries; this type remains for internal transitions and compatibility helpers.
+ *
+ * @deprecated Use {@link RestResponseBody} for controller return types.
+ */
+@Deprecated
 public class RestResponse extends HashMap<String, Object> {
 
     public static final String STATUS_SUCCESS = "success";

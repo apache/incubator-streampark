@@ -19,6 +19,8 @@ package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
+import org.apache.streampark.console.base.web.FormOrJson;
 import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.system.assembler.PassportAssembler;
@@ -27,6 +29,7 @@ import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.request.passport.PassportSignInRequest;
+import org.apache.streampark.console.system.response.user.UserSessionResponse;
 import org.apache.streampark.console.system.security.Authenticator;
 import org.apache.streampark.console.system.service.UserService;
 
@@ -65,7 +68,7 @@ public class PassportController {
     private Boolean ldapEnable;
 
     @PostMapping("signtype")
-    public RestResponse type() {
+    public RestResponseBody<List<String>> type() {
         List<String> types = new ArrayList<>();
         types.add(LoginTypeEnum.PASSWORD.name().toLowerCase());
         if (ssoEnable) {
@@ -74,25 +77,25 @@ public class PassportController {
         if (ldapEnable) {
             types.add(LoginTypeEnum.LDAP.name().toLowerCase());
         }
-        return RestResponse.success(types);
+        return RestResponseBody.success(types);
     }
 
     @PostMapping("signin")
-    public RestResponse signin(PassportSignInRequest request) throws Exception {
+    public RestResponseBody<UserSessionResponse> signin(@FormOrJson PassportSignInRequest request) throws Exception {
 
         if (StringUtils.isEmpty(request.getUsername())) {
-            return RestResponse.success().put("code", 0);
+            return RestResponseBody.<UserSessionResponse>success(null).extra("code", 0);
         }
 
         User user = authenticator.authenticate(
             request.getUsername(), request.getPassword(), PassportAssembler.toLoginType(request));
 
         if (user == null) {
-            return RestResponse.success().put("code", 0);
+            return RestResponseBody.<UserSessionResponse>success(null).extra("code", 0);
         }
 
         if (User.STATUS_LOCK.equals(user.getStatus())) {
-            return RestResponse.success().put("code", 1);
+            return RestResponseBody.<UserSessionResponse>success(null).extra("code", 1);
         }
 
         this.userService.updateLoginTime(request.getUsername());
@@ -105,13 +108,16 @@ public class PassportController {
         user.setId(userId);
         JWTToken jwtToken = new JWTToken(token, ttl);
 
-        return new RestResponse().data(
-            UserAssembler.toSessionResponse(userService.generateFrontendUserInfo(user, jwtToken)));
+        UserSessionResponse session =
+            UserAssembler.toSessionResponse(userService.generateFrontendUserInfo(user, jwtToken));
+        return RestResponseBody.success(session);
     }
 
     @PostMapping("signout")
-    public RestResponse signout() {
+    public RestResponseBody<Void> signout() {
         SecurityUtils.getSubject().logout();
-        return new RestResponse();
+        RestResponseBody<Void> body = RestResponseBody.success();
+        body.setStatus(RestResponse.STATUS_SUCCESS);
+        return body;
     }
 }

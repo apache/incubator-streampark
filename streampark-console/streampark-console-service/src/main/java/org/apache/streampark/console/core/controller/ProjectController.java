@@ -68,7 +68,7 @@ public class ProjectController {
     public RestResponseBody<?> create(@Valid @FormOrJson ProjectCreateRequest request) {
         ApiAlertException.throwIfNull(
             request.getTeamId(), "The teamId can't be null. Create team failed.");
-        return RestResponseBody.from(projectService.create(ProjectAssembler.toEntity(request)));
+        return projectService.create(ProjectAssembler.toEntity(request));
     }
 
     @AppChangeEvent
@@ -98,7 +98,7 @@ public class ProjectController {
     @RequiresPermissions("project:build")
     @Permission(team = "#request.teamId")
     public RestResponseBody<?> buildLog(ProjectBuildLogRequest request) {
-        return RestResponseBody.from(projectService.getBuildLog(request.getId(), request.getStartOffset()));
+        return projectService.getBuildLog(request.getId(), request.getStartOffset());
     }
 
     @PostMapping("list")

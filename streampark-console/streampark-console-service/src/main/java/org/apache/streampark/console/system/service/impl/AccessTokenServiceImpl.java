@@ -19,7 +19,7 @@ package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.system.authentication.JWTUtil;
@@ -51,15 +51,18 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     private UserService userService;
 
     @Override
-    public RestResponse create(Long userId, String description) throws Exception {
+    public RestResponseBody<AccessToken> create(Long userId, String description) throws Exception {
         User user = userService.getById(userId);
         if (user == null) {
-            return RestResponse.success().put("code", 0).message("user not available");
+            return RestResponseBody.<AccessToken>success(null)
+                .extra("code", 0)
+                .message("user not available");
         }
 
         AccessToken existAccessToken = baseMapper.selectByUserId(user.getUserId());
         if (existAccessToken != null) {
-            return RestResponse.success().put("code", 0)
+            return RestResponseBody.<AccessToken>success(null)
+                .extra("code", 0)
                 .message(String.format("user %s already has a token", user.getUsername()));
         }
 
@@ -68,11 +71,10 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
         accessToken.setToken(token);
         accessToken.setUserId(user.getUserId());
         accessToken.setDescription(description);
-
         accessToken.setStatus(AccessToken.STATUS_ENABLE);
 
         this.save(accessToken);
-        return RestResponse.success().data(accessToken);
+        return RestResponseBody.success(accessToken);
     }
 
     @Override
@@ -85,14 +87,14 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     }
 
     @Override
-    public RestResponse toggle(Long tokenId) {
+    public RestResponseBody<Boolean> toggle(Long tokenId) {
         AccessToken tokenInfo = baseMapper.selectById(tokenId);
         if (tokenInfo == null) {
-            return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "accessToken could not be found!");
+            return RestResponseBody.fail(ResponseCode.CODE_FAIL_ALERT, "accessToken could not be found!");
         }
 
         if (User.STATUS_LOCK.equals(tokenInfo.getUserStatus())) {
-            return RestResponse.fail(
+            return RestResponseBody.fail(
                 ResponseCode.CODE_FAIL_ALERT,
                 "user status is locked, could not operate this accessToken!");
         }
@@ -104,7 +106,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
         AccessToken updateObj = new AccessToken();
         updateObj.setStatus(status);
         updateObj.setId(tokenId);
-        return RestResponse.success(this.updateById(updateObj));
+        return RestResponseBody.success(this.updateById(updateObj));
     }
 
     @Override

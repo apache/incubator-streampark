@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.aspect;
 
-import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.entity.FlinkApplication;
@@ -60,7 +59,7 @@ public class PermissionAspect {
     }
 
     @Around("permissionPointcut()")
-    public RestResponse permissionAction(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object permissionAction(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         Permission permission = methodSignature.getMethod().getAnnotation(Permission.class);
 
@@ -99,7 +98,7 @@ public class PermissionAspect {
             }
         }
 
-        return (RestResponse) joinPoint.proceed();
+        return joinPoint.proceed();
     }
 
     private Long getId(ProceedingJoinPoint joinPoint, MethodSignature methodSignature, String expr) {

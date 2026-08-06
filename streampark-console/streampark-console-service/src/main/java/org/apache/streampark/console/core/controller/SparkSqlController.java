@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
@@ -76,19 +75,15 @@ public class SparkSqlController {
         SparkSqlValidationResult sparkSqlValidationResult = sparkSqlService.verifySql(sql, request.getVersionId());
         if (!sparkSqlValidationResult.success()) {
             String exception = sparkSqlValidationResult.exception();
-            RestResponse response = RestResponse.success()
-                .data(false)
-                .message(exception)
-                .put(TYPE, sparkSqlValidationResult.failedType().getFailedType())
-                .put(START, sparkSqlValidationResult.lineStart())
-                .put(END, sparkSqlValidationResult.lineEnd());
-
+            RestResponseBody<Boolean> response = RestResponseBody.success(false).message(exception);
+            response.extra(TYPE, sparkSqlValidationResult.failedType().getFailedType());
+            response.extra(START, sparkSqlValidationResult.lineStart());
+            response.extra(END, sparkSqlValidationResult.lineEnd());
             if (sparkSqlValidationResult.errorLine() > 0) {
-                response
-                    .put(START, sparkSqlValidationResult.errorLine())
-                    .put(END, sparkSqlValidationResult.errorLine() + 1);
+                response.extra(START, sparkSqlValidationResult.errorLine());
+                response.extra(END, sparkSqlValidationResult.errorLine() + 1);
             }
-            return RestResponseBody.from(response);
+            return response;
         }
         return RestResponseBody.success(true);
     }

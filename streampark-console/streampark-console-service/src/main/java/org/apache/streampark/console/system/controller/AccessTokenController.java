@@ -19,6 +19,7 @@ package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponseBody;
+import org.apache.streampark.console.base.web.FormOrJson;
 import org.apache.streampark.console.core.enums.AccessTokenStateEnum;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.system.assembler.AccessTokenAssembler;
@@ -53,8 +54,8 @@ public class AccessTokenController {
 
     @PostMapping(value = "create")
     @RequiresPermissions("token:add")
-    public RestResponseBody<?> createToken(@Valid TokenCreateRequest request) throws Exception {
-        return RestResponseBody.from(accessTokenService.create(request.getUserId(), request.getDescription()));
+    public RestResponseBody<AccessToken> createToken(@Valid @FormOrJson TokenCreateRequest request) throws Exception {
+        return accessTokenService.create(request.getUserId(), request.getDescription());
     }
 
     @PostMapping(value = "check")
@@ -85,13 +86,13 @@ public class AccessTokenController {
 
     @PostMapping("toggle")
     @RequiresPermissions("token:add")
-    public RestResponseBody<?> toggleToken(@Valid TokenToggleRequest request) {
-        return RestResponseBody.from(accessTokenService.toggle(request.getTokenId()));
+    public RestResponseBody<Boolean> toggleToken(@Valid @FormOrJson TokenToggleRequest request) {
+        return accessTokenService.toggle(request.getTokenId());
     }
 
     @DeleteMapping(value = "delete")
     @RequiresPermissions("token:delete")
-    public RestResponseBody<Boolean> deleteToken(@Valid TokenDeleteRequest request) {
+    public RestResponseBody<Boolean> deleteToken(@Valid @FormOrJson TokenDeleteRequest request) {
         boolean res = accessTokenService.removeById(request.getTokenId());
         return RestResponseBody.success(res);
     }

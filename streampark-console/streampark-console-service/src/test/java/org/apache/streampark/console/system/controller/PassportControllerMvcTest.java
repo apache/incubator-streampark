@@ -19,7 +19,8 @@ package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.console.base.handler.GlobalExceptionHandler;
 import org.apache.streampark.console.base.web.FormOrJsonArgumentResolver;
-import org.apache.streampark.console.system.service.TeamService;
+import org.apache.streampark.console.system.security.Authenticator;
+import org.apache.streampark.console.system.service.UserService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,22 +31,23 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(TeamController.class)
+@WebMvcTest(PassportController.class)
 @AutoConfigureMockMvc(addFilters = false)
-@Import({GlobalExceptionHandler.class, FormOrJsonArgumentResolver.class, TeamControllerMvcTest.MvcTestConfig.class})
-class TeamControllerMvcTest {
+@Import({GlobalExceptionHandler.class, FormOrJsonArgumentResolver.class, PassportControllerMvcTest.MvcTestConfig.class})
+class PassportControllerMvcTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private TeamService teamService;
+    private UserService userService;
+
+    @MockBean
+    private Authenticator authenticator;
 
     @org.springframework.boot.test.context.TestConfiguration
     static class MvcTestConfig implements org.springframework.web.servlet.config.annotation.WebMvcConfigurer {
@@ -61,37 +63,12 @@ class TeamControllerMvcTest {
     }
 
     @Test
-    void addTeamShouldAcceptFormUrlEncodedBody() throws Exception {
-        doNothing().when(teamService).createTeam(any());
-
+    void signinShouldReturnLegacyFailureCode() throws Exception {
         mockMvc.perform(
-            post("/team/post")
+            post("/passport/signin")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .param("teamName", "demo")
-                .param("description", "test"))
+                .param("username", ""))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.status").value("success"));
-    }
-
-    @Test
-    void addTeamShouldAcceptJsonBody() throws Exception {
-        doNothing().when(teamService).createTeam(any());
-
-        mockMvc.perform(
-            post("/team/post")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"teamName\":\"demo\",\"description\":\"test\"}"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.status").value("success"));
-    }
-
-    @Test
-    void addTeamShouldRejectBlankTeamNameJson() throws Exception {
-        mockMvc.perform(
-            post("/team/post")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"teamName\":\"\",\"description\":\"test\"}"))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.status").value("error"));
+            .andExpect(jsonPath("$.code").value(0));
     }
 }

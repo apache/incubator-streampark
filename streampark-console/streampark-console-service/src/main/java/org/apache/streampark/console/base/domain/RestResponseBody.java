@@ -17,17 +17,22 @@
 
 package org.apache.streampark.console.base.domain;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.helpers.MessageFormatter;
 
 import java.io.Serializable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Typed REST envelope replacing raw {@link RestResponse} at controller boundaries.
  *
  * <p>Wire JSON shape is unchanged: {@code status}, {@code code}, optional {@code message}, optional
- * {@code data}.
+ * {@code data}. Additional top-level keys from legacy {@link RestResponse} maps are supported via
+ * {@link #extra(String, Object)} and serialize through {@link #getExtensions()}.
  *
  * @param <T> payload type
  */
@@ -44,6 +49,9 @@ public class RestResponseBody<T> implements Serializable {
     private String message;
 
     private T data;
+
+    @JsonIgnore
+    private Map<String, Object> extensions;
 
     public static <T> RestResponseBody<T> success(T data) {
         RestResponseBody<T> body = new RestResponseBody<>();
@@ -81,6 +89,22 @@ public class RestResponseBody<T> implements Serializable {
         return this;
     }
 
+    public RestResponseBody<T> extra(String key, Object value) {
+        if (extensions == null) {
+            extensions = new LinkedHashMap<>();
+        }
+        extensions.put(key, value);
+        if (RestResponse.CODE_KEY.equals(key) && value instanceof Number) {
+            this.code = ((Number) value).longValue();
+        }
+        return this;
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> getExtensions() {
+        return extensions;
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> RestResponseBody<T> from(RestResponse response) {
         RestResponseBody<T> body = new RestResponseBody<>();
@@ -91,6 +115,16 @@ public class RestResponseBody<T> implements Serializable {
         body.setCode((Long) response.get(RestResponse.CODE_KEY));
         body.setMessage((String) response.get(RestResponse.MESSAGE_KEY));
         body.setData((T) response.get(RestResponse.DATA_KEY));
+        for (Map.Entry<String, Object> entry : response.entrySet()) {
+            String key = entry.getKey();
+            if (RestResponse.STATUS_KEY.equals(key)
+                || RestResponse.CODE_KEY.equals(key)
+                || RestResponse.MESSAGE_KEY.equals(key)
+                || RestResponse.DATA_KEY.equals(key)) {
+                continue;
+            }
+            body.extra(key, entry.getValue());
+        }
         return body;
     }
 
@@ -102,6 +136,9 @@ public class RestResponseBody<T> implements Serializable {
             response.put(RestResponse.MESSAGE_KEY, message);
         }
         response.put(RestResponse.DATA_KEY, data);
+        if (extensions != null) {
+            response.putAll(extensions);
+        }
         return response;
     }
 }

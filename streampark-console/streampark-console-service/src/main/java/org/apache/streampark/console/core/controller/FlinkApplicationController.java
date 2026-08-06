@@ -100,7 +100,7 @@ public class FlinkApplicationController {
     @PostMapping("get")
     @Permission(app = "#request.id")
     @RequiresPermissions("app:detail")
-    public RestResponseBody<?> get(@Valid FlinkAppIdRequest request) {
+    public RestResponseBody<FlinkAppResponse> get(@Valid FlinkAppIdRequest request) {
         FlinkApplication application = applicationManageService.getApp(request.getId());
         FlinkAppResponse response = FlinkApplicationAssembler.toResponse(application);
         return RestResponseBody.success(response);
@@ -248,7 +248,7 @@ public class FlinkApplicationController {
     @Permission(app = "#request.appId", team = "#request.teamId")
     @PostMapping("delete/opt_log")
     @RequiresPermissions("app:delete")
-    public RestResponseBody<?> deleteLog(AppOptLogDeleteRequest request) {
+    public RestResponseBody<?> deleteLog(@Valid @FormOrJson AppOptLogDeleteRequest request) {
         Boolean deleted = applicationLogService.delete(AppLogAssembler.toEntity(request));
         return RestResponseBody.success(deleted);
     }
@@ -263,7 +263,7 @@ public class FlinkApplicationController {
 
     @Permission(app = "#request.appId")
     @PostMapping("delete/backup")
-    public RestResponseBody<?> deleteBackup(AppBackupDeleteRequest request) throws InternalException {
+    public RestResponseBody<?> deleteBackup(@Valid @FormOrJson AppBackupDeleteRequest request) throws InternalException {
         Boolean deleted = backUpService.removeById(request.getId());
         return RestResponseBody.success(deleted);
     }

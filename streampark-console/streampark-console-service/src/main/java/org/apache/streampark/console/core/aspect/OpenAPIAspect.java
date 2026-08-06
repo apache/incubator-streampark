@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.aspect;
 
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.common.util.ReflectUtils;
-import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.OpenAPI;
 import org.apache.streampark.console.system.entity.AccessToken;
@@ -48,15 +47,13 @@ import java.util.TimeZone;
 @Aspect
 public class OpenAPIAspect {
 
-    @Pointcut("execution(public"
-        + " org.apache.streampark.console.base.domain.RestResponse"
-        + " org.apache.streampark.console.core.controller.*.*(..))")
+    @Pointcut("@annotation(org.apache.streampark.console.core.annotation.OpenAPI)")
     public void openAPIPointcut() {
     }
 
     @SuppressWarnings("checkstyle:SimplifyBooleanExpression")
     @Around(value = "openAPIPointcut()")
-    public RestResponse openAPI(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object openAPI(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         log.debug("restResponse aspect, method:{}", methodSignature.getName());
         Boolean isApi = (Boolean) SecurityUtils.getSubject().getSession().getAttribute(AccessToken.IS_API_TOKEN);
@@ -99,6 +96,6 @@ public class OpenAPIAspect {
                 }
             }
         }
-        return (RestResponse) joinPoint.proceed();
+        return joinPoint.proceed();
     }
 }

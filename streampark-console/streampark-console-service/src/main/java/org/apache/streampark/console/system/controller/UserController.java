@@ -37,6 +37,7 @@ import org.apache.streampark.console.system.request.user.UserResetPasswordReques
 import org.apache.streampark.console.system.request.user.UserTeamIdRequest;
 import org.apache.streampark.console.system.request.user.UserTransferResourceRequest;
 import org.apache.streampark.console.system.request.user.UserUpdateRequest;
+import org.apache.streampark.console.system.response.user.UserUpdateResponse;
 import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
 
@@ -89,8 +90,8 @@ public class UserController {
     @PutMapping("update")
     @Permission(user = "#request.userId")
     @RequiresPermissions("user:update")
-    public RestResponseBody<?> updateUser(@Valid @FormOrJson UserUpdateRequest request) throws Exception {
-        return RestResponseBody.from(this.userService.updateUser(UserAssembler.toEntity(request)));
+    public RestResponseBody<UserUpdateResponse> updateUser(@Valid @FormOrJson UserUpdateRequest request) throws Exception {
+        return this.userService.updateUser(UserAssembler.toEntity(request));
     }
 
     @PutMapping("transferResource")

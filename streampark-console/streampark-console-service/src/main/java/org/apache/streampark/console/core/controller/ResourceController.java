@@ -64,7 +64,7 @@ public class ResourceController {
 
     @PostMapping("check")
     public RestResponseBody<?> checkResource(@Valid ResourceCreateRequest request) throws Exception {
-        return RestResponseBody.from(this.resourceService.checkResource(ResourceAssembler.toEntity(request)));
+        return resourceService.checkResource(ResourceAssembler.toEntity(request));
     }
 
     @PostMapping("page")

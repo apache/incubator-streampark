@@ -17,10 +17,13 @@
 
 package org.apache.streampark.console.base.domain;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class RestResponseBodyTest {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     void shouldRoundTripTypedData() {
@@ -32,5 +35,31 @@ class RestResponseBodyTest {
 
         RestResponse restored = body.toRestResponse();
         Assertions.assertEquals("payload", restored.getDataAs(String.class));
+    }
+
+    @Test
+    void shouldSerializeExtensionFieldsAtTopLevel() throws Exception {
+        RestResponseBody<Boolean> body = RestResponseBody.success(false)
+            .message("syntax error")
+            .extra("type", 4)
+            .extra("start", 1)
+            .extra("end", 2);
+
+        String json = objectMapper.writeValueAsString(body);
+        Assertions.assertTrue(json.contains("\"type\":4"));
+        Assertions.assertTrue(json.contains("\"start\":1"));
+        Assertions.assertTrue(json.contains("\"end\":2"));
+    }
+
+    @Test
+    void shouldCopyLegacyExtraFieldsFromRestResponse() {
+        RestResponse response = RestResponse.success(false)
+            .message("err")
+            .put("type", 4)
+            .put("start", 1)
+            .put("end", 2);
+        RestResponseBody<Boolean> body = RestResponseBody.from(response);
+        Assertions.assertEquals(4, body.getExtensions().get("type"));
+        Assertions.assertEquals(1, body.getExtensions().get("start"));
     }
 }

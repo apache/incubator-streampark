@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
@@ -77,19 +76,15 @@ public class FlinkSqlController {
             flinkSqlService.verifySql(sql, request.getVersionId());
         if (!flinkSqlValidationResult.success()) {
             String exception = flinkSqlValidationResult.exception();
-            RestResponse response = RestResponse.success()
-                .data(false)
-                .message(exception)
-                .put(TYPE, flinkSqlValidationResult.failedType().getFailedType())
-                .put(START, flinkSqlValidationResult.lineStart())
-                .put(END, flinkSqlValidationResult.lineEnd());
-
+            RestResponseBody<Boolean> response = RestResponseBody.success(false).message(exception);
+            response.extra(TYPE, flinkSqlValidationResult.failedType().getFailedType());
+            response.extra(START, flinkSqlValidationResult.lineStart());
+            response.extra(END, flinkSqlValidationResult.lineEnd());
             if (flinkSqlValidationResult.errorLine() > 0) {
-                response
-                    .put(START, flinkSqlValidationResult.errorLine())
-                    .put(END, flinkSqlValidationResult.errorLine() + 1);
+                response.extra(START, flinkSqlValidationResult.errorLine());
+                response.extra(END, flinkSqlValidationResult.errorLine() + 1);
             }
-            return RestResponseBody.from(response);
+            return response;
         }
         return RestResponseBody.success(true);
     }
