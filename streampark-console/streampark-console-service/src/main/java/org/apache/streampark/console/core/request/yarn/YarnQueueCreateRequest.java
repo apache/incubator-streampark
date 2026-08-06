@@ -22,6 +22,9 @@ import org.apache.streampark.console.core.request.common.TeamIdRequest;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 /** Request body for {@code POST /yarn/queue/create}. */
 @Getter
 @Setter
@@ -29,6 +32,7 @@ public class YarnQueueCreateRequest extends TeamIdRequest {
 
     private static final long serialVersionUID = 1L;
 
+    @NotBlank
     private String queueLabel;
 
     private String description;

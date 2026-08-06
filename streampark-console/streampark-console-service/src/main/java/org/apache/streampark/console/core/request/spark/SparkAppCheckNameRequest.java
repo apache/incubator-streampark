@@ -20,6 +20,8 @@ package org.apache.streampark.console.core.request.spark;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+
 import java.io.Serializable;
 
 /**
@@ -35,5 +37,6 @@ public class SparkAppCheckNameRequest implements Serializable {
 
     private Long teamId;
 
+    @NotBlank
     private String appName;
 }

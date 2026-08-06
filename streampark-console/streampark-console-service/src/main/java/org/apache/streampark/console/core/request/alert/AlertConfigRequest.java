@@ -26,6 +26,9 @@ import org.apache.streampark.console.core.bean.AlertWeComParams;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 import java.io.Serializable;
 
 /** Request body for alert config create/update/exists, aligned with webapp {@code AlertCreate}. */
@@ -39,8 +42,10 @@ public class AlertConfigRequest implements Serializable {
 
     private Long userId;
 
+    @NotBlank
     private String alertName;
 
+    @NotNull
     private Integer alertType;
 
     private AlertEmailParams emailParams;

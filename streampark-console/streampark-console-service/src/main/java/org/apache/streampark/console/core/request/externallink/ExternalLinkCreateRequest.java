@@ -20,6 +20,8 @@ package org.apache.streampark.console.core.request.externallink;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+
 import java.io.Serializable;
 
 /** Request body for {@code POST /flink/externalLink/create}. */
@@ -31,9 +33,11 @@ public class ExternalLinkCreateRequest implements Serializable {
 
     private String badgeLabel;
 
+    @NotBlank
     private String badgeName;
 
     private String badgeColor;
 
+    @NotBlank
     private String linkUrl;
 }

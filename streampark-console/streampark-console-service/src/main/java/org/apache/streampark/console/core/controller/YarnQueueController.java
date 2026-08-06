@@ -37,6 +37,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @Slf4j
 @Validated
 @RestController
@@ -54,26 +56,26 @@ public class YarnQueueController {
     }
 
     @PostMapping("check")
-    public RestResponse check(YarnQueueCreateRequest request) {
+    public RestResponse check(@Valid YarnQueueCreateRequest request) {
         return RestResponse.success(yarnQueueService.checkYarnQueue(YarnQueueAssembler.toEntity(request)));
     }
 
     @PostMapping("create")
     @RequiresPermissions("yarnQueue:create")
-    public RestResponse create(YarnQueueCreateRequest request) {
+    public RestResponse create(@Valid YarnQueueCreateRequest request) {
         return RestResponse.success(yarnQueueService.createYarnQueue(YarnQueueAssembler.toEntity(request)));
     }
 
     @PostMapping("update")
     @RequiresPermissions("yarnQueue:update")
-    public RestResponse update(YarnQueueUpdateRequest request) {
+    public RestResponse update(@Valid YarnQueueUpdateRequest request) {
         yarnQueueService.updateYarnQueue(YarnQueueAssembler.toEntity(request));
         return RestResponse.success();
     }
 
     @PostMapping("delete")
     @RequiresPermissions("yarnQueue:delete")
-    public RestResponse delete(YarnQueueDeleteRequest request) {
+    public RestResponse delete(@Valid YarnQueueDeleteRequest request) {
         yarnQueueService.remove(YarnQueueAssembler.toEntity(request));
         return RestResponse.success();
     }

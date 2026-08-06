@@ -69,7 +69,7 @@ public class SparkSqlController {
     private SqlCompleteService sqlComplete;
 
     @PostMapping("verify")
-    public RestResponse verify(SparkSqlVerifyRequest request) {
+    public RestResponse verify(@Valid SparkSqlVerifyRequest request) {
         String sql = variableService.replaceVariable(request.getTeamId(), request.getSql());
         SparkSqlValidationResult sparkSqlValidationResult = sparkSqlService.verifySql(sql, request.getVersionId());
         if (!sparkSqlValidationResult.success()) {

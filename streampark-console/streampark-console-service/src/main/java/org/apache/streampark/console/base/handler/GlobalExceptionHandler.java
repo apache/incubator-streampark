@@ -33,6 +33,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -89,6 +90,25 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public RestResponse validExceptionHandler(BindException e) {
         log.error("bind exception:", e);
+        StringBuilder message = new StringBuilder();
+        List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
+        for (FieldError error : fieldErrors) {
+            message.append(error.getField()).append(error.getDefaultMessage()).append(StringPool.COMMA);
+        }
+        message = new StringBuilder(message.substring(0, message.length() - 1));
+        return RestResponse.fail(ResponseCode.CODE_FAIL, message.toString());
+    }
+
+    /**
+     * Unified processing of request parameter verification ({@code @RequestBody} JSON).
+     *
+     * @param e MethodArgumentNotValidException
+     * @return RestResponse
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public RestResponse methodArgumentNotValidHandler(MethodArgumentNotValidException e) {
+        log.error("method argument not valid exception:", e);
         StringBuilder message = new StringBuilder();
         List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
         for (FieldError error : fieldErrors) {

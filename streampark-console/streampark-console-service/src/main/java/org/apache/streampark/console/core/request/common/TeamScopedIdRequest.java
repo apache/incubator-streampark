@@ -20,11 +20,14 @@ package org.apache.streampark.console.core.request.common;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotNull;
+
 @Getter
 @Setter
 public class TeamScopedIdRequest extends IdRequest {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
     private Long teamId;
 }

@@ -20,6 +20,8 @@ package org.apache.streampark.console.core.request.resource;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotNull;
+
 /** Request body for {@code PUT /resource/update}. */
 @Getter
 @Setter
@@ -27,5 +29,6 @@ public class ResourceUpdateRequest extends ResourceCreateRequest {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
     private Long id;
 }

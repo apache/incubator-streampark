@@ -20,6 +20,9 @@ package org.apache.streampark.console.core.request.spark;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 import java.io.Serializable;
 
 /**
@@ -31,10 +34,12 @@ public class SparkAppCopyRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
     private Long id;
 
     private Long teamId;
 
+    @NotBlank
     private String appName;
 
     private String appArgs;

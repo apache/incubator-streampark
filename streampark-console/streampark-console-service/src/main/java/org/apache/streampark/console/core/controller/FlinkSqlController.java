@@ -69,7 +69,7 @@ public class FlinkSqlController {
     private SqlCompleteService sqlComplete;
 
     @PostMapping("verify")
-    public RestResponse verify(FlinkSqlVerifyRequest request) {
+    public RestResponse verify(@Valid FlinkSqlVerifyRequest request) {
         String sql = variableService.replaceVariable(request.getTeamId(), request.getSql());
         FlinkSqlValidationResult flinkSqlValidationResult =
             flinkSqlService.verifySql(sql, request.getVersionId());

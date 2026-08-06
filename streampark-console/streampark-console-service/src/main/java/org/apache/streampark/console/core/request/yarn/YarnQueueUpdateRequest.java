@@ -20,6 +20,8 @@ package org.apache.streampark.console.core.request.yarn;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotNull;
+
 /** Request body for {@code POST /yarn/queue/update}. */
 @Getter
 @Setter
@@ -27,5 +29,6 @@ public class YarnQueueUpdateRequest extends YarnQueueCreateRequest {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
     private Long id;
 }

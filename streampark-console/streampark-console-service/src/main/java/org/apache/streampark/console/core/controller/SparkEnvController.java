@@ -37,6 +37,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 import java.util.List;
 
 @Slf4j
@@ -61,7 +63,7 @@ public class SparkEnvController {
     }
 
     @PostMapping("create")
-    public RestResponse create(SparkEnvCreateRequest request) {
+    public RestResponse create(@Valid SparkEnvCreateRequest request) {
         try {
             sparkEnvService.create(SparkEnvAssembler.toEntity(request));
         } catch (Exception e) {
@@ -85,7 +87,7 @@ public class SparkEnvController {
     }
 
     @PostMapping("update")
-    public RestResponse update(SparkEnvUpdateRequest request) throws Exception {
+    public RestResponse update(@Valid SparkEnvUpdateRequest request) throws Exception {
         try {
             sparkEnvService.update(SparkEnvAssembler.toEntity(request));
         } catch (Exception e) {

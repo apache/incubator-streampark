@@ -114,7 +114,7 @@ public class SparkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("copy")
     @RequiresPermissions("app:copy")
-    public RestResponse copy(SparkAppCopyRequest request) throws IOException {
+    public RestResponse copy(@Valid SparkAppCopyRequest request) throws IOException {
         applicationManageService.copy(SparkApplicationAssembler.toEntity(request));
         return RestResponse.success();
     }
@@ -123,7 +123,7 @@ public class SparkApplicationController {
     @Permission(app = "#request.id")
     @PostMapping("update")
     @RequiresPermissions("app:update")
-    public RestResponse update(SparkAppUpdateRequest request) {
+    public RestResponse update(@Valid SparkAppUpdateRequest request) {
         applicationManageService.update(SparkApplicationAssembler.toEntity(request));
         return RestResponse.success(true);
     }
@@ -173,7 +173,7 @@ public class SparkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("start")
     @RequiresPermissions("app:start")
-    public RestResponse start(SparkAppStartRequest request) {
+    public RestResponse start(@Valid SparkAppStartRequest request) {
         try {
             applicationActionService.start(SparkApplicationAssembler.toEntity(request), false);
             return RestResponse.success(true);
@@ -185,7 +185,7 @@ public class SparkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("cancel")
     @RequiresPermissions("app:cancel")
-    public RestResponse cancel(SparkAppCancelRequest request) throws Exception {
+    public RestResponse cancel(@Valid SparkAppCancelRequest request) throws Exception {
         applicationActionService.cancel(SparkApplicationAssembler.toEntity(request));
         return RestResponse.success();
     }
@@ -221,7 +221,7 @@ public class SparkApplicationController {
 
     @PostMapping("check/name")
     @Permission(app = "#request.id", team = "#request.teamId")
-    public RestResponse checkName(SparkAppCheckNameRequest request) {
+    public RestResponse checkName(@Valid SparkAppCheckNameRequest request) {
         AppExistsStateEnum exists = applicationInfoService.checkExists(SparkApplicationAssembler.toEntity(request));
         return RestResponse.success(exists.get());
     }

@@ -20,6 +20,9 @@ package org.apache.streampark.console.core.request.resource;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 import java.io.Serializable;
 
 /** Request body for {@code POST /resource/add}. */
@@ -29,12 +32,14 @@ public class ResourceCreateRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
     private Long teamId;
 
     private String resourceName;
 
     private String resourcePath;
 
+    @NotBlank
     private String resource;
 
     private String description;

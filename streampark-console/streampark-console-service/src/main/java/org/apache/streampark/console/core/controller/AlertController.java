@@ -60,25 +60,25 @@ public class AlertController {
     private final AlertService alertService;
 
     @PostMapping("/add")
-    public RestResponse createAlertConfig(@RequestBody AlertConfigRequest request) {
+    public RestResponse createAlertConfig(@Valid @RequestBody AlertConfigRequest request) {
         boolean save = alertConfigService.save(AlertAssembler.toEntity(request));
         return RestResponse.success(save);
     }
 
     @PostMapping("/exists")
-    public RestResponse verifyAlertConfig(@RequestBody AlertConfigRequest request) {
+    public RestResponse verifyAlertConfig(@Valid @RequestBody AlertConfigRequest request) {
         boolean exist = alertConfigService.exist(AlertAssembler.toEntity(request));
         return RestResponse.success(exist);
     }
 
     @PostMapping("/update")
-    public RestResponse updateAlertConfig(@RequestBody AlertConfigRequest request) {
+    public RestResponse updateAlertConfig(@Valid @RequestBody AlertConfigRequest request) {
         boolean update = alertConfigService.updateById(AlertAssembler.toEntity(request));
         return RestResponse.success(update);
     }
 
     @PostMapping("/get")
-    public RestResponse getAlertConfig(@RequestBody AlertConfigIdRequest request) {
+    public RestResponse getAlertConfig(@Valid @RequestBody AlertConfigIdRequest request) {
         AlertConfig alertConfig = alertConfigService.getById(request.getId());
         return RestResponse.success(AlertAssembler.toResponse(alertConfig));
     }
