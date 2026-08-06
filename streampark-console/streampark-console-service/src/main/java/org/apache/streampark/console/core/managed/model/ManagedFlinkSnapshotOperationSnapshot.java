@@ -35,7 +35,9 @@ public class ManagedFlinkSnapshotOperationSnapshot {
 
     private String providerType;
 
-    private String projectId;
+    private String providerConfigJson;
+
+    private Integer providerConfigVersion;
 
     private String jobId;
 

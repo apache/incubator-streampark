@@ -32,6 +32,10 @@ public interface ManagedFlinkProvider {
 
     CredentialCheckResult validateCredential(ProviderContext context);
 
+    /** Validates the provider-owned environment payload without exposing its fields to core. */
+    default void validateEnvironmentConfig(ProviderContext context) {
+    }
+
     List<CloudProject> listProjects(ProviderContext context, String keyword);
 
     List<ManagedResourcePool> listResourcePools(

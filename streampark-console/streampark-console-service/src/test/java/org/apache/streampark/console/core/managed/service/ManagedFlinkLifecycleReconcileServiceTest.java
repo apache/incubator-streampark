@@ -64,7 +64,8 @@ class ManagedFlinkLifecycleReconcileServiceTest {
         snapshot.setAppId(100004L);
         snapshot.setCloudAccountId(2L);
         snapshot.setProviderType("VOLCENGINE");
-        snapshot.setProjectId("project-1");
+        snapshot.setProviderConfigJson("{\"fixture\":true}");
+        snapshot.setProviderConfigVersion(1);
         snapshot.setJobName("job-1");
         snapshot.setOperationType("RESTART");
         snapshot.setJobId("job-1");
@@ -85,9 +86,12 @@ class ManagedFlinkLifecycleReconcileServiceTest {
             new ManagedFlinkProviderSession(
                 ManagedFlinkProviderType.VOLCENGINE,
                 provider,
-                ProviderContext.builder().projectId("project-1").build(),
+                ProviderContext.builder()
+                    .providerConfigJson("{\"fixture\":true}")
+                    .providerConfigVersion(1)
+                    .build(),
                 null);
-        when(contextService.resolve(1L, 2L, "project-1")).thenReturn(session);
+        when(contextService.resolve(1L, 2L, "{\"fixture\":true}", 1)).thenReturn(session);
         when(provider.getJob(any(), any()))
             .thenReturn(
                 ManagedJobStatus.builder()

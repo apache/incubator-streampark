@@ -31,8 +31,6 @@ public class VolcengineFlinkProperties {
 
     private String endpoint = "https://open.volcengineapi.com";
 
-    private String iamEndpoint = "https://iam.volcengineapi.com";
-
     private int connectTimeoutMs = 3000;
 
     private int requestTimeoutMs = 10000;

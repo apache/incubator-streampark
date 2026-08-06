@@ -101,13 +101,15 @@ public class ManagedFlinkSnapshotServiceImpl implements ManagedFlinkSnapshotServ
         ApiAlertException.throwIfTrue(
             environment == null
                 || environment.getCloudAccountId() == null
-                || isBlank(environment.getProjectId()),
+                || isBlank(environment.getProviderConfigJson())
+                || environment.getProviderConfigVersion() == null,
             "Managed Flink environment is unavailable.");
         ManagedFlinkProviderSession session =
             providerContextService.resolve(
                 request.getTeamId(),
                 environment.getCloudAccountId(),
-                environment.getProjectId());
+                environment.getProviderConfigJson(),
+                environment.getProviderConfigVersion());
         ApiAlertException.throwIfFalse(
             session.getProviderType().name().equals(deployed.getProviderType()),
             "Managed Flink provider routing has changed.");
@@ -157,11 +159,15 @@ public class ManagedFlinkSnapshotServiceImpl implements ManagedFlinkSnapshotServ
         ApiAlertException.throwIfTrue(
             environment == null
                 || environment.getCloudAccountId() == null
-                || isBlank(environment.getProjectId()),
+                || isBlank(environment.getProviderConfigJson())
+                || environment.getProviderConfigVersion() == null,
             "Managed Flink environment is unavailable.");
         ManagedFlinkProviderSession session =
             providerContextService.resolve(
-                teamId, environment.getCloudAccountId(), environment.getProjectId());
+                teamId,
+                environment.getCloudAccountId(),
+                environment.getProviderConfigJson(),
+                environment.getProviderConfigVersion());
         ApiAlertException.throwIfFalse(
             session.getProviderType().name().equals(deployed.getProviderType()),
             "Managed Flink provider routing has changed.");
@@ -358,7 +364,8 @@ public class ManagedFlinkSnapshotServiceImpl implements ManagedFlinkSnapshotServ
         snapshot.setAppId(request.getAppId());
         snapshot.setCloudAccountId(environment.getCloudAccountId());
         snapshot.setProviderType(deployed.getProviderType());
-        snapshot.setProjectId(environment.getProjectId());
+        snapshot.setProviderConfigJson(environment.getProviderConfigJson());
+        snapshot.setProviderConfigVersion(environment.getProviderConfigVersion());
         snapshot.setJobId(managed.getExternalApplicationId());
         snapshot.setInstanceId(managed.getExternalInstanceId());
         snapshot.setUserDescription(userDescription);
@@ -379,7 +386,6 @@ public class ManagedFlinkSnapshotServiceImpl implements ManagedFlinkSnapshotServ
                 .listSnapshots(
                     session.getContext(),
                     ManagedSnapshotLookupRequest.builder()
-                        .projectId(environment.getProjectId())
                         .jobId(managed.getExternalApplicationId())
                         .build());
         return snapshots == null ? Collections.emptyList() : snapshots;

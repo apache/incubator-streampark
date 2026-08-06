@@ -42,6 +42,7 @@
     ManagedFlinkEnvironment,
     ManagedFlinkEnvironmentForm,
   } from '/@/api/flink/managedFlink.type';
+  import { parseVolcengineEnvironmentConfig } from '/@/api/flink/managedFlink.type';
   import { useUserStore } from '/@/store/modules/user';
 
   const go = useGo();
@@ -143,6 +144,7 @@
   }
   function handleReset() {
     const resetParams = handleResetApplication();
+    const providerConfig = parseVolcengineEnvironmentConfig(managedEnvironment.value);
     nextTick(() => {
       let selectAlertId: string | undefined;
       if (cluster.alertId) {
@@ -166,9 +168,10 @@
         k8sNamespace: cluster.k8sNamespace,
         cloudAccountId: managedEnvironment.value?.cloudAccountId,
         region: managedEnvironment.value?.region,
-        projectId: managedEnvironment.value?.projectId,
-        resourcePoolId: managedEnvironment.value?.resourcePoolId,
-        draftDirectoryId: managedEnvironment.value?.draftDirectoryId,
+        projectId: providerConfig.projectId,
+        resourcePoolId: providerConfig.resourcePoolId,
+        draftDirectoryId: providerConfig.draftDirectoryId,
+        tosBucket: providerConfig.tosBucket,
         ...resetParams,
       });
     });

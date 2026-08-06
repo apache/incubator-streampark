@@ -90,7 +90,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -157,6 +156,30 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
     @Override
     public ManagedFlinkProviderType type() {
         return ManagedFlinkProviderType.VOLCENGINE;
+    }
+
+    @Override
+    public void validateEnvironmentConfig(ProviderContext context) {
+        VolcengineEnvironmentConfig config = environmentConfig(context);
+        boolean projectExists =
+            listProjects(context, null).stream()
+                .anyMatch(project -> config.getProjectId().equals(project.getId()));
+        if (!projectExists) {
+            throw validation("ProjectNotFound");
+        }
+        boolean resourcePoolExists =
+            listResourcePools(context, config.getProjectId(), null).stream()
+                .anyMatch(pool -> config.getResourcePoolId().equals(pool.getId()));
+        if (!resourcePoolExists) {
+            throw validation("ResourcePoolNotFound");
+        }
+        boolean directoryExists =
+            listDraftDirectories(context, config.getProjectId(), null).stream()
+                .anyMatch(
+                    directory -> config.getDraftDirectoryId().toString().equals(directory.getId()));
+        if (!directoryExists) {
+            throw validation("DraftDirectoryNotFound");
+        }
     }
 
     @Override
@@ -302,9 +325,10 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
             return existing;
         }
 
-        String bucket = resolveArtifactBucket(context);
+        VolcengineEnvironmentConfig config = environmentConfig(context);
+        String bucket = config.getTosBucket();
         String objectKey =
-            "__artifacts/" + context.getProjectId() + "/resources/"
+            "__artifacts/" + config.getProjectId() + "/resources/"
                 + request.getChecksum() + "/" + request.getContentAddressedName();
         String uri = "tos://" + bucket + "/" + objectKey;
         String directoryId = requireArtifactDirectory(context);
@@ -320,7 +344,7 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
                 context,
                 "CreateMetadataResource",
                 FILE_API_VERSION,
-                Collections.singletonMap("ProjectId", context.getProjectId()),
+                Collections.singletonMap("ProjectId", config.getProjectId()),
                 body);
         } catch (ManagedFlinkProviderException exception) {
             StagedArtifact reconciled =
@@ -352,22 +376,6 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
         return staged;
     }
 
-    private String resolveArtifactBucket(ProviderContext context) {
-        Map<String, String> parameters = new LinkedHashMap<>();
-        parameters.put("ProjectId", context.getProjectId());
-        parameters.put("PageNum", "1");
-        parameters.put("PageSize", "1");
-        VolcengineOpenApiResponse response =
-            openApiClient.get(
-                context, "ListGMSMetaResource", FILE_API_VERSION, parameters);
-        String existingBucket = artifactBucket(response.getRoot());
-        if (!isBlank(existingBucket)) {
-            return existingBucket;
-        }
-        String accountId = openApiClient.resolveProviderAccountId(context);
-        return "volc-flink-meta-" + accountId + "-" + context.getRegion();
-    }
-
     @Override
     public StagedArtifact findArtifact(
                                        ProviderContext context, ArtifactLookupRequest request) {
@@ -379,7 +387,7 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
                 "Managed Flink artifact lookup is incomplete.");
         }
         Map<String, String> parameters = new LinkedHashMap<>();
-        parameters.put("ProjectId", context.getProjectId());
+        parameters.put("ProjectId", projectId(context));
         parameters.put("NameKey", request.getContentAddressedName());
         parameters.put("PageNum", "1");
         parameters.put("PageSize", String.valueOf(PAGE_SIZE));
@@ -420,6 +428,7 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
     @Override
     public ManagedDraft upsertDraft(ProviderContext context, ManagedDraftRequest request) {
         requireDraftRequest(request);
+        VolcengineEnvironmentConfig config = environmentConfig(context);
         String draftId = request.getExistingDraftId();
         String createRequestId = null;
         JsonNode providerDraft;
@@ -429,8 +438,8 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
                     context,
                     "CreateGWSApplicationDraft",
                     DRAFT_WRITE_API_VERSION,
-                    Collections.singletonMap("ProjectId", request.getProjectId()),
-                    createRequestBody(request));
+                    Collections.singletonMap("ProjectId", config.getProjectId()),
+                    createRequestBody(request, config));
             providerDraft = result(created.getRoot());
             draftId = text(providerDraft, "Id", "ID");
             createRequestId = created.getRequestId();
@@ -438,10 +447,10 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
                 throw invalidResponse(createRequestId);
             }
             if (!hasDraftUpdateContext(providerDraft)) {
-                providerDraft = getDraft(context, request.getProjectId(), draftId);
+                providerDraft = getDraft(context, config.getProjectId(), draftId);
             }
         } else {
-            providerDraft = getDraft(context, request.getProjectId(), draftId);
+            providerDraft = getDraft(context, config.getProjectId(), draftId);
         }
 
         VolcengineOpenApiResponse updated =
@@ -449,8 +458,8 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
                 context,
                 "UpdateGWSApplicationDraft",
                 DRAFT_WRITE_API_VERSION,
-                Collections.singletonMap("ProjectId", request.getProjectId()),
-                updateRequestBody(providerDraft, request));
+                Collections.singletonMap("ProjectId", config.getProjectId()),
+                updateRequestBody(providerDraft, request, config));
         JsonNode updateResult = result(updated.getRoot());
         if (updateResult.has("Success") && !updateResult.path("Success").asBoolean()) {
             throw invalidResponse(updated.getRequestId());
@@ -466,12 +475,13 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
     public ManagedDeployment deployDraft(
                                          ProviderContext context, ManagedDeployRequest request) {
         requireDeployRequest(request);
+        VolcengineEnvironmentConfig config = environmentConfig(context);
         try (
             VolcengineCredentials credentials = credentialResolver.resolve(context);
             VolcengineSdkClientFactory.Session session =
                 sdkClientFactory.open(context, credentials)) {
             ApiResponse<DeployGWSApplicationDraftResponse> deployed =
-                session.api().deployGWSApplicationDraftWithHttpInfo(deployRequest(request));
+                session.api().deployGWSApplicationDraftWithHttpInfo(deployRequest(request, config));
             String requestId = requestId(deployed);
             DeployGWSApplicationDraftResponse response = deployed.getData();
             if (response == null
@@ -494,13 +504,14 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
                                             ProviderContext context,
                                             ManagedDeploymentLookupRequest request) {
         requireDeploymentLookupRequest(request);
+        VolcengineEnvironmentConfig config = environmentConfig(context);
         try (
             VolcengineCredentials credentials = credentialResolver.resolve(context);
             VolcengineSdkClientFactory.Session session =
                 sdkClientFactory.open(context, credentials)) {
             for (int page = 1; page <= MAX_PAGES; page++) {
                 ListGWSApplicationRequest body = new ListGWSApplicationRequest();
-                body.setProjectId(request.getProjectId());
+                body.setProjectId(config.getProjectId());
                 body.setJobName(request.getJobName());
                 body.setPageNum(page);
                 body.setPageSize(PAGE_SIZE);
@@ -538,6 +549,7 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
     public ManagedJobActionResult startJob(
                                            ProviderContext context, ManagedJobStartRequest request) {
         requireStartRequest(request);
+        VolcengineEnvironmentConfig config = environmentConfig(context);
         try (
             VolcengineCredentials credentials = credentialResolver.resolve(context);
             VolcengineSdkClientFactory.Session session =
@@ -545,7 +557,7 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
             ApiResponse<StartApplicationInstanceResponse> started =
                 session
                     .api()
-                    .startApplicationInstanceWithHttpInfo(startRequest(request));
+                    .startApplicationInstanceWithHttpInfo(startRequest(request, config));
             String requestId = requestId(started);
             StartApplicationInstanceResponse response = started.getData();
             if (response == null
@@ -575,7 +587,7 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
                     context,
                     STOP_WITH_SNAPSHOT_ACTION,
                     STOP_WITH_SNAPSHOT_API_VERSION,
-                    Collections.singletonMap("ProjectId", context.getProjectId()),
+                    Collections.singletonMap("ProjectId", projectId(context)),
                     stopWithSnapshotRequest(request));
             JsonNode response = result(stopped.getRoot());
             if (response.has("Success") && !response.path("Success").asBoolean()) {
@@ -651,7 +663,7 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
                                    ProviderContext context, ManagedJobLookupRequest request) {
         requireJobLookupRequest(request);
         Map<String, String> parameters = new LinkedHashMap<>();
-        parameters.put("ProjectId", request.getProjectId());
+        parameters.put("ProjectId", projectId(context));
         Map<String, String> body = new LinkedHashMap<>();
         body.put("AccountId", "");
         body.put("Id", request.getJobId());
@@ -698,7 +710,7 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
                 sdkClientFactory.open(context, credentials)) {
             ListApplicationInstanceRequest request =
                 new ListApplicationInstanceRequest()
-                    .projectId(context.getProjectId())
+                    .projectId(projectId(context))
                     .jobId(Long.valueOf(jobId))
                     .pageNum("1")
                     .pageSize("20")
@@ -779,7 +791,7 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
                              String applicationId,
                              GetApplicationInstanceResponse instance) {
         String region = context == null ? null : context.getRegion();
-        String projectId = context == null ? null : context.getProjectId();
+        String projectId = context == null ? null : projectId(context);
         String clusterId =
             instance == null
                 ? null
@@ -882,20 +894,24 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
         }
     }
 
-    static CreateGWSApplicationDraftRequest createRequest(ManagedDraftRequest request) {
+    static CreateGWSApplicationDraftRequest createRequest(
+                                                          ManagedDraftRequest request,
+                                                          VolcengineEnvironmentConfig config) {
         CreateGWSApplicationDraftRequest body = new CreateGWSApplicationDraftRequest();
-        body.setProjectId(request.getProjectId());
-        body.setDirectoryId(request.getDirectoryId());
+        body.setProjectId(config.getProjectId());
+        body.setDirectoryId(config.getDraftDirectoryId());
         body.setJobName(request.getJobName());
         body.setJobType(providerJobType(request.getJobType()));
         body.setEngineVersion(providerEngineVersion(request.getEngineVersion()));
         return body;
     }
 
-    static Map<String, Object> createRequestBody(ManagedDraftRequest request) {
+    static Map<String, Object> createRequestBody(
+                                                 ManagedDraftRequest request,
+                                                 VolcengineEnvironmentConfig config) {
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("ProjectId", request.getProjectId());
-        body.put("DirectoryId", request.getDirectoryId());
+        body.put("ProjectId", config.getProjectId());
+        body.put("DirectoryId", config.getDraftDirectoryId());
         body.put("JobName", request.getJobName());
         body.put("JobType", providerJobType(request.getJobType()));
         body.put("EngineVersion", providerEngineVersion(request.getEngineVersion()));
@@ -928,12 +944,15 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
             && !isBlank(text(draft, "CreateTime"));
     }
 
-    ObjectNode updateRequestBody(JsonNode providerDraft, ManagedDraftRequest request) {
+    ObjectNode updateRequestBody(
+                                 JsonNode providerDraft,
+                                 ManagedDraftRequest request,
+                                 VolcengineEnvironmentConfig config) {
         if (providerDraft == null || !providerDraft.isObject()) {
             throw invalidResponse(null);
         }
         ObjectNode body = ((ObjectNode) providerDraft).deepCopy();
-        body.put("ProjectId", request.getProjectId());
+        body.put("ProjectId", config.getProjectId());
         body.put("JobName", request.getJobName());
         body.put("JobType", providerJobType(request.getJobType()));
         body.put("EngineVersion", providerEngineVersion(request.getEngineVersion()));
@@ -1105,25 +1124,29 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
         }
     }
 
-    static DeployGWSApplicationDraftRequest deployRequest(ManagedDeployRequest request) {
+    static DeployGWSApplicationDraftRequest deployRequest(
+                                                          ManagedDeployRequest request,
+                                                          VolcengineEnvironmentConfig config) {
         DeployGWSApplicationDraftRequest body = new DeployGWSApplicationDraftRequest();
         body.setDraftId(request.getDraftId());
-        body.setProjectId(request.getProjectId());
-        body.setResourcePool(request.getResourcePool());
-        body.setQueue(request.getQueue());
+        body.setProjectId(config.getProjectId());
+        body.setResourcePool(config.getResourcePoolName());
+        body.setQueue(config.getResourcePoolId());
         body.setPriority(request.getPriority());
         body.setSchedulePolicy(request.getSchedulePolicy());
         body.setScheduleTimeout(request.getScheduleTimeoutSeconds());
         return body;
     }
 
-    static StartApplicationInstanceRequest startRequest(ManagedJobStartRequest request) {
+    static StartApplicationInstanceRequest startRequest(
+                                                        ManagedJobStartRequest request,
+                                                        VolcengineEnvironmentConfig config) {
         StartApplicationInstanceRequest body = new StartApplicationInstanceRequest();
         body.setId(request.getJobId());
         DeployRequestForStartApplicationInstanceInput deployRequest =
             new DeployRequestForStartApplicationInstanceInput();
-        deployRequest.setResourcePool(request.getResourcePool());
-        deployRequest.setQueue(request.getQueue());
+        deployRequest.setResourcePool(config.getResourcePoolName());
+        deployRequest.setQueue(config.getResourcePoolId());
         deployRequest.setPriority(request.getPriority());
         if (!isBlank(request.getSchedulePolicy())) {
             deployRequest.setSchedulePolicy(
@@ -1234,9 +1257,6 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
 
     private static void requireDraftRequest(ManagedDraftRequest request) {
         if (request == null
-            || isBlank(request.getProjectId())
-            || request.getDirectoryId() == null
-            || request.getDirectoryId() <= 0
             || isBlank(request.getJobName())
             || isBlank(request.getJobType())
             || isBlank(request.getEngineVersion())
@@ -1256,8 +1276,6 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
     private static void requireDeployRequest(ManagedDeployRequest request) {
         if (request == null
             || isBlank(request.getDraftId())
-            || isBlank(request.getProjectId())
-            || isBlank(request.getResourcePool())
             || isBlank(request.getDefinitionHash())) {
             throw validation("InvalidDeployRequest");
         }
@@ -1266,7 +1284,6 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
     private static void requireDeploymentLookupRequest(
                                                        ManagedDeploymentLookupRequest request) {
         if (request == null
-            || isBlank(request.getProjectId())
             || isBlank(request.getDraftId())
             || isBlank(request.getJobName())
             || isBlank(request.getDefinitionHash())) {
@@ -1277,8 +1294,6 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
     private static void requireStartRequest(ManagedJobStartRequest request) {
         if (request == null
             || isBlank(request.getJobId())
-            || isBlank(request.getResourcePool())
-            || isBlank(request.getQueue())
             || !validRestoreRequest(request.getRestoreMode(), request.getSnapshotId())) {
             throw validation("InvalidStartRequest");
         }
@@ -1302,7 +1317,6 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
 
     private static void requireJobLookupRequest(ManagedJobLookupRequest request) {
         if (request == null
-            || isBlank(request.getProjectId())
             || isBlank(request.getJobName())
             || isBlank(request.getJobId())) {
             throw validation("InvalidJobLookupRequest");
@@ -1311,7 +1325,6 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
 
     private static void requireSnapshotLookupRequest(ManagedSnapshotLookupRequest request) {
         if (request == null
-            || isBlank(request.getProjectId())
             || isBlank(request.getJobId())) {
             throw validation("InvalidSnapshotLookupRequest");
         }
@@ -1319,7 +1332,6 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
 
     private static void requireSnapshotCreateRequest(ManagedSnapshotCreateRequest request) {
         if (request == null
-            || isBlank(request.getProjectId())
             || isBlank(request.getJobId())
             || isBlank(request.getInstanceId())) {
             throw validation("InvalidSnapshotCreateRequest");
@@ -1448,6 +1460,39 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
         }
     }
 
+    private static String projectId(ProviderContext context) {
+        return environmentConfig(context).getProjectId();
+    }
+
+    private static VolcengineEnvironmentConfig environmentConfig(ProviderContext context) {
+        if (context == null
+            || context.getProviderConfigVersion() == null
+            || context.getProviderConfigVersion() != VolcengineEnvironmentConfig.CURRENT_VERSION
+            || isBlank(context.getProviderConfigJson())) {
+            throw validation("InvalidEnvironmentConfig");
+        }
+        try {
+            VolcengineEnvironmentConfig config =
+                new ObjectMapper().readValue(
+                    context.getProviderConfigJson(), VolcengineEnvironmentConfig.class);
+            if (isBlank(config.getProjectId())
+                || isBlank(config.getResourcePoolId())
+                || config.getDraftDirectoryId() == null
+                || config.getDraftDirectoryId() <= 0
+                || isBlank(config.getTosBucket())) {
+                throw validation("InvalidEnvironmentConfig");
+            }
+            config.setProjectId(config.getProjectId().trim());
+            config.setResourcePoolId(config.getResourcePoolId().trim());
+            config.setTosBucket(config.getTosBucket().trim());
+            return config;
+        } catch (ManagedFlinkProviderException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw validation("InvalidEnvironmentConfig");
+        }
+    }
+
     private String uploadArtifact(
                                   ProviderContext context,
                                   ArtifactStageRequest request,
@@ -1492,7 +1537,7 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
 
     private String requireArtifactDirectory(ProviderContext context) {
         Map<String, String> parameters =
-            Collections.singletonMap("ProjectId", context.getProjectId());
+            Collections.singletonMap("ProjectId", projectId(context));
         VolcengineOpenApiResponse listed =
             openApiClient.get(
                 context, "ListMetadataResourceDir", FILE_API_VERSION, parameters);
@@ -1557,7 +1602,7 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
 
     private ArtifactVersion latestArtifactVersion(ProviderContext context, String artifactId) {
         Map<String, String> parameters = new LinkedHashMap<>();
-        parameters.put("ProjectId", context.getProjectId());
+        parameters.put("ProjectId", projectId(context));
         parameters.put("ResourceId", artifactId);
         parameters.put("PageSize", String.valueOf(PAGE_SIZE));
         VolcengineOpenApiResponse response =
@@ -1602,29 +1647,6 @@ public class VolcengineManagedFlinkProvider implements ManagedFlinkProvider {
                 "Items",
                 "List")
             : items;
-    }
-
-    static String artifactBucket(JsonNode root) {
-        JsonNode items = fileItems(root);
-        if (items == null) {
-            return null;
-        }
-        for (JsonNode item : items) {
-            String uri = text(item, "Uri", "URI", "TosUri", "TOSURI");
-            if (isBlank(uri)) {
-                continue;
-            }
-            try {
-                URI parsed = URI.create(uri);
-                if ("tos".equalsIgnoreCase(parsed.getScheme())
-                    && !isBlank(parsed.getAuthority())) {
-                    return parsed.getAuthority();
-                }
-            } catch (IllegalArgumentException ignored) {
-                // Ignore malformed provider entries and inspect the next resource.
-            }
-        }
-        return null;
     }
 
     private static JsonNode fileVersionItems(JsonNode root) {

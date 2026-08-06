@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 export default {
+  accessEntry: 'Access',
+  flinkWebUi: 'Flink Web UI',
+  providerConsole: 'Provider Console',
   title: 'Flink Cluster',
   detail: 'View Cluster Detail',
   stop: 'Stop Cluster',
@@ -91,18 +94,21 @@ export default {
     region: 'Region',
     project: 'Project',
     resourcePool: 'Resource Pool',
+    tosBucket: 'Flink TOS Bucket',
     draftDirectoryId: 'Draft Directory',
     probe: 'Test Environment',
     probeSuccess: 'The managed Flink environment is available',
     probeFailed: 'The managed Flink environment probe failed',
     metadataUnavailable: 'Managed environment metadata is unavailable. Refresh and retry.',
     placeholder: {
+      tosBucket: 'Enter the bucket name without tos://',
       draftDirectoryId: 'Select a draft directory by name',
     },
     required: {
       cloudAccount: 'Cloud Account is required',
       project: 'Project is required',
       resourcePool: 'Resource Pool is required',
+      tosBucket: 'Flink TOS Bucket is required',
       draftDirectoryId: 'Select a draft directory',
     },
   },

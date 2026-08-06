@@ -25,8 +25,6 @@ import lombok.Value;
 @Builder
 public class ManagedJobLookupRequest {
 
-    String projectId;
-
     String jobName;
 
     String jobId;

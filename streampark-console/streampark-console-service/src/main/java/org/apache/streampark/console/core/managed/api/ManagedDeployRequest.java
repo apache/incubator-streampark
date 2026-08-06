@@ -27,12 +27,6 @@ public class ManagedDeployRequest {
 
     String draftId;
 
-    String projectId;
-
-    String resourcePool;
-
-    String queue;
-
     String priority;
 
     String schedulePolicy;

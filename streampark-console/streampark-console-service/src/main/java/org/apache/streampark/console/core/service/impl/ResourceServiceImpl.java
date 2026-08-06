@@ -72,6 +72,7 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -267,13 +268,14 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         File temp = WebUtils.getAppTempDir();
         String fileName = FilenameUtils.getName(Objects.requireNonNull(file.getOriginalFilename()));
         File saveFile = new File(temp, fileName);
-        if (!saveFile.exists()) {
-            // save file to temp dir
-            try {
+        try {
+            Files.createDirectories(temp.toPath());
+            if (!saveFile.exists()) {
+                // save file to temp dir
                 file.transferTo(saveFile);
-            } catch (Exception e) {
-                throw new ApiDetailException(e);
             }
+        } catch (Exception e) {
+            throw new ApiDetailException(e);
         }
         String mainClass = null;
         try {

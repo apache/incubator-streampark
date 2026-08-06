@@ -35,13 +35,9 @@ public class ManagedFlinkReleaseSnapshot {
 
     private String providerType;
 
-    private String projectId;
+    private String providerConfigJson;
 
-    private String resourcePoolId;
-
-    private String resourcePoolName;
-
-    private Long draftDirectoryId;
+    private Integer providerConfigVersion;
 
     private String existingDraftId;
 
@@ -66,8 +62,6 @@ public class ManagedFlinkReleaseSnapshot {
     private String dynamicOptionsJson;
 
     private String dependencyJson;
-
-    private String queue;
 
     private String priority;
 

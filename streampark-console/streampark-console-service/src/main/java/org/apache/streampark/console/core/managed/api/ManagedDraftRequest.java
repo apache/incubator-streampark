@@ -27,10 +27,6 @@ public class ManagedDraftRequest {
 
     String existingDraftId;
 
-    String projectId;
-
-    Long directoryId;
-
     String jobName;
 
     String jobType;

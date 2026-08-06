@@ -209,18 +209,20 @@ export const useAppTableAction = (
       },
       {
         label: t('flink.app.operation.remapping'),
-        ifShow: [
-          AppStateEnum.ADDED,
-          AppStateEnum.FAILED,
-          AppStateEnum.CANCELED,
-          AppStateEnum.KILLED,
-          AppStateEnum.SUCCEEDED,
-          AppStateEnum.TERMINATED,
-          AppStateEnum.POS_TERMINATED,
-          AppStateEnum.FINISHED,
-          AppStateEnum.SUSPENDED,
-          AppStateEnum.LOST,
-        ].includes(record.state),
+        ifShow:
+          record.deployMode !== DeployMode.MANAGED_APPLICATION &&
+          [
+            AppStateEnum.ADDED,
+            AppStateEnum.FAILED,
+            AppStateEnum.CANCELED,
+            AppStateEnum.KILLED,
+            AppStateEnum.SUCCEEDED,
+            AppStateEnum.TERMINATED,
+            AppStateEnum.POS_TERMINATED,
+            AppStateEnum.FINISHED,
+            AppStateEnum.SUSPENDED,
+            AppStateEnum.LOST,
+          ].includes(record.state),
         auth: 'app:mapping',
         class: 'e2e-flinkapp-remapping-btn',
         icon: 'ant-design:deployment-unit-outlined',

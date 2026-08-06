@@ -229,13 +229,12 @@ public class ManagedFlinkLifecycleServiceImpl implements ManagedFlinkLifecycleSe
         snapshot.setAppId(appId);
         snapshot.setCloudAccountId(deployed.getCloudAccountId());
         snapshot.setProviderType(deployed.getProviderType());
-        snapshot.setProjectId(deployed.getProjectId());
+        snapshot.setProviderConfigJson(deployed.getProviderConfigJson());
+        snapshot.setProviderConfigVersion(deployed.getProviderConfigVersion());
         snapshot.setJobName(deployed.getJobName());
         snapshot.setOperationType(operationType);
         snapshot.setJobId(managed.getExternalApplicationId());
         snapshot.setInstanceId(managed.getExternalInstanceId());
-        snapshot.setResourcePool(deployed.getResourcePoolName());
-        snapshot.setQueue(deployed.getResourcePoolId());
         snapshot.setPriority(deployed.getPriority());
         snapshot.setSchedulePolicy(deployed.getSchedulePolicy());
         snapshot.setScheduleTimeoutSeconds(deployed.getScheduleTimeoutSeconds());

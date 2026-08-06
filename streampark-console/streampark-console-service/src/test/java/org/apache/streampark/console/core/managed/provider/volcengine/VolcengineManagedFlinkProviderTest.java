@@ -170,6 +170,23 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
                 eq(Collections.emptyMap()));
     }
 
+    @Test
+    void shouldValidateNumericDraftDirectoryIdReturnedAsString() throws Exception {
+        when(client.get(
+            any(),
+            eq("ListGMCSResourcePool"),
+            eq("2022-06-01"),
+            anyMap()))
+                .thenReturn(
+                    response(
+                        "{\"Result\":{\"Total\":1,\"DataList\":[{"
+                            + "\"ResourcePoolId\":\"o-00g0ok9qhjcc\","
+                            + "\"ResourcePoolName\":\"Pool One\"}]}}",
+                        "request-pool"));
+
+        provider.validateEnvironmentConfig(validContext());
+    }
+
     @Override
     protected ManagedFlinkProvider provider() {
         return provider;
@@ -290,18 +307,6 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
     }
 
     @Test
-    void shouldResolveArtifactBucketFromExistingFileUri() throws Exception {
-        assertThat(
-            VolcengineManagedFlinkProvider.artifactBucket(
-                new ObjectMapper()
-                    .readTree(
-                        "{\"Result\":{\"MetaResourceList\":[{"
-                            + "\"Uri\":\"tos://volc-flink-meta-2101000277-cn-beijing/"
-                            + "__artifacts/project/resources/resource/file.jar\"}]}}")))
-                                .isEqualTo("volc-flink-meta-2101000277-cn-beijing");
-    }
-
-    @Test
     void shouldTranslateProviderNeutralDraftEnums() {
         assertThat(VolcengineManagedFlinkProvider.providerJobType("STREAMING_SQL"))
             .isEqualTo("FLINK_STREAMING_SQL");
@@ -319,50 +324,46 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
         assertThat(
             VolcengineManagedFlinkProvider.createRequestBody(
                 ManagedDraftRequest.builder()
-                    .projectId("project-1")
-                    .directoryId(2082077328433315841L)
                     .jobName("job-1")
                     .jobType("STREAMING_SQL")
                     .engineVersion("1.17")
-                    .build()))
-                        .containsEntry("ProjectId", "project-1")
-                        .containsEntry("DirectoryId", 2082077328433315841L)
-                        .containsEntry("JobType", "FLINK_STREAMING_SQL")
-                        .containsEntry("EngineVersion", "FLINK_VERSION_1_17");
+                    .build(),
+                config()))
+                    .containsEntry("ProjectId", "project-1")
+                    .containsEntry("DirectoryId", 2082077328433315841L)
+                    .containsEntry("JobType", "FLINK_STREAMING_SQL")
+                    .containsEntry("EngineVersion", "FLINK_VERSION_1_17");
 
         assertThat(
             VolcengineManagedFlinkProvider.createRequest(
                 ManagedDraftRequest.builder()
-                    .projectId("project-1")
-                    .directoryId(2082077328433315841L)
                     .jobName("job-1")
                     .jobType("STREAMING_SQL")
                     .engineVersion("1.17")
-                    .build()))
-                        .satisfies(
-                            request -> {
-                                assertThat(request.getDirectoryId())
-                                    .isEqualTo(2082077328433315841L);
-                                assertThat(request.getJobType())
-                                    .isEqualTo("FLINK_STREAMING_SQL");
-                                assertThat(request.getEngineVersion())
-                                    .isEqualTo("FLINK_VERSION_1_17");
-                            });
+                    .build(),
+                config()))
+                    .satisfies(
+                        request -> {
+                            assertThat(request.getDirectoryId())
+                                .isEqualTo(2082077328433315841L);
+                            assertThat(request.getJobType())
+                                .isEqualTo("FLINK_STREAMING_SQL");
+                            assertThat(request.getEngineVersion())
+                                .isEqualTo("FLINK_VERSION_1_17");
+                        });
 
         assertThat(
             VolcengineManagedFlinkProvider.deployRequest(
                 ManagedDeployRequest.builder()
                     .draftId("draft-1")
-                    .projectId("project-1")
-                    .resourcePool("paimon-test2")
-                    .queue("o-00g0ok9qhjcc")
                     .schedulePolicy("GANG")
-                    .build()))
-                        .satisfies(
-                            request -> {
-                                assertThat(request.getResourcePool()).isEqualTo("paimon-test2");
-                                assertThat(request.getQueue()).isEqualTo("o-00g0ok9qhjcc");
-                            });
+                    .build(),
+                config()))
+                    .satisfies(
+                        request -> {
+                            assertThat(request.getResourcePool()).isEqualTo("paimon-test2");
+                            assertThat(request.getQueue()).isEqualTo("o-00g0ok9qhjcc");
+                        });
     }
 
     @Test
@@ -407,7 +408,6 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
             provider.updateRequestBody(
                 objectMapper.readTree(providerDraft),
                 ManagedDraftRequest.builder()
-                    .projectId("project-1")
                     .jobName("updated-name")
                     .jobType("STREAMING_SQL")
                     .engineVersion("1.17")
@@ -416,7 +416,8 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
                     .dynamicOptionsJson(
                         "{\"custom.runtime\":\"release\",\"paimon.connector.version\":\"1.1\"}")
                     .dependencyJson("[]")
-                    .build());
+                    .build(),
+                config());
 
         assertThat(body.path("AccountId").asText()).isEqualTo("account-1");
         assertThat(body.path("UserId").asText()).isEqualTo("user-1");
@@ -464,7 +465,6 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
                         + "\"CreateTime\":\"2026-08-05 19:58:16\""
                         + "}"),
                 ManagedDraftRequest.builder()
-                    .projectId("project-1")
                     .jobName("jar-job")
                     .jobType("STREAMING_JAR")
                     .engineVersion("FLINK_VERSION_1_17")
@@ -474,7 +474,8 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
                     .optionsJson("{}")
                     .dynamicOptionsJson("{}")
                     .dependencyJson("{\"jars\":[]}")
-                    .build());
+                    .build(),
+                config());
 
         assertThat(body.path("JobType").asText()).isEqualTo("FLINK_STREAMING_JAR");
         assertThat(body.path("ResourceVersion").asText()).isEqualTo("0");
@@ -517,8 +518,6 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
             validContext(),
             ManagedDraftRequest.builder()
                 .existingDraftId("draft-1")
-                .projectId("project-1")
-                .directoryId(1L)
                 .jobName("job-1")
                 .jobType("STREAMING_SQL")
                 .engineVersion("1.17")
@@ -564,32 +563,31 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
             VolcengineManagedFlinkProvider.startRequest(
                 ManagedJobStartRequest.builder()
                     .jobId("job-1")
-                    .resourcePool("paimon-test2")
-                    .queue("o-00g0ok9qhjcc")
                     .priority("5")
                     .schedulePolicy("GANG")
                     .scheduleTimeoutSeconds(300)
                     .restoreMode(ManagedJobRestoreMode.FRESH)
-                    .build()))
-                        .satisfies(
-                            request -> {
-                                assertThat(request.getId()).isEqualTo("job-1");
-                                assertThat(request.getApp().getDeployRequest().getResourcePool())
-                                    .isEqualTo("paimon-test2");
-                                assertThat(request.getApp().getDeployRequest().getQueue())
-                                    .isEqualTo("o-00g0ok9qhjcc");
-                                assertThat(request.getApp().getDeployRequest().getPriority())
-                                    .isEqualTo("5");
-                                assertThat(request.getApp().getDeployRequest().getSchedulePolicy())
-                                    .isEqualTo(
-                                        DeployRequestForStartApplicationInstanceInput.SchedulePolicyEnum.GANG);
-                                assertThat(
-                                    request.getApp().getDeployRequest().getScheduleTimeout())
-                                        .isEqualTo("300");
-                                assertThat(request.getRestoreStrategy().getType())
-                                    .isEqualTo("FROM_NEW");
-                                assertThat(request.getRestoreStrategy().getSavepointId()).isNull();
-                            });
+                    .build(),
+                config()))
+                    .satisfies(
+                        request -> {
+                            assertThat(request.getId()).isEqualTo("job-1");
+                            assertThat(request.getApp().getDeployRequest().getResourcePool())
+                                .isEqualTo("paimon-test2");
+                            assertThat(request.getApp().getDeployRequest().getQueue())
+                                .isEqualTo("o-00g0ok9qhjcc");
+                            assertThat(request.getApp().getDeployRequest().getPriority())
+                                .isEqualTo("5");
+                            assertThat(request.getApp().getDeployRequest().getSchedulePolicy())
+                                .isEqualTo(
+                                    DeployRequestForStartApplicationInstanceInput.SchedulePolicyEnum.GANG);
+                            assertThat(
+                                request.getApp().getDeployRequest().getScheduleTimeout())
+                                    .isEqualTo("300");
+                            assertThat(request.getRestoreStrategy().getType())
+                                .isEqualTo("FROM_NEW");
+                            assertThat(request.getRestoreStrategy().getSavepointId()).isNull();
+                        });
 
         assertThat(
             VolcengineManagedFlinkProvider.startRequest(
@@ -597,14 +595,15 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
                     .jobId("job-1")
                     .restoreMode(ManagedJobRestoreMode.SPECIFIED_SNAPSHOT)
                     .snapshotId("savepoint-1")
-                    .build()))
-                        .satisfies(
-                            request -> {
-                                assertThat(request.getRestoreStrategy().getType())
-                                    .isEqualTo("FROM_SAVEPOINT");
-                                assertThat(request.getRestoreStrategy().getSavepointId())
-                                    .isEqualTo("savepoint-1");
-                            });
+                    .build(),
+                config()))
+                    .satisfies(
+                        request -> {
+                            assertThat(request.getRestoreStrategy().getType())
+                                .isEqualTo("FROM_SAVEPOINT");
+                            assertThat(request.getRestoreStrategy().getSavepointId())
+                                .isEqualTo("savepoint-1");
+                        });
     }
 
     @Test
@@ -664,7 +663,6 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
             provider.getJob(
                 validContext(),
                 ManagedJobLookupRequest.builder()
-                    .projectId("project-1")
                     .jobName("job-name")
                     .jobId("job-1")
                     .build()))
@@ -782,7 +780,6 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
         assertThat(
             VolcengineManagedFlinkProvider.snapshotLookupRequest(
                 ManagedSnapshotLookupRequest.builder()
-                    .projectId("project-1")
                     .jobId("job-1")
                     .build())
                 .getId())
@@ -790,7 +787,6 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
         assertThat(
             VolcengineManagedFlinkProvider.snapshotCreateRequest(
                 ManagedSnapshotCreateRequest.builder()
-                    .projectId("project-1")
                     .jobId("job-1")
                     .instanceId("s-instance-1")
                     .description("manual")
@@ -844,7 +840,23 @@ class VolcengineManagedFlinkProviderTest extends ManagedFlinkProviderMetadataCon
             .cloudAccountId(accountId)
             .credentialVersion(0L)
             .region("cn-beijing")
-            .projectId("project-1")
+            .providerConfigJson(
+                "{\"projectId\":\"project-1\",\"projectName\":\"Project\","
+                    + "\"resourcePoolId\":\"o-00g0ok9qhjcc\","
+                    + "\"resourcePoolName\":\"paimon-test2\","
+                    + "\"draftDirectoryId\":2082077328433315841,"
+                    + "\"tosBucket\":\"test-flink-bucket\"}")
+            .providerConfigVersion(1)
             .build();
+    }
+
+    private static VolcengineEnvironmentConfig config() {
+        VolcengineEnvironmentConfig config = new VolcengineEnvironmentConfig();
+        config.setProjectId("project-1");
+        config.setResourcePoolId("o-00g0ok9qhjcc");
+        config.setResourcePoolName("paimon-test2");
+        config.setDraftDirectoryId(2082077328433315841L);
+        config.setTosBucket("test-flink-bucket");
+        return config;
     }
 }

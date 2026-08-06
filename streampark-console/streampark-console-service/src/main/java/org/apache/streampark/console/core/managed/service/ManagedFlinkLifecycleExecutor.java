@@ -73,7 +73,8 @@ class ManagedFlinkLifecycleExecutor {
                 providerContextService.resolve(
                     snapshot.getTeamId(),
                     snapshot.getCloudAccountId(),
-                    snapshot.getProjectId());
+                    snapshot.getProviderConfigJson(),
+                    snapshot.getProviderConfigVersion());
             if (!session.getProviderType().name().equals(snapshot.getProviderType())) {
                 throw new IllegalStateException("Managed Flink provider routing changed.");
             }
@@ -125,8 +126,6 @@ class ManagedFlinkLifecycleExecutor {
                         session.getContext(),
                         ManagedJobStartRequest.builder()
                             .jobId(snapshot.getJobId())
-                            .resourcePool(snapshot.getResourcePool())
-                            .queue(snapshot.getQueue())
                             .priority(snapshot.getPriority())
                             .schedulePolicy(snapshot.getSchedulePolicy())
                             .scheduleTimeoutSeconds(snapshot.getScheduleTimeoutSeconds())

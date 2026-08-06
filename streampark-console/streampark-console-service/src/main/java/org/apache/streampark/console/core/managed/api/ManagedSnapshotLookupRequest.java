@@ -25,6 +25,5 @@ import lombok.Value;
 @Builder
 public class ManagedSnapshotLookupRequest {
 
-    String projectId;
     String jobId;
 }

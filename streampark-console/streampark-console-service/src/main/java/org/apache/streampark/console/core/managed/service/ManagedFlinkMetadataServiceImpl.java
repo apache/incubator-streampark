@@ -41,14 +41,14 @@ public class ManagedFlinkMetadataServiceImpl implements ManagedFlinkMetadataServ
     @Override
     public ManagedFlinkCapability capability(ManagedFlinkMetadataRequest request) {
         ManagedFlinkProviderSession session =
-            contextService.resolve(request.getTeamId(), request.getCloudAccountId(), null);
+            contextService.resolve(request.getTeamId(), request.getCloudAccountId());
         return session.getProvider().getCapability(session.getContext());
     }
 
     @Override
     public List<CloudProject> projects(ManagedFlinkMetadataRequest request) {
         ManagedFlinkProviderSession session =
-            contextService.resolve(request.getTeamId(), request.getCloudAccountId(), null);
+            contextService.resolve(request.getTeamId(), request.getCloudAccountId());
         ManagedFlinkCapability capability =
             session.getProvider().getCapability(session.getContext());
         ApiAlertException.throwIfFalse(
@@ -61,8 +61,7 @@ public class ManagedFlinkMetadataServiceImpl implements ManagedFlinkMetadataServ
     public List<ManagedResourcePool> resourcePools(
                                                    ManagedFlinkResourcePoolRequest request) {
         ManagedFlinkProviderSession session =
-            contextService.resolve(
-                request.getTeamId(), request.getCloudAccountId(), request.getProjectId());
+            contextService.resolve(request.getTeamId(), request.getCloudAccountId());
         ManagedFlinkCapability capability =
             session.getProvider().getCapability(session.getContext());
         ApiAlertException.throwIfFalse(
@@ -78,8 +77,7 @@ public class ManagedFlinkMetadataServiceImpl implements ManagedFlinkMetadataServ
     public List<ManagedDraftDirectory> draftDirectories(
                                                         ManagedFlinkDraftDirectoryRequest request) {
         ManagedFlinkProviderSession session =
-            contextService.resolve(
-                request.getTeamId(), request.getCloudAccountId(), request.getProjectId());
+            contextService.resolve(request.getTeamId(), request.getCloudAccountId());
         try {
             return session
                 .getProvider()

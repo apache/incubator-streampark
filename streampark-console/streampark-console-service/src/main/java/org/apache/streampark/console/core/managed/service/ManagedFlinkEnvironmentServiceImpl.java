@@ -25,12 +25,10 @@ import org.apache.streampark.console.core.entity.CloudAccount;
 import org.apache.streampark.console.core.entity.CloudAccountTeam;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.ManagedFlinkEnvironment;
-import org.apache.streampark.console.core.managed.api.CloudProject;
 import org.apache.streampark.console.core.managed.api.CredentialCheckResult;
 import org.apache.streampark.console.core.managed.api.ManagedFlinkCapability;
 import org.apache.streampark.console.core.managed.api.ManagedFlinkProviderException;
 import org.apache.streampark.console.core.managed.api.ManagedFlinkProviderType;
-import org.apache.streampark.console.core.managed.api.ManagedResourcePool;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkEnvironmentCreateRequest;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkEnvironmentListRequest;
 import org.apache.streampark.console.core.managed.model.ManagedFlinkEnvironmentUpdateRequest;
@@ -57,7 +55,6 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -103,11 +100,8 @@ public class ManagedFlinkEnvironmentServiceImpl implements ManagedFlinkEnvironme
         applyRegistration(
             environment,
             account,
-            request.getProjectId(),
-            request.getProjectName(),
-            request.getResourcePoolId(),
-            request.getResourcePoolName(),
-            request.getDraftDirectoryId());
+            request.getProviderConfigJson(),
+            request.getProviderConfigVersion());
         environment.setVersion(0);
         ApiAlertException.throwIfFalse(
             environmentMapper.insert(environment) == 1,
@@ -132,19 +126,12 @@ public class ManagedFlinkEnvironmentServiceImpl implements ManagedFlinkEnvironme
                 .set(ManagedFlinkEnvironment::getProviderType, account.getProviderType())
                 .set(ManagedFlinkEnvironment::getCloudAccountId, account.getId())
                 .set(ManagedFlinkEnvironment::getRegion, account.getRegion())
-                .set(ManagedFlinkEnvironment::getProjectId, request.getProjectId().trim())
                 .set(
-                    ManagedFlinkEnvironment::getProjectName,
-                    StringUtils.trimToNull(request.getProjectName()))
+                    ManagedFlinkEnvironment::getProviderConfigJson,
+                    requireProviderConfig(request.getProviderConfigJson()))
                 .set(
-                    ManagedFlinkEnvironment::getResourcePoolId,
-                    request.getResourcePoolId().trim())
-                .set(
-                    ManagedFlinkEnvironment::getResourcePoolName,
-                    StringUtils.trimToNull(request.getResourcePoolName()))
-                .set(
-                    ManagedFlinkEnvironment::getDraftDirectoryId,
-                    request.getDraftDirectoryId())
+                    ManagedFlinkEnvironment::getProviderConfigVersion,
+                    request.getProviderConfigVersion())
                 .set(ManagedFlinkEnvironment::getConsoleUrl, null)
                 .set(ManagedFlinkEnvironment::getCapabilityJson, null)
                 .set(ManagedFlinkEnvironment::getLastProbeTime, null)
@@ -271,7 +258,10 @@ public class ManagedFlinkEnvironmentServiceImpl implements ManagedFlinkEnvironme
                                       Long teamId, ManagedFlinkEnvironment environment) {
         ManagedFlinkProviderSession session =
             contextService.resolve(
-                teamId, environment.getCloudAccountId(), environment.getProjectId());
+                teamId,
+                environment.getCloudAccountId(),
+                environment.getProviderConfigJson(),
+                environment.getProviderConfigVersion());
         CredentialCheckResult credential =
             session.getProvider().validateCredential(session.getContext());
         if (credential == null || !credential.isSuccess()) {
@@ -282,37 +272,8 @@ public class ManagedFlinkEnvironmentServiceImpl implements ManagedFlinkEnvironme
         if (capability == null || capability.getProviderType() != session.getProviderType()) {
             throw new ProbeValidationException("VALIDATION:InvalidCapability");
         }
-
-        String projectName = environment.getProjectName();
-        if (capability.isSupportsProjectList()) {
-            CloudProject project =
-                session.getProvider().listProjects(session.getContext(), null).stream()
-                    .filter(item -> Objects.equals(item.getId(), environment.getProjectId()))
-                    .findFirst()
-                    .orElseThrow(
-                        () -> new ProbeValidationException("VALIDATION:ProjectNotFound"));
-            projectName = project.getName();
-        }
-
-        String resourcePoolName = environment.getResourcePoolName();
-        if (capability.isSupportsResourcePoolList()) {
-            ManagedResourcePool resourcePool =
-                session
-                    .getProvider()
-                    .listResourcePools(
-                        session.getContext(), environment.getProjectId(), null)
-                    .stream()
-                    .filter(
-                        item -> Objects.equals(
-                            item.getId(), environment.getResourcePoolId()))
-                    .findFirst()
-                    .orElseThrow(
-                        () -> new ProbeValidationException(
-                            "VALIDATION:ResourcePoolNotFound"));
-            resourcePoolName = resourcePool.getName();
-        }
-        return new ProbeSuccess(
-            projectName, resourcePoolName, capabilitySnapshot(capability));
+        session.getProvider().validateEnvironmentConfig(session.getContext());
+        return new ProbeSuccess(capabilitySnapshot(capability));
     }
 
     private void persistProbeSuccess(
@@ -323,10 +284,6 @@ public class ManagedFlinkEnvironmentServiceImpl implements ManagedFlinkEnvironme
             new LambdaUpdateWrapper<ManagedFlinkEnvironment>()
                 .eq(ManagedFlinkEnvironment::getClusterId, environment.getClusterId())
                 .eq(ManagedFlinkEnvironment::getVersion, environment.getVersion())
-                .set(ManagedFlinkEnvironment::getProjectName, success.getProjectName())
-                .set(
-                    ManagedFlinkEnvironment::getResourcePoolName,
-                    success.getResourcePoolName())
                 .set(
                     ManagedFlinkEnvironment::getCapabilityJson,
                     success.getCapabilityJson())
@@ -419,19 +376,13 @@ public class ManagedFlinkEnvironmentServiceImpl implements ManagedFlinkEnvironme
     private static void applyRegistration(
                                           ManagedFlinkEnvironment environment,
                                           CloudAccount account,
-                                          String projectId,
-                                          String projectName,
-                                          String resourcePoolId,
-                                          String resourcePoolName,
-                                          Long draftDirectoryId) {
+                                          String providerConfigJson,
+                                          Integer providerConfigVersion) {
         environment.setProviderType(account.getProviderType());
         environment.setCloudAccountId(account.getId());
         environment.setRegion(account.getRegion());
-        environment.setProjectId(projectId.trim());
-        environment.setProjectName(StringUtils.trimToNull(projectName));
-        environment.setResourcePoolId(resourcePoolId.trim());
-        environment.setResourcePoolName(StringUtils.trimToNull(resourcePoolName));
-        environment.setDraftDirectoryId(draftDirectoryId);
+        environment.setProviderConfigJson(requireProviderConfig(providerConfigJson));
+        environment.setProviderConfigVersion(providerConfigVersion);
         environment.setConsoleUrl(
             ManagedFlinkProviderType.consoleUrl(account.getProviderType()));
     }
@@ -449,11 +400,8 @@ public class ManagedFlinkEnvironmentServiceImpl implements ManagedFlinkEnvironme
             .providerType(environment.getProviderType())
             .cloudAccountId(environment.getCloudAccountId())
             .region(environment.getRegion())
-            .projectId(environment.getProjectId())
-            .projectName(environment.getProjectName())
-            .resourcePoolId(environment.getResourcePoolId())
-            .resourcePoolName(environment.getResourcePoolName())
-            .draftDirectoryId(environment.getDraftDirectoryId())
+            .providerConfigJson(environment.getProviderConfigJson())
+            .providerConfigVersion(environment.getProviderConfigVersion())
             .consoleUrl(environment.getConsoleUrl())
             .capabilityJson(environment.getCapabilityJson())
             .lastProbeTime(environment.getLastProbeTime())
@@ -495,6 +443,13 @@ public class ManagedFlinkEnvironmentServiceImpl implements ManagedFlinkEnvironme
         }
     }
 
+    private static String requireProviderConfig(String providerConfigJson) {
+        String normalized = StringUtils.trimToNull(providerConfigJson);
+        ApiAlertException.throwIfNull(
+            normalized, "Managed Flink provider configuration is required.");
+        return normalized;
+    }
+
     private static String decimal(BigDecimal value) {
         return value == null ? null : value.toPlainString();
     }
@@ -513,10 +468,6 @@ public class ManagedFlinkEnvironmentServiceImpl implements ManagedFlinkEnvironme
 
     @lombok.Value
     private static class ProbeSuccess {
-
-        String projectName;
-
-        String resourcePoolName;
 
         String capabilityJson;
     }

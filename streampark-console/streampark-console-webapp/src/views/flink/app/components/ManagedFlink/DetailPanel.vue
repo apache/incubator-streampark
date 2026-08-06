@@ -42,6 +42,7 @@
     ManagedFlinkOperation,
     ManagedFlinkSnapshot,
   } from '/@/api/flink/managedFlink.type';
+  import { parseVolcengineEnvironmentConfig } from '/@/api/flink/managedFlink.type';
   import type { AppListRecord } from '/@/api/flink/app.type';
   import { useI18n } from '/@/hooks/web/useI18n';
 
@@ -58,6 +59,7 @@
 
   const application = ref<ManagedFlinkApplication>();
   const environment = ref<ManagedFlinkEnvironment>();
+  const providerConfig = computed(() => parseVolcengineEnvironmentConfig(environment.value));
   const snapshots = ref<ManagedFlinkSnapshot[]>([]);
   const operations = ref<ManagedFlinkOperation[]>([]);
   const loading = ref(false);
@@ -307,10 +309,10 @@
           {{ application.providerType }}
         </DescriptionItem>
         <DescriptionItem :label="t('flink.app.managed.project')">
-          {{ environment?.projectName || environment?.projectId || '—' }}
+          {{ providerConfig.projectName || providerConfig.projectId || '—' }}
         </DescriptionItem>
         <DescriptionItem :label="t('flink.app.managed.resourcePool')">
-          {{ environment?.resourcePoolName || environment?.resourcePoolId || '—' }}
+          {{ providerConfig.resourcePoolName || providerConfig.resourcePoolId || '—' }}
         </DescriptionItem>
         <DescriptionItem :label="t('flink.app.managed.engineVersion')">
           {{ application.runtimeConfig.engineVersion }}

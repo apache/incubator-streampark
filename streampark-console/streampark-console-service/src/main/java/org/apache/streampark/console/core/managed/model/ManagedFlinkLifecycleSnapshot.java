@@ -35,7 +35,9 @@ public class ManagedFlinkLifecycleSnapshot {
 
     private String providerType;
 
-    private String projectId;
+    private String providerConfigJson;
+
+    private Integer providerConfigVersion;
 
     private String jobName;
 
@@ -44,10 +46,6 @@ public class ManagedFlinkLifecycleSnapshot {
     private String jobId;
 
     private String instanceId;
-
-    private String resourcePool;
-
-    private String queue;
 
     private String priority;
 

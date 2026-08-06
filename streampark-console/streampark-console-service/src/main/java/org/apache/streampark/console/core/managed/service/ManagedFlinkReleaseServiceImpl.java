@@ -127,12 +127,8 @@ public class ManagedFlinkReleaseServiceImpl implements ManagedFlinkReleaseServic
         snapshot.setManagedEnvironmentId(application.getManagedEnvironmentId());
         snapshot.setCloudAccountId(environment.getCloudAccountId());
         snapshot.setProviderType(managed.getProviderType());
-        snapshot.setProjectId(environment.getProjectId());
-        snapshot.setResourcePoolId(
-            StringUtils.defaultIfBlank(
-                release.getResourcePoolId(), environment.getResourcePoolId()));
-        snapshot.setResourcePoolName(environment.getResourcePoolName());
-        snapshot.setDraftDirectoryId(environment.getDraftDirectoryId());
+        snapshot.setProviderConfigJson(environment.getProviderConfigJson());
+        snapshot.setProviderConfigVersion(environment.getProviderConfigVersion());
         snapshot.setExistingDraftId(managed.getExternalDraftId());
         snapshot.setJobName(application.getJobName());
         snapshot.setJobType(application.getJobType());
@@ -167,12 +163,10 @@ public class ManagedFlinkReleaseServiceImpl implements ManagedFlinkReleaseServic
         snapshot.setSchedulePolicy(release.getSchedulingStrategy());
         snapshot.setDefinitionHash(application.getLocalDefinitionHash());
         ApiAlertException.throwIfTrue(
-            snapshot.getDraftDirectoryId() == null
+            snapshot.getProviderConfigVersion() == null
                 || StringUtils.isAnyBlank(
                     snapshot.getProviderType(),
-                    snapshot.getProjectId(),
-                    snapshot.getResourcePoolId(),
-                    snapshot.getResourcePoolName(),
+                    snapshot.getProviderConfigJson(),
                     snapshot.getJobName(),
                     snapshot.getEngineVersion(),
                     snapshot.getDefinitionHash()),

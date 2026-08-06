@@ -45,15 +45,9 @@ public class ManagedFlinkEnvironmentView {
 
     String region;
 
-    String projectId;
+    String providerConfigJson;
 
-    String projectName;
-
-    String resourcePoolId;
-
-    String resourcePoolName;
-
-    Long draftDirectoryId;
+    Integer providerConfigVersion;
 
     String consoleUrl;
 

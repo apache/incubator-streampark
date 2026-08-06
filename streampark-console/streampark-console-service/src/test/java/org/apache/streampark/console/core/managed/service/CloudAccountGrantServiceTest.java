@@ -178,9 +178,8 @@ class CloudAccountGrantServiceTest extends SpringUnitTestBase {
         environment.setProviderType("VOLCENGINE");
         environment.setCloudAccountId(accountId);
         environment.setRegion("cn-beijing");
-        environment.setProjectId("cwz-test");
-        environment.setResourcePoolId("paimon-test2");
-        environment.setDraftDirectoryId(1L);
+        environment.setProviderConfigJson("{\"fixture\":true}");
+        environment.setProviderConfigVersion(1);
         environment.setVersion(0);
         assertThat(managedFlinkEnvironmentMapper.insert(environment)).isEqualTo(1);
 

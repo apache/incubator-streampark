@@ -712,11 +712,8 @@ create table if not exists `t_managed_flink_env` (
   `provider_type` varchar(32) not null,
   `cloud_account_id` bigint not null,
   `region` varchar(64) not null,
-  `project_id` varchar(128) not null,
-  `project_name` varchar(128) default null,
-  `resource_pool_id` varchar(128) not null,
-  `resource_pool_name` varchar(128) default null,
-  `draft_directory_id` bigint not null,
+  `provider_config_json` text not null,
+  `provider_config_version` int not null default 1,
   `console_url` varchar(512) default null,
   `capability_json` text default null,
   `last_probe_time` datetime default null,
@@ -728,6 +725,17 @@ create table if not exists `t_managed_flink_env` (
   constraint `fk_managed_flink_env_account`
     foreign key (`cloud_account_id`) references `t_cloud_account` (`id`)
 );
+
+alter table `t_managed_flink_env`
+  add column if not exists `provider_config_json` text default null;
+alter table `t_managed_flink_env`
+  add column if not exists `provider_config_version` int not null default 1;
+alter table `t_managed_flink_env`
+  alter column if exists `project_id` set null;
+alter table `t_managed_flink_env`
+  alter column if exists `resource_pool_id` set null;
+alter table `t_managed_flink_env`
+  alter column if exists `draft_directory_id` set null;
 
 create index if not exists `inx_managed_flink_env_account`
   on `t_managed_flink_env` (`cloud_account_id`);

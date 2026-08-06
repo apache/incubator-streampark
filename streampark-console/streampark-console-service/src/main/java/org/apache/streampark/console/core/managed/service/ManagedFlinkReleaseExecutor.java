@@ -70,7 +70,8 @@ class ManagedFlinkReleaseExecutor {
                 providerContextService.resolve(
                     snapshot.getTeamId(),
                     snapshot.getCloudAccountId(),
-                    snapshot.getProjectId());
+                    snapshot.getProviderConfigJson(),
+                    snapshot.getProviderConfigVersion());
             if (!session.getProviderType().name().equals(snapshot.getProviderType())) {
                 throw new IllegalStateException("Managed Flink provider routing changed.");
             }
@@ -81,8 +82,6 @@ class ManagedFlinkReleaseExecutor {
                     session.getContext(),
                     ManagedDraftRequest.builder()
                         .existingDraftId(snapshot.getExistingDraftId())
-                        .projectId(snapshot.getProjectId())
-                        .directoryId(snapshot.getDraftDirectoryId())
                         .jobName(snapshot.getJobName())
                         .jobType(snapshot.getJobType())
                         .engineVersion(snapshot.getEngineVersion())
@@ -107,9 +106,6 @@ class ManagedFlinkReleaseExecutor {
                     session.getContext(),
                     ManagedDeployRequest.builder()
                         .draftId(draft.getDraftId())
-                        .projectId(snapshot.getProjectId())
-                        .resourcePool(snapshot.getResourcePoolName())
-                        .queue(snapshot.getResourcePoolId())
                         .priority(snapshot.getPriority())
                         .schedulePolicy(snapshot.getSchedulePolicy())
                         .scheduleTimeoutSeconds(snapshot.getScheduleTimeoutSeconds())

@@ -38,5 +38,7 @@ public class ProviderContext {
 
     String endpoint;
 
-    String projectId;
+    String providerConfigJson;
+
+    Integer providerConfigVersion;
 }

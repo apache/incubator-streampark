@@ -15,26 +15,27 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.managed.model;
+package org.apache.streampark.console.core.managed.provider.volcengine;
 
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-/** Provider-neutral release configuration for a managed Flink application. */
+/** Volcengine-specific configuration stored in a managed environment provider payload. */
 @Getter
 @Setter
-public class ManagedFlinkReleaseConfig {
+public class VolcengineEnvironmentConfig {
 
-    private Integer priority;
+    public static final int CURRENT_VERSION = 1;
 
-    private String schedulingStrategy = "DEFAULT";
+    private String projectId;
 
-    private List<String> dependencyResourceNames = new ArrayList<>();
+    private String projectName;
 
-    private Map<String, String> customProperties = new LinkedHashMap<>();
+    private String resourcePoolId;
+
+    private String resourcePoolName;
+
+    private Long draftDirectoryId;
+
+    private String tosBucket;
 }

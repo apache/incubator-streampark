@@ -113,7 +113,7 @@ class ManagedFlinkArtifactServiceTest extends SpringUnitTestBase {
     @Test
     void shouldStageMainJarAndDependencyOncePerChecksum() throws Exception {
         Long environmentId = createEnvironment("artifact-cache-env");
-        createResource("main.jar", "main-content");
+        createApplicationResource("main.jar", "main-content");
         createResource("dependency.jar", "dependency-content");
         Long appId =
             createJarApplication(
@@ -166,7 +166,7 @@ class ManagedFlinkArtifactServiceTest extends SpringUnitTestBase {
     @Test
     void shouldReconcileProviderReferenceAfterRetryableTimeout() throws Exception {
         Long environmentId = createEnvironment("artifact-reconcile-env");
-        createResource("reconcile.jar", "reconcile-content");
+        createApplicationResource("reconcile.jar", "reconcile-content");
         Long appId =
             createJarApplication(
                 environmentId,
@@ -191,7 +191,7 @@ class ManagedFlinkArtifactServiceTest extends SpringUnitTestBase {
     @Test
     void shouldRetryFailedCacheEntryWithoutCreatingDuplicate() throws Exception {
         Long environmentId = createEnvironment("artifact-retry-env");
-        createResource("retry.jar", "retry-content");
+        createApplicationResource("retry.jar", "retry-content");
         Long appId =
             createJarApplication(
                 environmentId,
@@ -224,11 +224,22 @@ class ManagedFlinkArtifactServiceTest extends SpringUnitTestBase {
     }
 
     private void createResource(String name, String content) throws Exception {
+        createResource(name, content, ResourceTypeEnum.JAR_LIBRARY);
+    }
+
+    private void createApplicationResource(String name, String content) throws Exception {
+        createResource(name, content, ResourceTypeEnum.APP);
+    }
+
+    private void createResource(
+                                String name,
+                                String content,
+                                ResourceTypeEnum resourceType) throws Exception {
         Path file = tempDirectory.resolve(name);
         Files.writeString(file, content, StandardCharsets.UTF_8);
         Resource resource = new Resource();
         resource.setResourceName(name);
-        resource.setResourceType(ResourceTypeEnum.JAR_LIBRARY);
+        resource.setResourceType(resourceType);
         resource.setResourcePath(name + ":" + file);
         resource.setResource("[\"" + name + ":" + file + "\"]");
         resource.setEngineType(EngineTypeEnum.FLINK);
@@ -275,9 +286,8 @@ class ManagedFlinkArtifactServiceTest extends SpringUnitTestBase {
         environment.setTeamId(TEAM_ID);
         environment.setClusterName(name);
         environment.setCloudAccountId(accountId);
-        environment.setProjectId("fake-project");
-        environment.setResourcePoolId("fake-pool");
-        environment.setDraftDirectoryId(1L);
+        environment.setProviderConfigJson("{\"fixture\":true}");
+        environment.setProviderConfigVersion(1);
         Long environmentId = environmentService.create(environment);
         environmentService.probe(TEAM_ID, environmentId);
         return environmentId;

@@ -86,7 +86,8 @@ class VolcengineSdkClientFactoryTest {
             .cloudAccountId(1L)
             .credentialVersion(1L)
             .region("cn-beijing")
-            .projectId("project")
+            .providerConfigJson("{\"fixture\":true}")
+            .providerConfigVersion(1)
             .build();
     }
 }

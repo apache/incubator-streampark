@@ -331,18 +331,21 @@ public class ManagedFlinkApplicationServiceImpl implements ManagedFlinkApplicati
         ApiAlertException.throwIfTrue(
             environment == null
                 || environment.getCloudAccountId() == null
-                || StringUtils.isBlank(environment.getProjectId()),
+                || StringUtils.isBlank(environment.getProviderConfigJson())
+                || environment.getProviderConfigVersion() == null,
             "Managed Flink environment is unavailable.");
         ManagedFlinkProviderSession session =
             providerContextService.resolve(
-                teamId, environment.getCloudAccountId(), environment.getProjectId());
+                teamId,
+                environment.getCloudAccountId(),
+                environment.getProviderConfigJson(),
+                environment.getProviderConfigVersion());
         ManagedJobStatus status =
             session
                 .getProvider()
                 .getJob(
                     session.getContext(),
                     ManagedJobLookupRequest.builder()
-                        .projectId(environment.getProjectId())
                         .jobName(application.getJobName())
                         .jobId(managed.getExternalApplicationId())
                         .instanceId(managed.getExternalInstanceId())

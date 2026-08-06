@@ -76,7 +76,10 @@ public class ManagedFlinkReleaseReconcileService {
         try {
             ManagedFlinkProviderSession session =
                 providerContextService.resolve(
-                    teamId, snapshot.getCloudAccountId(), snapshot.getProjectId());
+                    teamId,
+                    snapshot.getCloudAccountId(),
+                    snapshot.getProviderConfigJson(),
+                    snapshot.getProviderConfigVersion());
             ApiAlertException.throwIfFalse(
                 session.getProviderType().name().equals(snapshot.getProviderType()),
                 "Managed Flink provider routing changed.");
@@ -84,7 +87,6 @@ public class ManagedFlinkReleaseReconcileService {
                 session.getProvider().findDeployment(
                     session.getContext(),
                     ManagedDeploymentLookupRequest.builder()
-                        .projectId(snapshot.getProjectId())
                         .draftId(draftId)
                         .jobName(snapshot.getJobName())
                         .definitionHash(snapshot.getDefinitionHash())

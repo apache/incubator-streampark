@@ -255,9 +255,8 @@ class ManagedFlinkOperationServiceTest extends SpringUnitTestBase {
         environment.setTeamId(TEAM_ID);
         environment.setClusterName(name);
         environment.setCloudAccountId(accountId);
-        environment.setProjectId("fake-project");
-        environment.setResourcePoolId("fake-pool");
-        environment.setDraftDirectoryId(1L);
+        environment.setProviderConfigJson("{\"fixture\":true}");
+        environment.setProviderConfigVersion(1);
         Long environmentId = environmentService.create(environment);
         environmentService.probe(TEAM_ID, environmentId);
         return environmentId;

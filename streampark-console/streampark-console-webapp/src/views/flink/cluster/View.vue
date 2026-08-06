@@ -95,11 +95,7 @@
     columns: [
       { dataIndex: 'clusterName', title: t('setting.flinkCluster.form.clusterName') },
       { dataIndex: 'deployMode', title: t('setting.flinkCluster.form.deployMode') },
-      { dataIndex: 'address', title: t('setting.flinkCluster.form.address') },
-      {
-        dataIndex: 'resourcePool',
-        title: t('setting.flinkCluster.managed.resourcePool'),
-      },
+      { dataIndex: 'address', title: t('setting.flinkCluster.accessEntry') },
       { dataIndex: 'clusterState', title: t('setting.flinkCluster.form.runState') },
       { dataIndex: 'description', title: t('setting.flinkHome.description') },
     ],
@@ -268,7 +264,7 @@
               record.deployMode === DeployMode.YARN_SESSION
             "
           >
-            {{ record.address }}
+            {{ t('setting.flinkCluster.flinkWebUi') }}
           </a>
           <a
             v-else-if="record.managedEnvironment?.consoleUrl"
@@ -276,16 +272,8 @@
             target="_blank"
             rel="noopener noreferrer"
           >
-            {{ record.managedEnvironment.projectName || record.managedEnvironment.projectId }}
+            {{ t('setting.flinkCluster.providerConsole') }}
           </a>
-          <span v-else> - </span>
-        </template>
-        <template v-if="column.dataIndex === 'resourcePool'">
-          <span v-if="record.managedEnvironment">
-            {{
-              record.managedEnvironment.resourcePoolName || record.managedEnvironment.resourcePoolId
-            }}
-          </span>
           <span v-else>—</span>
         </template>
         <template v-if="column.dataIndex === 'clusterState'">

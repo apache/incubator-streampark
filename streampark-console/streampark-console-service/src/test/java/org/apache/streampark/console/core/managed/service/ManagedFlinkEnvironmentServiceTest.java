@@ -117,9 +117,11 @@ class ManagedFlinkEnvironmentServiceTest extends SpringUnitTestBase {
         assertThat(view.getClusterName()).isEqualTo("managed-registration");
         assertThat(view.getProviderType()).isEqualTo("VOLCENGINE");
         assertThat(view.getRegion()).isEqualTo("cn-beijing");
+        assertThat(view.getProviderConfigJson()).contains("test-flink-bucket");
+        assertThat(view.getProviderConfigVersion()).isEqualTo(1);
         assertThat(view.getClusterState()).isEqualTo(ClusterState.CREATED.getState());
         assertThat(view.getVersion()).isZero();
-        assertThat(view.getConsoleUrl()).isNull();
+        assertThat(view.getConsoleUrl()).isEqualTo("https://console.volcengine.com/flink");
 
         FlinkCluster cluster = clusterMapper.selectById(clusterId);
         assertThat(cluster.getDeployMode())
@@ -129,6 +131,18 @@ class ManagedFlinkEnvironmentServiceTest extends SpringUnitTestBase {
             .extracting(ManagedFlinkEnvironmentView::getClusterId)
             .contains(clusterId);
         assertThat(environmentService.list(listRequest(TEST_TEAM_ID))).isEmpty();
+    }
+
+    @Test
+    void shouldRequireProviderConfiguration() {
+        Long accountId = createGrantedAccount("environment-bucket-account");
+        ManagedFlinkEnvironmentCreateRequest request =
+            createRequest(accountId, "managed-without-bucket", "fake-project", "fake-pool");
+        request.setProviderConfigJson(" ");
+
+        assertThatExceptionOfType(ApiAlertException.class)
+            .isThrownBy(() -> environmentService.create(request))
+            .withMessage("Managed Flink provider configuration is required.");
     }
 
     @Test
@@ -171,8 +185,6 @@ class ManagedFlinkEnvironmentServiceTest extends SpringUnitTestBase {
             environmentService.probe(DEFAULT_TEAM_ID, clusterId);
 
         assertThat(probed.getClusterState()).isEqualTo(ClusterState.RUNNING.getState());
-        assertThat(probed.getProjectName()).isEqualTo("Fake Project");
-        assertThat(probed.getResourcePoolName()).isEqualTo("Fake Pool");
         assertThat(probed.getLastProbeTime()).isNotNull();
         assertThat(probed.getLastProbeError()).isNull();
         assertThat(probed.getVersion()).isEqualTo(1);
@@ -266,9 +278,10 @@ class ManagedFlinkEnvironmentServiceTest extends SpringUnitTestBase {
         request.setClusterName(clusterName);
         request.setDescription("managed environment test");
         request.setCloudAccountId(accountId);
-        request.setProjectId(projectId);
-        request.setResourcePoolId(poolId);
-        request.setDraftDirectoryId(1L);
+        request.setProviderConfigJson(
+            "{\"projectId\":\"" + projectId + "\",\"resourcePoolId\":\"" + poolId
+                + "\",\"draftDirectoryId\":1,\"tosBucket\":\"test-flink-bucket\"}");
+        request.setProviderConfigVersion(1);
         return request;
     }
 
@@ -285,9 +298,10 @@ class ManagedFlinkEnvironmentServiceTest extends SpringUnitTestBase {
         request.setClusterName(clusterName);
         request.setDescription(view.getDescription());
         request.setCloudAccountId(view.getCloudAccountId());
-        request.setProjectId(projectId);
-        request.setResourcePoolId(poolId);
-        request.setDraftDirectoryId(1L);
+        request.setProviderConfigJson(
+            "{\"projectId\":\"" + projectId + "\",\"resourcePoolId\":\"" + poolId
+                + "\",\"draftDirectoryId\":1,\"tosBucket\":\"test-flink-bucket\"}");
+        request.setProviderConfigVersion(view.getProviderConfigVersion());
         return request;
     }
 

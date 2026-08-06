@@ -106,11 +106,9 @@ class ManagedFlinkPersistenceTest extends SpringUnitTestBase {
         environment.setProviderType("VOLCENGINE");
         environment.setCloudAccountId(account.getId());
         environment.setRegion("cn-beijing");
-        environment.setProjectId("cwz-test");
-        environment.setProjectName("cwz-test");
-        environment.setResourcePoolId("paimon-test2");
-        environment.setDraftDirectoryId(1L);
-        environment.setResourcePoolName("paimon-test2");
+        environment.setProviderConfigJson(
+            "{\"projectId\":\"cwz-test\",\"resourcePoolId\":\"paimon-test2\"}");
+        environment.setProviderConfigVersion(1);
         environment.setConsoleUrl("https://console.volcengine.com/flink");
         environment.setCapabilityJson("{\"savepoint\":true}");
         environment.setVersion(0);
@@ -118,9 +116,12 @@ class ManagedFlinkPersistenceTest extends SpringUnitTestBase {
         assertThat(managedFlinkEnvironmentMapper.insert(environment)).isEqualTo(1);
         assertThat(managedFlinkEnvironmentMapper.selectById(cluster.getId()))
             .extracting(
-                ManagedFlinkEnvironment::getProjectId,
-                ManagedFlinkEnvironment::getResourcePoolId,
+                ManagedFlinkEnvironment::getProviderConfigJson,
+                ManagedFlinkEnvironment::getProviderConfigVersion,
                 ManagedFlinkEnvironment::getVersion)
-            .containsExactly("cwz-test", "paimon-test2", 0);
+            .containsExactly(
+                "{\"projectId\":\"cwz-test\",\"resourcePoolId\":\"paimon-test2\"}",
+                1,
+                0);
     }
 }

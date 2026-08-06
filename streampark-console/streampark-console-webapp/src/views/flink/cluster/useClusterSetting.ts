@@ -53,6 +53,7 @@ import type {
   ManagedFlinkEnvironment,
   ManagedResourcePool,
 } from '/@/api/flink/managedFlink.type';
+import { parseVolcengineEnvironmentConfig } from '/@/api/flink/managedFlink.type';
 import { useUserStore } from '/@/store/modules/user';
 
 export const useClusterSetting = () => {
@@ -226,10 +227,11 @@ export const useClusterSetting = () => {
   }
 
   async function prepareManagedEnvironment(environment: ManagedFlinkEnvironment) {
+    const providerConfig = parseVolcengineEnvironmentConfig(environment);
     await loadManagedProjects(environment.cloudAccountId);
     await Promise.all([
-      loadManagedResourcePools(environment.cloudAccountId, environment.projectId),
-      loadManagedDraftDirectories(environment.cloudAccountId, environment.projectId),
+      loadManagedResourcePools(environment.cloudAccountId, providerConfig.projectId),
+      loadManagedDraftDirectories(environment.cloudAccountId, providerConfig.projectId),
     ]);
   }
 
@@ -298,6 +300,7 @@ export const useClusterSetting = () => {
             formModel.projectId = undefined;
             formModel.resourcePoolId = undefined;
             formModel.draftDirectoryId = undefined;
+            formModel.tosBucket = undefined;
             await loadManagedProjects(cloudAccountId);
           },
         }),
@@ -359,6 +362,23 @@ export const useClusterSetting = () => {
           {
             required: true,
             message: t('setting.flinkCluster.managed.required.resourcePool'),
+          },
+        ],
+      },
+      {
+        field: 'tosBucket',
+        label: t('setting.flinkCluster.managed.tosBucket'),
+        component: 'Input',
+        ifShow: ({ values }) => isManagedMode(values),
+        componentProps: {
+          allowClear: true,
+          maxlength: 128,
+          placeholder: t('setting.flinkCluster.managed.placeholder.tosBucket'),
+        },
+        rules: [
+          {
+            required: true,
+            message: t('setting.flinkCluster.managed.required.tosBucket'),
           },
         ],
       },
@@ -635,11 +655,15 @@ export const useClusterSetting = () => {
           clusterName: values.clusterName,
           description: values.description,
           cloudAccountId: values.cloudAccountId,
-          projectId: values.projectId,
-          projectName: project?.name,
-          resourcePoolId: values.resourcePoolId,
-          resourcePoolName: resourcePool?.name || resourcePool?.fullName,
-          draftDirectoryId: values.draftDirectoryId,
+          providerConfigJson: JSON.stringify({
+            projectId: values.projectId,
+            projectName: project?.name,
+            resourcePoolId: values.resourcePoolId,
+            resourcePoolName: resourcePool?.name || resourcePool?.fullName,
+            draftDirectoryId: values.draftDirectoryId,
+            tosBucket: values.tosBucket,
+          }),
+          providerConfigVersion: 1,
         };
       }
       default:

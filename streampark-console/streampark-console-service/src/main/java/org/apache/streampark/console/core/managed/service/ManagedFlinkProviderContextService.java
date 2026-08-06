@@ -40,17 +40,31 @@ class ManagedFlinkProviderContextService {
     private final ManagedFlinkProviderRegistry providerRegistry;
     private final ManagedFlinkFeatureGate featureGate;
 
-    ManagedFlinkProviderSession resolve(Long teamId, Long accountId, String projectId) {
+    ManagedFlinkProviderSession resolve(Long teamId, Long accountId) {
         authorizationService.requireAuthorized(teamId, accountId);
-        return resolveEnabledAccount(accountId, projectId);
+        return resolveEnabledAccount(accountId, null, null);
     }
 
-    ManagedFlinkProviderSession resolveForSystem(Long accountId, String projectId) {
-        return resolveEnabledAccount(accountId, projectId);
+    ManagedFlinkProviderSession resolve(
+                                        Long teamId,
+                                        Long accountId,
+                                        String providerConfigJson,
+                                        Integer providerConfigVersion) {
+        authorizationService.requireAuthorized(teamId, accountId);
+        return resolveEnabledAccount(accountId, providerConfigJson, providerConfigVersion);
+    }
+
+    ManagedFlinkProviderSession resolveForSystem(
+                                                 Long accountId,
+                                                 String providerConfigJson,
+                                                 Integer providerConfigVersion) {
+        return resolveEnabledAccount(accountId, providerConfigJson, providerConfigVersion);
     }
 
     private ManagedFlinkProviderSession resolveEnabledAccount(
-                                                              Long accountId, String projectId) {
+                                                              Long accountId,
+                                                              String providerConfigJson,
+                                                              Integer providerConfigVersion) {
         CloudAccount account = cloudAccountMapper.selectById(accountId);
         ApiAlertException.throwIfTrue(
             account == null
@@ -73,7 +87,8 @@ class ManagedFlinkProviderContextService {
                 .credentialVersion(account.getVersion().longValue())
                 .region(account.getRegion())
                 .endpoint(account.getEndpoint())
-                .projectId(projectId)
+                .providerConfigJson(providerConfigJson)
+                .providerConfigVersion(providerConfigVersion)
                 .build();
         return new ManagedFlinkProviderSession(providerType, provider, context, account);
     }

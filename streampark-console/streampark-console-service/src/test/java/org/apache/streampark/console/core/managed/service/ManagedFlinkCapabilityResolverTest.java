@@ -55,7 +55,8 @@ class ManagedFlinkCapabilityResolverTest {
             .cloudAccountId(FakeManagedFlinkProvider.VALID_ACCOUNT_ID)
             .credentialVersion(1L)
             .region("cn-beijing")
-            .projectId("fake-project")
+            .providerConfigJson("{\"fixture\":true}")
+            .providerConfigVersion(1)
             .build();
     }
 

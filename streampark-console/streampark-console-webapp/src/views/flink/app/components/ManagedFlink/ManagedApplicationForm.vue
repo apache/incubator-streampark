@@ -32,6 +32,7 @@
     ManagedFlinkCapability,
     ManagedFlinkEnvironment,
   } from '/@/api/flink/managedFlink.type';
+  import { parseVolcengineEnvironmentConfig } from '/@/api/flink/managedFlink.type';
   import { fetchTeamResource } from '/@/api/resource/upload';
   import type { ResourceListRecord } from '/@/api/resource/upload/model/resourceModel';
   import { EngineTypeEnum, ResourceTypeEnum } from '/@/views/resource/upload/upload.data';
@@ -105,13 +106,16 @@
   }
 
   function environmentOptions() {
-    return unref(environments).map((environment) => ({
-      label: `${environment.clusterName} · ${environment.projectName || environment.projectId} · ${
-        environment.resourcePoolName || environment.resourcePoolId
-      }`,
-      value: environment.clusterId,
-      disabled: !environment.lastProbeTime || Boolean(environment.lastProbeError),
-    }));
+    return unref(environments).map((environment) => {
+      const config = parseVolcengineEnvironmentConfig(environment);
+      return {
+        label: `${environment.clusterName} · ${config.projectName || config.projectId} · ${
+          config.resourcePoolName || config.resourcePoolId
+        }`,
+        value: environment.clusterId,
+        disabled: !environment.lastProbeTime || Boolean(environment.lastProbeError),
+      };
+    });
   }
 
   function applicationResourceOptions() {
@@ -726,7 +730,6 @@
         customProperties: parseProperties(values.runtimeCustomProperties),
       },
       releaseConfig: {
-        resourcePoolId: environment.resourcePoolId,
         priority: values.priority,
         schedulingStrategy: values.schedulingStrategy,
         dependencyResourceNames:

@@ -49,11 +49,8 @@ export interface ManagedFlinkEnvironment {
   providerType: string;
   cloudAccountId: string;
   region: string;
-  projectId: string;
-  projectName?: string;
-  resourcePoolId: string;
-  resourcePoolName?: string;
-  draftDirectoryId: string;
+  providerConfigJson: string;
+  providerConfigVersion: number;
   consoleUrl?: string;
   capabilityJson?: string;
   lastProbeTime?: string;
@@ -66,11 +63,30 @@ export interface ManagedFlinkEnvironmentForm {
   clusterName: string;
   description?: string;
   cloudAccountId: string;
+  providerConfigJson: string;
+  providerConfigVersion: number;
+}
+
+export interface VolcengineEnvironmentConfig {
   projectId: string;
   projectName?: string;
   resourcePoolId: string;
   resourcePoolName?: string;
   draftDirectoryId: string;
+  tosBucket: string;
+}
+
+export function parseVolcengineEnvironmentConfig(
+  environment?: Pick<ManagedFlinkEnvironment, 'providerConfigJson' | 'providerConfigVersion'>,
+): Partial<VolcengineEnvironmentConfig> {
+  if (!environment || environment.providerConfigVersion !== 1) {
+    return {};
+  }
+  try {
+    return JSON.parse(environment.providerConfigJson) as VolcengineEnvironmentConfig;
+  } catch (_error) {
+    return {};
+  }
 }
 
 export interface ManagedFlinkEnvironmentUpdateForm extends ManagedFlinkEnvironmentForm {
@@ -131,7 +147,6 @@ export interface ManagedFlinkRuntimeConfig {
 }
 
 export interface ManagedFlinkReleaseConfig {
-  resourcePoolId: string;
   priority?: number;
   schedulingStrategy: string;
   dependencyResourceNames: string[];

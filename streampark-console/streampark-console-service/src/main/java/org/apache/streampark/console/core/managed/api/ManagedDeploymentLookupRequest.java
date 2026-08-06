@@ -25,8 +25,6 @@ import lombok.Value;
 @Builder
 public class ManagedDeploymentLookupRequest {
 
-    String projectId;
-
     String draftId;
 
     String jobName;

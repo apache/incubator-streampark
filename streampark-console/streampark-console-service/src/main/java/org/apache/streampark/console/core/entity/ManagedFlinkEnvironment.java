@@ -26,7 +26,7 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.util.Date;
 
-/** Provider-specific extension of a managed Flink cluster registration. */
+/** Provider-neutral extension of a managed Flink cluster registration. */
 @Getter
 @Setter
 @TableName("t_managed_flink_env")
@@ -43,15 +43,9 @@ public class ManagedFlinkEnvironment implements Serializable {
 
     private String region;
 
-    private String projectId;
+    private String providerConfigJson;
 
-    private String projectName;
-
-    private String resourcePoolId;
-
-    private String resourcePoolName;
-
-    private Long draftDirectoryId;
+    private Integer providerConfigVersion;
 
     private String consoleUrl;
 

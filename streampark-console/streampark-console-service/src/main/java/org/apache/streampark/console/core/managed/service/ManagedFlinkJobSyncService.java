@@ -113,12 +113,12 @@ public class ManagedFlinkJobSyncService {
             ManagedFlinkProviderSession session =
                 providerContextService.resolveForSystem(
                     target.environment.getCloudAccountId(),
-                    target.environment.getProjectId());
+                    target.environment.getProviderConfigJson(),
+                    target.environment.getProviderConfigVersion());
             ManagedJobStatus status =
                 session.getProvider().getJob(
                     session.getContext(),
                     ManagedJobLookupRequest.builder()
-                        .projectId(target.environment.getProjectId())
                         .jobName(target.application.getJobName())
                         .jobId(target.managed.getExternalApplicationId())
                         .instanceId(target.managed.getExternalInstanceId())
@@ -176,7 +176,8 @@ public class ManagedFlinkJobSyncService {
             || environment == null
             || !owner.equals(managed.getSyncOwner())
             || StringUtils.isBlank(managed.getExternalApplicationId())
-            || StringUtils.isBlank(environment.getProjectId())
+            || StringUtils.isBlank(environment.getProviderConfigJson())
+            || environment.getProviderConfigVersion() == null
             || environment.getCloudAccountId() == null) {
             return null;
         }

@@ -39,7 +39,8 @@ class FakeManagedFlinkProviderLifecycleTest {
         ProviderContext.builder()
             .cloudAccountId(FakeManagedFlinkProvider.VALID_ACCOUNT_ID)
             .region("cn-beijing")
-            .projectId("project-1")
+            .providerConfigJson("{\"fixture\":true}")
+            .providerConfigVersion(1)
             .build();
 
     @Test

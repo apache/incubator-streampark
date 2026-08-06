@@ -17,14 +17,15 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.SpringUnitTestBase;
+import org.apache.streampark.common.conf.ConfigKeys;
+import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.service.impl.ResourceServiceImpl;
 
 import org.apache.hc.core5.http.ContentType;
 
 import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,28 +36,41 @@ import java.nio.file.Path;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /** org.apache.streampark.console.core.service.ResourceServiceTest. */
-class ResourceServiceTest extends SpringUnitTestBase {
+class ResourceServiceTest {
 
-    @Autowired
-    private ResourceService resourceService;
+    private final ResourceService resourceService = new ResourceServiceImpl();
 
     @Test
     void testUpload(@TempDir Path tempDir) throws Exception {
-        // specify the file path
-        File fileToStoreUploadFile =
-            new File(tempDir.toFile().getAbsolutePath() + "/fileToStoreUploadFile");
-        FileUtils.createFile(fileToStoreUploadFile.getAbsolutePath());
+        String originalAppHome = System.getProperty(ConfigKeys.KEY_APP_HOME());
+        System.setProperty(ConfigKeys.KEY_APP_HOME(), tempDir.resolve("app-home").toString());
 
-        File fileToUpload = new File(tempDir.toFile().getAbsolutePath() + "/fileToUpload.jar");
-        FileUtils.createFile(fileToUpload.getAbsolutePath());
-        assertThat(fileToUpload).exists();
-        MultipartFile mulFile =
-            new MockMultipartFile(
-                "test", // fileName (eg: streampark.jar)
-                fileToUpload.getAbsolutePath(), // originalFilename (eg: path + fileName =
-                // /tmp/file/streampark.jar)
-                ContentType.APPLICATION_OCTET_STREAM.toString(),
-                Files.newInputStream(fileToStoreUploadFile.toPath()));
-        resourceService.upload(mulFile);
+        try {
+            // specify the file path
+            File fileToStoreUploadFile =
+                new File(tempDir.toFile().getAbsolutePath() + "/fileToStoreUploadFile");
+            FileUtils.createFile(fileToStoreUploadFile.getAbsolutePath());
+
+            File fileToUpload = new File(tempDir.toFile().getAbsolutePath() + "/fileToUpload.jar");
+            FileUtils.createFile(fileToUpload.getAbsolutePath());
+            assertThat(fileToUpload).exists();
+            MultipartFile mulFile =
+                new MockMultipartFile(
+                    "test", // fileName (eg: streampark.jar)
+                    fileToUpload.getAbsolutePath(), // originalFilename (eg: path + fileName =
+                    // /tmp/file/streampark.jar)
+                    ContentType.APPLICATION_OCTET_STREAM.toString(),
+                    Files.newInputStream(fileToStoreUploadFile.toPath()));
+            resourceService.upload(mulFile);
+
+            assertThat(WebUtils.getAppTempDir()).isDirectory();
+            assertThat(new File(WebUtils.getAppTempDir(), fileToUpload.getName())).exists();
+        } finally {
+            if (originalAppHome == null) {
+                System.clearProperty(ConfigKeys.KEY_APP_HOME());
+            } else {
+                System.setProperty(ConfigKeys.KEY_APP_HOME(), originalAppHome);
+            }
+        }
     }
 }

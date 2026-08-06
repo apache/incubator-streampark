@@ -46,20 +46,10 @@ public class ManagedFlinkEnvironmentCreateRequest {
     private Long cloudAccountId;
 
     @NotBlank
-    @Size(max = 128)
-    private String projectId;
-
-    @Size(max = 128)
-    private String projectName;
-
-    @NotBlank
-    @Size(max = 128)
-    private String resourcePoolId;
-
-    @Size(max = 128)
-    private String resourcePoolName;
+    @Size(max = 8192)
+    private String providerConfigJson;
 
     @NotNull
     @Positive
-    private Long draftDirectoryId;
+    private Integer providerConfigVersion;
 }

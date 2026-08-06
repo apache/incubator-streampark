@@ -27,10 +27,6 @@ public class ManagedJobStartRequest {
 
     String jobId;
 
-    String resourcePool;
-
-    String queue;
-
     String priority;
 
     String schedulePolicy;

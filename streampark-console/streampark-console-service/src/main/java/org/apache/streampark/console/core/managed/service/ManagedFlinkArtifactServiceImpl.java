@@ -105,7 +105,8 @@ public class ManagedFlinkArtifactServiceImpl implements ManagedFlinkArtifactServ
             contextService.resolve(
                 teamId,
                 environment.getEnvironment().getCloudAccountId(),
-                environment.getEnvironment().getProjectId());
+                environment.getEnvironment().getProviderConfigJson(),
+                environment.getEnvironment().getProviderConfigVersion());
         ApiAlertException.throwIfFalse(
             session.getProvider().getCapability(session.getContext()).isSupportsJarDirectUpload(),
             "Managed Flink environment does not support direct artifact staging.");
