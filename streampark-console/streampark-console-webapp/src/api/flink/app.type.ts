@@ -14,9 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * Backend contract: {@code FlinkAppDashboardResponse}
- */
+// dashboard
 export interface DashboardResponse {
   totalTM: number;
   task: Task;
@@ -39,23 +37,22 @@ interface Task {
   failed: number;
   reconciling: number;
 }
-/** Backend contract: {@code FlinkAppResponse} (MyBatis page wrapper) */
+// The list of data
 export interface AppListResponse {
-  total: number;
+  total: string;
   records: AppListRecord[];
 }
-/** Backend contract: {@code FlinkAppResponse} */
 export interface AppListRecord {
-  id: number;
+  id: string;
   jobType: number;
   projectId?: any;
   tags?: any;
-  userId: number;
-  teamId: number;
+  userId: string;
+  teamId: string;
   jobName: string;
   appId?: string;
   jobId?: string;
-  versionId: number;
+  versionId: string;
   clusterId?: string;
   flinkImage?: string;
   k8sNamespace: string;
@@ -149,15 +146,15 @@ interface AppControl {
   allowStop: boolean;
   allowBuild: boolean;
 }
-/* Backend contract: FlinkAppCancelRequest */
+/* cancel params */
 export interface CancelParam {
-  id: number;
+  id: string;
   restoreOrTriggerSavepoint: boolean;
   drain: boolean;
   nativeFormat?: boolean;
   savepointPath: string;
 }
-// Backend contract: FlinkAppCreateRequest
+// create Params
 export interface CreateParams {
   jobType: number;
   deployMode: number;
