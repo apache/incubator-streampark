@@ -60,7 +60,7 @@ public class SparkEnvController {
     }
 
     @PostMapping("check")
-    public RestResponseBody<Object> check(SparkEnvCheckRequest request) {
+    public RestResponseBody<Integer> check(SparkEnvCheckRequest request) {
         FlinkEnvCheckEnum checkResp = sparkEnvService.check(SparkEnvAssembler.toEntity(request));
         return RestResponseBody.success(checkResp.getCode());
     }
@@ -76,7 +76,7 @@ public class SparkEnvController {
     }
 
     @PostMapping("get")
-    public RestResponseBody<Object> get(@Valid IdRequest request) throws Exception {
+    public RestResponseBody<SparkEnvResponse> get(@Valid IdRequest request) throws Exception {
         SparkEnv sparkEnv = sparkEnvService.getById(request.getId());
         ApiAlertException.throwIfNull(sparkEnv, "Spark environment not found.");
         sparkEnv.unzipSparkConf();

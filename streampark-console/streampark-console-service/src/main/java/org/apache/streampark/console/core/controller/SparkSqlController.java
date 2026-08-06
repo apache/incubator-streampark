@@ -32,6 +32,7 @@ import org.apache.streampark.console.core.request.spark.SparkSqlHistoryRequest;
 import org.apache.streampark.console.core.request.spark.SparkSqlListQueryRequest;
 import org.apache.streampark.console.core.request.spark.SparkSqlVerifyRequest;
 import org.apache.streampark.console.core.response.spark.SparkSqlResponse;
+import org.apache.streampark.console.core.response.sql.SqlCompleteResponse;
 import org.apache.streampark.console.core.service.SparkSqlService;
 import org.apache.streampark.console.core.service.SqlCompleteService;
 import org.apache.streampark.console.core.service.VariableService;
@@ -107,9 +108,11 @@ public class SparkSqlController {
         return RestResponseBody.success(deleted);
     }
 
+    /** {@code data} is {@link SparkSqlResponse} for one id, or {@link SparkSqlResponse}{@code []} for two ids (legacy compare). */
+    @SuppressWarnings("java:S1452")
     @PostMapping("get")
     @Permission(app = "#request.appId", team = "#request.teamId")
-    public RestResponseBody<Object> get(@Valid SparkSqlGetRequest request) throws InternalException {
+    public RestResponseBody<?> get(@Valid SparkSqlGetRequest request) throws InternalException {
         ApiAlertException.throwIfTrue(
             request.getAppId() == null || request.getTeamId() == null,
             "Permission denied, appId and teamId cannot be null");
@@ -134,8 +137,9 @@ public class SparkSqlController {
     }
 
     @PostMapping("sqlComplete")
-    public RestResponseBody<Object> getSqlComplete(@Valid SparkSqlCompleteRequest request) {
-        return RestResponseBody.success(
-            java.util.Collections.singletonMap("word", sqlComplete.getComplete(request.getSql())));
+    public RestResponseBody<SqlCompleteResponse> getSqlComplete(@Valid SparkSqlCompleteRequest request) {
+        SqlCompleteResponse response = new SqlCompleteResponse();
+        response.setWord(sqlComplete.getComplete(request.getSql()));
+        return RestResponseBody.success(response);
     }
 }

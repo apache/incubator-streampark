@@ -26,6 +26,7 @@ import org.apache.streampark.console.core.request.yarn.YarnQueueCreateRequest;
 import org.apache.streampark.console.core.request.yarn.YarnQueueDeleteRequest;
 import org.apache.streampark.console.core.request.yarn.YarnQueueListQueryRequest;
 import org.apache.streampark.console.core.request.yarn.YarnQueueUpdateRequest;
+import org.apache.streampark.console.core.response.yarn.YarnQueueCheckResponse;
 import org.apache.streampark.console.core.response.yarn.YarnQueueResponse;
 import org.apache.streampark.console.core.service.YarnQueueService;
 
@@ -58,13 +59,14 @@ public class YarnQueueController {
     }
 
     @PostMapping("check")
-    public RestResponseBody<Object> check(@Valid YarnQueueCreateRequest request) {
-        return RestResponseBody.success(yarnQueueService.checkYarnQueue(YarnQueueAssembler.toEntity(request)));
+    public RestResponseBody<YarnQueueCheckResponse> check(@Valid YarnQueueCreateRequest request) {
+        return RestResponseBody.success(
+            YarnQueueAssembler.toCheckResponse(yarnQueueService.checkYarnQueue(YarnQueueAssembler.toEntity(request))));
     }
 
     @PostMapping("create")
     @RequiresPermissions("yarnQueue:create")
-    public RestResponseBody<Object> create(@Valid @FormOrJson YarnQueueCreateRequest request) {
+    public RestResponseBody<Boolean> create(@Valid @FormOrJson YarnQueueCreateRequest request) {
         return RestResponseBody.success(yarnQueueService.createYarnQueue(YarnQueueAssembler.toEntity(request)));
     }
 

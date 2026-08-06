@@ -105,7 +105,7 @@ public class ResourceController {
     }
 
     @PostMapping("upload_jars")
-    public RestResponseBody<Object> listUploadJars() {
+    public RestResponseBody<List<String>> listUploadJars() {
         List<String> jars = resourceService.listHistoryUploadJars();
         return RestResponseBody.success(jars);
     }

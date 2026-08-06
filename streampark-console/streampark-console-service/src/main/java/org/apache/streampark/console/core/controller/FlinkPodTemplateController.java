@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 public class FlinkPodTemplateController {
 
     @PostMapping("sys_hosts")
-    public RestResponseBody<Object> getHosts() {
+    public RestResponseBody<List<String>> getHosts() {
         Map<String, String> hostMap = HostsUtils.getSystemHostsAsJava(true);
         List<String> friendlyHosts = hostMap.entrySet().stream()
             .map(e -> e.getKey() + ":" + e.getValue())
@@ -56,7 +56,7 @@ public class FlinkPodTemplateController {
     }
 
     @PostMapping("init")
-    public RestResponseBody<Object> getInitContent() {
+    public RestResponseBody<String> getInitContent() {
         return RestResponseBody.success(PodTemplateParser.getInitPodTemplateContent());
     }
 
@@ -84,7 +84,7 @@ public class FlinkPodTemplateController {
     }
 
     @PostMapping("extract_host_alias")
-    public RestResponseBody<Object> extractHostAlias(@Valid FlinkPodTemplateExtractRequest request) {
+    public RestResponseBody<List<String>> extractHostAlias(@Valid FlinkPodTemplateExtractRequest request) {
         Map<String, String> hosts = PodTemplateParser.extractHostAliasMap(request.getPodTemplate());
         List<String> friendlyHosts = hosts.entrySet().stream()
             .map(e -> e.getKey() + ":" + e.getValue())

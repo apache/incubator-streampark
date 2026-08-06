@@ -21,11 +21,13 @@ import org.apache.streampark.common.util.HadoopConfigUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponseBody;
 import org.apache.streampark.console.base.web.FormOrJson;
+import org.apache.streampark.console.core.assembler.FlinkConfAssembler;
 import org.apache.streampark.console.core.assembler.SparkConfigAssembler;
 import org.apache.streampark.console.core.entity.SparkApplicationConfig;
 import org.apache.streampark.console.core.request.common.IdRequest;
 import org.apache.streampark.console.core.request.spark.SparkConfHistoryRequest;
 import org.apache.streampark.console.core.request.spark.SparkConfListQueryRequest;
+import org.apache.streampark.console.core.response.flink.FlinkConfHadoopResponse;
 import org.apache.streampark.console.core.response.spark.SparkConfResponse;
 import org.apache.streampark.console.core.service.application.SparkApplicationConfigService;
 
@@ -88,10 +90,10 @@ public class SparkConfigController {
 
     @PostMapping("sysHadoopConf")
     @RequiresPermissions("app:create")
-    public RestResponseBody<Object> getSystemHadoopConfig() {
+    public RestResponseBody<FlinkConfHadoopResponse> getSystemHadoopConfig() {
         Map<String, Map<String, String>> result = ImmutableMap.of(
             "hadoop", HadoopConfigUtils.readSystemHadoopConf(),
             "hive", HadoopConfigUtils.readSystemHiveConf());
-        return RestResponseBody.success(result);
+        return RestResponseBody.success(FlinkConfAssembler.toHadoopResponse(result));
     }
 }

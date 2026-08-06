@@ -67,7 +67,7 @@ public class FlinkEnvController {
     }
 
     @PostMapping("check")
-    public RestResponseBody<Object> check(FlinkEnvCheckRequest request) {
+    public RestResponseBody<Integer> check(FlinkEnvCheckRequest request) {
         FlinkEnvCheckEnum checkResp = flinkEnvService.check(FlinkEnvAssembler.toEntity(request));
         return RestResponseBody.success(checkResp.getCode());
     }

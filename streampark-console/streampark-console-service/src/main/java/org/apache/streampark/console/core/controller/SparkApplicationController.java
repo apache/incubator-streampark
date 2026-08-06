@@ -169,7 +169,7 @@ public class SparkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("check/start")
     @RequiresPermissions("app:start")
-    public RestResponseBody<Object> checkStart(@Valid SparkAppIdRequest request) {
+    public RestResponseBody<Integer> checkStart(@Valid SparkAppIdRequest request) {
         AppExistsStateEnum stateEnum = applicationInfoService.checkStart(request.getId());
         return RestResponseBody.success(stateEnum.get());
     }
@@ -225,7 +225,7 @@ public class SparkApplicationController {
 
     @PostMapping("check/name")
     @Permission(app = "#request.id", team = "#request.teamId")
-    public RestResponseBody<Object> checkName(@Valid SparkAppCheckNameRequest request) {
+    public RestResponseBody<Integer> checkName(@Valid SparkAppCheckNameRequest request) {
         AppExistsStateEnum exists = applicationInfoService.checkExists(SparkApplicationAssembler.toEntity(request));
         return RestResponseBody.success(exists.get());
     }
@@ -273,14 +273,13 @@ public class SparkApplicationController {
     }
 
     @PostMapping("check/jar")
-    public RestResponseBody<Object> checkjar(String jar) {
+    public RestResponseBody<Boolean> checkjar(String jar) {
         File file = new File(jar);
         try {
             Utils.requireCheckJarFile(file.toURI().toURL());
             return RestResponseBody.success(true);
         } catch (IOException e) {
-            RestResponseBody<Object> response = RestResponseBody.success((Object) file);
-            return response.message(e.getLocalizedMessage());
+            return RestResponseBody.success(false).message(e.getLocalizedMessage());
         }
     }
 

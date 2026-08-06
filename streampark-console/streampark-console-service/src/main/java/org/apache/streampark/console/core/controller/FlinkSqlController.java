@@ -32,6 +32,7 @@ import org.apache.streampark.console.core.request.flink.FlinkSqlGetRequest;
 import org.apache.streampark.console.core.request.flink.FlinkSqlListQueryRequest;
 import org.apache.streampark.console.core.request.flink.FlinkSqlVerifyRequest;
 import org.apache.streampark.console.core.response.flink.FlinkSqlResponse;
+import org.apache.streampark.console.core.response.sql.SqlCompleteResponse;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.SqlCompleteService;
 import org.apache.streampark.console.core.service.VariableService;
@@ -105,9 +106,11 @@ public class FlinkSqlController {
         return RestResponseBody.success(deleted);
     }
 
+    /** {@code data} is {@link FlinkSqlResponse} for one id, or {@link FlinkSqlResponse}{@code []} for two ids (legacy compare). */
+    @SuppressWarnings("java:S1452")
     @PostMapping("get")
     @Permission(app = "#request.appId", team = "#request.teamId")
-    public RestResponseBody<Object> get(@Valid FlinkSqlGetRequest request) throws InternalException {
+    public RestResponseBody<?> get(@Valid FlinkSqlGetRequest request) throws InternalException {
         ApiAlertException.throwIfTrue(
             request.getAppId() == null || request.getTeamId() == null,
             "Permission denied, appId and teamId cannot be null");
@@ -133,8 +136,9 @@ public class FlinkSqlController {
     }
 
     @PostMapping("sql_complete")
-    public RestResponseBody<Object> getSqlComplete(@Valid FlinkSqlCompleteRequest request) {
-        return RestResponseBody.success(
-            java.util.Collections.singletonMap("word", sqlComplete.getComplete(request.getSql())));
+    public RestResponseBody<SqlCompleteResponse> getSqlComplete(@Valid FlinkSqlCompleteRequest request) {
+        SqlCompleteResponse response = new SqlCompleteResponse();
+        response.setWord(sqlComplete.getComplete(request.getSql()));
+        return RestResponseBody.success(response);
     }
 }

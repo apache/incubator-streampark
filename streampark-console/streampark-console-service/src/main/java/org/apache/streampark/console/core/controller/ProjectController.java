@@ -42,6 +42,7 @@ import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -106,9 +107,11 @@ public class ProjectController {
     @PostMapping("list")
     @RequiresPermissions("project:view")
     @Permission(team = "#query.teamId")
-    public RestResponseBody<Object> list(ProjectListQueryRequest query, RestRequest restRequest) {
+    public RestResponseBody<IPage<ProjectResponse>> list(ProjectListQueryRequest query, RestRequest restRequest) {
         if (query.getTeamId() == null) {
-            return RestResponseBody.success(Collections.emptyList());
+            Page<ProjectResponse> emptyPage = new Page<>();
+            emptyPage.setRecords(Collections.emptyList());
+            return RestResponseBody.success(emptyPage);
         }
         IPage<Project> page = projectService.getPage(ProjectAssembler.toEntity(query), restRequest);
         return RestResponseBody.success(ProjectAssembler.toPageResponse(page));

@@ -56,7 +56,7 @@ public class MessageController {
     }
 
     @PostMapping("delete")
-    public RestResponseBody<Object> delete(@Valid @FormOrJson MessageDeleteRequest request) {
+    public RestResponseBody<Boolean> delete(@Valid @FormOrJson MessageDeleteRequest request) {
         return RestResponseBody.success(messageService.removeById(request.getId()));
     }
 }

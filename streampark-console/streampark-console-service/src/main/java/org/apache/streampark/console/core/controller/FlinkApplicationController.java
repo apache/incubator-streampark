@@ -172,7 +172,7 @@ public class FlinkApplicationController {
     @Permission(app = "#request.id", team = "#request.teamId")
     @PostMapping("check/start")
     @RequiresPermissions("app:start")
-    public RestResponseBody<Object> checkStart(@Valid FlinkAppIdRequest request) {
+    public RestResponseBody<Integer> checkStart(@Valid FlinkAppIdRequest request) {
         AppExistsStateEnum stateEnum = applicationInfoService.checkStart(request.getId());
         return RestResponseBody.success(stateEnum.get());
     }
@@ -216,7 +216,7 @@ public class FlinkApplicationController {
 
     @PostMapping("check/name")
     @Permission(app = "#request.id", team = "#request.teamId")
-    public RestResponseBody<Object> checkName(@Valid FlinkAppCheckNameRequest request) {
+    public RestResponseBody<Integer> checkName(@Valid FlinkAppCheckNameRequest request) {
         AppExistsStateEnum exists = applicationInfoService.checkExists(FlinkApplicationAssembler.toEntity(request));
         return RestResponseBody.success(exists.get());
     }

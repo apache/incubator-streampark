@@ -17,11 +17,13 @@
 
 package org.apache.streampark.console.core.assembler;
 
+import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.YarnQueue;
 import org.apache.streampark.console.core.request.yarn.YarnQueueCreateRequest;
 import org.apache.streampark.console.core.request.yarn.YarnQueueDeleteRequest;
 import org.apache.streampark.console.core.request.yarn.YarnQueueListQueryRequest;
 import org.apache.streampark.console.core.request.yarn.YarnQueueUpdateRequest;
+import org.apache.streampark.console.core.response.yarn.YarnQueueCheckResponse;
 import org.apache.streampark.console.core.response.yarn.YarnQueueResponse;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -76,5 +78,16 @@ public final class YarnQueueAssembler {
 
     public static IPage<YarnQueueResponse> toPageResponse(IPage<YarnQueue> page) {
         return DtoAssembler.toPage(page, YarnQueueAssembler::toResponse);
+    }
+
+    public static YarnQueueCheckResponse toCheckResponse(ResponseResult<String> checkResult) {
+        if (checkResult == null) {
+            return null;
+        }
+        YarnQueueCheckResponse response = new YarnQueueCheckResponse();
+        response.setStatus(checkResult.getStatus());
+        response.setMsg(checkResult.getMsg());
+        response.setResult(checkResult.getResult());
+        return response;
     }
 }
