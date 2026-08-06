@@ -24,6 +24,7 @@ import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.core.assembler.AlertAssembler;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.AlertConfig;
+import org.apache.streampark.console.core.request.alert.AlertConfigExistsRequest;
 import org.apache.streampark.console.core.request.alert.AlertConfigIdRequest;
 import org.apache.streampark.console.core.request.alert.AlertConfigPageRequest;
 import org.apache.streampark.console.core.request.alert.AlertConfigRequest;
@@ -68,8 +69,10 @@ public class AlertController {
     }
 
     @PostMapping("/exists")
-    public RestResponseBody<Boolean> verifyAlertConfig(@Valid @RequestBody AlertConfigRequest request) {
-        boolean exist = alertConfigService.exist(AlertAssembler.toEntity(request));
+    public RestResponseBody<Boolean> verifyAlertConfig(@Valid @RequestBody AlertConfigExistsRequest request) {
+        AlertConfig probe = new AlertConfig();
+        probe.setAlertName(request.getAlertName());
+        boolean exist = alertConfigService.exist(probe);
         return RestResponseBody.success(exist);
     }
 

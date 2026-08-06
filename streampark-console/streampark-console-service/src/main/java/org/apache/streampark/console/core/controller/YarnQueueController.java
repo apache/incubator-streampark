@@ -59,7 +59,7 @@ public class YarnQueueController {
     }
 
     @PostMapping("check")
-    public RestResponseBody<YarnQueueCheckResponse> check(@Valid YarnQueueCreateRequest request) {
+    public RestResponseBody<YarnQueueCheckResponse> check(YarnQueueCreateRequest request) {
         return RestResponseBody.success(
             YarnQueueAssembler.toCheckResponse(yarnQueueService.checkYarnQueue(YarnQueueAssembler.toEntity(request))));
     }

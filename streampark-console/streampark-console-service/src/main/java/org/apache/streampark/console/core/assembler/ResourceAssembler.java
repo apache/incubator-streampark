@@ -48,7 +48,7 @@ public final class ResourceAssembler {
             return null;
         }
         Resource resource = new Resource();
-        BeanUtils.copyProperties(request, resource, "resourceType", "engineType");
+        BeanUtils.copyProperties(request, resource, "resourceType", "engineType", "resourcePath");
         resource.setResourceType(parseResourceType(request.getResourceType()));
         resource.setEngineType(parseEngineType(request.getEngineType()));
         return resource;
