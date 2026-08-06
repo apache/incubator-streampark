@@ -17,22 +17,22 @@
 
 package org.apache.streampark.console.system.request.team;
 
+import org.apache.streampark.console.core.request.common.IdRequest;
+
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-
-import java.io.Serializable;
 
 /** Request body for {@code PUT /team/update}. */
 @Getter
 @Setter
-public class TeamUpdateRequest implements Serializable {
+public class TeamUpdateRequest extends IdRequest {
 
     private static final long serialVersionUID = 1L;
 
-    private Long id;
-
+    @NotBlank(message = "{required}")
     @Size(min = 4, max = 20, message = "{range}")
     private String teamName;
 

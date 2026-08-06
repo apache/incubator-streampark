@@ -20,6 +20,8 @@ package org.apache.streampark.console.system.request.role;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotNull;
+
 import java.io.Serializable;
 
 /** Request body for {@code DELETE /role/delete}. */
@@ -29,5 +31,6 @@ public class RoleDeleteRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
     private Long roleId;
 }

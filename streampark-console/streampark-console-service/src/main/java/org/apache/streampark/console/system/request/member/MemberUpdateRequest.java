@@ -17,24 +17,23 @@
 
 package org.apache.streampark.console.system.request.member;
 
+import org.apache.streampark.console.core.request.common.TeamScopedIdRequest;
+
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
+import javax.validation.constraints.NotNull;
 
 /** Request body for {@code PUT /member/update}. */
 @Getter
 @Setter
-public class MemberUpdateRequest implements Serializable {
+public class MemberUpdateRequest extends TeamScopedIdRequest {
 
     private static final long serialVersionUID = 1L;
 
-    private Long id;
-
-    private Long teamId;
-
     private Long userId;
 
+    @NotNull
     private Long roleId;
 
     private String userName;

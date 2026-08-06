@@ -20,6 +20,8 @@ package org.apache.streampark.console.core.request.setting;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+
 import java.io.Serializable;
 
 /** Request body for email setting endpoints. */
@@ -29,10 +31,12 @@ public class SettingEmailRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotBlank
     private String host;
 
     private Integer port;
 
+    @NotBlank
     private String from;
 
     private String userName;

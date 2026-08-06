@@ -38,6 +38,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +53,7 @@ public class SparkConfigController {
     private SparkApplicationConfigService applicationConfigService;
 
     @PostMapping("get")
-    public RestResponse get(IdRequest request) {
+    public RestResponse get(@Valid IdRequest request) {
         SparkApplicationConfig config = applicationConfigService.get(request.getId());
         return RestResponse.success(SparkConfigAssembler.toResponse(config));
     }
@@ -70,14 +72,14 @@ public class SparkConfigController {
     }
 
     @PostMapping("history")
-    public RestResponse history(SparkConfHistoryRequest request) {
+    public RestResponse history(@Valid SparkConfHistoryRequest request) {
         List<SparkApplicationConfig> history = applicationConfigService.list(request.getId());
         return RestResponse.success(SparkConfigAssembler.toListResponse(history));
     }
 
     @PostMapping("delete")
     @RequiresPermissions("conf:delete")
-    public RestResponse delete(IdRequest request) {
+    public RestResponse delete(@Valid IdRequest request) {
         Boolean deleted = applicationConfigService.removeById(request.getId());
         return RestResponse.success(deleted);
     }

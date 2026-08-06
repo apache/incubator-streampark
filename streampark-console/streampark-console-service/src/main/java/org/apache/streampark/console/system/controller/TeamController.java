@@ -72,14 +72,14 @@ public class TeamController {
 
     @DeleteMapping("delete")
     @RequiresPermissions("team:delete")
-    public RestResponse deleteTeam(TeamDeleteRequest request) {
+    public RestResponse deleteTeam(@Valid TeamDeleteRequest request) {
         this.teamService.removeById(request.getId());
         return RestResponse.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("team:update")
-    public RestResponse updateTeam(TeamUpdateRequest request) {
+    public RestResponse updateTeam(@Valid TeamUpdateRequest request) {
         this.teamService.updateTeam(TeamAssembler.toEntity(request));
         return RestResponse.success();
     }

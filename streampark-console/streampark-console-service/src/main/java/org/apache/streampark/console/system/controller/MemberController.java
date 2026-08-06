@@ -95,7 +95,7 @@ public class MemberController {
     @DeleteMapping("delete")
     @Permission(team = "#request.teamId")
     @RequiresPermissions("member:delete")
-    public RestResponse delete(MemberDeleteRequest request) {
+    public RestResponse delete(@Valid MemberDeleteRequest request) {
         this.memberService.remove(request.getId());
         return RestResponse.success();
     }
@@ -103,7 +103,7 @@ public class MemberController {
     @PutMapping("update")
     @Permission(team = "#request.teamId")
     @RequiresPermissions("member:update")
-    public RestResponse update(MemberUpdateRequest request) {
+    public RestResponse update(@Valid MemberUpdateRequest request) {
         this.memberService.updateMember(MemberAssembler.toEntity(request));
         return RestResponse.success();
     }

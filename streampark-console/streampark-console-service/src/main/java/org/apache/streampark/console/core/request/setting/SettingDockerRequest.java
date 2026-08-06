@@ -20,6 +20,8 @@ package org.apache.streampark.console.core.request.setting;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+
 import java.io.Serializable;
 
 /** Request body for docker setting endpoints. */
@@ -29,6 +31,7 @@ public class SettingDockerRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotBlank
     private String address;
 
     private String username;

@@ -90,14 +90,14 @@ public class RoleController {
 
     @DeleteMapping("delete")
     @RequiresPermissions("role:delete")
-    public RestResponse deleteRole(RoleDeleteRequest request) {
+    public RestResponse deleteRole(@Valid RoleDeleteRequest request) {
         this.roleService.removeById(request.getRoleId());
         return RestResponse.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("role:update")
-    public RestResponse updateRole(RoleUpdateRequest request) throws Exception {
+    public RestResponse updateRole(@Valid RoleUpdateRequest request) throws Exception {
         this.roleService.updateRole(RoleAssembler.toEntity(request));
         return RestResponse.success();
     }

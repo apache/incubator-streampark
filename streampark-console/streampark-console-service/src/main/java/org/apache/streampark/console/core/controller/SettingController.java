@@ -37,6 +37,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -59,14 +61,14 @@ public class SettingController {
     }
 
     @PostMapping("get")
-    public RestResponse get(SettingGetRequest request) {
+    public RestResponse get(@Valid SettingGetRequest request) {
         Setting setting = settingService.get(request.getKey());
         return RestResponse.success(SettingAssembler.toResponse(setting));
     }
 
     @PostMapping("update")
     @RequiresPermissions("setting:update")
-    public RestResponse update(SettingUpdateRequest request) {
+    public RestResponse update(@Valid SettingUpdateRequest request) {
         boolean updated = settingService.update(SettingAssembler.toEntity(request));
         return RestResponse.success(updated);
     }
@@ -79,7 +81,7 @@ public class SettingController {
 
     @PostMapping("check/docker")
     @RequiresPermissions("setting:view")
-    public RestResponse checkDocker(SettingDockerRequest request) {
+    public RestResponse checkDocker(@Valid SettingDockerRequest request) {
         return RestResponse.success(
             SettingAssembler.toCheckResponse(
                 settingService.checkDocker(SettingAssembler.toDockerConfig(request))));
@@ -87,7 +89,7 @@ public class SettingController {
 
     @PostMapping("update/docker")
     @RequiresPermissions("setting:update")
-    public RestResponse updateDocker(SettingDockerRequest request) {
+    public RestResponse updateDocker(@Valid SettingDockerRequest request) {
         boolean updated =
             settingService.updateDocker(SettingAssembler.toDockerConfig(request));
         return RestResponse.success(updated);
@@ -101,7 +103,7 @@ public class SettingController {
 
     @PostMapping("check/email")
     @RequiresPermissions("setting:view")
-    public RestResponse checkEmail(SettingEmailRequest request) {
+    public RestResponse checkEmail(@Valid SettingEmailRequest request) {
         return RestResponse.success(
             SettingAssembler.toCheckResponse(
                 settingService.checkEmail(SettingAssembler.toSenderEmail(request))));
@@ -109,7 +111,7 @@ public class SettingController {
 
     @PostMapping("update/email")
     @RequiresPermissions("setting:update")
-    public RestResponse updateEmail(SettingEmailRequest request) {
+    public RestResponse updateEmail(@Valid SettingEmailRequest request) {
         boolean updated = settingService.updateEmail(SettingAssembler.toSenderEmail(request));
         return RestResponse.success(updated);
     }

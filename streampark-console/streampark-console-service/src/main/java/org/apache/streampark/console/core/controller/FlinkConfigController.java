@@ -38,6 +38,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +53,7 @@ public class FlinkConfigController {
     private FlinkApplicationConfigService applicationConfigService;
 
     @PostMapping("get")
-    public RestResponse get(IdRequest request) {
+    public RestResponse get(@Valid IdRequest request) {
         FlinkApplicationConfig config = applicationConfigService.get(request.getId());
         return RestResponse.success(FlinkConfAssembler.toResponse(config));
     }
@@ -78,7 +80,7 @@ public class FlinkConfigController {
 
     @PostMapping("delete")
     @RequiresPermissions("conf:delete")
-    public RestResponse delete(IdRequest request) {
+    public RestResponse delete(@Valid IdRequest request) {
         Boolean deleted = applicationConfigService.removeById(request.getId());
         return RestResponse.success(deleted);
     }

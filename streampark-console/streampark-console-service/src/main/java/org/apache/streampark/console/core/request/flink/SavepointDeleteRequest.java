@@ -17,23 +17,22 @@
 
 package org.apache.streampark.console.core.request.flink;
 
+import org.apache.streampark.console.core.request.common.TeamScopedIdRequest;
+
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
+import javax.validation.constraints.NotNull;
 
 /**
  * Request body for {@code POST /flink/savepoint/delete}.
  */
 @Getter
 @Setter
-public class SavepointDeleteRequest implements Serializable {
+public class SavepointDeleteRequest extends TeamScopedIdRequest {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
     private Long appId;
-
-    private Long teamId;
-
-    private Long id;
 }

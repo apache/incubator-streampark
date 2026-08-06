@@ -20,6 +20,8 @@ package org.apache.streampark.console.core.request.setting;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+
 import java.io.Serializable;
 
 /** Request body for {@code POST /setting/update}. */
@@ -29,6 +31,7 @@ public class SettingUpdateRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotBlank
     private String settingKey;
 
     private String settingValue;

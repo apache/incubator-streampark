@@ -40,6 +40,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @Slf4j
 @Validated
 @RestController
@@ -63,7 +65,7 @@ public class SavepointController {
     @PostMapping("delete")
     @RequiresPermissions("savepoint:delete")
     @Permission(app = "#request.appId", team = "#request.teamId")
-    public RestResponse delete(SavepointDeleteRequest request) throws InternalException {
+    public RestResponse delete(@Valid SavepointDeleteRequest request) throws InternalException {
         FlinkSavepoint savepoint = savepointService.getById(request.getId());
         FlinkApplication application = applicationManageService.getById(savepoint.getAppId());
         Boolean deleted = savepointService.remove(request.getId(), application);
@@ -73,7 +75,7 @@ public class SavepointController {
     @PostMapping("trigger")
     @Permission(app = "#request.appId", team = "#request.teamId")
     @RequiresPermissions("savepoint:trigger")
-    public RestResponse trigger(SavepointTriggerRequest request) {
+    public RestResponse trigger(@Valid SavepointTriggerRequest request) {
         savepointService.trigger(request.getAppId(), request.getSavepointPath(), request.getNativeFormat());
         return RestResponse.success(true);
     }

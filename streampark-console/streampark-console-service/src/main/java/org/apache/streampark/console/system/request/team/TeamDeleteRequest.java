@@ -17,17 +17,15 @@
 
 package org.apache.streampark.console.system.request.team;
 
+import org.apache.streampark.console.core.request.common.IdRequest;
+
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serializable;
 
 /** Request body for {@code DELETE /team/delete}. */
 @Getter
 @Setter
-public class TeamDeleteRequest implements Serializable {
+public class TeamDeleteRequest extends IdRequest {
 
     private static final long serialVersionUID = 1L;
-
-    private Long id;
 }

@@ -20,6 +20,7 @@ package org.apache.streampark.console.system.request.role;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import java.io.Serializable;
@@ -31,6 +32,7 @@ public class RoleUpdateRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
     private Long roleId;
 
     @Size(max = 10, message = "{noMoreThan}")

@@ -17,19 +17,17 @@
 
 package org.apache.streampark.console.core.request.spark;
 
+import org.apache.streampark.console.core.request.common.IdRequest;
+
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serializable;
 
 /**
  * Request body for {@code POST /spark/conf/history}.
  */
 @Getter
 @Setter
-public class SparkConfHistoryRequest implements Serializable {
+public class SparkConfHistoryRequest extends IdRequest {
 
     private static final long serialVersionUID = 1L;
-
-    private Long id;
 }

@@ -20,6 +20,7 @@ package org.apache.streampark.console.system.request.team;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 import java.io.Serializable;
@@ -31,6 +32,7 @@ public class TeamCreateRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotBlank(message = "{required}")
     @Size(min = 4, max = 20, message = "{range}")
     private String teamName;
 

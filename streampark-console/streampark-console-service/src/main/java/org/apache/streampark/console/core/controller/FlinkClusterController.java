@@ -102,13 +102,13 @@ public class FlinkClusterController {
     }
 
     @PostMapping("get")
-    public RestResponse get(IdRequest request) throws InternalException {
+    public RestResponse get(@Valid IdRequest request) throws InternalException {
         FlinkCluster cluster = flinkClusterService.getById(request.getId());
         return RestResponse.success(FlinkClusterAssembler.toResponse(cluster));
     }
 
     @PostMapping("start")
-    public RestResponse start(IdRequest request) {
+    public RestResponse start(@Valid IdRequest request) {
         flinkClusterService.updateClusterState(request.getId(), ClusterState.STARTING);
         flinkClusterService.start(FlinkClusterAssembler.toEntity(request));
         return RestResponse.success();
@@ -125,7 +125,7 @@ public class FlinkClusterController {
     }
 
     @PostMapping("delete")
-    public RestResponse delete(IdRequest request) {
+    public RestResponse delete(@Valid IdRequest request) {
         flinkClusterService.remove(request.getId());
         return RestResponse.success();
     }
