@@ -79,6 +79,7 @@ public class UserController {
     @RequiresPermissions("user:add")
     public RestResponse addUser(@Valid UserCreateRequest request) throws Exception {
         User user = UserAssembler.toEntity(request);
+        ApiAlertException.throwIfNull(user, "User create request cannot be null.");
         user.setLoginType(LoginTypeEnum.PASSWORD);
         this.userService.createUser(user);
         return RestResponse.success();

@@ -102,7 +102,9 @@ public class SparkSqlController {
     @RequiresPermissions("sql:delete")
     @Permission(app = "#request.appId", team = "#request.teamId")
     public RestResponse delete(SparkSqlDeleteRequest request) {
-        Boolean deleted = sparkSqlService.removeById(SparkSqlAssembler.toDeleteEntity(request).getSql());
+        SparkSql sparkSql = SparkSqlAssembler.toDeleteEntity(request);
+        ApiAlertException.throwIfNull(sparkSql, "Spark SQL delete request cannot be null.");
+        Boolean deleted = sparkSqlService.removeById(sparkSql.getSql());
         return RestResponse.success(deleted);
     }
 

@@ -115,10 +115,10 @@ public class FlinkClusterController {
     }
 
     @PostMapping("shutdown")
-    public RestResponse shutdown(IdRequest request) {
+    public RestResponse shutdown(@Valid IdRequest request) {
         FlinkCluster cluster = FlinkClusterAssembler.toEntity(request);
-        if (flinkClusterService.allowShutdownCluster(cluster)) {
-            flinkClusterService.updateClusterState(request.getId(), ClusterState.CANCELLING);
+        if (cluster != null && flinkClusterService.allowShutdownCluster(cluster)) {
+            flinkClusterService.updateClusterState(cluster.getId(), ClusterState.CANCELLING);
             flinkClusterService.shutdown(cluster);
         }
         return RestResponse.success();
