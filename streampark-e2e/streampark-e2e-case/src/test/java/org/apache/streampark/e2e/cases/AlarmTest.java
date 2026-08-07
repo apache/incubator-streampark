@@ -17,133 +17,110 @@
 
 package org.apache.streampark.e2e.cases;
 
-import org.apache.streampark.e2e.core.StreamPark;
-import org.apache.streampark.e2e.pages.LoginPage;
-import org.apache.streampark.e2e.pages.setting.SettingPage;
-import org.apache.streampark.e2e.pages.setting.alarm.AlarmPage;
-import org.apache.streampark.e2e.pages.setting.alarm.AlertTypeDetailForm;
-import org.apache.streampark.e2e.pages.setting.alarm.DingTalkAlertForm;
-import org.apache.streampark.e2e.pages.setting.alarm.EmailAlertForm;
-import org.apache.streampark.e2e.pages.setting.alarm.LarkAlertForm;
-import org.apache.streampark.e2e.pages.setting.alarm.WeChatAlertForm;
+import org.apache.streampark.e2e.core.StreamParkApi;
+import org.apache.streampark.e2e.core.api.ApiClient;
+import org.apache.streampark.e2e.core.api.ApiResponse;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
+@StreamParkApi(composeFiles = "docker/basic/docker-compose.yaml")
 public class AlarmTest {
 
-    public static RemoteWebDriver browser;
+    public static ApiClient api;
 
     private static final String newEmail = "new@streampark.com";
-
     private static final String newAlarmName = "new_alarm";
-
     private static final String editAlarmName = "edit_alarm";
+
+    private static Long alertId;
 
     @BeforeAll
     public static void setup() {
-        new LoginPage(browser)
-            .login()
-            .goToNav(SettingPage.class)
-            .goToTab(AlarmPage.class);
+        api.login();
     }
 
     @Test
     @Order(1)
     public void testCreateAlarm() {
-        final AlarmPage alarmPage = new AlarmPage(browser);
+        ApiResponse response = api.postJson("/flink/alert/add", api.writeJson(buildAlertBody(newAlarmName, 23, true)));
+        assertThat(response.isSuccess()).isTrue();
 
-        final String dingTalkURL = "";
-        final String dingTalkToken = "dingTalkToken";
-        final String dingTalkSecretToken = "dingTalkSecretToken";
-        final String dingTalkReceiveUser = "dingTalkUser";
-
-        final String wechatToken = "wechatToken";
-
-        final String larkToken = "larkToken";
-        final String larkSecretToken = "larkSecretToken";
-
-        AlertTypeDetailForm alertTypeDetailForm = alarmPage.createAlarm();
-        alertTypeDetailForm
-            .<EmailAlertForm>addAlertType(AlertTypeDetailForm.AlertTypeEnum.EMAIL)
-            .email(newEmail)
-            .alertName(newAlarmName);
-        alertTypeDetailForm
-            .<DingTalkAlertForm>addAlertType(AlertTypeDetailForm.AlertTypeEnum.DINGTALK)
-            .url(dingTalkURL)
-            .token(dingTalkToken)
-            .secretEnable()
-            .secretToken(dingTalkSecretToken)
-            .effectToAllUsers()
-            .receiveUser(dingTalkReceiveUser);
-        alertTypeDetailForm
-            .<WeChatAlertForm>addAlertType(AlertTypeDetailForm.AlertTypeEnum.WECHAT)
-            .token(wechatToken);
-        alertTypeDetailForm
-            .<LarkAlertForm>addAlertType(AlertTypeDetailForm.AlertTypeEnum.LARK)
-            .token(larkToken)
-            .secretEnable()
-            .secretToken(larkSecretToken)
-            .effectToAllUsers()
-            .submit();
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(alarmPage.alarmList)
-                    .as("Alarm list should contain newly-created alarm")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(newAlarmName))
-                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.EMAIL.desc))
-                    .anyMatch(it -> it.contains(newEmail))
-                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.DINGTALK.desc))
-                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.WECHAT.desc))
-                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.LARK.desc))
-                    .anyMatch(it -> it.contains(dingTalkReceiveUser)));
+        ApiResponse list = api.postJson("/flink/alert/list", "{}");
+        assertThat(list.isSuccess()).isTrue();
+        assertThat(list.getData().toString()).contains(newAlarmName);
+        assertThat(list.getData().toString()).contains(newEmail);
     }
 
     @Test
     @Order(2)
     public void testEditAlarm() {
-        final AlarmPage alarmPage = new AlarmPage(browser);
+        alertId = findAlertId(newAlarmName).orElseThrow();
 
-        alarmPage.editAlarm(newAlarmName)
-            // this step will cancel E-mail type click status.
-            .<EmailAlertForm>addAlertType(AlertTypeDetailForm.AlertTypeEnum.EMAIL)
-            .alertName(editAlarmName)
-            .submit();
+        ApiResponse response =
+            api.postJson("/flink/alert/update", api.writeJson(buildAlertBody(editAlarmName, 22, false)));
+        assertThat(response.isSuccess()).isTrue();
 
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(alarmPage.alarmList)
-                    .as("Alarm list should contain edited alarm")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(editAlarmName))
-                    .noneMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.EMAIL.desc))
-                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.DINGTALK.desc))
-                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.WECHAT.desc))
-                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.LARK.desc))
-                    .noneMatch(it -> it.contains(newEmail)));
+        ApiResponse list = api.postJson("/flink/alert/list", "{}");
+        assertThat(list.getData().toString()).contains(editAlarmName);
+        assertThat(list.getData().toString()).doesNotContain(newEmail);
     }
 
     @Test
     @Order(3)
     public void testDeleteAlarm() {
-        final AlarmPage alarmPage = new AlarmPage(browser);
+        ApiResponse response = api.deleteForm("/flink/alert/delete", api.params("id", String.valueOf(alertId)));
+        assertThat(response.isSuccess()).isTrue();
 
-        alarmPage.deleteAlarm(editAlarmName);
+        ApiResponse list = api.postJson("/flink/alert/list", "{}");
+        assertThat(list.getData().toString()).doesNotContain(editAlarmName);
+    }
 
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(alarmPage.alarmList)
-                    .as(String.format("Alarm list shouldn't contain alarm witch named %s", editAlarmName))
-                    .extracting(WebElement::getText)
-                    .noneMatch(it -> it.contains(editAlarmName)));
+    private static Optional<Long> findAlertId(String alertName) {
+        ApiResponse list = api.postJson("/flink/alert/list", "{}");
+        if (list.getData() == null || !list.getData().isArray()) {
+            return Optional.empty();
+        }
+        for (JsonNode item : list.getData()) {
+            if (alertName.equals(item.path("alertName").asText())) {
+                return Optional.of(item.path("id").asLong());
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static ObjectNode buildAlertBody(String alertName, int alertType, boolean withEmail) {
+        ObjectNode body = api.objectNode();
+        if (alertId != null) {
+            body.put("id", alertId);
+        }
+        body.put("alertName", alertName);
+        body.put("alertType", alertType);
+        if (withEmail) {
+            ObjectNode emailParams = body.putObject("emailParams");
+            emailParams.putArray("contacts").add(newEmail);
+        }
+        ObjectNode dingTalkParams = body.putObject("dingTalkParams");
+        dingTalkParams.put("alertDingURL", "");
+        dingTalkParams.put("token", "dingTalkToken");
+        dingTalkParams.put("secretEnable", true);
+        dingTalkParams.put("secretToken", "dingTalkSecretToken");
+        dingTalkParams.put("isAtAll", true);
+        dingTalkParams.putArray("contacts").add("dingTalkUser");
+        ObjectNode weComParams = body.putObject("weComParams");
+        weComParams.put("token", "wechatToken");
+        ObjectNode larkParams = body.putObject("larkParams");
+        larkParams.put("token", "larkToken");
+        larkParams.put("secretEnable", true);
+        larkParams.put("secretToken", "larkSecretToken");
+        larkParams.put("isAtAll", true);
+        return body;
     }
 }

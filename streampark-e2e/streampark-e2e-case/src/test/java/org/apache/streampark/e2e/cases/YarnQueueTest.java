@@ -17,97 +17,94 @@
 
 package org.apache.streampark.e2e.cases;
 
-import org.apache.streampark.e2e.core.StreamPark;
-import org.apache.streampark.e2e.pages.LoginPage;
-import org.apache.streampark.e2e.pages.setting.SettingPage;
-import org.apache.streampark.e2e.pages.setting.YarnQueuePage;
+import org.apache.streampark.e2e.core.StreamParkApi;
+import org.apache.streampark.e2e.core.api.ApiClient;
+import org.apache.streampark.e2e.core.api.ApiResponse;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
+@StreamParkApi(composeFiles = "docker/basic/docker-compose.yaml")
 public class YarnQueueTest {
 
-    public static RemoteWebDriver browser;
+    public static ApiClient api;
 
     private static final String newQueueLabel = "new_label";
-
     private static final String editQueueLabel = "edit_label";
-
     private static final String description = "test_description";
 
     @BeforeAll
     public static void setup() {
-        new LoginPage(browser)
-            .login()
-            .goToNav(SettingPage.class)
-            .goToTab(YarnQueuePage.class);
+        api.login();
     }
 
     @Test
     @Order(1)
     void testYarnQueue() {
-        final YarnQueuePage queuePage = new YarnQueuePage(browser);
-        queuePage.createYarnQueue(newQueueLabel, description);
+        Map<String, String> params = queueParams(newQueueLabel, description);
+        ApiResponse response = api.postForm("/yarn/queue/create", params);
+        assertThat(response.isSuccess()).isTrue();
 
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(queuePage.yarnQueueList)
-                    .as("Yarn Queue list should contain newly-created item")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(newQueueLabel))
-                    .anyMatch(it -> it.contains(description)));
+        ApiResponse list = api.postForm("/yarn/queue/list", api.params("pageNum", "1", "pageSize", "50"));
+        assertThat(api.pageRecordsContain(list, "queueLabel", newQueueLabel)).isTrue();
+        assertThat(api.pageRecordsContain(list, "description", description)).isTrue();
     }
 
     @Test
     @Order(2)
     void testCreateDuplicateYarnQueue() {
-        final YarnQueuePage queuePage = new YarnQueuePage(browser);
-        queuePage.createYarnQueue(newQueueLabel, description);
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(queuePage.errorMessageList)
-                    .as("Yarn Queue Duplicated Error message should be displayed")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("The queue label existed in the current team")));
-
-        queuePage.createYarnQueueForm.buttonCancel.click();
+        Map<String, String> params = queueParams(newQueueLabel, description);
+        ApiResponse response = api.postForm("/yarn/queue/create", params);
+        assertThat(response.isSuccess()).isFalse();
+        assertThat(response.getMessage()).contains("The queue label existed in the current team");
     }
 
     @Test
     @Order(3)
     void testEditYarnQueue() {
-        final YarnQueuePage queuePage = new YarnQueuePage(browser);
         String editDescription = "edit_" + description;
+        Map<String, String> params = queueParams(editQueueLabel, editDescription);
+        params.put("id", api.findInPageRecords(
+            api.postForm("/yarn/queue/list", api.params("pageNum", "1", "pageSize", "50")),
+            "queueLabel",
+            newQueueLabel)
+            .map(node -> String.valueOf(node.path("id").asLong()))
+            .orElseThrow());
 
-        queuePage.editYarnQueue(newQueueLabel, editQueueLabel, editDescription);
+        ApiResponse response = api.postForm("/yarn/queue/update", params);
+        assertThat(response.isSuccess()).isTrue();
 
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(queuePage.yarnQueueList)
-                    .as("Yarn queue list should contain edited yarn queue")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(editQueueLabel))
-                    .anyMatch(it -> it.contains(editDescription)));
+        ApiResponse list = api.postForm("/yarn/queue/list", api.params("pageNum", "1", "pageSize", "50"));
+        assertThat(api.pageRecordsContain(list, "queueLabel", editQueueLabel)).isTrue();
+        assertThat(api.pageRecordsContain(list, "description", editDescription)).isTrue();
     }
 
     @Test
     @Order(4)
     void testDeleteYarnQueue() {
-        final YarnQueuePage queuePage = new YarnQueuePage(browser);
+        ApiResponse list = api.postForm("/yarn/queue/list", api.params("pageNum", "1", "pageSize", "50"));
+        String id =
+            api.findInPageRecords(list, "queueLabel", editQueueLabel)
+                .map(node -> String.valueOf(node.path("id").asLong()))
+                .orElseThrow();
 
-        queuePage.deleteYarnQueue(editQueueLabel);
-        Awaitility.await()
-            .untilAsserted(
-                () -> {
-                    assertThat(queuePage.yarnQueueList)
-                        .noneMatch(it -> it.getText().contains(editQueueLabel));
-                });
+        ApiResponse response = api.postForm("/yarn/queue/delete", api.params("id", id));
+        assertThat(response.isSuccess()).isTrue();
+
+        list = api.postForm("/yarn/queue/list", api.params("pageNum", "1", "pageSize", "50"));
+        assertThat(api.pageRecordsContain(list, "queueLabel", editQueueLabel)).isFalse();
+    }
+
+    private static Map<String, String> queueParams(String queueLabel, String queueDescription) {
+        Map<String, String> params = new LinkedHashMap<>(api.teamParams());
+        params.put("queueLabel", queueLabel);
+        params.put("description", queueDescription);
+        return params;
     }
 }

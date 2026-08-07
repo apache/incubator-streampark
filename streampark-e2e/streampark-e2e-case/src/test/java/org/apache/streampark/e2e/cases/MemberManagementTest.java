@@ -17,101 +17,101 @@
 
 package org.apache.streampark.e2e.cases;
 
-import org.apache.streampark.e2e.core.StreamPark;
-import org.apache.streampark.e2e.pages.LoginPage;
-import org.apache.streampark.e2e.pages.system.MemberManagementPage;
-import org.apache.streampark.e2e.pages.system.SystemPage;
+import org.apache.streampark.e2e.core.StreamParkApi;
+import org.apache.streampark.e2e.core.api.ApiClient;
+import org.apache.streampark.e2e.core.api.ApiResponse;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
+@StreamParkApi(composeFiles = "docker/basic/docker-compose.yaml")
 public class MemberManagementTest {
 
-    public static RemoteWebDriver browser;
+    public static ApiClient api;
 
     private static final String existUserName = "test3";
-
     private static final String existRole = "developer";
 
     @BeforeAll
     public static void setup() {
-        new LoginPage(browser)
-            .login()
-            .goToNav(SystemPage.class)
-            .goToTab(MemberManagementPage.class);
+        api.login();
     }
 
     @Test
     @Order(1)
     void testCreateMember() {
-        final MemberManagementPage memberManagementPage = new MemberManagementPage(browser);
+        ApiResponse response = api.postForm("/member/post", memberParams(existUserName, existRole));
+        assertThat(response.isSuccess()).isTrue();
 
-        memberManagementPage.createMember(existUserName, existRole);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(memberManagementPage.memberList)
-                    .as("Member list should contain newly-created member")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(existUserName)));
+        ApiResponse list = memberList();
+        assertThat(api.pageRecordsContain(list, "userName", existUserName)).isTrue();
     }
 
     @Test
     @Order(2)
     void testCreateDuplicateMember() {
-        final MemberManagementPage memberManagementPage = new MemberManagementPage(browser);
-
-        memberManagementPage.createMember(existUserName, existRole);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(memberManagementPage.errorMessage)
-                    .as("Member Duplicated Error message should be displayed")
-                    .extracting(WebElement::getText)
-                    .matches(it -> it.contains("please don't add it again.")));
-
-        memberManagementPage.errorMessageConfirmButton.click();
-        memberManagementPage.createMemberForm.buttonCancel.click();
+        ApiResponse response = api.postForm("/member/post", memberParams(existUserName, existRole));
+        assertThat(response.isSuccess()).isFalse();
+        assertThat(response.getMessage()).contains("please don't add it again.");
     }
 
     @Test
     @Order(3)
     void testEditMember() {
-        final MemberManagementPage memberManagementPage = new MemberManagementPage(browser);
         String anotherRole = "team admin";
+        ApiResponse list = memberList();
+        Long memberId =
+            api.findInPageRecords(list, "userName", existUserName)
+                .map(node -> node.path("id").asLong())
+                .orElseThrow();
 
-        memberManagementPage.editMember(existUserName, anotherRole);
+        Map<String, String> params = memberParams(existUserName, anotherRole);
+        params.put("id", String.valueOf(memberId));
 
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(memberManagementPage.memberList)
-                    .as("Team list should contain edited team")
-                    .extracting(WebElement::getText)
-                    .anyMatch(
-                        it -> it.contains(existUserName)));
+        ApiResponse response = api.putForm("/member/update", params);
+        assertThat(response.isSuccess()).isTrue();
+
+        list = memberList();
+        assertThat(api.pageRecordsContain(list, "userName", existUserName)).isTrue();
     }
 
     @Test
     @Order(4)
     void testDeleteMember() {
-        final MemberManagementPage memberManagementPage = new MemberManagementPage(browser);
+        ApiResponse list = memberList();
+        Long memberId =
+            api.findInPageRecords(list, "userName", existUserName)
+                .map(node -> node.path("id").asLong())
+                .orElseThrow();
 
-        memberManagementPage.deleteMember(existUserName);
+        Map<String, String> params = new LinkedHashMap<>(api.teamParams());
+        params.put("id", String.valueOf(memberId));
 
-        Awaitility.await()
-            .untilAsserted(
-                () -> {
-                    browser.navigate().refresh();
+        ApiResponse response = api.deleteForm("/member/delete", params);
+        assertThat(response.isSuccess()).isTrue();
 
-                    assertThat(memberManagementPage.memberList)
-                        .noneMatch(it -> it.getText().contains(existUserName));
-                });
+        list = memberList();
+        assertThat(api.pageRecordsContain(list, "userName", existUserName)).isFalse();
+    }
+
+    private static ApiResponse memberList() {
+        Map<String, String> params = new LinkedHashMap<>(api.teamParams());
+        params.put("pageNum", "1");
+        params.put("pageSize", "100");
+        return api.postForm("/member/list", params);
+    }
+
+    private static Map<String, String> memberParams(String userName, String roleName) {
+        Long roleId = api.findRoleIdByName(roleName).orElseThrow();
+        Map<String, String> params = new LinkedHashMap<>(api.teamParams());
+        params.put("userName", userName);
+        params.put("roleId", String.valueOf(roleId));
+        return params;
     }
 }

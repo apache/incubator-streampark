@@ -65,6 +65,14 @@ public class ClusterDetailForm {
                         String.format("Execution Mode not found: %s", deployMode.desc)))
                     .click();
                 return (T) new YarnSessionForm(this);
+            case KUBERNETES_SESSION:
+                selectDeployMode.stream()
+                    .filter(e -> e.getText().equalsIgnoreCase(DeployMode.KUBERNETES_SESSION.desc))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException(
+                        String.format("Execution Mode not found: %s", deployMode.desc)))
+                    .click();
+                return (T) new KubernetesSessionForm(this);
             default:
                 throw new UnsupportedOperationException(
                     String.format("Unknown execution mode: %s", deployMode.desc));

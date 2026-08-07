@@ -15,7 +15,7 @@
 
 services:
   namenode:
-    image: apache/streampark-flink-1.16.3-on-yarn:ci
+    image: apache/streampark-flink-2.2.1-on-yarn:ci
     hostname: namenode
     command: [ "hdfs", "namenode" ]
     networks:
@@ -42,7 +42,7 @@ services:
       timeout: 5s
       retries: 120
   datanode:
-    image: apache/streampark-flink-1.16.3-on-yarn:ci
+    image: apache/streampark-flink-2.2.1-on-yarn:ci
     hostname: datanode
     command: [ "hdfs", "datanode" ]
     networks:
@@ -68,7 +68,7 @@ services:
       namenode:
         condition: service_healthy
   resourcemanager:
-    image: apache/streampark-flink-1.16.3-on-yarn:ci
+    image: apache/streampark-flink-2.2.1-on-yarn:ci
     hostname: resourcemanager
     command: [ "yarn", "resourcemanager" ]
     networks:
@@ -93,7 +93,7 @@ services:
       timeout: 5s
       retries: 120
   nodemanager:
-    image: apache/streampark-flink-1.16.3-on-yarn:ci
+    image: apache/streampark-flink-2.2.1-on-yarn:ci
     hostname: nodemanager
     command: [ "yarn", "nodemanager" ]
     networks:
@@ -119,7 +119,7 @@ services:
       timeout: 5s
       retries: 120
   streampark:
-    image: apache/streampark-flink-1.16.3-on-yarn:ci
+    image: apache/streampark-flink-2.2.1-on-yarn:ci
     hostname: streampark
     command:
       - sh
@@ -145,14 +145,14 @@ services:
     stdin_open: true
     restart: always
     depends_on:
-        namenode:
-            condition: service_healthy
-        datanode:
-            condition: service_healthy
-        resourcemanager:
-            condition: service_healthy
-        nodemanager:
-            condition: service_healthy
+      namenode:
+        condition: service_healthy
+      datanode:
+        condition: service_healthy
+      resourcemanager:
+        condition: service_healthy
+      nodemanager:
+        condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "http://streampark:10000" ]
       interval: 5s

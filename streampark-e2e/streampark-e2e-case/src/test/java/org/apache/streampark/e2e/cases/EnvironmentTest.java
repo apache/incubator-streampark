@@ -17,175 +17,118 @@
 
 package org.apache.streampark.e2e.cases;
 
-import org.apache.streampark.e2e.core.StreamPark;
-import org.apache.streampark.e2e.pages.LoginPage;
-import org.apache.streampark.e2e.pages.common.Constants;
-import org.apache.streampark.e2e.pages.setting.SettingPage;
-import org.apache.streampark.e2e.pages.setting.env.DockerSettingForm;
-import org.apache.streampark.e2e.pages.setting.env.EmailSettingForm;
-import org.apache.streampark.e2e.pages.setting.env.EnvironmentDetailForm;
-import org.apache.streampark.e2e.pages.setting.env.EnvironmentPage;
-import org.apache.streampark.e2e.pages.setting.env.IngressSettingForm;
-import org.apache.streampark.e2e.pages.setting.env.MavenSettingForm;
+import org.apache.streampark.e2e.core.StreamParkApi;
+import org.apache.streampark.e2e.core.api.ApiClient;
+import org.apache.streampark.e2e.core.api.ApiResponse;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
 
-import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementClick;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
-@StreamPark(composeFiles = "docker/environment/docker-compose.yaml")
+@StreamParkApi(composeFiles = "docker/environment/docker-compose.yaml")
 public class EnvironmentTest {
 
-    public static RemoteWebDriver browser;
+    public static ApiClient api;
 
-    // maven
-    final String mavenFilePath = "/maven/file/path";
-    final String mavenCentralRepository = "https://mvnrepository.com/";
-    final String mavenAuthUser = "maven_user";
-    final String mavenAuthPassword = "maven_password";
-
-    // ingress
-    final String ingressDomainAddress = "https://localhost";
-
-    // docker
-    final String dockerAddress = "https://hub.docker.com/v2/";
-    final String dockerNamespace = "hello";
-    final String dockerUser = "docker_user";
-    final String dockerPassword = "docker_password";
-
-    // email
-    final String emailHost = "smtp.163.com";
-    final String editEmailHost = "postfix";
-    final String emailPort = "25";
-    final String emailAddress = "hello@163.com";
-    final String editEmailAddress = "hello@postfix.com";
-    final String emailUser = "email_password";
-    final String emailPassword = "email_password";
+    private static final String mavenFilePath = "/maven/file/path";
+    private static final String mavenCentralRepository = "https://mvnrepository.com/";
+    private static final String mavenAuthUser = "maven_user";
+    private static final String mavenAuthPassword = "maven_password";
+    private static final String ingressDomainAddress = "https://localhost";
+    private static final String dockerAddress = "https://hub.docker.com/v2/";
+    private static final String dockerNamespace = "hello";
+    private static final String dockerUser = "docker_user";
+    private static final String dockerPassword = "docker_password";
+    private static final String emailHost = "smtp.163.com";
+    private static final String editEmailHost = "postfix";
+    private static final String emailPort = "25";
+    private static final String emailAddress = "hello@163.com";
+    private static final String editEmailAddress = "hello@postfix.com";
+    private static final String emailUser = "email_password";
+    private static final String emailPassword = "email_password";
 
     @BeforeAll
     public static void setup() {
-        new LoginPage(browser)
-            .login()
-            .goToNav(SettingPage.class)
-            .goToTab(EnvironmentPage.class);
+        api.login();
     }
 
     @Test
     @Order(1)
     public void testCreateEnvironment() {
-        final EnvironmentPage environmentPage = new EnvironmentPage(browser);
+        updateSetting("streampark.maven.settings", mavenFilePath);
+        updateSetting("streampark.maven.central.repository", mavenCentralRepository);
+        updateSetting("streampark.maven.auth.user", mavenAuthUser);
+        updateSetting("streampark.maven.auth.password", mavenAuthPassword);
+        updateSetting("ingress.mode.default", ingressDomainAddress);
 
-        environmentPage.createEnvironment(EnvironmentDetailForm.EnvSettingTypeEnum.Maven)
-            .<MavenSettingForm>addSetting(EnvironmentDetailForm.EnvSettingTypeEnum.Maven)
-            .filePath(mavenFilePath)
-            .centralRepository(mavenCentralRepository)
-            .authUser(mavenAuthUser)
-            .authPassword(mavenAuthPassword);
-
-        environmentPage.createEnvironment(EnvironmentDetailForm.EnvSettingTypeEnum.Ingress)
-            .<IngressSettingForm>addSetting(EnvironmentDetailForm.EnvSettingTypeEnum.Ingress)
-            .domainAddress(ingressDomainAddress);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(environmentPage.settingList)
-                    .as("Setting list should contain newly-created setting")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(mavenFilePath))
-                    .anyMatch(it -> it.contains(mavenCentralRepository))
-                    .anyMatch(it -> it.contains(mavenAuthUser))
-                    .anyMatch(it -> it.contains(ingressDomainAddress)));
+        ApiResponse list = api.postForm("/setting/all", new LinkedHashMap<>());
+        assertThat(list.isSuccess()).isTrue();
+        String settings = list.getData().toString();
+        assertThat(settings).contains(mavenFilePath);
+        assertThat(settings).contains(mavenCentralRepository);
+        assertThat(settings).contains(mavenAuthUser);
+        assertThat(settings).contains(ingressDomainAddress);
     }
 
     @Test
     @Order(2)
     public void testCreateEmailSettingFailedWithAuth() {
-        final EnvironmentPage environmentPage = new EnvironmentPage(browser);
-
-        EmailSettingForm emailSettingForm =
-            environmentPage.createEnvironment(EnvironmentDetailForm.EnvSettingTypeEnum.Email)
-                .<EmailSettingForm>addSetting(EnvironmentDetailForm.EnvSettingTypeEnum.Email)
-                .host(emailHost)
-                .port(emailPort)
-                .address(emailAddress)
-                .user(emailUser)
-                .password(emailPassword)
-                .ok();
-
-        String expectedErrorMessage =
-            "connect to target mail server failed: 535 Error: authentication failed";
-        Awaitility.await()
-
-            .untilAsserted(
-                () -> {
-                    new WebDriverWait(browser, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
-                    assertThat(environmentPage.errorMessageList)
-                        .as("Connect failed error message should be displayed")
-                        .extracting(WebElement::getText)
-                        .anyMatch(it -> it.contains(expectedErrorMessage));
-                });
-
-        WebElementClick(browser, environmentPage.errorMessageConfirmButton);
-        emailSettingForm.cancel();
+        ApiResponse response = api.postForm("/setting/check/email", emailParams(emailHost, emailAddress));
+        assertThat(response.isSuccess()).isTrue();
+        assertThat(response.getData().path("msg").asText())
+            .contains("connect to target mail server failed: 535 Error: authentication failed");
     }
 
     @Test
     @Order(3)
     public void testCreateEmailSettingSuccessful() {
-        final EnvironmentPage environmentPage = new EnvironmentPage(browser);
+        ApiResponse check = api.postForm("/setting/check/email", emailParams(editEmailHost, editEmailAddress));
+        assertThat(check.isSuccess()).isTrue();
 
-        EmailSettingForm emailSettingForm =
-            environmentPage.createEnvironment(EnvironmentDetailForm.EnvSettingTypeEnum.Email)
-                .<EmailSettingForm>addSetting(EnvironmentDetailForm.EnvSettingTypeEnum.Email)
-                .host(editEmailHost)
-                .port(emailPort)
-                .address(editEmailAddress)
-                .user(emailUser)
-                .password(emailPassword)
-                .ok();
+        ApiResponse update = api.postForm("/setting/update/email", emailParams(editEmailHost, editEmailAddress));
+        assertThat(update.isSuccess()).isTrue();
 
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(environmentPage.settingList)
-                    .as("Setting list should contain newly-created email setting")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(editEmailAddress)));
+        ApiResponse list = api.postForm("/setting/all", new LinkedHashMap<>());
+        assertThat(list.getData().toString()).contains(editEmailAddress);
     }
 
     @Test
     @Order(4)
     public void testCreateDockerSettingFailed() {
-        final EnvironmentPage environmentPage = new EnvironmentPage(browser);
-        DockerSettingForm dockerSettingForm =
-            environmentPage.createEnvironment(EnvironmentDetailForm.EnvSettingTypeEnum.Docker)
-                .<DockerSettingForm>addSetting(EnvironmentDetailForm.EnvSettingTypeEnum.Docker)
-                .address(dockerAddress)
-                .namespace(dockerNamespace)
-                .user(dockerUser)
-                .password(dockerPassword)
-                .ok();
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("address", dockerAddress);
+        params.put("namespace", dockerNamespace);
+        params.put("username", dockerUser);
+        params.put("password", dockerPassword);
 
-        String expectedErrorMessage = String.format(
-            "Failed to validate Docker registry, error: Status 500: {\"message\":\"login attempt to %s failed with status: 404 Not Found\"}",
-            dockerAddress);
-        Awaitility.await()
+        ApiResponse response = api.postForm("/setting/check/docker", params);
+        assertThat(response.isSuccess()).isTrue();
+        assertThat(response.getData().path("msg").asText())
+            .contains(
+                String.format(
+                    "Failed to validate Docker registry, error: Status 500: {\"message\":\"login attempt to %s failed with status: 404 Not Found\"}",
+                    dockerAddress));
+    }
 
-            .untilAsserted(
-                () -> {
-                    new WebDriverWait(browser, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
-                    assertThat(environmentPage.errorMessageList)
-                        .as("Failed to validate docker registry error message should be displayed")
-                        .extracting(WebElement::getText)
-                        .anyMatch(it -> it.contains(expectedErrorMessage));
-                });
+    private static void updateSetting(String key, String value) {
+        ApiResponse response =
+            api.postForm("/setting/update", api.params("settingKey", key, "settingValue", value));
+        assertThat(response.isSuccess()).isTrue();
+    }
 
-        WebElementClick(browser, environmentPage.errorMessageConfirmButton);
-        dockerSettingForm.cancel();
+    private static Map<String, String> emailParams(String host, String from) {
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("host", host);
+        params.put("port", emailPort);
+        params.put("from", from);
+        params.put("userName", emailUser);
+        params.put("password", emailPassword);
+        params.put("ssl", "false");
+        return params;
     }
 }

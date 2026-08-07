@@ -27,7 +27,7 @@ name: E2E
 
 concurrency:
   group: e2e-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 
 jobs:
@@ -102,12 +102,13 @@ jobs:
           name: standalone-image
           path: /tmp/standalone-image.tar
           retention-days: 1
-  e2e:
-    name: ${{ matrix.case.name }}
+  api-e2e:
+    name: API-${{ matrix.case.name }}
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 120
     strategy:
+      fail-fast: false
       matrix:
         case:
           - name: EnvironmentTest
@@ -135,34 +136,98 @@ jobs:
           - name: VariableManagementTest
             class: org.apache.streampark.e2e.cases.VariableManagementTest
 
-          - name: FlinkOnRemoteClusterDeployTest
+          # Flink remote cluster (API)
+          - name: Flink117-RemoteDeploy
+            class: org.apache.streampark.e2e.cases.Flink117OnRemoteClusterDeployTest
+          - name: Flink118-RemoteDeploy
+            class: org.apache.streampark.e2e.cases.Flink118OnRemoteClusterDeployTest
+          - name: Flink119-RemoteDeploy
+            class: org.apache.streampark.e2e.cases.Flink119OnRemoteClusterDeployTest
+          - name: Flink120-RemoteDeploy
             class: org.apache.streampark.e2e.cases.Flink120OnRemoteClusterDeployTest
+          - name: Flink200-RemoteDeploy
+            class: org.apache.streampark.e2e.cases.Flink200OnRemoteClusterDeployTest
+          - name: Flink210-RemoteDeploy
+            class: org.apache.streampark.e2e.cases.Flink210OnRemoteClusterDeployTest
+          - name: Flink220-RemoteDeploy
+            class: org.apache.streampark.e2e.cases.Flink220OnRemoteClusterDeployTest
+          - name: Flink230-RemoteDeploy
+            class: org.apache.streampark.e2e.cases.Flink230OnRemoteClusterDeployTest
 
-          # - name: FlinkOnYarnClusterDeployTest
-          #  class: org.apache.streampark.e2e.cases.Flink120OnYarnClusterDeployTest
+          # Flink yarn cluster (API)
+          - name: Flink117-YarnClusterDeploy
+            class: org.apache.streampark.e2e.cases.Flink117OnYarnClusterDeployTest
+          - name: Flink118-YarnClusterDeploy
+            class: org.apache.streampark.e2e.cases.Flink118OnYarnClusterDeployTest
+          - name: Flink119-YarnClusterDeploy
+            class: org.apache.streampark.e2e.cases.Flink119OnYarnClusterDeployTest
+          - name: Flink120-YarnClusterDeploy
+            class: org.apache.streampark.e2e.cases.Flink120OnYarnClusterDeployTest
+          - name: Flink200-YarnClusterDeploy
+            class: org.apache.streampark.e2e.cases.Flink200OnYarnClusterDeployTest
+          - name: Flink210-YarnClusterDeploy
+            class: org.apache.streampark.e2e.cases.Flink210OnYarnClusterDeployTest
+          - name: Flink220-YarnClusterDeploy
+            class: org.apache.streampark.e2e.cases.Flink220OnYarnClusterDeployTest
+          - name: Flink230-YarnClusterDeploy
+            class: org.apache.streampark.e2e.cases.Flink230OnYarnClusterDeployTest
 
-          # - name: FlinkSQLOnYarnTest
-          #  class: org.apache.streampark.e2e.cases.FlinkSQL120OnYarnTest
+          # Flink SQL on Yarn (API)
+          - name: FlinkSQL117-Yarn
+            class: org.apache.streampark.e2e.cases.FlinkSQL117OnYarnTest
+          - name: FlinkSQL118-Yarn
+            class: org.apache.streampark.e2e.cases.FlinkSQL118OnYarnTest
+          - name: FlinkSQL119-Yarn
+            class: org.apache.streampark.e2e.cases.FlinkSQL119OnYarnTest
+          - name: FlinkSQL120-Yarn
+            class: org.apache.streampark.e2e.cases.FlinkSQL120OnYarnTest
+          - name: FlinkSQL200-Yarn
+            class: org.apache.streampark.e2e.cases.FlinkSQL200OnYarnTest
+          - name: FlinkSQL210-Yarn
+            class: org.apache.streampark.e2e.cases.FlinkSQL210OnYarnTest
+          - name: FlinkSQL220-Yarn
+            class: org.apache.streampark.e2e.cases.FlinkSQL220OnYarnTest
+          - name: FlinkSQL230-Yarn
+            class: org.apache.streampark.e2e.cases.FlinkSQL230OnYarnTest
 
-          #- name: Flink117OnRemoteClusterDeployTest
-          #  class: org.apache.streampark.e2e.cases.Flink117OnRemoteClusterDeployTest
-          #- name: Flink116OnRemoteClusterDeployTest
-          #  class: org.apache.streampark.e2e.cases.Flink116OnRemoteClusterDeployTest
+          # Flink K8s cluster (API)
+          - name: Flink117-K8sClusterDeploy
+            class: org.apache.streampark.e2e.cases.Flink117OnK8sClusterDeployTest
+          - name: Flink118-K8sClusterDeploy
+            class: org.apache.streampark.e2e.cases.Flink118OnK8sClusterDeployTest
+          - name: Flink119-K8sClusterDeploy
+            class: org.apache.streampark.e2e.cases.Flink119OnK8sClusterDeployTest
+          - name: Flink120-K8sClusterDeploy
+            class: org.apache.streampark.e2e.cases.Flink120OnK8sClusterDeployTest
+          - name: Flink200-K8sClusterDeploy
+            class: org.apache.streampark.e2e.cases.Flink200OnK8sClusterDeployTest
+          - name: Flink210-K8sClusterDeploy
+            class: org.apache.streampark.e2e.cases.Flink210OnK8sClusterDeployTest
+          - name: Flink220-K8sClusterDeploy
+            class: org.apache.streampark.e2e.cases.Flink220OnK8sClusterDeployTest
+          - name: Flink230-K8sClusterDeploy
+            class: org.apache.streampark.e2e.cases.Flink230OnK8sClusterDeployTest
 
-          # - name: Flink116OnYarnClusterDeployTest
-          #  class: org.apache.streampark.e2e.cases.Flink116OnYarnClusterDeployTest
-          # - name: Flink117OnYarnClusterDeployTest
-          #  class: org.apache.streampark.e2e.cases.Flink117OnYarnClusterDeployTest
-
-          # - name: FlinkSQL116OnYarnTest
-          #  class: org.apache.streampark.e2e.cases.FlinkSQL116OnYarnTest
-          # - name: FlinkSQL117OnYarnTest
-          #  class: org.apache.streampark.e2e.cases.FlinkSQL117OnYarnTest
-    env:
-      RECORDING_PATH: /tmp/recording-${{ matrix.case.name }}
+          # Flink SQL on K8s (API)
+          - name: FlinkSQL117-K8s
+            class: org.apache.streampark.e2e.cases.FlinkSQL117OnK8sTest
+          - name: FlinkSQL118-K8s
+            class: org.apache.streampark.e2e.cases.FlinkSQL118OnK8sTest
+          - name: FlinkSQL119-K8s
+            class: org.apache.streampark.e2e.cases.FlinkSQL119OnK8sTest
+          - name: FlinkSQL120-K8s
+            class: org.apache.streampark.e2e.cases.FlinkSQL120OnK8sTest
+          - name: FlinkSQL200-K8s
+            class: org.apache.streampark.e2e.cases.FlinkSQL200OnK8sTest
+          - name: FlinkSQL210-K8s
+            class: org.apache.streampark.e2e.cases.FlinkSQL210OnK8sTest
+          - name: FlinkSQL220-K8s
+            class: org.apache.streampark.e2e.cases.FlinkSQL220OnK8sTest
+          - name: FlinkSQL230-K8s
+            class: org.apache.streampark.e2e.cases.FlinkSQL230OnK8sTest
     steps:
       - name: Free Disk Space
-        # refer: https://github.com/jlumbroso/free-disk-space
+        if: contains(matrix.case.name, 'Flink')
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
         with:
           dotnet: true
@@ -213,19 +278,12 @@ jobs:
             return 1
           }
           pull_with_retry testcontainers/ryuk:0.7.0
-          pull_with_retry selenium/standalone-chrome:4.13.0 || true
-      - name: Run Test
+          pull_with_retry rancher/k3s:v1.30.5-k3s1 || true
+      - name: Run API Test
         run: |
           ./mvnw -B -f streampark-e2e/pom.xml -am \
             -DfailIfNoTests=false \
             -Dtest=${{ matrix.case.class }} test
-      - uses: actions/upload-artifact@v4
-        if: always()
-        name: Upload Recording
-        with:
-          name: recording-${{ matrix.case.name }}
-          path: ${{ env.RECORDING_PATH }}
-          retention-days: 1
       - uses: actions/upload-artifact@v4
         if: always()
         name: Upload Projects Build Logs
@@ -237,7 +295,7 @@ jobs:
     name: E2E - Result
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [ paths-filter, license-header, code-style, build, e2e ]
+    needs: [ paths-filter, license-header, code-style, build, api-e2e ]
     if: always()
     steps:
       - name: Status
@@ -246,7 +304,7 @@ jobs:
             echo "Skip E2E!"
             exit 0
           fi
-          if [[ ${{ needs.e2e.result }} != 'success' ]]; then
+          if [[ ${{ needs.api-e2e.result }} != 'success' ]]; then
             echo "E2E Failed!"
             exit 1
           fi

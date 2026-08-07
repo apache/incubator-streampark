@@ -17,341 +17,144 @@
 
 package org.apache.streampark.e2e.cases;
 
-import org.apache.streampark.e2e.core.StreamPark;
-import org.apache.streampark.e2e.pages.LoginPage;
-import org.apache.streampark.e2e.pages.common.Constants;
-import org.apache.streampark.e2e.pages.flink.ApacheFlinkPage;
-import org.apache.streampark.e2e.pages.flink.FlinkHomePage;
-import org.apache.streampark.e2e.pages.flink.applications.ApplicationForm;
-import org.apache.streampark.e2e.pages.flink.applications.ApplicationsPage;
-import org.apache.streampark.e2e.pages.flink.clusters.ClusterDetailForm;
-import org.apache.streampark.e2e.pages.flink.clusters.FlinkClustersPage;
-import org.apache.streampark.e2e.pages.flink.clusters.YarnSessionForm;
+import org.apache.streampark.e2e.core.StreamParkApi;
+import org.apache.streampark.e2e.core.api.ApiClient;
+import org.apache.streampark.e2e.core.api.flink.FlinkApiConstants;
+import org.apache.streampark.e2e.core.api.flink.FlinkApiSupport;
 
-import lombok.SneakyThrows;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
+
+import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@StreamPark(composeFiles = "docker/flink-1.17-on-yarn/docker-compose.yaml")
+@StreamParkApi(composeFiles = "docker/flink-1.17-on-yarn/docker-compose.yaml")
 public class FlinkSQL117OnYarnTest {
 
-    public static RemoteWebDriver browser;
+    public static ApiClient api;
+
+    private static FlinkApiSupport flink;
 
     private static final String flinkName = "flink-1.17.2";
 
     private static final String flinkHome = "/flink-1.17.2";
 
-    private static final String applicationName = "flink-117-e2e-test";
+    private static final String clusterName = "flink_1.17.2_cluster_e2e";
 
-    private static final String flinkDescription = "description test";
+    private static final String yarnAppJobName = "flink-117-e2e-test";
 
-    private static final String flinkClusterName = "flink_1.17.2_cluster_e2e";
+    private static final String yarnSessionJobName = "flink-117-session-e2e";
+
+    private static long versionId;
+
+    private static long clusterId;
+
+    private static long yarnAppId;
+
+    private static long yarnSessionAppId;
 
     @BeforeAll
     public static void setup() {
-        FlinkHomePage flinkHomePage = new LoginPage(browser)
-            .login()
-            .goToNav(ApacheFlinkPage.class)
-            .goToTab(FlinkHomePage.class);
+        api.login();
+        flink = new FlinkApiSupport(api);
+        flink.createFlinkEnv(flinkName, flinkHome, "description test");
+        versionId = flink.requireVersionId(flinkName);
 
-        flinkHomePage.createFlinkHome(flinkName, flinkHome, flinkDescription);
-
-        FlinkClustersPage flinkClustersPage = flinkHomePage.goToNav(ApacheFlinkPage.class)
-            .goToTab(FlinkClustersPage.class);
-
-        flinkClustersPage.createFlinkCluster()
-            .<YarnSessionForm>addCluster(ClusterDetailForm.DeployMode.YARN_SESSION)
-            .resolveOrder(YarnSessionForm.ResolveOrder.PARENT_FIRST)
-            .clusterName(flinkClusterName)
-            .flinkVersion(flinkName)
-            .submit();
-
-        flinkClustersPage.startFlinkCluster(flinkClusterName);
-
-        flinkClustersPage.goToNav(ApacheFlinkPage.class)
-            .goToTab(ApplicationsPage.class);
+        ObjectNode clusterBody =
+            flink.baseClusterBody(clusterName, FlinkApiConstants.DEPLOY_YARN_SESSION, versionId);
+        clusterBody.put("resolveOrder", FlinkApiConstants.RESOLVE_PARENT_FIRST);
+        clusterId = flink.createCluster(clusterBody);
+        flink.startCluster(clusterId);
+        flink.waitClusterState(
+            clusterId, state -> state == FlinkApiConstants.CLUSTER_RUNNING, Duration.ofMinutes(15));
     }
 
     @Test
     @Order(1)
     void testCreateFlinkApplicationOnYarnApplicationMode() {
-        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
-
-        applicationsPage
-            .createApplication()
-            .addApplication(
-                ApplicationForm.FlinkJobType.FLINK_SQL,
-                ApplicationForm.DeployMode.YARN_APPLICATION,
-                applicationName)
-            .flinkVersion(flinkName)
-            .flinkSql(Constants.TEST_FLINK_SQL)
-            .submit();
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList)
-                    .as("Applications list should contain newly-created application")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(applicationName)));
+        ObjectNode body =
+            flink.baseSqlAppBody(yarnAppJobName, FlinkApiConstants.DEPLOY_YARN_APPLICATION, versionId);
+        yarnAppId = flink.createApp(body);
+        assertThat(yarnAppId).isPositive();
     }
 
     @Test
     @Order(2)
     void testReleaseFlinkApplicationOnYarnApplicationMode() {
-        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
-
-        applicationsPage.releaseApplication(applicationName);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList)
-                    .as("Applications list should contain released application")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("SUCCESS")));
+        flink.releaseApp(yarnAppId);
     }
 
     @Test
     @Order(3)
     void testStartFlinkApplicationOnYarnApplicationMode() {
-        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
-
-        applicationsPage.startApplication(applicationName);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList)
-                    .as("Applications list should contain finished application")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("FINISHED")));
+        flink.startApp(yarnAppId);
+        flink.waitAppState(
+            yarnAppId, state -> state == FlinkApiConstants.APP_FINISHED, Duration.ofMinutes(20));
     }
 
     @Test
     @Order(4)
-    @SneakyThrows
     void testCancelFlinkApplicationOnYarnApplicationMode() {
-        Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
-        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
-
-        applicationsPage.startApplication(applicationName);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList)
-                    .as("Applications list should contain restarted application")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("RUNNING")));
-
-        applicationsPage.cancelApplication(applicationName);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList)
-                    .as("Applications list should contain canceled application")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("CANCELED")));
+        flink.startApp(yarnAppId);
+        flink.waitAppState(
+            yarnAppId, state -> state == FlinkApiConstants.APP_RUNNING, Duration.ofMinutes(20));
+        flink.cancelApp(yarnAppId);
+        flink.waitAppState(
+            yarnAppId, state -> state == FlinkApiConstants.APP_CANCELED, Duration.ofMinutes(20));
     }
 
     @Test
     @Order(5)
     void testDeleteFlinkApplicationOnYarnApplicationMode() {
-        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
-
-        applicationsPage.deleteApplication(applicationName);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> {
-                    browser.navigate().refresh();
-
-                    assertThat(applicationsPage.applicationsList)
-                        .noneMatch(it -> it.getText().contains(applicationName));
-                });
+        flink.deleteApp(yarnAppId);
+        assertThatThrownBy(() -> flink.requireAppId(yarnAppJobName))
+            .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     @Order(6)
-    void testCreateFlinkApplicationOnYarnPerJobMode() {
-        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
-
-        applicationsPage
-            .createApplication()
-            .addApplication(
-                ApplicationForm.FlinkJobType.FLINK_SQL,
-                ApplicationForm.DeployMode.YARN_PER_JOB,
-                applicationName)
-            .flinkVersion(flinkName)
-            .flinkSql(Constants.TEST_FLINK_SQL)
-            .submit();
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList)
-                    .as("Applications list should contain newly-created application")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(applicationName)));
+    void testCreateFlinkApplicationOnYarnSessionMode() {
+        ObjectNode body =
+            flink.baseSqlAppBody(yarnSessionJobName, FlinkApiConstants.DEPLOY_YARN_SESSION, versionId);
+        body.put("flinkClusterId", clusterId);
+        yarnSessionAppId = flink.createApp(body);
+        assertThat(yarnSessionAppId).isPositive();
     }
 
     @Test
     @Order(7)
-    void testReleaseFlinkApplicationOnYarnPerJobMode() {
-        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
-
-        applicationsPage.releaseApplication(applicationName);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList)
-                    .as("Applications list should contain released application")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("SUCCESS")));
+    void testReleaseFlinkApplicationOnYarnSessionMode() {
+        flink.releaseApp(yarnSessionAppId);
     }
 
     @Test
     @Order(8)
-    void testStartFlinkApplicationOnYarnPerJobMode() {
-        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
-
-        applicationsPage.startApplication(applicationName);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList)
-                    .as("Applications list should contain started application")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("RUNNING")));
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList)
-                    .as("Applications list should contain finished application")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("FINISHED")));
+    void testStartFlinkApplicationOnYarnSessionMode() {
+        flink.startApp(yarnSessionAppId);
+        flink.waitAppState(
+            yarnSessionAppId, state -> state == FlinkApiConstants.APP_FINISHED, Duration.ofMinutes(20));
     }
 
     @Test
     @Order(9)
-    void testDeleteFlinkApplicationOnYarnPerJobMode() {
-        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
-
-        applicationsPage.deleteApplication(applicationName);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> {
-                    browser.navigate().refresh();
-
-                    assertThat(applicationsPage.applicationsList)
-                        .noneMatch(it -> it.getText().contains(applicationName));
-                });
+    void testCancelFlinkApplicationOnYarnSessionMode() {
+        flink.startApp(yarnSessionAppId);
+        flink.waitAppState(
+            yarnSessionAppId, state -> state == FlinkApiConstants.APP_RUNNING, Duration.ofMinutes(20));
+        flink.cancelApp(yarnSessionAppId);
+        flink.waitAppState(
+            yarnSessionAppId, state -> state == FlinkApiConstants.APP_CANCELED, Duration.ofMinutes(20));
     }
 
     @Test
     @Order(10)
-    void testCreateFlinkApplicationOnYarnSessionMode() {
-        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
-
-        applicationsPage
-            .createApplication()
-            .addApplication(
-                ApplicationForm.FlinkJobType.FLINK_SQL,
-                ApplicationForm.DeployMode.YARN_SESSION,
-                applicationName)
-            .flinkVersion(flinkName)
-            .flinkSql(Constants.TEST_FLINK_SQL)
-            .flinkCluster(flinkClusterName)
-            .submit();
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList)
-                    .as("Applications list should contain newly-created application")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(applicationName)));
-    }
-
-    @Test
-    @Order(11)
-    void testReleaseFlinkApplicationOnYarnSessionMode() {
-        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
-
-        applicationsPage.releaseApplication(applicationName);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList)
-                    .as("Applications list should contain released application")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("SUCCESS")));
-    }
-
-    @Test
-    @Order(12)
-    void testStartFlinkApplicationOnYarnSessionMode() {
-        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
-
-        applicationsPage.startApplication(applicationName);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList)
-                    .as("Applications list should contain started application")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("RUNNING")));
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList)
-                    .as("Applications list should contain finished application")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("FINISHED")));
-    }
-
-    @Test
-    @Order(13)
-    @SneakyThrows
-    void testRestartAndCancelFlinkApplicationOnYarnSessionMode() {
-        Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
-        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
-
-        applicationsPage.startApplication(applicationName);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList)
-                    .as("Applications list should contain restarted application")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("RUNNING")));
-
-        applicationsPage.cancelApplication(applicationName);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList)
-                    .as("Applications list should contain canceled application")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("CANCELED")));
-    }
-
-    @Test
-    @Order(14)
     void testDeleteFlinkApplicationOnYarnSessionMode() {
-        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
-
-        applicationsPage.deleteApplication(applicationName);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> {
-                    browser.navigate().refresh();
-
-                    assertThat(applicationsPage.applicationsList)
-                        .noneMatch(it -> it.getText().contains(applicationName));
-                });
+        flink.deleteApp(yarnSessionAppId);
+        assertThatThrownBy(() -> flink.requireAppId(yarnSessionJobName))
+            .isInstanceOf(IllegalStateException.class);
     }
 }
