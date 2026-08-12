@@ -60,10 +60,7 @@ public class FlinkK8sSessionBuildPipeline extends BuildPipeline {
                     LfsOperator.mkCleanDirs(workspace);
                     logInfo("Recreate building workspace: " + workspace);
                     return workspace;
-                })
-                    .orElseThrow(() -> {
-                        throw pipelineException();
-                    });
+                });
 
         File shadedJar =
             execStep(
@@ -76,10 +73,7 @@ public class FlinkK8sSessionBuildPipeline extends BuildPipeline {
                             request.getShadedJarPath(buildWorkspace));
                     logInfo("Output shaded flink job jar: " + output.getAbsolutePath());
                     return output;
-                })
-                    .orElseThrow(() -> {
-                        throw pipelineException();
-                    });
+                });
 
         return new ShadedBuildResponse(buildWorkspace, shadedJar.getAbsolutePath());
     }

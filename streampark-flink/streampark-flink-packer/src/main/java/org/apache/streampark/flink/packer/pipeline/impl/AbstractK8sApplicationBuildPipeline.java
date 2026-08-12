@@ -65,8 +65,7 @@ abstract class AbstractK8sApplicationBuildPipeline extends BuildPipeline {
                     this::logInfo,
                     checkLocalImageFirst);
                 return null;
-            })
-                .orElseThrow(this::pipelineException);
+            });
 
         execStep(
             6,
@@ -79,8 +78,7 @@ abstract class AbstractK8sApplicationBuildPipeline extends BuildPipeline {
                     dockerProcessWatcher,
                     this::logInfo);
                 return null;
-            })
-                .orElseThrow(this::pipelineException);
+            });
 
         execStep(
             7,
@@ -88,8 +86,7 @@ abstract class AbstractK8sApplicationBuildPipeline extends BuildPipeline {
                 K8sDockerBuildSupport.pushImage(
                     dockerConf, pushImageTag, dockerProcess, dockerProcessWatcher, this::logInfo);
                 return null;
-            })
-                .orElseThrow(this::pipelineException);
+            });
     }
 
     protected Map<String, String> preparePodTemplateStep(
@@ -112,7 +109,6 @@ abstract class AbstractK8sApplicationBuildPipeline extends BuildPipeline {
                         + " podTemplates: "
                         + String.join(",", podTemplateFiles.values()));
                 return podTemplateFiles;
-            })
-                .orElseThrow(this::pipelineException);
+            });
     }
 }

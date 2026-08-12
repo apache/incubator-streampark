@@ -110,7 +110,7 @@ public abstract class BuildPipeline extends LoggerSupport
         }
     }
 
-    protected <R> java.util.Optional<R> execStep(int seq, Callable<R> process) {
+    protected <R> R execStep(int seq, Callable<R> process) {
         try {
             curStep = seq;
             stepsStatus.put(
@@ -132,7 +132,7 @@ public abstract class BuildPipeline extends LoggerSupport
                     PipelineStepStatusEnum.SUCCESS, System.currentTimeMillis()));
             logInfo("Building pipeline step[" + seq + "/" + allSteps() + "] success");
             notifyStepChange();
-            return java.util.Optional.of(result);
+            return result;
         } catch (Exception cause) {
             stepsStatus.put(
                 seq,
@@ -148,7 +148,7 @@ public abstract class BuildPipeline extends LoggerSupport
                     + "] failure => "
                     + pipeType().getSteps().get(seq));
             notifyStepChange();
-            return java.util.Optional.empty();
+            throw pipelineException();
         }
     }
 
@@ -275,8 +275,7 @@ public abstract class BuildPipeline extends LoggerSupport
                 }
                 logInfo("Recreate building workspace: " + yarnProvidedPath);
                 return null;
-            })
-                .orElseThrow(this::pipelineException);
+            });
 
         List<String> mavenJars =
             execStep(
@@ -290,8 +289,7 @@ public abstract class BuildPipeline extends LoggerSupport
                         mavenArts.stream().map(File::getAbsolutePath).collect(Collectors.toList());
                     paths.addAll(dependencyInfo.extJarLibs());
                     return paths;
-                })
-                    .orElseThrow(this::pipelineException);
+                });
 
         execStep(
             3,
@@ -301,8 +299,7 @@ public abstract class BuildPipeline extends LoggerSupport
                     YarnJarUploader.uploadJarToHdfsOrLfs(FsOperator.hdfs(), jar, yarnProvidedPath);
                 }
                 return null;
-            })
-                .orElseThrow(this::pipelineException);
+            });
     }
 
     /** intercept snapshot */

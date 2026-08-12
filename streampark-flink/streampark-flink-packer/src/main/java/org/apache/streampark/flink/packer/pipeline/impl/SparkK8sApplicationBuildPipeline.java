@@ -63,8 +63,7 @@ public class SparkK8sApplicationBuildPipeline extends AbstractK8sApplicationBuil
                     LfsOperator.mkCleanDirs(workspace);
                     logInfo("Recreate building workspace: " + workspace);
                     return workspace;
-                })
-                    .orElseThrow(this::pipelineException);
+                });
 
         Map<String, String> podTemplatePaths =
             preparePodTemplateStep(
@@ -84,8 +83,7 @@ public class SparkK8sApplicationBuildPipeline extends AbstractK8sApplicationBuil
                     LfsOperator.copy(request.mainJar(), path);
                     logInfo("Prepared spark job jar: " + path);
                     return path;
-                })
-                    .orElseThrow(this::pipelineException);
+                });
         final Set<String> extJarLibs = new HashSet<>();
 
         Object[] dockerResult =
@@ -115,8 +113,7 @@ public class SparkK8sApplicationBuildPipeline extends AbstractK8sApplicationBuil
                             + ", content: \n"
                             + template.offerDockerfileContent());
                     return new Object[]{dockerFile, template};
-                })
-                    .orElseThrow(this::pipelineException);
+                });
         File dockerfile = (File) dockerResult[0];
         SparkDockerfileTemplateTrait dockerFileTemplate = (SparkDockerfileTemplateTrait) dockerResult[1];
 

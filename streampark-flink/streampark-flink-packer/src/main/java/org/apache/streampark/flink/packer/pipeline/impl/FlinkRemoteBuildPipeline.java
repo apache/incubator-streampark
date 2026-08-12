@@ -60,8 +60,6 @@ public class FlinkRemoteBuildPipeline extends BuildPipeline {
             LfsOperator.mkCleanDirs(request.workspace());
             logInfo("Recreate building workspace: " + request.workspace());
             return null;
-        }).orElseThrow(() -> {
-            throw pipelineException();
         });
 
         File shadedJar =
@@ -78,10 +76,7 @@ public class FlinkRemoteBuildPipeline extends BuildPipeline {
                         return output;
                     }
                     return new File(request.customFlinkUserJar());
-                })
-                    .orElseThrow(() -> {
-                        throw pipelineException();
-                    });
+                });
 
         List<String> mavenJars =
             execStep(
@@ -98,10 +93,7 @@ public class FlinkRemoteBuildPipeline extends BuildPipeline {
                         return paths;
                     }
                     return Collections.<String>emptyList();
-                })
-                    .orElseThrow(() -> {
-                        throw pipelineException();
-                    });
+                });
 
         execStep(
             4,
@@ -118,10 +110,7 @@ public class FlinkRemoteBuildPipeline extends BuildPipeline {
                     }
                 }
                 return null;
-            })
-                .orElseThrow(() -> {
-                    throw pipelineException();
-                });
+            });
 
         return new ShadedBuildResponse(request.workspace(), shadedJar.getAbsolutePath());
     }
