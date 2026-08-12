@@ -64,7 +64,7 @@ public class ServiceHelper {
             ApiAlertException.throwIfFalse(
                 localClient.exists(), "[StreamPark] " + localClient + " no exists. please check.");
 
-            String regex = String.format("streampark-flink-sqlclient_%s-.*\\.jar", flinkEnv.getScalaVersion());
+            String regex = "streampark-flink-sqlclient-.*\\.jar";
 
             List<String> jars = Arrays.stream(Objects.requireNonNull(localClient.list()))
                 .filter(x -> x.matches(regex))
