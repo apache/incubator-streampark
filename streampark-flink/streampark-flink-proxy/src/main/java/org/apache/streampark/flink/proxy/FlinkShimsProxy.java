@@ -60,6 +60,8 @@ public final class FlinkShimsProxy extends LoggerSupport {
 
     private static final String FLINK_SHIMS_PREFIX = "streampark-flink-shims_flink";
 
+    private static final String FLINK_SHIMS_BASE_PREFIX = "streampark-flink-shims-base";
+
     private static final List<String> PARENT_FIRST_PATTERNS = Collections.unmodifiableList(
         Arrays.asList(
             "java.",
@@ -196,6 +198,9 @@ public final class FlinkShimsProxy extends LoggerSupport {
         if (jarName.startsWith(FLINK_SHIMS_PREFIX)) {
             String prefixVer = FLINK_SHIMS_PREFIX + "-" + majorVersion + "_" + scalaVersion;
             return jarName.startsWith(prefixVer) ? "Include flink shims jar lib: " : null;
+        }
+        if (jarName.startsWith(FLINK_SHIMS_BASE_PREFIX)) {
+            return "Include flink shims base jar lib: ";
         }
         if (INCLUDE_PATTERN.matcher(jarName).matches()) {
             return "Include jar lib: ";
