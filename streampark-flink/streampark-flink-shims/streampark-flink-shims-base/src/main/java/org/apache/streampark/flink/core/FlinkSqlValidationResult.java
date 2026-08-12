@@ -19,8 +19,12 @@ package org.apache.streampark.flink.core;
 
 import org.apache.streampark.common.enums.FlinkSqlValidationFailedType;
 
+import java.io.Serializable;
+
 /** Flink SQL validation result. */
-public class FlinkSqlValidationResult {
+public class FlinkSqlValidationResult implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     public final boolean success;
     public final FlinkSqlValidationFailedType failedType;
