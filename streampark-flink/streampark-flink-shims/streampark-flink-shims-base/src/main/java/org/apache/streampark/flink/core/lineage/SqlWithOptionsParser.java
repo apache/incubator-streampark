@@ -47,29 +47,37 @@ import java.util.regex.Pattern;
 public final class SqlWithOptionsParser {
 
     /**
-     * A single SQL identifier, either bare or backtick-quoted (a quoted one may contain dots). Both
-     * letter cases are spelled out, so the surrounding pattern must not be compiled {@code
-     * CASE_INSENSITIVE} — the keywords carry their own {@code (?i:...)} instead, which also keeps
-     * identifier matching case-exact, as Flink treats it.
+     * The alternatives of a single SQL identifier, bare or backtick-quoted (a quoted one may contain
+     * dots). Deliberately ungrouped, so each use can wrap it in whichever kind of group it needs
+     * without nesting a redundant one inside. Both letter cases are spelled out, so a pattern using
+     * it must not be compiled {@code CASE_INSENSITIVE} — the keywords below carry their own {@code
+     * (?i:...)} instead, which also keeps identifier matching case-exact, as Flink treats it.
      */
-    private static final String IDENTIFIER = "(?:`[^`]+`|[A-Za-z_][A-Za-z0-9_$]*)";
+    private static final String IDENTIFIER = "`[^`]+`|[A-Za-z_][A-Za-z0-9_$]*";
+
+    /** The {@code CREATE ... TABLE} keywords, up to where the declared name starts. */
+    private static final Pattern CREATE_TABLE_KEYWORDS =
+        Pattern.compile("\\s*(?i:CREATE\\s+(?:TEMPORARY\\s+)?TABLE\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?)");
+
+    /** The {@code CREATE CATALOG} keywords, up to where the declared name starts. */
+    private static final Pattern CREATE_CATALOG_KEYWORDS =
+        Pattern.compile("\\s*(?i:CREATE\\s+CATALOG\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?)");
 
     /**
-     * The name may be qualified ({@code CREATE TABLE mydb.mytable ...}); the qualifier prefix is
-     * matched but not captured, so the capture group is the local name alone — that is what a
-     * {@code CompiledPlan} identifier reports the table under. The qualifier repetition is
-     * possessive: every iteration ends in a dot, so no match ever needs to backtrack into an
-     * already-accepted qualifier, and a possessive group repetition is matched iteratively rather
-     * than recursively (no stack growth proportional to the identifier count).
+     * The declared name, matched from just past those keywords. It may be qualified ({@code CREATE
+     * TABLE mydb.mytable ...}); the qualifier prefix is matched but not captured, so the capture
+     * group is the local name alone — that is what a {@code CompiledPlan} identifier reports the
+     * table under. Kept apart from the keywords rather than inlined into both patterns above: one
+     * definition of what a declared name looks like, and neither pattern then has to carry the
+     * other's share of the complexity.
+     *
+     * <p>The qualifier repetition is possessive: every iteration ends in a dot, so no match ever
+     * needs to backtrack into an already-accepted qualifier, and a possessive group repetition is
+     * matched iteratively rather than recursively (no stack growth proportional to the identifier
+     * count).
      */
-    private static final Pattern TABLE_NAME =
-        Pattern.compile(
-            "^\\s*(?i:CREATE\\s+(?:TEMPORARY\\s+)?TABLE\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?)"
-                + "(?:" + IDENTIFIER + "\\s*\\.\\s*)*+(" + IDENTIFIER + ")");
-
-    private static final Pattern CATALOG_NAME =
-        Pattern.compile(
-            "^\\s*(?i:CREATE\\s+CATALOG\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?)(" + IDENTIFIER + ")");
+    private static final Pattern DECLARED_NAME =
+        Pattern.compile("(?:(?:" + IDENTIFIER + ")\\s*\\.\\s*)*+(" + IDENTIFIER + ")");
 
     private static final Pattern WITH_CLAUSE = Pattern.compile("\\bWITH\\s*\\(", Pattern.CASE_INSENSITIVE);
     /**
@@ -118,7 +126,7 @@ public final class SqlWithOptionsParser {
      * TABLE ... LIKE ...} or a catalog-backed table with no inline connector options.
      */
     public static WithOptions parse(String createTableStatement) {
-        return parseDeclaration(TABLE_NAME, createTableStatement);
+        return parseDeclaration(CREATE_TABLE_KEYWORDS, createTableStatement);
     }
 
     /**
@@ -126,7 +134,7 @@ public final class SqlWithOptionsParser {
      * option is {@code 'type'}, which names the catalog implementation (paimon, hive, jdbc, ...).
      */
     public static WithOptions parseCatalog(String createCatalogStatement) {
-        return parseDeclaration(CATALOG_NAME, createCatalogStatement);
+        return parseDeclaration(CREATE_CATALOG_KEYWORDS, createCatalogStatement);
     }
 
     /**
@@ -146,9 +154,15 @@ public final class SqlWithOptionsParser {
         }
     }
 
-    private static WithOptions parseDeclaration(Pattern namePattern, String statement) {
-        Matcher nameMatcher = namePattern.matcher(statement);
-        if (!nameMatcher.find()) {
+    private static WithOptions parseDeclaration(Pattern keywords, String statement) {
+        Matcher keywordMatcher = keywords.matcher(statement);
+        if (!keywordMatcher.lookingAt()) {
+            return null;
+        }
+        // Anchored at the keywords' end rather than searched for: a name found anywhere else in the
+        // statement (a column, a WITH value) would not be the declared one.
+        Matcher nameMatcher = DECLARED_NAME.matcher(statement).region(keywordMatcher.end(), statement.length());
+        if (!nameMatcher.lookingAt()) {
             return null;
         }
         String name = unquote(nameMatcher.group(1));
