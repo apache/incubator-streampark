@@ -125,4 +125,6 @@ public class FlinkAppCreateRequest implements Serializable {
     private Boolean k8sHadoopIntegration;
 
     private String serviceAccount;
+
+    private Boolean lineageEnable;
 }

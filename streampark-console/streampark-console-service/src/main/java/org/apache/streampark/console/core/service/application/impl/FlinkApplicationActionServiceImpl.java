@@ -37,6 +37,7 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.base.util.Tuple2;
 import org.apache.streampark.console.base.util.Tuple3;
+import org.apache.streampark.console.core.bean.LineageConfig;
 import org.apache.streampark.console.core.entity.ApplicationBuildPipeline;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkApplication;
@@ -57,6 +58,7 @@ import org.apache.streampark.console.core.mapper.FlinkApplicationMapper;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
+import org.apache.streampark.console.core.service.GravitinoLineageService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.SettingService;
@@ -81,12 +83,14 @@ import org.apache.streampark.flink.client.bean.SubmitApplicationSpec;
 import org.apache.streampark.flink.client.bean.SubmitClusterSpec;
 import org.apache.streampark.flink.client.bean.SubmitRequest;
 import org.apache.streampark.flink.client.bean.SubmitResponse;
+import org.apache.streampark.flink.core.lineage.LineagePipeline;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper;
 import org.apache.streampark.flink.kubernetes.ingress.IngressController;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
+import org.apache.streampark.flink.proxy.FlinkShimsProxy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
@@ -114,7 +118,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nonnull;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -135,6 +141,9 @@ public class FlinkApplicationActionServiceImpl
         ServiceImpl<FlinkApplicationMapper, FlinkApplication>
     implements
         FlinkApplicationActionService {
+
+    private static final String FLINK_SQL_LINEAGE_EXTRACTOR_CLASS =
+        "org.apache.streampark.flink.core.FlinkSqlLineageExtractor";
 
     @Qualifier("streamparkDeployExecutor")
     @Autowired
@@ -187,6 +196,9 @@ public class FlinkApplicationActionServiceImpl
 
     @Autowired
     private FlinkK8sWatcherWrapper k8sWatcherWrapper;
+
+    @Autowired
+    private GravitinoLineageService gravitinoLineageService;
 
     private final Map<Long, CompletableFuture<SubmitResponse>> startFutureMap =
         new ConcurrentHashMap<>();
@@ -424,12 +436,16 @@ public class FlinkApplicationActionServiceImpl
         applicationManageService.toEffective(application);
 
         Map<String, Object> extraParameter = new HashMap<>(0);
+        final List<LineagePipeline> lineagePipelines;
         if (application.isFlinkSql()) {
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), true);
             // Get the sql of the replaced placeholder
             String realSql = variableService.replaceVariable(application.getTeamId(), flinkSql.getSql());
             flinkSql.setSql(DeflaterUtils.zipString(realSql));
             extraParameter.put(ConfigKeys.KEY_FLINK_SQL(null), flinkSql.getSql());
+            lineagePipelines = extractLineagePipelines(flinkEnv, application, realSql);
+        } else {
+            lineagePipelines = new ArrayList<>();
         }
 
         Tuple2<String, String> userJarAndAppConf = getUserJarAndAppConf(flinkEnv, application);
@@ -497,8 +513,53 @@ public class FlinkApplicationActionServiceImpl
                     return;
                 }
                 // 3) success
-                processForSuccess(appParam, response, applicationLog, application);
+                processForSuccess(appParam, response, applicationLog, application, lineagePipelines);
             });
+    }
+
+    /**
+     * Extracts table-level lineage from a Flink SQL job's source text via the same
+     * per-Flink-version, classloader-isolated mechanism {@code FlinkSqlServiceImpl.verifySql} uses
+     * for syntax validation — except this needs the full registered Flink Home {@code lib/}
+     * classpath (connector factories included), not the narrower table-planner-only one
+     * {@code FlinkShimsProxy.proxyVerifySql} loads, since resolving a connector-backed {@code
+     * CREATE TABLE} requires that connector's factory to be on the classpath. That is the same
+     * classpath the job itself already needs those connectors on to run, so this has no additional
+     * operational requirement beyond what the job already demands.
+     *
+     * <p>Never throws — see {@link GravitinoLineageService} for why this whole path is fail-open.
+     */
+    List<LineagePipeline> extractLineagePipelines(FlinkEnv flinkEnv, FlinkApplication application, String sql) {
+        if (!Boolean.TRUE.equals(application.getLineageEnable())) {
+            return new ArrayList<>();
+        }
+        if (!settingService.getLineageConfig().enabled()) {
+            return new ArrayList<>();
+        }
+        try {
+            List<LineagePipeline> pipelines = FlinkShimsProxy.proxy(
+                flinkEnv.getFlinkVersion(),
+                classLoader -> {
+                    try {
+                        Class<?> clazz = classLoader.loadClass(FLINK_SQL_LINEAGE_EXTRACTOR_CLASS);
+                        Method method = clazz.getDeclaredMethod("extractLineage", String.class);
+                        method.setAccessible(true);
+                        Object result = method.invoke(null, sql);
+                        if (result == null) {
+                            return null;
+                        }
+                        return FlinkShimsProxy.getObject(this.getClass().getClassLoader(), result, ArrayList.class);
+                    } catch (Throwable e) {
+                        log.warn(
+                            "[lineage] failed to extract lineage for application id={}", application.getId(), e);
+                        return null;
+                    }
+                });
+            return pipelines == null ? new ArrayList<>() : pipelines;
+        } catch (Exception e) {
+            log.warn("[lineage] failed to extract lineage for application id={}", application.getId(), e);
+            return new ArrayList<>();
+        }
     }
 
     @Nonnull
@@ -516,7 +577,8 @@ public class FlinkApplicationActionServiceImpl
                                    FlinkApplication appParam,
                                    SubmitResponse response,
                                    ApplicationLog applicationLog,
-                                   FlinkApplication flinkApplication) {
+                                   FlinkApplication flinkApplication,
+                                   List<LineagePipeline> lineagePipelines) {
         applicationLog.setSuccess(true);
         if (response.flinkConfig() != null) {
             String jmMemory = response.flinkConfig().get(ConfigKeys.KEY_FLINK_JM_PROCESS_MEMORY());
@@ -547,10 +609,15 @@ public class FlinkApplicationActionServiceImpl
 
         // if start completed, will be added task to tracking queue
         if (flinkApplication.isKubernetesModeJob()) {
+            // Kubernetes-mode jobs are tracked by a separate watcher (k8SFlinkTrackMonitor) that
+            // this feature does not hook into yet, so lineage START is deliberately not tracked
+            // here either — tracking it with no corresponding terminal hook would leak pending
+            // runs in gravitinoLineageService's in-memory map forever.
             processForK8sApp(flinkApplication, applicationLog);
         } else {
             FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionStateEnum.STARTING);
             FlinkAppHttpWatcher.doWatching(flinkApplication);
+            gravitinoLineageService.trackAndEmitStart(flinkApplication, response.jobId(), lineagePipelines);
         }
         // update app
         updateById(flinkApplication);
@@ -793,8 +860,12 @@ public class FlinkApplicationActionServiceImpl
             properties.put(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key(), true);
         }
 
+        applyNativeLineageListenerConfig(application, properties);
+
         Map<String, String> dynamicProperties =
             FlinkConfigurationUtils.extractDynamicPropertiesAsJava(runtimeProperties);
+        // Applied last so a key the user set explicitly in Dynamic Properties always wins over
+        // anything this method injected above, including the native lineage listener config.
         properties.putAll(dynamicProperties);
         ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
         if (resolveOrder != null) {
@@ -802,6 +873,46 @@ public class FlinkApplicationActionServiceImpl
         }
 
         return properties;
+    }
+
+    /**
+     * Injects the official {@code openlineage-flink} job-status-changed-listener config. Covers
+     * what {@link #extractLineagePipelines} cannot: Custom Code (jar) Flink jobs, and — since the
+     * official implementation currently only produces lineage for the Kafka connector, per its own
+     * documented scope — Kafka-sourced tables in SQL jobs too.
+     *
+     * <p>Gated on two independent switches, both required: this application's own lineage switch,
+     * and the global "native listener" switch. The latter defaults to enabled but only actually
+     * injects anything once a Gravitino address is configured (see {@link
+     * LineageConfig#enabled()}) — an operator who has not yet placed the {@code openlineage-flink}
+     * jar in the registered Flink Home's {@code lib/} gets zero behavior change, not a broken job:
+     * without this guard, injecting {@code execution.job-status-changed-listeners} against a
+     * cluster missing that jar would fail every job at startup with a listener-factory
+     * ClassNotFoundException.
+     */
+    void applyNativeLineageListenerConfig(FlinkApplication application, Map<String, Object> properties) {
+        if (!Boolean.TRUE.equals(application.getLineageEnable())) {
+            return;
+        }
+        LineageConfig lineageConfig = settingService.getLineageConfig();
+        if (!lineageConfig.enabled() || !lineageConfig.isFlinkNativeListenerEnable()) {
+            return;
+        }
+        properties.put(
+            "execution.job-status-changed-listeners",
+            "io.openlineage.flink.listener.OpenLineageJobStatusChangedListenerFactory");
+        properties.put("openlineage.transport.type", "http");
+        properties.put("openlineage.transport.url", lineageConfig.getGravitinoAddress());
+        properties.put("openlineage.transport.endpoint", "/api/lineage");
+        if (StringUtils.isNotBlank(lineageConfig.getGravitinoToken())) {
+            properties.put("openlineage.transport.auth.type", "api_key");
+            properties.put("openlineage.transport.auth.apiKey", lineageConfig.getGravitinoToken());
+        }
+        String namespace =
+            StringUtils.isNotBlank(lineageConfig.getGravitinoNamespace())
+                ? lineageConfig.getGravitinoNamespace()
+                : "streampark";
+        properties.put("openlineage.job.namespace", namespace);
     }
 
     private void doAbort(Long id) {
