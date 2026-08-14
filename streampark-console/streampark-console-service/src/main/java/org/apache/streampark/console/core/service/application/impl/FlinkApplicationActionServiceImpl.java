@@ -903,16 +903,12 @@ public class FlinkApplicationActionServiceImpl
             "io.openlineage.flink.listener.OpenLineageJobStatusChangedListenerFactory");
         properties.put("openlineage.transport.type", "http");
         properties.put("openlineage.transport.url", lineageConfig.getGravitinoAddress());
-        properties.put("openlineage.transport.endpoint", "/api/lineage");
+        properties.put("openlineage.transport.endpoint", LineageConfig.LINEAGE_ENDPOINT_PATH);
         if (StringUtils.isNotBlank(lineageConfig.getGravitinoToken())) {
             properties.put("openlineage.transport.auth.type", "api_key");
             properties.put("openlineage.transport.auth.apiKey", lineageConfig.getGravitinoToken());
         }
-        String namespace =
-            StringUtils.isNotBlank(lineageConfig.getGravitinoNamespace())
-                ? lineageConfig.getGravitinoNamespace()
-                : "streampark";
-        properties.put("openlineage.job.namespace", namespace);
+        properties.put("openlineage.job.namespace", lineageConfig.namespaceOrDefault());
     }
 
     private void doAbort(Long id) {

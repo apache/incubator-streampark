@@ -438,14 +438,15 @@ public class SparkApplicationActionServiceImpl
         lineageProperties.put("spark.extraListeners", "io.openlineage.spark.agent.OpenLineageSparkListener");
         lineageProperties.put("spark.openlineage.transport.type", "http");
         lineageProperties.put("spark.openlineage.transport.url", lineageConfig.getGravitinoAddress());
-        lineageProperties.put("spark.openlineage.transport.endpoint", "/api/lineage");
+        lineageProperties.put("spark.openlineage.transport.endpoint", LineageConfig.LINEAGE_ENDPOINT_PATH);
         if (StringUtils.isNotBlank(lineageConfig.getGravitinoToken())) {
             lineageProperties.put("spark.openlineage.transport.auth.type", "api_key");
             lineageProperties.put("spark.openlineage.transport.auth.apiKey", lineageConfig.getGravitinoToken());
         }
-        if (StringUtils.isNotBlank(lineageConfig.getGravitinoNamespace())) {
-            lineageProperties.put("spark.openlineage.namespace", lineageConfig.getGravitinoNamespace());
-        }
+        // Always set, defaulted the same way the Flink path defaults it: leaving it unset would let
+        // OpenLineage pick its own default and land Spark's datasets in a different namespace from
+        // Flink's, in the same StreamPark install reporting to the same Gravitino.
+        lineageProperties.put("spark.openlineage.namespace", lineageConfig.namespaceOrDefault());
         lineageProperties.put("spark.openlineage.columnLineage.datasetLineageEnabled", "true");
         lineageProperties.forEach(sparkProperties::putIfAbsent);
     }

@@ -60,6 +60,8 @@ public final class CompiledPlanLineageParser {
      * @param tempTables tables declared in this job's own SQL text via {@code CREATE [TEMPORARY]
      *     TABLE ... WITH (...)}, keyed by local (unqualified) table name — see {@link
      *     SqlWithOptionsParser}
+     * @param catalogTypes the {@code 'type'} of every catalog this job's own SQL text attached via
+     *     {@code CREATE CATALOG}, keyed by catalog name — see {@link #resolveOne}
      * @return one {@link LineagePipeline} per sink found in the plan; a sink or input whose
      *     identity cannot be resolved is dropped (logged), never thrown — see class javadoc on
      *     {@link DatasetIdentityRegistry} for the fail-open rationale
@@ -68,7 +70,8 @@ public final class CompiledPlanLineageParser {
      */
     public static List<LineagePipeline> parse(
                                               String compiledPlanJson,
-                                              Map<String, SqlWithOptionsParser.TableOptions> tempTables) {
+                                              Map<String, SqlWithOptionsParser.WithOptions> tempTables,
+                                              Map<String, String> catalogTypes) {
         JsonNode root;
         try {
             root = MAPPER.readTree(compiledPlanJson);
@@ -93,7 +96,7 @@ public final class CompiledPlanLineageParser {
             if (!sink.isTextual()) {
                 continue;
             }
-            LineageDataset output = resolveOne(sink.asText(), tempTables, "output");
+            LineageDataset output = resolveOne(sink.asText(), tempTables, catalogTypes, "output");
             if (output == null) {
                 continue;
             }
@@ -108,9 +111,15 @@ public final class CompiledPlanLineageParser {
                     continue;
                 }
                 JsonNode current = nodesById.get(currentId);
+                if (current == null) {
+                    // An edge referencing a node absent from "nodes" would be a malformed plan;
+                    // skip it rather than NPE on a path contracted to only throw on bad JSON.
+                    LOG.warn("[lineage] CompiledPlan edge references unknown node id {}, skipping it", currentId);
+                    continue;
+                }
                 JsonNode source = current.path("scanTableSource").path("table").path("identifier");
                 if (source.isTextual()) {
-                    LineageDataset input = resolveOne(source.asText(), tempTables, "input");
+                    LineageDataset input = resolveOne(source.asText(), tempTables, catalogTypes, "input");
                     if (input != null) {
                         inputs.add(input);
                     }
@@ -120,7 +129,7 @@ public final class CompiledPlanLineageParser {
                 JsonNode lookupSource =
                     current.path("temporalTable").path("lookupTableSource").path("table").path("identifier");
                 if (lookupSource.isTextual()) {
-                    LineageDataset input = resolveOne(lookupSource.asText(), tempTables, "input");
+                    LineageDataset input = resolveOne(lookupSource.asText(), tempTables, catalogTypes, "input");
                     if (input != null) {
                         inputs.add(input);
                     }
@@ -134,9 +143,29 @@ public final class CompiledPlanLineageParser {
         return pipelines;
     }
 
+    /**
+     * Resolves one {@code `catalog`.`database`.`table`} plan identifier to a dataset identity, by
+     * whichever of the two routes applies:
+     *
+     * <ul>
+     *   <li>the table was declared in this job's own SQL via {@code CREATE TABLE ... WITH (...)} —
+     *       its connector options carry the physical location, so {@link DatasetIdentityRegistry}
+     *       decides;
+     *   <li>the table lives in an attached catalog — the plan names the catalog but not its kind,
+     *       so the {@code 'type'} captured from that catalog's {@code CREATE CATALOG} becomes the
+     *       namespace scheme ({@code paimon://catalog/db}, {@code hive://catalog/db}, ...).
+     * </ul>
+     *
+     * <p>Returns {@code null} (logged) when neither applies — a table from a catalog attached
+     * outside this job's SQL, whose kind is therefore unknowable here. Guessing a scheme would be
+     * worse than reporting nothing: dataset identity is deduplicated by exact string match, so a
+     * wrong guess silently splits one physical table into two nodes in the graph instead of failing
+     * loudly. Same rationale as {@link DatasetIdentityRegistry}'s refusal of a generic fallback.
+     */
     private static LineageDataset resolveOne(
                                              String rawIdentifier,
-                                             Map<String, SqlWithOptionsParser.TableOptions> tempTables,
+                                             Map<String, SqlWithOptionsParser.WithOptions> tempTables,
+                                             Map<String, String> catalogTypes,
                                              String role) {
         Matcher matcher = IDENTIFIER.matcher(rawIdentifier);
         if (!matcher.matches()) {
@@ -147,7 +176,7 @@ public final class CompiledPlanLineageParser {
         String database = matcher.group(2);
         String table = matcher.group(3);
 
-        SqlWithOptionsParser.TableOptions tableOptions = tempTables.get(table);
+        SqlWithOptionsParser.WithOptions tableOptions = tempTables.get(table);
         if (tableOptions != null) {
             LineageDataset resolved = DatasetIdentityRegistry.resolve(table, tableOptions.options());
             if (resolved != null) {
@@ -160,11 +189,17 @@ public final class CompiledPlanLineageParser {
             return resolved;
         }
 
-        // Falls through here for tables that come from an attached Flink catalog rather than a
-        // per-job CREATE TABLE — in this deployment that is exclusively the Paimon catalog (see
-        // DatasetIdentityRegistry javadoc: dataset identity is a fixed convention shared with other
-        // Gravitino emitters, not something to invent generically here).
-        LineageDataset resolved = new LineageDataset("paimon://" + catalog + "/" + database, table);
+        String catalogType = catalogTypes.get(catalog);
+        if (catalogType == null) {
+            LOG.warn(
+                "[lineage] table `{}` belongs to catalog `{}`, whose type is not declared in this job's SQL"
+                    + " (role={}), skipping lineage for it",
+                table,
+                catalog,
+                role);
+            return null;
+        }
+        LineageDataset resolved = new LineageDataset(catalogType + "://" + catalog + "/" + database, table);
         LOG.info("[lineage] dataset resolved from catalog identifier (role={}): {}", role, resolved);
         return resolved;
     }

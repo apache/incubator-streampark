@@ -23,8 +23,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Extracts the table name and {@code WITH (...)} connector options from one {@code CREATE TABLE}
- * or {@code CREATE TEMPORARY TABLE} statement.
+ * Extracts the declared name and {@code WITH (...)} options from one {@code CREATE
+ * [TEMPORARY] TABLE} or {@code CREATE CATALOG} statement.
  *
  * <p>Why this exists: a Flink {@code CompiledPlan} gives an accurate {@code
  * `catalog`.`database`.`table`} identifier only for tables that live in a real, attached Flink
@@ -34,6 +34,10 @@ import java.util.regex.Pattern;
  * "session default catalog/database + local table name", carrying no connector/host/physical-table
  * info at all. That information lives in the SQL text itself, so it is extracted here instead.
  *
+ * <p>The same holds one level up for {@code CREATE CATALOG ... WITH ('type' = '...')} — see
+ * {@link CompiledPlanLineageParser#resolveOne} for why a catalog's declared type has to come from
+ * the SQL text as well.
+ *
  * <p>Deliberately not scoped to {@code TEMPORARY} tables only (unlike the reference implementation
  * this was ported from): a plain {@code CREATE TABLE} without an attached persistent catalog is
  * exactly as ephemeral as a {@code CREATE TEMPORARY TABLE} from Gravitino's point of view, and
@@ -42,10 +46,25 @@ import java.util.regex.Pattern;
  */
 public final class SqlWithOptionsParser {
 
+    /** A single SQL identifier, either bare or backtick-quoted (a quoted one may contain dots). */
+    private static final String IDENTIFIER = "(?:`[^`]+`|[A-Za-z_][A-Za-z0-9_$]*)";
+
+    /**
+     * The name may be qualified ({@code CREATE TABLE mydb.mytable ...}); the qualifier prefix is
+     * matched but not captured, so the capture group is the local name alone — that is what a
+     * {@code CompiledPlan} identifier reports the table under.
+     */
     private static final Pattern TABLE_NAME =
         Pattern.compile(
-            "^\\s*CREATE\\s+(?:TEMPORARY\\s+)?TABLE\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?`?([A-Za-z_][A-Za-z0-9_]*)`?",
+            "^\\s*CREATE\\s+(?:TEMPORARY\\s+)?TABLE\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?"
+                + "(?:" + IDENTIFIER + "\\s*\\.\\s*)*(" + IDENTIFIER + ")",
             Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern CATALOG_NAME =
+        Pattern.compile(
+            "^\\s*CREATE\\s+CATALOG\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?(" + IDENTIFIER + ")",
+            Pattern.CASE_INSENSITIVE);
+
     private static final Pattern WITH_CLAUSE = Pattern.compile("\\bWITH\\s*\\(", Pattern.CASE_INSENSITIVE);
     /**
      * {@code 'key' = 'value'}. A literal's embedded {@code ''} must count as an escaped single quote,
@@ -59,13 +78,13 @@ public final class SqlWithOptionsParser {
     private SqlWithOptionsParser() {
     }
 
-    /** One {@code CREATE TABLE}'s local name and its {@code WITH (...)} connector options. */
-    public static final class TableOptions {
+    /** One declaration's local (unqualified) name and its {@code WITH (...)} options. */
+    public static final class WithOptions {
 
         private final String name;
         private final Map<String, String> options;
 
-        TableOptions(String name, Map<String, String> options) {
+        WithOptions(String name, Map<String, String> options) {
             this.name = name;
             this.options = options;
         }
@@ -85,18 +104,47 @@ public final class SqlWithOptionsParser {
      * does not match the expected shape or carries no {@code WITH (...)} clause, e.g. {@code CREATE
      * TABLE ... LIKE ...} or a catalog-backed table with no inline connector options.
      */
-    public static TableOptions parse(String createTableStatement) {
-        Matcher nameMatcher = TABLE_NAME.matcher(createTableStatement);
+    public static WithOptions parse(String createTableStatement) {
+        return parseDeclaration(TABLE_NAME, createTableStatement);
+    }
+
+    /**
+     * Parses one {@code CREATE CATALOG} statement, same contract as {@link #parse}. The interesting
+     * option is {@code 'type'}, which names the catalog implementation (paimon, hive, jdbc, ...).
+     */
+    public static WithOptions parseCatalog(String createCatalogStatement) {
+        return parseDeclaration(CATALOG_NAME, createCatalogStatement);
+    }
+
+    /**
+     * Records a {@code CREATE CATALOG}'s declared {@code 'type'} under its catalog name, or does
+     * nothing when the statement declares none. Lives here rather than in each per-Flink-version
+     * extractor that calls it: it is pure SQL-text parsing with no version-specific type in its
+     * signature, so duplicating it alongside those extractors would only risk them diverging.
+     */
+    public static void rememberCatalogType(String createCatalogStatement, Map<String, String> catalogTypes) {
+        WithOptions catalog = parseCatalog(createCatalogStatement);
+        if (catalog == null) {
+            return;
+        }
+        String type = catalog.options().get("type");
+        if (type != null) {
+            catalogTypes.put(catalog.name(), type);
+        }
+    }
+
+    private static WithOptions parseDeclaration(Pattern namePattern, String statement) {
+        Matcher nameMatcher = namePattern.matcher(statement);
         if (!nameMatcher.find()) {
             return null;
         }
-        String name = nameMatcher.group(1);
+        String name = unquote(nameMatcher.group(1));
 
-        Matcher withStart = WITH_CLAUSE.matcher(createTableStatement);
-        if (!withStart.find()) {
+        int bodyStart = findWithClauseBodyStart(statement);
+        if (bodyStart < 0) {
             return null;
         }
-        String body = extractParenthesizedBody(createTableStatement, withStart.end());
+        String body = extractParenthesizedBody(statement, bodyStart);
         if (body == null) {
             return null;
         }
@@ -106,7 +154,35 @@ public final class SqlWithOptionsParser {
         while (entry.find()) {
             options.put(unescapeLiteral(entry.group(1)), unescapeLiteral(entry.group(2)));
         }
-        return new TableOptions(name, options);
+        return new WithOptions(name, options);
+    }
+
+    /** Strips the backticks around a quoted identifier: {@code `my.table`} to {@code my.table}. */
+    private static String unquote(String identifier) {
+        return identifier.startsWith("`") ? identifier.substring(1, identifier.length() - 1) : identifier;
+    }
+
+    /**
+     * Index just past the opening {@code (} of the first {@code WITH (} that is not itself inside a
+     * string literal, or {@code -1}. The quote check matters: a column {@code COMMENT 'see WITH
+     * (x)'} would otherwise be mistaken for the options clause and parsed as garbage.
+     */
+    private static int findWithClauseBodyStart(String sql) {
+        Matcher withStart = WITH_CLAUSE.matcher(sql);
+        int scanned = 0;
+        boolean inSingleQuote = false;
+        while (withStart.find()) {
+            while (scanned < withStart.start()) {
+                if (sql.charAt(scanned) == '\'') {
+                    inSingleQuote = !inSingleQuote;
+                }
+                scanned++;
+            }
+            if (!inSingleQuote) {
+                return withStart.end();
+            }
+        }
+        return -1;
     }
 
     /** Balanced-parenthesis scan from just past the opening {@code (}, quote-aware. */

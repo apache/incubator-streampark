@@ -32,6 +32,19 @@ import lombok.Setter;
 @Setter
 public class LineageConfig {
 
+    /**
+     * Namespace used when an operator has not set one. It ends up inside emitted event payloads and
+     * inside injected job configuration, so both paths must agree on it — hence one definition.
+     */
+    public static final String DEFAULT_NAMESPACE = "streampark";
+
+    /**
+     * Gravitino's lineage-ingest path, appended to {@link #gravitinoAddress}. Written into the
+     * Flink and Spark listener configuration as well as used by the Console's own emitter, and all
+     * three must address the same endpoint — hence one definition.
+     */
+    public static final String LINEAGE_ENDPOINT_PATH = "/api/lineage";
+
     /** Gravitino base URL, e.g. {@code http://192.168.10.132:8090}. */
     private String gravitinoAddress;
 
@@ -46,5 +59,10 @@ public class LineageConfig {
 
     public boolean enabled() {
         return StringUtils.isNotBlank(gravitinoAddress);
+    }
+
+    /** The configured namespace, or {@link #DEFAULT_NAMESPACE} when none was set. */
+    public String namespaceOrDefault() {
+        return StringUtils.defaultIfBlank(gravitinoNamespace, DEFAULT_NAMESPACE);
     }
 }

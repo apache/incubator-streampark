@@ -26,6 +26,7 @@ import org.apache.streampark.flink.core.lineage.LineagePipeline;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.openlineage.client.OpenLineage;
 import io.openlineage.client.OpenLineage.RunEvent.EventType;
 import io.openlineage.client.OpenLineageClient;
@@ -38,6 +39,7 @@ import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -45,7 +47,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Slf4j
 @Service
@@ -63,15 +65,23 @@ public class GravitinoLineageServiceImpl implements GravitinoLineageService {
 
     private static final URI PRODUCER = URI.create("https://streampark.apache.org/");
 
-    private static final String LINEAGE_ENDPOINT_PATH = "/api/lineage";
-
-    private static final String DEFAULT_NAMESPACE = "streampark";
+    /**
+     * How long a started run stays eligible for its terminal event. A run whose application is
+     * deleted, or whose terminal state is never observed (Console restarted, watcher stopped
+     * tracking it), would otherwise pin its entry forever — this map lives for the whole Console
+     * process, so an unbounded one is a slow leak. The bound is time, not size: a legitimate
+     * streaming job may run for weeks before its COMPLETE, and evicting it because newer jobs
+     * started would lose the terminal event for the longest-running jobs first, which is exactly
+     * backwards.
+     */
+    private static final Duration PENDING_RUN_TTL = Duration.ofDays(30);
 
     @Autowired
     private SettingService settingService;
 
     /** In-memory only — see class contract in {@link GravitinoLineageService}. */
-    private final Map<Long, PendingRun> pendingRuns = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Long, PendingRun> pendingRuns =
+        Caffeine.newBuilder().expireAfterWrite(PENDING_RUN_TTL).<Long, PendingRun>build().asMap();
 
     @Override
     public void trackAndEmitStart(
@@ -91,7 +101,7 @@ public class GravitinoLineageServiceImpl implements GravitinoLineageService {
         if (!config.enabled()) {
             return;
         }
-        String jobNamespace = namespaceOf(config);
+        String jobNamespace = config.namespaceOrDefault();
         String jobName = application.getJobName();
         try (OpenLineageClient client = buildClient(config)) {
             OpenLineage openLineage = new OpenLineage(PRODUCER);
@@ -209,18 +219,13 @@ public class GravitinoLineageServiceImpl implements GravitinoLineageService {
     private OpenLineageClient buildClient(LineageConfig config) {
         HttpConfig httpConfig = new HttpConfig();
         httpConfig.setUrl(URI.create(config.getGravitinoAddress()));
-        httpConfig.setEndpoint(LINEAGE_ENDPOINT_PATH);
+        httpConfig.setEndpoint(LineageConfig.LINEAGE_ENDPOINT_PATH);
         if (StringUtils.isNotBlank(config.getGravitinoToken())) {
             ApiKeyTokenProvider tokenProvider = new ApiKeyTokenProvider();
             tokenProvider.setApiKey(config.getGravitinoToken());
             httpConfig.setAuth(tokenProvider);
         }
         return OpenLineageClient.builder().transport(new HttpTransport(httpConfig)).build();
-    }
-
-    private String namespaceOf(LineageConfig config) {
-        return StringUtils.isNotBlank(config.getGravitinoNamespace()) ? config.getGravitinoNamespace()
-            : DEFAULT_NAMESPACE;
     }
 
     private static final class PendingRun {

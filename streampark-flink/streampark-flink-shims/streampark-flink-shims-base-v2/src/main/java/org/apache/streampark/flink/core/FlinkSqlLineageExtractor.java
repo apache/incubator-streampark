@@ -77,7 +77,8 @@ public final class FlinkSqlLineageExtractor {
         TableEnvironment tableEnv =
             TableEnvironment.create(EnvironmentSettings.newInstance().inStreamingMode().build());
         StatementSet statementSet = tableEnv.createStatementSet();
-        Map<String, SqlWithOptionsParser.TableOptions> tempTables = new LinkedHashMap<>();
+        Map<String, SqlWithOptionsParser.WithOptions> tempTables = new LinkedHashMap<>();
+        Map<String, String> catalogTypes = new LinkedHashMap<>();
         boolean hasInsert = false;
 
         for (SqlCommandCall call : calls) {
@@ -115,10 +116,12 @@ public final class FlinkSqlLineageExtractor {
                     break;
                 default:
                     if (call.command == SqlCommand.CREATE_TABLE) {
-                        SqlWithOptionsParser.TableOptions options = SqlWithOptionsParser.parse(call.originSql);
+                        SqlWithOptionsParser.WithOptions options = SqlWithOptionsParser.parse(call.originSql);
                         if (options != null) {
                             tempTables.put(options.name(), options);
                         }
+                    } else if (call.command == SqlCommand.CREATE_CATALOG) {
+                        SqlWithOptionsParser.rememberCatalogType(call.originSql, catalogTypes);
                     }
                     tableEnv.executeSql(call.originSql);
             }
@@ -129,7 +132,7 @@ public final class FlinkSqlLineageExtractor {
         }
 
         CompiledPlan plan = statementSet.compilePlan();
-        return new ArrayList<>(CompiledPlanLineageParser.parse(plan.asJsonString(), tempTables));
+        return new ArrayList<>(CompiledPlanLineageParser.parse(plan.asJsonString(), tempTables, catalogTypes));
     }
 
     /**

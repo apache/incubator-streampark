@@ -33,8 +33,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class CompiledPlanLineageParserTest {
 
-    private static SqlWithOptionsParser.TableOptions tempTable(String name, Map<String, String> options) {
-        SqlWithOptionsParser.TableOptions parsed =
+    /**
+     * What {@code CREATE CATALOG paimon_s3 WITH ('type' = 'paimon', ...)} in the job's own SQL
+     * contributes: the plan identifies a table's catalog by name only, so the catalog's declared
+     * type is the only thing that says how its datasets should be named.
+     */
+    private static final Map<String, String> PAIMON_CATALOG = Map.of("paimon_s3", "paimon");
+
+    private static SqlWithOptionsParser.WithOptions tempTable(String name, Map<String, String> options) {
+        SqlWithOptionsParser.WithOptions parsed =
             SqlWithOptionsParser.parse(
                 "CREATE TABLE `" + name + "` WITH (" + toWithClause(options) + ")");
         assertThat(parsed).isNotNull();
@@ -55,7 +62,7 @@ class CompiledPlanLineageParserTest {
                 + "{\"id\":1,\"scanTableSource\":{\"table\":{\"identifier\":\"`paimon_s3`.`lineage_flink_verify`.`mysql_pat_surgery`\"}}},"
                 + "{\"id\":2,\"dynamicTableSink\":{\"table\":{\"identifier\":\"`paimon_s3`.`lineage_flink_verify`.`ods_pat_surgery`\"}}}"
                 + "],\"edges\":[{\"source\":1,\"target\":2}]}";
-        SqlWithOptionsParser.TableOptions source =
+        SqlWithOptionsParser.WithOptions source =
             tempTable(
                 "mysql_pat_surgery",
                 Map.of(
@@ -66,7 +73,7 @@ class CompiledPlanLineageParserTest {
                     "table-name", "pat_surgery"));
 
         List<LineagePipeline> pipelines =
-            CompiledPlanLineageParser.parse(plan, Map.of(source.name(), source));
+            CompiledPlanLineageParser.parse(plan, Map.of(source.name(), source), PAIMON_CATALOG);
 
         assertThat(pipelines).hasSize(1);
         LineagePipeline pipeline = pipelines.get(0);
@@ -88,7 +95,7 @@ class CompiledPlanLineageParserTest {
                 + "{\"id\":3,\"dynamicTableSink\":{\"table\":{\"identifier\":\"`paimon_s3`.`db`.`sink`\"}}}"
                 + "],\"edges\":[{\"source\":1,\"target\":2},{\"source\":2,\"target\":3}]}";
 
-        List<LineagePipeline> pipelines = CompiledPlanLineageParser.parse(plan, Map.of());
+        List<LineagePipeline> pipelines = CompiledPlanLineageParser.parse(plan, Map.of(), PAIMON_CATALOG);
 
         assertThat(pipelines).hasSize(1);
         assertThat(pipelines.get(0).inputs())
@@ -111,7 +118,7 @@ class CompiledPlanLineageParserTest {
                 + "{\"id\":4,\"dynamicTableSink\":{\"table\":{\"identifier\":\"`paimon_s3`.`db`.`sink_b`\"}}}"
                 + "],\"edges\":[{\"source\":1,\"target\":2},{\"source\":3,\"target\":4}]}";
 
-        List<LineagePipeline> pipelines = CompiledPlanLineageParser.parse(plan, Map.of());
+        List<LineagePipeline> pipelines = CompiledPlanLineageParser.parse(plan, Map.of(), PAIMON_CATALOG);
 
         assertThat(pipelines).hasSize(2);
         for (LineagePipeline pipeline : pipelines) {
@@ -135,10 +142,57 @@ class CompiledPlanLineageParserTest {
                 + "{\"id\":1,\"scanTableSource\":{\"table\":{\"identifier\":\"`paimon_s3`.`db`.`kafka_src`\"}}},"
                 + "{\"id\":2,\"dynamicTableSink\":{\"table\":{\"identifier\":\"`paimon_s3`.`db`.`sink`\"}}}"
                 + "],\"edges\":[{\"source\":1,\"target\":2}]}";
-        SqlWithOptionsParser.TableOptions source = tempTable("kafka_src", Map.of("connector", "kafka"));
+        SqlWithOptionsParser.WithOptions source = tempTable("kafka_src", Map.of("connector", "kafka"));
 
         List<LineagePipeline> pipelines =
-            CompiledPlanLineageParser.parse(plan, Map.of(source.name(), source));
+            CompiledPlanLineageParser.parse(plan, Map.of(source.name(), source), PAIMON_CATALOG);
+
+        assertThat(pipelines).hasSize(1);
+        assertThat(pipelines.get(0).inputs()).isEmpty();
+    }
+
+    @Test
+    void namespaceSchemeFollowsTheCatalogsDeclaredType() {
+        // Nothing here is Paimon-specific: the scheme is whatever `CREATE CATALOG ... WITH
+        // ('type' = ...)` declared, so a Hive catalog's datasets must be named hive://, not
+        // silently reported under some other engine's namespace.
+        String plan =
+            "{\"nodes\":["
+                + "{\"id\":1,\"scanTableSource\":{\"table\":{\"identifier\":\"`hive_prod`.`db`.`src`\"}}},"
+                + "{\"id\":2,\"dynamicTableSink\":{\"table\":{\"identifier\":\"`hive_prod`.`db`.`sink`\"}}}"
+                + "],\"edges\":[{\"source\":1,\"target\":2}]}";
+
+        List<LineagePipeline> pipelines =
+            CompiledPlanLineageParser.parse(plan, Map.of(), Map.of("hive_prod", "hive"));
+
+        assertThat(pipelines).hasSize(1);
+        assertThat(pipelines.get(0).output()).isEqualTo(new LineageDataset("hive://hive_prod/db", "sink"));
+        assertThat(pipelines.get(0).inputs())
+            .containsExactly(new LineageDataset("hive://hive_prod/db", "src"));
+    }
+
+    @Test
+    void skipsCatalogTableWhoseCatalogTypeIsUnknown() {
+        // A catalog attached outside this job's SQL leaves its type unknowable here. Guessing a
+        // scheme would silently split one physical table into two graph nodes (dataset identity is
+        // deduplicated by exact string), which is worse than reporting nothing.
+        String plan =
+            "{\"nodes\":["
+                + "{\"id\":1,\"scanTableSource\":{\"table\":{\"identifier\":\"`unknown_cat`.`db`.`src`\"}}},"
+                + "{\"id\":2,\"dynamicTableSink\":{\"table\":{\"identifier\":\"`unknown_cat`.`db`.`sink`\"}}}"
+                + "],\"edges\":[{\"source\":1,\"target\":2}]}";
+
+        assertThat(CompiledPlanLineageParser.parse(plan, Map.of(), Map.of())).isEmpty();
+    }
+
+    @Test
+    void ignoresEdgesReferencingNodesAbsentFromThePlan() {
+        String plan =
+            "{\"nodes\":["
+                + "{\"id\":2,\"dynamicTableSink\":{\"table\":{\"identifier\":\"`paimon_s3`.`db`.`sink`\"}}}"
+                + "],\"edges\":[{\"source\":99,\"target\":2}]}";
+
+        List<LineagePipeline> pipelines = CompiledPlanLineageParser.parse(plan, Map.of(), PAIMON_CATALOG);
 
         assertThat(pipelines).hasSize(1);
         assertThat(pipelines.get(0).inputs()).isEmpty();
@@ -148,7 +202,7 @@ class CompiledPlanLineageParserTest {
     void throwsOnMalformedJsonRatherThanSilentlyReturningEmpty() {
         // Malformed CompiledPlan JSON is a structural/version-mismatch problem worth surfacing to
         // the caller's own try/catch, not a per-dataset resolution gap to silently absorb here.
-        assertThatThrownBy(() -> CompiledPlanLineageParser.parse("not json", Map.of()))
+        assertThatThrownBy(() -> CompiledPlanLineageParser.parse("not json", Map.of(), Map.of()))
             .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -156,6 +210,6 @@ class CompiledPlanLineageParserTest {
     void plansWithNoSinksYieldNoPipelines() {
         String plan = "{\"nodes\":[],\"edges\":[]}";
 
-        assertThat(CompiledPlanLineageParser.parse(plan, Map.of())).isEmpty();
+        assertThat(CompiledPlanLineageParser.parse(plan, Map.of(), PAIMON_CATALOG)).isEmpty();
     }
 }

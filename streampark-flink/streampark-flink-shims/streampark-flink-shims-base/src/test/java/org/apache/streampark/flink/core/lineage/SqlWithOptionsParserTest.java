@@ -35,7 +35,7 @@ class SqlWithOptionsParserTest {
                 + "'database-name' = 'lineage_flink_verify',"
                 + "'table-name' = 'pat_surgery')";
 
-        SqlWithOptionsParser.TableOptions result = SqlWithOptionsParser.parse(sql);
+        SqlWithOptionsParser.WithOptions result = SqlWithOptionsParser.parse(sql);
 
         assertThat(result).isNotNull();
         assertThat(result.name()).isEqualTo("mysql_pat_surgery");
@@ -55,7 +55,7 @@ class SqlWithOptionsParserTest {
                 + "'fenodes' = '192.168.10.131:8030',"
                 + "'table.identifier' = 'db.ods_table')";
 
-        SqlWithOptionsParser.TableOptions result = SqlWithOptionsParser.parse(sql);
+        SqlWithOptionsParser.WithOptions result = SqlWithOptionsParser.parse(sql);
 
         assertThat(result).isNotNull();
         assertThat(result.name()).isEqualTo("doris_sink");
@@ -69,10 +69,52 @@ class SqlWithOptionsParserTest {
                 + "'connector' = 'mysql-cdc',"
                 + "'password' = 'a''b')";
 
-        SqlWithOptionsParser.TableOptions result = SqlWithOptionsParser.parse(sql);
+        SqlWithOptionsParser.WithOptions result = SqlWithOptionsParser.parse(sql);
 
         assertThat(result).isNotNull();
         assertThat(result.options()).containsEntry("password", "a'b");
+    }
+
+    @Test
+    void reducesQualifiedTableNameToItsLocalName() {
+        // A CompiledPlan identifier always reports the table under its own name only, so keying
+        // these options by the qualified form would never match and the table would be treated as
+        // catalog-backed instead of connector-backed.
+        String sql =
+            "CREATE TABLE mydb.mytable (id BIGINT) WITH ('connector' = 'doris',"
+                + "'fenodes' = '192.168.10.131:8030','table.identifier' = 'db.t')";
+
+        SqlWithOptionsParser.WithOptions result = SqlWithOptionsParser.parse(sql);
+
+        assertThat(result).isNotNull();
+        assertThat(result.name()).isEqualTo("mytable");
+        assertThat(result.options()).containsEntry("connector", "doris");
+    }
+
+    @Test
+    void ignoresAWithClauseThatOnlyAppearsInsideAStringLiteral() {
+        String sql =
+            "CREATE TABLE t (id BIGINT COMMENT 'joined WITH (other)') WITH ("
+                + "'connector' = 'mysql-cdc','hostname' = 'h')";
+
+        SqlWithOptionsParser.WithOptions result = SqlWithOptionsParser.parse(sql);
+
+        assertThat(result).isNotNull();
+        assertThat(result.options())
+            .containsEntry("connector", "mysql-cdc")
+            .containsEntry("hostname", "h");
+    }
+
+    @Test
+    void parsesCreateCatalogType() {
+        String sql =
+            "CREATE CATALOG paimon_s3 WITH ('type' = 'paimon','warehouse' = 's3://bucket/warehouse')";
+
+        SqlWithOptionsParser.WithOptions result = SqlWithOptionsParser.parseCatalog(sql);
+
+        assertThat(result).isNotNull();
+        assertThat(result.name()).isEqualTo("paimon_s3");
+        assertThat(result.options()).containsEntry("type", "paimon");
     }
 
     @Test
