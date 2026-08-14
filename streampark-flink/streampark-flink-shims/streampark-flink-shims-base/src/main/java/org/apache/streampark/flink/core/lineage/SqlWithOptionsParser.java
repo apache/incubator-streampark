@@ -46,24 +46,30 @@ import java.util.regex.Pattern;
  */
 public final class SqlWithOptionsParser {
 
-    /** A single SQL identifier, either bare or backtick-quoted (a quoted one may contain dots). */
+    /**
+     * A single SQL identifier, either bare or backtick-quoted (a quoted one may contain dots). Both
+     * letter cases are spelled out, so the surrounding pattern must not be compiled {@code
+     * CASE_INSENSITIVE} — the keywords carry their own {@code (?i:...)} instead, which also keeps
+     * identifier matching case-exact, as Flink treats it.
+     */
     private static final String IDENTIFIER = "(?:`[^`]+`|[A-Za-z_][A-Za-z0-9_$]*)";
 
     /**
      * The name may be qualified ({@code CREATE TABLE mydb.mytable ...}); the qualifier prefix is
      * matched but not captured, so the capture group is the local name alone — that is what a
-     * {@code CompiledPlan} identifier reports the table under.
+     * {@code CompiledPlan} identifier reports the table under. The qualifier repetition is
+     * possessive: every iteration ends in a dot, so no match ever needs to backtrack into an
+     * already-accepted qualifier, and a possessive group repetition is matched iteratively rather
+     * than recursively (no stack growth proportional to the identifier count).
      */
     private static final Pattern TABLE_NAME =
         Pattern.compile(
-            "^\\s*CREATE\\s+(?:TEMPORARY\\s+)?TABLE\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?"
-                + "(?:" + IDENTIFIER + "\\s*\\.\\s*)*(" + IDENTIFIER + ")",
-            Pattern.CASE_INSENSITIVE);
+            "^\\s*(?i:CREATE\\s+(?:TEMPORARY\\s+)?TABLE\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?)"
+                + "(?:" + IDENTIFIER + "\\s*\\.\\s*)*+(" + IDENTIFIER + ")");
 
     private static final Pattern CATALOG_NAME =
         Pattern.compile(
-            "^\\s*CREATE\\s+CATALOG\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?(" + IDENTIFIER + ")",
-            Pattern.CASE_INSENSITIVE);
+            "^\\s*(?i:CREATE\\s+CATALOG\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?)(" + IDENTIFIER + ")");
 
     private static final Pattern WITH_CLAUSE = Pattern.compile("\\bWITH\\s*\\(", Pattern.CASE_INSENSITIVE);
     /**
@@ -71,9 +77,16 @@ public final class SqlWithOptionsParser {
      * not the end of the literal — a connector option value (e.g. a password) may legitimately
      * contain a quote escaped this way, and treating it as the literal's end would truncate the
      * value at that point.
+     *
+     * <p>Both literal bodies repeat possessively. Nothing inside a literal can match the closing
+     * quote that follows it (a {@code '} is only ever consumed as part of {@code ''} or {@code \'}),
+     * so a well-formed entry never needs to give characters back; only an unterminated literal now
+     * fails to match instead of being salvaged into a truncated option, which is the better outcome
+     * for a lenient parser. The gain is that a possessive group repetition is matched iteratively —
+     * a greedy one recurses once per character, overflowing the stack on a long option value.
      */
     private static final Pattern OPTION_ENTRY =
-        Pattern.compile("'((?:[^'\\\\]|\\\\.|'')*)'\\s*=\\s*'((?:[^'\\\\]|\\\\.|'')*)'");
+        Pattern.compile("'((?:[^'\\\\]|\\\\.|'')*+)'\\s*=\\s*'((?:[^'\\\\]|\\\\.|'')*+)'");
 
     private SqlWithOptionsParser() {
     }

@@ -101,32 +101,14 @@ public class GravitinoLineageServiceImpl implements GravitinoLineageService {
         if (!config.enabled()) {
             return;
         }
-        String jobNamespace = config.namespaceOrDefault();
-        String jobName = application.getJobName();
-        try (OpenLineageClient client = buildClient(config)) {
-            OpenLineage openLineage = new OpenLineage(PRODUCER);
-            for (LineagePipeline pipeline : pipelines) {
-                try {
-                    UUID runId = runIdFor(flinkJobIdHex, pipeline.output());
-                    client.emit(
-                        buildEvent(
-                            openLineage, EventType.START, runId, jobNamespace, jobName, flinkJobIdHex, pipeline));
-                } catch (Exception e) {
-                    log.warn(
-                        "[lineage] failed to emit START for application id={}, sink={}",
-                        application.getId(),
-                        pipeline.output(),
-                        e);
-                }
-            }
-        } catch (Exception e) {
-            log.warn("[lineage] failed to build Gravitino client for application id={}", application.getId(), e);
-        }
+        PendingRun run =
+            new PendingRun(flinkJobIdHex, config.namespaceOrDefault(), application.getJobName(), pipelines);
+        emitRunEvents(config, EventType.START, application.getId(), run);
         // Tracked regardless of individual emit failures above: a later terminal call is itself
         // independently fail-open (see emitTerminal), so there is no harm in attempting it even for
         // a pipeline whose START never reached Gravitino — only a missed opportunity to close out
         // the ones that did.
-        pendingRuns.put(application.getId(), new PendingRun(flinkJobIdHex, jobNamespace, jobName, pipelines));
+        pendingRuns.put(application.getId(), run);
     }
 
     @Override
@@ -146,26 +128,47 @@ public class GravitinoLineageServiceImpl implements GravitinoLineageService {
         if (!config.enabled()) {
             return;
         }
-        EventType eventType = success ? EventType.COMPLETE : EventType.FAIL;
+        emitRunEvents(config, success ? EventType.COMPLETE : EventType.FAIL, appId, run);
+    }
+
+    /**
+     * Emits one event per pipeline of a run over a single client. Fail-open at both levels: an
+     * unusable client costs the run its events, but one pipeline's failed emit must not cost the
+     * remaining pipelines of the same job theirs.
+     */
+    private void emitRunEvents(LineageConfig config, EventType eventType, Long appId, PendingRun run) {
         try (OpenLineageClient client = buildClient(config)) {
             OpenLineage openLineage = new OpenLineage(PRODUCER);
             for (LineagePipeline pipeline : run.pipelines) {
-                try {
-                    UUID runId = runIdFor(run.jobIdHex, pipeline.output());
-                    client.emit(
-                        buildEvent(
-                            openLineage, eventType, runId, run.jobNamespace, run.jobName, null, pipeline));
-                } catch (Exception e) {
-                    log.warn(
-                        "[lineage] failed to emit {} for application id={}, sink={}",
-                        eventType,
-                        appId,
-                        pipeline.output(),
-                        e);
-                }
+                emitOne(client, openLineage, eventType, appId, run, pipeline);
             }
         } catch (Exception e) {
             log.warn("[lineage] failed to build Gravitino client for application id={}", appId, e);
+        }
+    }
+
+    private void emitOne(
+                         OpenLineageClient client,
+                         OpenLineage openLineage,
+                         EventType eventType,
+                         Long appId,
+                         PendingRun run,
+                         LineagePipeline pipeline) {
+        try {
+            UUID runId = runIdFor(run.jobIdHex, pipeline.output());
+            // The Flink JobID travels as a run facet on START only — a terminal event is matched to
+            // its run by runId, and re-sending the facet would only restate what START established.
+            String startFacetJobIdHex = eventType == EventType.START ? run.jobIdHex : null;
+            client.emit(
+                buildEvent(
+                    openLineage, eventType, runId, run.jobNamespace, run.jobName, startFacetJobIdHex, pipeline));
+        } catch (Exception e) {
+            log.warn(
+                "[lineage] failed to emit {} for application id={}, sink={}",
+                eventType,
+                appId,
+                pipeline.output(),
+                e);
         }
     }
 

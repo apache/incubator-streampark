@@ -63,6 +63,34 @@ class SqlWithOptionsParserTest {
     }
 
     @Test
+    void parsesLowercaseAndQualifiedTableNames() {
+        SqlWithOptionsParser.WithOptions result =
+            SqlWithOptionsParser.parse("create table mydb.mytable (id BIGINT) with ('connector' = 'doris')");
+
+        assertThat(result).isNotNull();
+        assertThat(result.name()).isEqualTo("mytable");
+        assertThat(result.options()).containsEntry("connector", "doris");
+    }
+
+    @Test
+    void parsesLongOptionValueWithoutOverflowingTheStack() {
+        // A greedily-repeated literal body recurses once per character, so a long value (a
+        // certificate, a serialized properties blob) used to throw StackOverflowError on the
+        // submission path rather than yielding lineage.
+        StringBuilder longValue = new StringBuilder();
+        for (int i = 0; i < 20000; i++) {
+            longValue.append('a');
+        }
+        String sql =
+            "CREATE TABLE t (id BIGINT) WITH ('connector' = 'mysql-cdc','password' = '" + longValue + "')";
+
+        SqlWithOptionsParser.WithOptions result = SqlWithOptionsParser.parse(sql);
+
+        assertThat(result).isNotNull();
+        assertThat(result.options().get("password")).hasSize(20000);
+    }
+
+    @Test
     void unescapesDoubledSingleQuotesInsideOptionValues() {
         String sql =
             "CREATE TABLE t (id BIGINT) WITH ("

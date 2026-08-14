@@ -549,7 +549,11 @@ public class FlinkApplicationActionServiceImpl
                             return null;
                         }
                         return FlinkShimsProxy.getObject(this.getClass().getClassLoader(), result, ArrayList.class);
-                    } catch (Throwable e) {
+                    } catch (Exception | LinkageError e) {
+                        // LinkageError alongside Exception: this reflective call crosses into a
+                        // shims classloader built for a different Flink version, so a missing or
+                        // incompatible class surfaces as NoClassDefFoundError rather than as an
+                        // exception, and must stay as fail-open as any other lineage gap.
                         log.warn(
                             "[lineage] failed to extract lineage for application id={}", application.getId(), e);
                         return null;

@@ -52,6 +52,10 @@ public final class CompiledPlanLineageParser {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final Pattern IDENTIFIER = Pattern.compile("`([^`]+)`\\.`([^`]+)`\\.`([^`]+)`");
 
+    /** Plan JSON field names shared by the source, sink and lookup-source table descriptors. */
+    private static final String FIELD_TABLE = "table";
+    private static final String FIELD_IDENTIFIER = "identifier";
+
     private CompiledPlanLineageParser() {
     }
 
@@ -79,68 +83,109 @@ public final class CompiledPlanLineageParser {
             throw new IllegalArgumentException("Failed to parse CompiledPlan JSON", e);
         }
 
+        Map<Integer, JsonNode> nodesById = indexNodes(root);
+        Map<Integer, List<Integer>> predecessors = indexPredecessors(root);
+
+        List<LineagePipeline> pipelines = new ArrayList<>();
+        for (JsonNode node : nodesById.values()) {
+            LineagePipeline pipeline = resolvePipeline(node, nodesById, predecessors, tempTables, catalogTypes);
+            if (pipeline != null) {
+                pipelines.add(pipeline);
+            }
+        }
+        return pipelines;
+    }
+
+    private static Map<Integer, JsonNode> indexNodes(JsonNode root) {
         Map<Integer, JsonNode> nodesById = new LinkedHashMap<>();
         for (JsonNode node : root.path("nodes")) {
             nodesById.put(node.path("id").asInt(), node);
         }
+        return nodesById;
+    }
+
+    private static Map<Integer, List<Integer>> indexPredecessors(JsonNode root) {
         Map<Integer, List<Integer>> predecessors = new LinkedHashMap<>();
         for (JsonNode edge : root.path("edges")) {
             int source = edge.path("source").asInt();
             int target = edge.path("target").asInt();
             predecessors.computeIfAbsent(target, k -> new ArrayList<>()).add(source);
         }
+        return predecessors;
+    }
 
-        List<LineagePipeline> pipelines = new ArrayList<>();
-        for (JsonNode node : nodesById.values()) {
-            JsonNode sink = node.path("dynamicTableSink").path("table").path("identifier");
-            if (!sink.isTextual()) {
+    /**
+     * The pipeline this node produces, or {@code null} when the node is not a sink at all or its
+     * sink identity cannot be resolved — in either case it contributes no lineage.
+     */
+    private static LineagePipeline resolvePipeline(
+                                                   JsonNode node,
+                                                   Map<Integer, JsonNode> nodesById,
+                                                   Map<Integer, List<Integer>> predecessors,
+                                                   Map<String, SqlWithOptionsParser.WithOptions> tempTables,
+                                                   Map<String, String> catalogTypes) {
+        JsonNode sink = node.path("dynamicTableSink").path(FIELD_TABLE).path(FIELD_IDENTIFIER);
+        if (!sink.isTextual()) {
+            return null;
+        }
+        LineageDataset output = resolveOne(sink.asText(), tempTables, catalogTypes, "output");
+        if (output == null) {
+            return null;
+        }
+        Set<LineageDataset> inputs =
+            collectInputs(node.path("id").asInt(), nodesById, predecessors, tempTables, catalogTypes);
+        return new LineagePipeline(output, inputs);
+    }
+
+    /** Every source table reachable upstream of one sink node, walking the plan's edges backwards. */
+    private static Set<LineageDataset> collectInputs(
+                                                     int sinkNodeId,
+                                                     Map<Integer, JsonNode> nodesById,
+                                                     Map<Integer, List<Integer>> predecessors,
+                                                     Map<String, SqlWithOptionsParser.WithOptions> tempTables,
+                                                     Map<String, String> catalogTypes) {
+        Set<LineageDataset> inputs = new LinkedHashSet<>();
+        Set<Integer> visited = new LinkedHashSet<>();
+        Deque<Integer> pending = new ArrayDeque<>();
+        pending.push(sinkNodeId);
+        while (!pending.isEmpty()) {
+            int currentId = pending.pop();
+            if (!visited.add(currentId)) {
                 continue;
             }
-            LineageDataset output = resolveOne(sink.asText(), tempTables, catalogTypes, "output");
-            if (output == null) {
-                continue;
-            }
-
-            Set<LineageDataset> inputs = new LinkedHashSet<>();
-            Set<Integer> visited = new LinkedHashSet<>();
-            Deque<Integer> pending = new ArrayDeque<>();
-            pending.push(node.path("id").asInt());
-            while (!pending.isEmpty()) {
-                int currentId = pending.pop();
-                if (!visited.add(currentId)) {
-                    continue;
-                }
-                JsonNode current = nodesById.get(currentId);
-                if (current == null) {
-                    // An edge referencing a node absent from "nodes" would be a malformed plan;
-                    // skip it rather than NPE on a path contracted to only throw on bad JSON.
-                    LOG.warn("[lineage] CompiledPlan edge references unknown node id {}, skipping it", currentId);
-                    continue;
-                }
-                JsonNode source = current.path("scanTableSource").path("table").path("identifier");
-                if (source.isTextual()) {
-                    LineageDataset input = resolveOne(source.asText(), tempTables, catalogTypes, "input");
-                    if (input != null) {
-                        inputs.add(input);
-                    }
-                }
+            JsonNode current = nodesById.get(currentId);
+            if (current == null) {
+                // An edge referencing a node absent from "nodes" would be a malformed plan;
+                // skip it rather than NPE on a path contracted to only throw on bad JSON.
+                LOG.warn("[lineage] CompiledPlan edge references unknown node id {}, skipping it", currentId);
+            } else {
+                addInput(current.path("scanTableSource").path(FIELD_TABLE).path(FIELD_IDENTIFIER),
+                    inputs, tempTables, catalogTypes);
                 // Lookup joins (stream-exec-lookup-join) don't produce a scanTableSource node — the
                 // temporal table they read is nested under temporalTable.lookupTableSource instead.
-                JsonNode lookupSource =
-                    current.path("temporalTable").path("lookupTableSource").path("table").path("identifier");
-                if (lookupSource.isTextual()) {
-                    LineageDataset input = resolveOne(lookupSource.asText(), tempTables, catalogTypes, "input");
-                    if (input != null) {
-                        inputs.add(input);
-                    }
-                }
+                addInput(
+                    current.path("temporalTable").path("lookupTableSource").path(FIELD_TABLE).path(FIELD_IDENTIFIER),
+                    inputs, tempTables, catalogTypes);
                 for (int predecessorId : predecessors.getOrDefault(currentId, List.of())) {
                     pending.push(predecessorId);
                 }
             }
-            pipelines.add(new LineagePipeline(output, inputs));
         }
-        return pipelines;
+        return inputs;
+    }
+
+    private static void addInput(
+                                 JsonNode identifier,
+                                 Set<LineageDataset> inputs,
+                                 Map<String, SqlWithOptionsParser.WithOptions> tempTables,
+                                 Map<String, String> catalogTypes) {
+        if (!identifier.isTextual()) {
+            return;
+        }
+        LineageDataset input = resolveOne(identifier.asText(), tempTables, catalogTypes, "input");
+        if (input != null) {
+            inputs.add(input);
+        }
     }
 
     /**
