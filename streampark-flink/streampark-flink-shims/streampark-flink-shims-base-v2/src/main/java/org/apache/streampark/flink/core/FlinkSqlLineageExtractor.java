@@ -63,7 +63,12 @@ public final class FlinkSqlLineageExtractor {
         }
     }
 
-    private static List<LineagePipeline> doExtract(String sql) throws Exception {
+    /**
+     * Visible for testing: {@link #extractLineage} swallows every failure by design, so only this
+     * method can tell "the plan compiled and yielded nothing resolvable" apart from "the plan failed
+     * to compile at all".
+     */
+    static List<LineagePipeline> doExtract(String sql) throws Exception {
         List<SqlCommandCall> calls = SqlCommandParser.parseSQL(sql, null);
         if (calls == null || calls.isEmpty()) {
             return new ArrayList<>();
