@@ -20,6 +20,7 @@ package org.apache.streampark.flink.client.tool;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.JsonUtils;
 import org.apache.streampark.common.util.LoggerSupport;
+import org.apache.streampark.flink.client.conf.FlinkSavepointOptions;
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
 
 import org.apache.streampark.shaded.com.fasterxml.jackson.databind.JsonNode;
@@ -27,7 +28,6 @@ import org.apache.streampark.shaded.com.fasterxml.jackson.databind.JsonNode;
 import org.apache.flink.client.deployment.application.ApplicationConfiguration;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.CoreOptions;
-import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.client5.http.fluent.Request;
 import org.apache.hc.core5.http.ContentType;
@@ -161,9 +161,9 @@ class JarRunRequest {
         List<String> args = flinkConf.get(ApplicationConfiguration.APPLICATION_ARGS);
         this.programArgs = args == null ? null : String.join(" ", args);
         this.parallelism = String.valueOf(flinkConf.get(CoreOptions.DEFAULT_PARALLELISM));
-        this.savepointPath = flinkConf.get(SavepointConfigOptions.SAVEPOINT_PATH);
+        this.savepointPath = flinkConf.get(FlinkSavepointOptions.SAVEPOINT_PATH);
         this.allowNonRestoredState =
-            flinkConf.getBoolean(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE);
+            flinkConf.get(FlinkSavepointOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE);
     }
 
     public String getEntryClass() {

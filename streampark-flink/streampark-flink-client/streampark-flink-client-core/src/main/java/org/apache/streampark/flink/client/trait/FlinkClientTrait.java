@@ -40,6 +40,7 @@ import org.apache.streampark.flink.client.bean.SavepointResponse;
 import org.apache.streampark.flink.client.bean.SubmitRequest;
 import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
+import org.apache.streampark.flink.client.conf.FlinkSavepointOptions;
 import org.apache.streampark.flink.core.FlinkClusterClient;
 import org.apache.streampark.flink.core.conf.FlinkRunOption;
 
@@ -70,7 +71,6 @@ import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.configuration.PipelineOptionsInternal;
 import org.apache.flink.python.PythonOptions;
 import org.apache.flink.runtime.jobgraph.JobGraph;
-import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 import org.apache.flink.util.FlinkException;
 import org.apache.flink.util.Preconditions;
 
@@ -222,6 +222,27 @@ public abstract class FlinkClientTrait extends LoggerSupport {
         logInfo(message.toString());
     }
 
+    /**
+     * Submits a job graph, tolerating the signature change {@code ClusterClient#submitJob} went
+     * through: it took a {@code JobGraph} until Flink 2.x widened the parameter to {@code
+     * ExecutionPlan}, which {@code JobGraph} implements. The instance is accepted by either
+     * version — only the declared parameter type moved — but this module is compiled once against
+     * a single baseline, so a direct call binds to one signature and fails against the other with
+     * {@code NoSuchMethodError}.
+     */
+    private static String submitJobGraph(ClusterClient<?> client, JobGraph jobGraph) throws Exception {
+        for (java.lang.reflect.Method method : client.getClass().getMethods()) {
+            if ("submitJob".equals(method.getName())
+                && method.getParameterCount() == 1
+                && method.getParameterTypes()[0].isInstance(jobGraph)) {
+                Object future = method.invoke(client, jobGraph);
+                return ((java.util.concurrent.CompletableFuture<?>) future).get().toString();
+            }
+        }
+        throw new FlinkException(
+            "No ClusterClient#submitJob(..) accepting a JobGraph on " + client.getClass().getName());
+    }
+
     protected SubmitResponse submitJobGraphToCluster(
                                                      SubmitRequest submitRequest,
                                                      Configuration flinkConfig,
@@ -236,7 +257,7 @@ public abstract class FlinkClientTrait extends LoggerSupport {
                 PackagedProgram packageProgram = programJobGraph._1();
                 JobGraph jobGraph = programJobGraph._2();
                 ClusterClient<?> client = clientSupplier.call();
-                String jobId = client.submitJob(jobGraph).get().toString();
+                String jobId = submitJobGraph(client, jobGraph);
                 SubmitResponse result =
                     new SubmitResponse(
                         clusterIdSupplier.call(),
@@ -386,7 +407,7 @@ public abstract class FlinkClientTrait extends LoggerSupport {
     private void applyCommonPipelineConfig(SubmitRequest submitRequest, Configuration flinkConfig) {
         safeSet(flinkConfig, PipelineOptions.NAME, submitRequest.effectiveAppName());
         safeSet(flinkConfig, DeploymentOptions.TARGET, submitRequest.deployMode().getName());
-        safeSet(flinkConfig, SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint());
+        safeSet(flinkConfig, FlinkSavepointOptions.SAVEPOINT_PATH, submitRequest.savePoint());
         safeSet(
             flinkConfig,
             ApplicationConfiguration.APPLICATION_MAIN_CLASS,
@@ -418,10 +439,10 @@ public abstract class FlinkClientTrait extends LoggerSupport {
         }
         safeSet(
             flinkConfig,
-            SavepointConfigOptions.SAVEPOINT_PATH,
+            FlinkSavepointOptions.SAVEPOINT_PATH,
             submitRequest.savePoint());
-        flinkConfig.setBoolean(
-            SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE,
+        flinkConfig.set(
+            FlinkSavepointOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE,
             submitRequest.allowNonRestoredState());
         boolean enableRestoreMode =
             submitRequest.restoreMode() != null
@@ -509,6 +530,21 @@ public abstract class FlinkClientTrait extends LoggerSupport {
         }
     }
 
+    /**
+     * Makes the program's classloader resolve {@code org.apache.streampark.*} from its parent — the
+     * shims classloader built for the registered Flink version — instead of from the submitted jar.
+     *
+     * <p>Set through the raw key rather than {@code CoreOptions}: the typed accessors around it
+     * moved between Flink 1.x and 2.x, while the key itself did not, and this module is compiled
+     * against a single baseline but submits to whichever version the user registered.
+     */
+    private static Configuration streamParkParentFirstConfig() {
+        Configuration configuration = new Configuration();
+        configuration.setString(
+            "classloader.parent-first-patterns.additional", "org.apache.streampark.");
+        return configuration;
+    }
+
     public Tuple2<PackagedProgram, JobGraph> getJobGraph(
                                                          Configuration flinkConfig, SubmitRequest submitRequest,
                                                          File jarFile) throws Exception {
@@ -535,16 +571,18 @@ public abstract class FlinkClientTrait extends LoggerSupport {
         } else {
             builder.setJarFile(jarFile);
             if (submitRequest.jobType() == FlinkJobType.FLINK_SQL) {
-                // FLINK_SQL fat jar only bundles the SQL client + shims; it does not contain the
-                // target Flink version's own connector/runtime jars, so those must be added
-                // explicitly. Scoped to FLINK_SQL only, unlike the blanket disable from
-                // https://github.com/apache/streampark/issues/3761, which was never verified
-                // against this job type on REMOTE mode specifically. Note this does not help
-                // resolve org.apache.flink.* classes themselves: Flink's classloader always
-                // resolves that package parent-first, and PackagedProgram's parent is
-                // console's own bundled (baseline-version) flink-clients, not the target
-                // version, so those still fail when target and baseline Flink versions diverge.
+                // The FLINK_SQL fat jar bundles only the SQL client and the shims it was built
+                // against; it carries none of the target Flink version's own jars, so those have to
+                // be handed to the program explicitly. Scoped to FLINK_SQL, unlike the blanket
+                // disable from https://github.com/apache/streampark/issues/3761, which was never
+                // verified against this job type.
                 builder.setUserClassPaths(Lists.newArrayList(submitRequest.classPaths()));
+                // ...and the StreamPark classes must come from the parent — this thread runs under
+                // the shims classloader for the *registered* Flink version, whereas the fat jar
+                // carries whichever shims it happened to be built with. Loading both ends in a
+                // LinkageError as soon as one references the other, and silently mixes Flink
+                // versions when it does not.
+                builder.setConfiguration(streamParkParentFirstConfig());
             }
         }
 
@@ -617,8 +655,7 @@ public abstract class FlinkClientTrait extends LoggerSupport {
                 submitRequest.getProp(ConfigKeys.KEY_FLINK_PARALLELISM()).toString());
         }
         return getFlinkDefaultConfiguration(submitRequest.flinkVersion().getFlinkHome())
-            .getInteger(
-                CoreOptions.DEFAULT_PARALLELISM, CoreOptions.DEFAULT_PARALLELISM.defaultValue());
+            .get(CoreOptions.DEFAULT_PARALLELISM, CoreOptions.DEFAULT_PARALLELISM.defaultValue());
     }
 
     Options getCommandLineOptions(String flinkHome) {

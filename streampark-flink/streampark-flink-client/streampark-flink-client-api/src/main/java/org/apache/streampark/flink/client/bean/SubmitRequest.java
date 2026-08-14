@@ -30,6 +30,7 @@ import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.HdfsUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
+import org.apache.streampark.flink.client.conf.FlinkSavepointOptions;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 
@@ -37,7 +38,6 @@ import org.apache.streampark.shaded.com.fasterxml.jackson.core.type.TypeReferenc
 import org.apache.streampark.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.commons.collections.MapUtils;
-import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings;
 
 import javax.annotation.Nullable;
@@ -263,7 +263,7 @@ public class SubmitRequest implements Serializable {
     public boolean allowNonRestoredState() {
         if (allowNonRestoredState == null) {
             Object value =
-                properties.get(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key());
+                properties.get(FlinkSavepointOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key());
             if (value == null) {
                 allowNonRestoredState = false;
             } else {

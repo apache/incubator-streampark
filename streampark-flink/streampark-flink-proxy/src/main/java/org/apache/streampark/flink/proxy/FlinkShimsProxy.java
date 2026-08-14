@@ -35,6 +35,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,6 +63,14 @@ public final class FlinkShimsProxy extends LoggerSupport {
 
     private static final String FLINK_SHIMS_BASE_PREFIX = "streampark-flink-shims-base";
 
+    private static final String FLINK_SHIMS_BASE_V2_PREFIX = "streampark-flink-shims-base-v2";
+
+    private static final String STREAMPARK_PREFIX = "streampark-";
+
+    private static final String STREAMPARK_CONSOLE_PREFIX = "streampark-console";
+
+    private static final String STREAMPARK_SHADED_PREFIX = "streampark-shaded-";
+
     private static final List<String> PARENT_FIRST_PATTERNS = Collections.unmodifiableList(
         Arrays.asList(
             "java.",
@@ -77,6 +86,13 @@ public final class FlinkShimsProxy extends LoggerSupport {
             "org.apache.hadoop"));
 
     private FlinkShimsProxy() {
+    }
+
+    /** {@code majorVersion} is shaped like "1.20" or "2.2". */
+    private static boolean isFlink2(String majorVersion) {
+        int dot = majorVersion.indexOf('.');
+        String major = dot < 0 ? majorVersion : majorVersion.substring(0, dot);
+        return "2".equals(major);
     }
 
     private static Pattern getFlinkShimsResourcePattern(String majorVersion) {
@@ -180,6 +196,7 @@ public final class FlinkShimsProxy extends LoggerSupport {
             return;
         }
 
+        List<File> matched = new ArrayList<>();
         for (File jar : jars) {
             String jarName = jar.getName();
             if (!jarName.endsWith(Constants.JAR_SUFFIX)) {
@@ -187,25 +204,51 @@ public final class FlinkShimsProxy extends LoggerSupport {
             }
             String includeReason = matchShimIncludeReason(jarName, majorVersion, scalaVersion);
             if (includeReason != null) {
-                addShimUrl.accept(jar);
+                matched.add(jar);
                 LOG.logInfo(includeReason + jarName);
             }
         }
+        // shims-base-v2 must precede shims-base: it redeclares a subset of its classes for Flink
+        // 2.x, and a URL classloader takes the first match. Directory listing order is arbitrary,
+        // so leaving this to chance means the Flink version a class was compiled for is decided by
+        // the filesystem.
+        matched.sort(
+            Comparator.comparing(file -> file.getName().startsWith(FLINK_SHIMS_BASE_V2_PREFIX) ? 0 : 1));
+        matched.forEach(addShimUrl);
     }
 
     private static String matchShimIncludeReason(
                                                  String jarName, String majorVersion, String scalaVersion) {
         if (jarName.startsWith(FLINK_SHIMS_PREFIX)) {
-            String prefixVer = FLINK_SHIMS_PREFIX + "-" + majorVersion + "_" + scalaVersion;
-            return jarName.startsWith(prefixVer) ? "Include flink shims jar lib: " : null;
+            // The shims artifacts carried a _${scala.binary.version} suffix until they were renamed
+            // without it; both spellings are accepted so the jar is matched either way. Getting this
+            // wrong is silent — a non-matching jar is simply left out of the classloader, and the
+            // job fails much later with a NoClassDefFoundError for a class the shims needed.
+            String prefixVer = FLINK_SHIMS_PREFIX + "-" + majorVersion;
+            return jarName.startsWith(prefixVer + "_" + scalaVersion) || jarName.startsWith(prefixVer + "-")
+                ? "Include flink shims jar lib: "
+                : null;
         }
         if (jarName.startsWith(FLINK_SHIMS_BASE_PREFIX)) {
-            return "Include flink shims base jar lib: ";
+            // shims-base-v2 redeclares a subset of shims-base for Flink 2.x and inherits the rest,
+            // so a 2.x target needs both jars with v2 taking precedence (see addShimsUrls), while a
+            // 1.x target must not see v2 at all — the two share class names, and v2's copies are
+            // compiled against APIs that moved in 2.x.
+            return !jarName.startsWith(FLINK_SHIMS_BASE_V2_PREFIX) || isFlink2(majorVersion)
+                ? "Include flink shims base jar lib: "
+                : null;
         }
         if (INCLUDE_PATTERN.matcher(jarName).matches()) {
             return "Include jar lib: ";
         }
-        if (jarName.matches("^streampark-.*_" + scalaVersion + ".*$")) {
+        // Everything StreamPark builds against Flink belongs in here, so that the whole submission
+        // stack resolves org.apache.flink.* from the target version's jars rather than from the
+        // console's own bundled baseline. This used to be spelled as "has a _${scala.binary.version}
+        // suffix", which stopped selecting anything on the Flink side once those modules were
+        // renamed without the suffix. The console's own jars stay out: they are the parent.
+        if (jarName.startsWith(STREAMPARK_PREFIX)
+            && !jarName.startsWith(STREAMPARK_CONSOLE_PREFIX)
+            && !jarName.startsWith(STREAMPARK_SHADED_PREFIX)) {
             return "Include streampark lib: ";
         }
         return null;
