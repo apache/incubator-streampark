@@ -54,6 +54,8 @@ public class FlinkAppCreateRequest implements Serializable {
 
     private String flinkSql;
 
+    private Long sqlId;
+
     @NotNull
     @ApiParam(description = "Application type", required = true)
     private Integer appType;

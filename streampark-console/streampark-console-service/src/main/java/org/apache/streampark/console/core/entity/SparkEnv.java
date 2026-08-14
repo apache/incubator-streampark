@@ -73,10 +73,11 @@ public class SparkEnv implements Serializable {
     public void doSetSparkConf() throws ApiDetailException {
         try {
             File yaml = new File(this.sparkHome.concat("/conf/spark-defaults.conf"));
-            if (yaml.exists()) {
-                String sparkConf = FileUtils.readFileToString(yaml, StandardCharsets.UTF_8);
-                this.sparkConf = DeflaterUtils.zipString(sparkConf);
-            }
+            // A stock Spark distribution ships only spark-defaults.conf.template, so an absent file
+            // is the normal case, not an error — but t_spark_env.spark_conf is NOT NULL, so it still
+            // has to be written as an empty conf rather than left null.
+            String sparkConf = yaml.exists() ? FileUtils.readFileToString(yaml, StandardCharsets.UTF_8) : "";
+            this.sparkConf = DeflaterUtils.zipString(sparkConf);
         } catch (Exception e) {
             throw new ApiDetailException(e);
         }

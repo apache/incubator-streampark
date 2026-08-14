@@ -78,6 +78,9 @@ public enum SparkAppStateEnum {
     }
 
     public static SparkAppStateEnum of(Integer state) {
+        if (state == null) {
+            return SparkAppStateEnum.OTHER;
+        }
         for (SparkAppStateEnum appState : values()) {
             if (appState.value == state) {
                 return appState;

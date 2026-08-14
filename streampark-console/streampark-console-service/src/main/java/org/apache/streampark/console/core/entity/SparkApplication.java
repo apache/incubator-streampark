@@ -127,8 +127,8 @@ public class SparkApplication extends BaseEntity implements ApplicationEntitySup
     /** spark docker base image */
     private String k8sContainerImage;
 
-    /** k8s image pull policy */
-    private int k8sImagePullPolicy;
+    /** k8s image pull policy — nullable, matching t_spark_app.k8s_image_pull_policy */
+    private Integer k8sImagePullPolicy;
 
     /** k8s spark service account */
     private String k8sServiceAccount;
