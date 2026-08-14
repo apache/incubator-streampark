@@ -49,19 +49,21 @@ public final class SqlWithOptionsParser {
     /**
      * The alternatives of a single SQL identifier, bare or backtick-quoted (a quoted one may contain
      * dots). Deliberately ungrouped, so each use can wrap it in whichever kind of group it needs
-     * without nesting a redundant one inside. Both letter cases are spelled out, so a pattern using
-     * it must not be compiled {@code CASE_INSENSITIVE} — the keywords below carry their own {@code
-     * (?i:...)} instead, which also keeps identifier matching case-exact, as Flink treats it.
+     * without nesting a redundant one inside. Both letter cases are spelled out, so the pattern
+     * using it must not be compiled {@code CASE_INSENSITIVE} — only the keyword patterns are, which
+     * also keeps identifier matching case-exact, as Flink treats it.
      */
     private static final String IDENTIFIER = "`[^`]+`|[A-Za-z_][A-Za-z0-9_$]*";
 
     /** The {@code CREATE ... TABLE} keywords, up to where the declared name starts. */
     private static final Pattern CREATE_TABLE_KEYWORDS =
-        Pattern.compile("\\s*(?i:CREATE\\s+(?:TEMPORARY\\s+)?TABLE\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?)");
+        Pattern.compile(
+            "\\s*CREATE\\s+(?:TEMPORARY\\s+)?TABLE\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?",
+            Pattern.CASE_INSENSITIVE);
 
     /** The {@code CREATE CATALOG} keywords, up to where the declared name starts. */
     private static final Pattern CREATE_CATALOG_KEYWORDS =
-        Pattern.compile("\\s*(?i:CREATE\\s+CATALOG\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?)");
+        Pattern.compile("\\s*CREATE\\s+CATALOG\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?", Pattern.CASE_INSENSITIVE);
 
     /**
      * The declared name, matched from just past those keywords. It may be qualified ({@code CREATE
