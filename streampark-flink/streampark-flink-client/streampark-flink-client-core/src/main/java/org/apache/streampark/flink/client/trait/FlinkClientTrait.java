@@ -26,6 +26,7 @@ import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.enums.FlinkRestoreMode;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.AssertUtils;
+import org.apache.streampark.common.util.ClassLoaderUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.FlinkConfigurationUtils;
@@ -533,8 +534,18 @@ public abstract class FlinkClientTrait extends LoggerSupport {
             }
         } else {
             builder.setJarFile(jarFile);
-            // BUG: https://github.com/apache/streampark/issues/3761
-            // .setUserClassPaths(Lists.newArrayList(submitRequest.classPaths()))
+            if (submitRequest.jobType() == FlinkJobType.FLINK_SQL) {
+                // FLINK_SQL fat jar only bundles the SQL client + shims; it does not contain the
+                // target Flink version's own connector/runtime jars, so those must be added
+                // explicitly. Scoped to FLINK_SQL only, unlike the blanket disable from
+                // https://github.com/apache/streampark/issues/3761, which was never verified
+                // against this job type on REMOTE mode specifically. Note this does not help
+                // resolve org.apache.flink.* classes themselves: Flink's classloader always
+                // resolves that package parent-first, and PackagedProgram's parent is
+                // console's own bundled (baseline-version) flink-clients, not the target
+                // version, so those still fail when target and baseline Flink versions diverge.
+                builder.setUserClassPaths(Lists.newArrayList(submitRequest.classPaths()));
+            }
         }
 
         PackagedProgram packageProgram = builder.build();
@@ -587,7 +598,17 @@ public abstract class FlinkClientTrait extends LoggerSupport {
     List<CustomCommandLine> getCustomCommandLines(String flinkHome) {
         Configuration flinkDefaultConfiguration = getFlinkDefaultConfiguration(flinkHome);
         String confDir = flinkHome + "/conf";
-        return CliFrontend.loadCustomCommandLines(flinkDefaultConfiguration, confDir);
+        // CliFrontend/GenericCLI are bound to the Flink version bundled with this module (loaded by
+        // this class's own classloader), but the calling thread's context classloader may currently
+        // be a target-version shims classloader (see FlinkShimsProxy). GenericCLI's internal
+        // ServiceLoader.load(PipelineExecutorFactory.class) resolves providers via the context
+        // classloader, so leaving it as the shims classloader here would load a PipelineExecutorFactory
+        // implementation from a different Flink version than the interface bundled here, throwing
+        // ServiceConfigurationError ("not a subtype"). Force it back to this class's own classloader
+        // for the duration of this call.
+        return ClassLoaderUtils.runAsClassLoader(
+            FlinkClientTrait.class.getClassLoader(),
+            () -> CliFrontend.loadCustomCommandLines(flinkDefaultConfiguration, confDir));
     }
 
     public Integer getParallelism(SubmitRequest submitRequest) {

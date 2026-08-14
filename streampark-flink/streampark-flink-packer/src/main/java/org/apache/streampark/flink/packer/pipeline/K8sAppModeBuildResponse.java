@@ -44,14 +44,17 @@ public class K8sAppModeBuildResponse extends AbstractFlinkBuildResponse {
         this.extraLibJarPaths = extraLibJarPaths;
     }
 
+    @JsonProperty("flinkBaseImage")
     public String flinkBaseImage() {
         return flinkBaseImage;
     }
 
+    @JsonProperty("mainJarPath")
     public String mainJarPath() {
         return mainJarPath;
     }
 
+    @JsonProperty("extraLibJarPaths")
     public Set<String> extraLibJarPaths() {
         return extraLibJarPaths;
     }
