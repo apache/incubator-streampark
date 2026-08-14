@@ -40,11 +40,13 @@ abstract class AbstractFlinkBuildResponse implements FlinkBuildResult, Serializa
     }
 
     @Override
+    @JsonProperty("workspacePath")
     public String workspacePath() {
         return workspacePath;
     }
 
     @Override
+    @JsonProperty("pass")
     public boolean pass() {
         return pass;
     }

@@ -37,6 +37,7 @@ public class ShadedBuildResponse extends AbstractFlinkBuildResponse {
     public ShadedBuildResponse() {
     }
 
+    @JsonProperty("shadedJarPath")
     public String shadedJarPath() {
         return shadedJarPath;
     }

@@ -296,7 +296,8 @@ public class SubmitRequest implements Serializable {
             } else {
                 checkBuildResult();
                 ShadedBuildResponse shadedBuildResult = buildResult.as(ShadedBuildResponse.class);
-                userJarFile = new File(shadedBuildResult.shadedJarPath());
+                String shadedJarPath = shadedBuildResult.shadedJarPath();
+                userJarFile = shadedJarPath == null ? null : new File(shadedJarPath);
             }
         }
         return userJarFile;

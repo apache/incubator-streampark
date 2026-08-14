@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.client.impl;
 
+import org.apache.streampark.common.util.ClassLoaderUtils;
 import org.apache.streampark.flink.client.bean.CancelRequest;
 import org.apache.streampark.flink.client.bean.CancelResponse;
 import org.apache.streampark.flink.client.bean.SavepointRequestTrait;
@@ -165,13 +166,25 @@ public final class RemoteClient extends FlinkClientTrait {
 
     private Tuple2<StandaloneClusterId, StandaloneClusterDescriptor> getStandAloneClusterDescriptor(
                                                                                                     Configuration flinkConfig) {
-        DefaultClusterClientServiceLoader serviceLoader = new DefaultClusterClientServiceLoader();
-        ClusterClientFactory<StandaloneClusterId> clientFactory =
-            serviceLoader.getClusterClientFactory(flinkConfig);
-        StandaloneClusterId standaloneClusterId = clientFactory.getClusterId(flinkConfig);
-        StandaloneClusterDescriptor standaloneClusterDescriptor =
-            (StandaloneClusterDescriptor) clientFactory.createClusterDescriptor(flinkConfig);
-        return new Tuple2<>(standaloneClusterId, standaloneClusterDescriptor);
+        // DefaultClusterClientServiceLoader is bound to the Flink version bundled with this module
+        // (loaded by this class's own classloader), but the calling thread's context classloader may
+        // currently be a target-version shims classloader (see FlinkShimsProxy). Its internal
+        // ServiceLoader.load(ClusterClientFactory.class) resolves providers via the context
+        // classloader, so leaving it as the shims classloader here would load a ClusterClientFactory
+        // implementation from a different Flink version than the interface bundled here, throwing
+        // ServiceConfigurationError ("not a subtype"). Force it back to this class's own classloader
+        // for the duration of this call.
+        return ClassLoaderUtils.runAsClassLoader(
+            RemoteClient.class.getClassLoader(),
+            () -> {
+                DefaultClusterClientServiceLoader serviceLoader = new DefaultClusterClientServiceLoader();
+                ClusterClientFactory<StandaloneClusterId> clientFactory =
+                    serviceLoader.getClusterClientFactory(flinkConfig);
+                StandaloneClusterId standaloneClusterId = clientFactory.getClusterId(flinkConfig);
+                StandaloneClusterDescriptor standaloneClusterDescriptor =
+                    (StandaloneClusterDescriptor) clientFactory.createClusterDescriptor(flinkConfig);
+                return new Tuple2<>(standaloneClusterId, standaloneClusterDescriptor);
+            });
     }
 
     @FunctionalInterface

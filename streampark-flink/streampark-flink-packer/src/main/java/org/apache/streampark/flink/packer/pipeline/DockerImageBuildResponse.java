@@ -52,14 +52,17 @@ public class DockerImageBuildResponse extends AbstractFlinkBuildResponse {
         this.dockerInnerMainJarPath = dockerInnerMainJarPath;
     }
 
+    @JsonProperty("flinkImageTag")
     public String flinkImageTag() {
         return flinkImageTag;
     }
 
+    @JsonProperty("podTemplatePaths")
     public Map<String, String> podTemplatePaths() {
         return podTemplatePaths;
     }
 
+    @JsonProperty("dockerInnerMainJarPath")
     public String dockerInnerMainJarPath() {
         return dockerInnerMainJarPath;
     }

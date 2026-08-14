@@ -372,6 +372,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.streampark</groupId>
+            <artifactId>streampark-flink-shims-base-v2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Ensure all Flink shims are built when console-service is built with -am -->
         <dependency>
             <groupId>org.apache.streampark</groupId>

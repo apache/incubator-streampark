@@ -39,11 +39,12 @@ public final class ClassLoaderUtils {
     }
 
     public static <R> R runAsClassLoader(ClassLoader targetClassLoader, Supplier<R> supplier) {
+        ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(targetClassLoader);
             return supplier.get();
         } finally {
-            Thread.currentThread().setContextClassLoader(ORIGINAL_CLASS_LOADER);
+            Thread.currentThread().setContextClassLoader(previousClassLoader);
         }
     }
 
