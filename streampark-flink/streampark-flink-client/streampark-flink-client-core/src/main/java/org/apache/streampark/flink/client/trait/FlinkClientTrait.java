@@ -329,6 +329,7 @@ public abstract class FlinkClientTrait extends LoggerSupport {
         applyCheckpointDefaults(submitRequest, flinkConfig);
         applySavepointConfig(submitRequest, flinkConfig);
         applyEnvProperties(submitRequest, flinkConfig);
+        applyAppProperties(submitRequest, flinkConfig);
         return flinkConfig;
     }
 
@@ -452,6 +453,21 @@ public abstract class FlinkClientTrait extends LoggerSupport {
                 logInfo("env opts:  " + entry.getKey() + ": " + entry.getValue());
                 flinkConfig.setString(entry.getKey(), entry.getValue().toString());
             }
+        }
+    }
+
+    private void applyAppProperties(SubmitRequest submitRequest, Configuration flinkConfig) {
+        Map<String, String> appProperties = submitRequest.appProperties();
+        if (MapUtils.isEmpty(appProperties)) {
+            return;
+        }
+        for (Map.Entry<String, String> entry : appProperties.entrySet()) {
+            logInfo(
+                "appProperties: "
+                    + entry.getKey()
+                    + " : "
+                    + entry.getValue());
+            flinkConfig.setString(entry.getKey(), entry.getValue());
         }
     }
 
