@@ -53,7 +53,13 @@ public final class DeflaterUtils {
     }
 
     public static String unzipString(String zipString) {
-        byte[] decode = Base64.getDecoder().decode(zipString);
+        byte[] decode;
+        try {
+            decode = Base64.getDecoder().decode(zipString);
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Failed to decode base64 string: {}", e.getMessage());
+            return null;
+        }
         Inflater inflater = new Inflater();
         inflater.setInput(decode);
         byte[] bytes = new byte[256];
