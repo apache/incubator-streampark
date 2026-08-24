@@ -118,6 +118,9 @@ public class FlinkEnv implements Serializable {
 
     public Map<String, String> convertFlinkYamlAsMap() {
         String flinkYamlString = DeflaterUtils.unzipString(flinkConf);
+        if (flinkYamlString == null) {
+            return new java.util.HashMap<>();
+        }
         if (isLegacyFlinkConf()) {
             return FlinkConfigurationUtils.loadLegacyFlinkConf(flinkYamlString);
         }
@@ -168,6 +171,9 @@ public class FlinkEnv implements Serializable {
     public Properties getFlinkConfig() {
         String flinkYamlString = DeflaterUtils.unzipString(flinkConf);
         Properties flinkConfig = new Properties();
+        if (flinkYamlString == null) {
+            return flinkConfig;
+        }
         Map<String, String> config = FlinkConfigurationUtils.loadLegacyFlinkConf(flinkYamlString);
         flinkConfig.putAll(config);
         return flinkConfig;
