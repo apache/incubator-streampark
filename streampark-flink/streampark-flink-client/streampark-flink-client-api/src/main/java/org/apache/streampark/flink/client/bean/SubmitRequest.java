@@ -202,6 +202,10 @@ public class SubmitRequest implements Serializable {
                 appMain = Constants.PYTHON_FLINK_DRIVER_CLASS_NAME;
             } else {
                 appMain = appProperties().get(ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS());
+                if (appMain == null && appConf() != null) {
+                    String format = appConf().substring(0, Math.min(appConf().length(), 7));
+                    appMain = loadAppConfMap(format).get(ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS());
+                }
             }
         }
         return appMain;

@@ -53,6 +53,17 @@ class SubmitRequestTest {
     }
 
     @Test
+    void appMainForFlinkJarFromJsonConf() {
+        String mainClass = "org.apache.flink.streaming.examples.windowing.TopSpeedWindowing";
+        String appConf =
+            String.format(
+                "json://{\"%s\":\"%s\"}",
+                ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS(), mainClass);
+        SubmitRequest request = createRequest(FlinkJobType.FLINK_JAR, appConf);
+        assertThat(request.appMain()).isEqualTo(mainClass);
+    }
+
+    @Test
     void savepointRestoreSettingsWithoutSavepoint() {
         SubmitRequest request = createRequest(FlinkJobType.FLINK_JAR, null);
         assertThat(request.savepointRestoreSettings()).isEqualTo(SavepointRestoreSettings.none());

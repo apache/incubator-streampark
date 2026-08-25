@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ShadedBuildResponse extends AbstractFlinkBuildResponse {
 
+    @JsonProperty("shadedJarPath")
     private String shadedJarPath;
 
     public ShadedBuildResponse(String workspacePath, String shadedJarPath) {

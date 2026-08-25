@@ -215,7 +215,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
                             app.getJar(),
                             app.getAppHome(),
                             app.getAppLib(),
-                            app.getDistHome(),
+                            app.isUploadResource() ? null : app.getDistHome(),
                             app.getFsOperator(),
                             appUploads,
                             app.isUploadResource(),

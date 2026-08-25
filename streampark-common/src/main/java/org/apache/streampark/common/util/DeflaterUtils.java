@@ -53,7 +53,12 @@ public final class DeflaterUtils {
     }
 
     public static String unzipString(String zipString) {
-        byte[] decode = Base64.getDecoder().decode(zipString);
+        byte[] decode;
+        try {
+            decode = Base64.getDecoder().decode(zipString);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
         Inflater inflater = new Inflater();
         inflater.setInput(decode);
         byte[] bytes = new byte[256];
@@ -70,5 +75,28 @@ public final class DeflaterUtils {
             inflater.end();
         }
         return outputStream.toString();
+    }
+
+    /** Returns plain text, repeatedly decoding when the input is compressed multiple times. */
+    public static String toPlainText(String text) {
+        if (StringUtils.isBlank(text)) {
+            return text;
+        }
+        String current = text;
+        while (true) {
+            String decoded = unzipString(current);
+            if (decoded == null) {
+                return current;
+            }
+            current = decoded;
+        }
+    }
+
+    /** Stores SQL/conf text as a single compressed blob regardless of input encoding. */
+    public static String compressForStorage(String text) {
+        if (StringUtils.isBlank(text)) {
+            return "";
+        }
+        return zipString(toPlainText(text));
     }
 }

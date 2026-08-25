@@ -21,6 +21,8 @@ import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.enums.ChangeTypeEnum;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -85,7 +87,7 @@ public class FlinkSql {
     }
 
     public void decode() {
-        this.setSql(DeflaterUtils.unzipString(this.sql));
+        this.setSql(DeflaterUtils.toPlainText(this.sql));
     }
 
     public void setToApplication(FlinkApplication application) {
@@ -105,8 +107,17 @@ public class FlinkSql {
     }
 
     public ChangeTypeEnum checkChange(FlinkSql target) {
+        if (target == null) {
+            return ChangeTypeEnum.NONE;
+        }
         // 1) determine if sql statement has changed
-        boolean sqlDifference = !this.getSql().trim().equals(target.getSql().trim());
+        String sourceSql =
+            StringUtils.trimToEmpty(DeflaterUtils.toPlainText(this.getSql()));
+        String targetSql =
+            target.getSql() == null
+                ? sourceSql
+                : StringUtils.trimToEmpty(DeflaterUtils.toPlainText(target.getSql()));
+        boolean sqlDifference = !sourceSql.equals(targetSql);
         // 2) determine if dependency has changed
         Dependency thisDependency = Dependency.toDependency(this.getDependency());
         Dependency targetDependency = Dependency.toDependency(target.getDependency());

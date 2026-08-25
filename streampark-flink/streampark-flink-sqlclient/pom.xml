@@ -93,6 +93,7 @@
                             <exclude>com.google.code.findbugs:jsr305</exclude>
                             <exclude>org.slf4j:*</exclude>
                             <exclude>log4j:*</exclude>
+                            <exclude>org.yaml:snakeyaml</exclude>
                         </excludes>
                     </artifactSet>
                     <filters>

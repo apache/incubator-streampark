@@ -82,6 +82,7 @@ public final class FlinkShimsProxy extends LoggerSupport {
             "org.apache.commons.cli",
             "ch.qos.logback",
             "org.xml",
+            "org.yaml",
             "org.w3c",
             "org.apache.hadoop"));
 

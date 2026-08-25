@@ -233,6 +233,9 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     private void updateFlinkClusterForRemoteMode(
                                                  FlinkCluster paramOfCluster, FlinkCluster flinkCluster) {
         flinkCluster.setAddress(paramOfCluster.getAddress());
+        if (paramOfCluster.getVersionId() != null) {
+            flinkCluster.setVersionId(paramOfCluster.getVersionId());
+        }
         flinkCluster.setClusterState(ClusterState.RUNNING.getState());
         flinkCluster.setStartTime(new Date());
         flinkCluster.setEndTime(null);

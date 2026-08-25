@@ -21,26 +21,34 @@ import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.JsonUtils;
 import org.apache.streampark.common.util.LoggerSupport;
 import org.apache.streampark.flink.client.conf.FlinkSavepointOptions;
-import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
 
 import org.apache.streampark.shaded.com.fasterxml.jackson.databind.JsonNode;
 
 import org.apache.flink.client.deployment.application.ApplicationConfiguration;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.CoreOptions;
-import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
-import org.apache.hc.client5.http.fluent.Request;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.io.entity.StringEntity;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.security.AccessController;
+import java.security.PrivilegedExceptionAction;
+import java.time.Duration;
 import java.util.List;
 
 /** Submit Flink jobs to session clusters via the REST API. */
 public final class FlinkSessionSubmitHelper extends LoggerSupport {
 
     private static final FlinkSessionSubmitHelper INSTANCE = new FlinkSessionSubmitHelper();
+
+    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(30);
+
+    private static final Duration REQUEST_TIMEOUT = Duration.ofMinutes(5);
 
     private FlinkSessionSubmitHelper() {
     }
@@ -60,21 +68,25 @@ public final class FlinkSessionSubmitHelper extends LoggerSupport {
     }
 
     private String doSubmitViaRestApi(String jmRestUrl, File flinkJobJar, Configuration flinkConfig) throws Exception {
+        HttpClient httpClient =
+            HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT).build();
+
+        String boundary = "----StreamParkBoundary" + System.currentTimeMillis();
+        HttpRequest uploadRequest =
+            HttpRequest.newBuilder()
+                .uri(URI.create(jmRestUrl + "/jars/upload"))
+                .timeout(REQUEST_TIMEOUT)
+                .header("Content-Type", "multipart/form-data; boundary=" + boundary)
+                .POST(HttpRequest.BodyPublishers.ofByteArray(buildMultipartBody(boundary, flinkJobJar)))
+                .build();
+
         String uploadResult =
-            Request.post(jmRestUrl + "/jars/upload")
-                .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
-                .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
-                .body(
-                    MultipartEntityBuilder.create()
-                        .addBinaryBody(
-                            "jarfile",
-                            flinkJobJar,
-                            ContentType.create("application/java-archive"),
-                            flinkJobJar.getName())
-                        .build())
-                .execute()
-                .returnContent()
-                .asString(StandardCharsets.UTF_8);
+            AccessController.doPrivileged(
+                (PrivilegedExceptionAction<String>) () -> httpClient
+                    .send(
+                        uploadRequest,
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
+                    .body());
 
         JarUploadResponse jarUploadResponse = parseJarUploadResponse(uploadResult);
 
@@ -85,16 +97,50 @@ public final class FlinkSessionSubmitHelper extends LoggerSupport {
                 + ", response="
                 + jarUploadResponse);
 
-        String resp =
-            Request.post(jmRestUrl + "/jars/" + jarUploadResponse.jarId() + "/run")
-                .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
-                .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
-                .body(new StringEntity(JsonUtils.write(new JarRunRequest(flinkConfig))))
-                .execute()
-                .returnContent()
-                .asString(StandardCharsets.UTF_8);
+        HttpRequest runRequest =
+            HttpRequest.newBuilder()
+                .uri(URI.create(jmRestUrl + "/jars/" + jarUploadResponse.jarId() + "/run"))
+                .timeout(REQUEST_TIMEOUT)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(JsonUtils.write(new JarRunRequest(flinkConfig))))
+                .build();
 
-        return parseJobId(resp);
+        String resp =
+            AccessController.doPrivileged(
+                (PrivilegedExceptionAction<String>) () -> httpClient
+                    .send(
+                        runRequest,
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
+                    .body());
+
+        String jobId = parseJobId(resp);
+        if (jobId == null || jobId.isBlank()) {
+            throw new IllegalStateException(
+                "[flink-submit] submit flink job via rest api failed, jmRestUrl="
+                    + jmRestUrl
+                    + ", response="
+                    + resp);
+        }
+        return jobId;
+    }
+
+    private byte[] buildMultipartBody(String boundary, File jarFile) throws IOException {
+        String header =
+            "--"
+                + boundary
+                + "\r\n"
+                + "Content-Disposition: form-data; name=\"jarfile\"; filename=\""
+                + jarFile.getName()
+                + "\"\r\n"
+                + "Content-Type: application/java-archive\r\n\r\n";
+        byte[] headerBytes = header.getBytes(StandardCharsets.UTF_8);
+        byte[] fileBytes = Files.readAllBytes(jarFile.toPath());
+        byte[] footerBytes = ("\r\n--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8);
+        byte[] body = new byte[headerBytes.length + fileBytes.length + footerBytes.length];
+        System.arraycopy(headerBytes, 0, body, 0, headerBytes.length);
+        System.arraycopy(fileBytes, 0, body, headerBytes.length, fileBytes.length);
+        System.arraycopy(footerBytes, 0, body, headerBytes.length + fileBytes.length, footerBytes.length);
+        return body;
     }
 
     private JarUploadResponse parseJarUploadResponse(String uploadResult) {
@@ -111,7 +157,16 @@ public final class FlinkSessionSubmitHelper extends LoggerSupport {
     private String parseJobId(String resp) {
         try {
             JsonNode node = JsonUtils.read(resp, JsonNode.class);
-            return node.has("jobid") ? node.get("jobid").asText(null) : null;
+            if (node.has("errors") && node.get("errors").size() > 0) {
+                return null;
+            }
+            if (node.has("jobid")) {
+                return node.get("jobid").asText(null);
+            }
+            if (node.has("jobId")) {
+                return node.get("jobId").asText(null);
+            }
+            return null;
         } catch (Exception e) {
             return null;
         }

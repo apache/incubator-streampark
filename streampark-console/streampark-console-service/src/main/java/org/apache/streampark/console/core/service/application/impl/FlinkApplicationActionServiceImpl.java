@@ -261,7 +261,7 @@ public class FlinkApplicationActionServiceImpl
         applicationLog.setClusterId(application.getClusterId());
         applicationLog.setUserId(ServiceHelper.getUserId());
 
-        if (appParam.getRestoreOrTriggerSavepoint()) {
+        if (Boolean.TRUE.equals(appParam.getRestoreOrTriggerSavepoint())) {
             FlinkAppHttpWatcher.addSavepoint(application.getId());
             application.setOptionState(OptionStateEnum.SAVEPOINTING.getValue());
         } else {
@@ -280,7 +280,7 @@ public class FlinkApplicationActionServiceImpl
 
         // infer savepoint
         String customSavepoint = null;
-        if (appParam.getRestoreOrTriggerSavepoint()) {
+        if (Boolean.TRUE.equals(appParam.getRestoreOrTriggerSavepoint())) {
             customSavepoint = appParam.getSavepointPath();
             if (StringUtils.isBlank(customSavepoint)) {
                 customSavepoint = savepointService.getSavePointPath(appParam);
@@ -315,10 +315,10 @@ public class FlinkApplicationActionServiceImpl
                 properties,
                 new JobClientTarget(clusterId, application.getJobId(), namespace),
                 new SavepointCancelOptions(
-                    appParam.getRestoreOrTriggerSavepoint(),
-                    appParam.getDrain(),
+                    Boolean.TRUE.equals(appParam.getRestoreOrTriggerSavepoint()),
+                    Boolean.TRUE.equals(appParam.getDrain()),
                     customSavepoint,
-                    appParam.getNativeFormat()));
+                    Boolean.TRUE.equals(appParam.getNativeFormat())));
 
         final Date triggerTime = new Date();
         CompletableFuture<CancelResponse> cancelFuture =
@@ -344,7 +344,7 @@ public class FlinkApplicationActionServiceImpl
                         application.setState(FlinkAppStateEnum.FAILED.getValue());
                         updateById(application);
 
-                        if (appParam.getRestoreOrTriggerSavepoint()) {
+                        if (Boolean.TRUE.equals(appParam.getRestoreOrTriggerSavepoint())) {
                             savepointService.expire(application.getId());
                         }
                         // re-tracking flink job on kubernetes and logging exception
@@ -436,10 +436,8 @@ public class FlinkApplicationActionServiceImpl
         String flinkUserJar = userJarAndAppConf.t1;
         String appConf = userJarAndAppConf.t2;
 
-        BuildResult buildResult = buildPipeline.getBuildResult();
-        if (FlinkDeployMode.YARN_APPLICATION == application.getDeployModeEnum()) {
-            buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
-        }
+        BuildResult buildResult =
+            resolveBuildResultForSubmit(application, buildPipeline.getBuildResult(), flinkUserJar);
 
         // Get the args after placeholder replacement
         String args =
@@ -635,6 +633,41 @@ public class FlinkApplicationActionServiceImpl
         application.setState(FlinkAppStateEnum.STARTING.getValue());
         application.setOptionTime(new Date());
         updateById(application);
+    }
+
+    private BuildResult resolveBuildResultForSubmit(
+                                                    FlinkApplication application,
+                                                    BuildResult buildResult,
+                                                    String flinkUserJar) {
+        if (FlinkDeployMode.YARN_APPLICATION == application.getDeployModeEnum()) {
+            return new ShadedBuildResponse(null, flinkUserJar, true);
+        }
+        if (!(buildResult instanceof ShadedBuildResponse)) {
+            return buildResult;
+        }
+        ShadedBuildResponse shaded = (ShadedBuildResponse) buildResult;
+        if (StringUtils.isNotBlank(shaded.shadedJarPath())) {
+            return shaded;
+        }
+        String workspace =
+            StringUtils.defaultIfBlank(shaded.workspacePath(), application.getLocalAppHome());
+        String jarPath =
+            workspace
+                + "/streampark-flinkjob_"
+                + application.getJobName().replaceAll("\\s+", "_")
+                + ".jar";
+        File jarFile = new File(jarPath);
+        if (!jarFile.isFile()
+            && application.isUploadResource()
+            && StringUtils.isNotBlank(application.getJar())) {
+            jarFile = new File(workspace, application.getJar());
+        }
+        ApiAlertException.throwIfTrue(
+            !jarFile.isFile(),
+            "[StreamPark] Shaded jar not found at "
+                + jarPath
+                + ", please rebuild the application.");
+        return new ShadedBuildResponse(workspace, jarPath, shaded.pass());
     }
 
     private Tuple2<String, String> getUserJarAndAppConf(
@@ -835,7 +868,7 @@ public class FlinkApplicationActionServiceImpl
     }
 
     private String getSavepointPath(FlinkApplication appParam) {
-        if (appParam.getRestoreOrTriggerSavepoint()) {
+        if (Boolean.TRUE.equals(appParam.getRestoreOrTriggerSavepoint())) {
             if (StringUtils.isBlank(appParam.getSavepointPath())) {
                 FlinkSavepoint savepoint = savepointService.getLatest(appParam.getId());
                 if (savepoint != null) {

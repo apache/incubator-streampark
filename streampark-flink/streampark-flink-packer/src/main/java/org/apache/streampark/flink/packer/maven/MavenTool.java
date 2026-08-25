@@ -306,7 +306,10 @@ public final class MavenTool extends LoggerSupport {
             boolean isFilteredState =
                 name.startsWith("META-INF/") && name.endsWith(".SF")
                     || name.endsWith(".DSA")
-                    || name.endsWith(".RSA");
+                    || name.endsWith(".RSA")
+                    || name.startsWith("org/yaml/")
+                    || name.startsWith("META-INF/versions/")
+                        && name.contains("/org/yaml/");
             if (isFilteredState) {
                 INSTANCE.logInfo("shade ignore file: " + name);
                 return true;

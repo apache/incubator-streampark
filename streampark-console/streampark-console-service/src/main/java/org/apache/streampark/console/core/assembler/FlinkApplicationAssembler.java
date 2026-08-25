@@ -86,9 +86,11 @@ public final class FlinkApplicationAssembler {
         FlinkApplication app = new FlinkApplication();
         app.setId(request.getId());
         app.setTeamId(request.getTeamId());
-        app.setRestoreOrTriggerSavepoint(request.getRestoreOrTriggerSavepoint());
+        app.setRestoreOrTriggerSavepoint(
+            request.getRestoreOrTriggerSavepoint() != null ? request.getRestoreOrTriggerSavepoint() : false);
         app.setSavepointPath(request.getSavepointPath());
-        app.setAllowNonRestored(request.getAllowNonRestored());
+        app.setAllowNonRestored(
+            request.getAllowNonRestored() != null ? request.getAllowNonRestored() : false);
         return app;
     }
 
@@ -99,9 +101,10 @@ public final class FlinkApplicationAssembler {
         FlinkApplication app = new FlinkApplication();
         app.setId(request.getId());
         app.setTeamId(request.getTeamId());
-        app.setRestoreOrTriggerSavepoint(request.getRestoreOrTriggerSavepoint());
-        app.setDrain(request.getDrain());
-        app.setNativeFormat(request.getNativeFormat());
+        app.setRestoreOrTriggerSavepoint(
+            request.getRestoreOrTriggerSavepoint() != null ? request.getRestoreOrTriggerSavepoint() : false);
+        app.setDrain(request.getDrain() != null ? request.getDrain() : false);
+        app.setNativeFormat(request.getNativeFormat() != null ? request.getNativeFormat() : false);
         app.setSavepointPath(request.getSavepointPath());
         return app;
     }

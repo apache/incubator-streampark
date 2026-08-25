@@ -86,12 +86,8 @@ public abstract class BuildPipeline extends LoggerSupport
         return this;
     }
 
-    private void notifyStart() {
-        try {
-            watcher.onStart(snapshot());
-        } catch (Exception e) {
-            logError("Pipeline watcher onStart callback failed", e);
-        }
+    private void notifyStart() throws Exception {
+        watcher.onStart(snapshot());
     }
 
     private void notifyStepChange() {
@@ -201,6 +197,13 @@ public abstract class BuildPipeline extends LoggerSupport
             notifyFinish(result);
             return result;
         } catch (TimeoutException e) {
+            pipeStatus = PipelineStatusEnum.FAILURE;
+            error = PipeError.of(e.getMessage(), e);
+            logError("Building pipeline has failed.", e);
+            BuildResult result = new ErrorResult();
+            notifyFinish(result);
+            return result;
+        } catch (Exception e) {
             pipeStatus = PipelineStatusEnum.FAILURE;
             error = PipeError.of(e.getMessage(), e);
             logError("Building pipeline has failed.", e);

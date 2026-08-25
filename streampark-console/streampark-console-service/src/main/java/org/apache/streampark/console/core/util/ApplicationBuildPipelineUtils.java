@@ -155,23 +155,29 @@ public final class ApplicationBuildPipelineUtils {
                                          boolean tempDirFallback) {
         fsOperator.delete(appHome);
         if (!fromUpload) {
+            ApiAlertException.throwIfTrue(
+                StringUtils.isBlank(distHome),
+                "[StreamPark] distHome is required for build-resource jar jobs");
             fsOperator.upload(distHome, appHome);
             return;
         }
 
-        String uploadJar = appUploads.concat("/").concat(jar);
-        File localJar = new File(String.format("%s/%d/%s", Workspace.local().APP_UPLOADS(), teamId, jar));
+        String teamUploads = appUploads.concat("/").concat(String.valueOf(teamId));
+        String uploadJar = teamUploads.concat("/").concat(jar);
+        File localJar = new File(uploadJar);
         if (!localJar.exists()) {
             Resource resource = resourceService.findByResourceName(teamId, jar);
             if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
                 localJar = new File(resource.getFilePath());
-                uploadJar = appUploads.concat("/").concat(localJar.getName());
+                uploadJar = teamUploads.concat("/").concat(localJar.getName());
             } else if (tempDirFallback) {
                 localJar = new File(WebUtils.getAppTempDir(), jar);
-                uploadJar = appUploads.concat("/").concat(localJar.getName());
             }
         }
-        checkOrElseUploadJar(fsOperator, localJar, uploadJar, appUploads);
+        if (!localJar.isFile()) {
+            throw new ApiAlertException("Missing jar file: " + jar + ", please upload again");
+        }
+        checkOrElseUploadJar(fsOperator, localJar, uploadJar, teamUploads);
 
         switch (applicationType) {
             case STREAMPARK_FLINK:

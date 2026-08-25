@@ -34,4 +34,9 @@ public final class ExitSecurityManager extends SecurityManager {
     public void checkPermission(Permission perm) {
         // no-op
     }
+
+    @Override
+    public void checkPermission(Permission perm, Object context) {
+        // no-op
+    }
 }

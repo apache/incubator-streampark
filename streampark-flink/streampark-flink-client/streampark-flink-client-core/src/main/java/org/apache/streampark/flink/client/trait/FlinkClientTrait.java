@@ -78,6 +78,7 @@ import com.google.common.collect.Lists;
 
 import java.io.File;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -509,6 +510,9 @@ public abstract class FlinkClientTrait extends LoggerSupport {
             logInfo("[flink-submit] Submit job with JobGraph Plan.");
             return jobGraphFunc.apply(submitRequest, flinkConfig, jarFile);
         } catch (FlinkException e) {
+            logWarn(
+                "[flink-submit] JobGraph submit plan failed, falling back to Rest API submit plan: "
+                    + ExceptionUtils.stringifyException(e));
             try {
                 return restApiFunc.apply(submitRequest, flinkConfig, jarFile);
             } catch (FlinkException fallbackException) {
@@ -545,6 +549,81 @@ public abstract class FlinkClientTrait extends LoggerSupport {
         return configuration;
     }
 
+    /**
+     * Parent-first patterns for FLINK_SQL fat jars, which bundle a SQL client but not the target
+     * Flink distribution. Without delegating {@code org.apache.flink.*} and {@code org.yaml.*}
+     * to the registered Flink version's lib directory, shaded YAML/Jackson classes from the jar
+     * collide with Flink's own copies and fail with {@code LinkageError}.
+     */
+    private static Configuration flinkSqlParentFirstConfig() {
+        Configuration configuration = new Configuration();
+        configuration.setString(
+            "classloader.parent-first-patterns.additional",
+            "org.apache.streampark.;org.apache.flink.;org.yaml.");
+        return configuration;
+    }
+
+    /**
+     * Parent for {@link org.apache.flink.client.program.PackagedProgram}'s user-code classloader.
+     *
+     * <p>Flink's parent-first patterns delegate matching classes to this loader before the SQL fat
+     * jar. The fat jar bundles an unshaded {@code org.yaml.snakeyaml} copy that clashes with Flink
+     * 2.x's shaded YAML stack, and it omits {@code org.apache.flink.*} entirely. StreamPark shims
+     * carry the registered Flink version's classes; the console classpath carries snakeyaml.
+     */
+    private static ClassLoader packagedProgramParentClassLoader(ClassLoader shimsClassLoader) {
+        ClassLoader consoleClassLoader = FlinkClientTrait.class.getClassLoader();
+        return new ClassLoader(shimsClassLoader) {
+
+            @Override
+            protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+                synchronized (getClassLoadingLock(name)) {
+                    Class<?> loaded = findLoadedClass(name);
+                    if (loaded == null) {
+                        if (name.startsWith("org.apache.streampark.")
+                            || name.startsWith("org.apache.flink.")) {
+                            loaded = getParent().loadClass(name);
+                        } else if (name.startsWith("org.yaml.")) {
+                            loaded = consoleClassLoader.loadClass(name);
+                        }
+                    }
+                    if (loaded == null) {
+                        loaded = super.loadClass(name, resolve);
+                    } else if (resolve) {
+                        resolveClass(loaded);
+                    }
+                    return loaded;
+                }
+            }
+        };
+    }
+
+    private static List<URL> jobGraphUserClassPaths(SubmitRequest submitRequest) {
+        return jobGraphUserClassPaths(submitRequest, false);
+    }
+
+    /**
+     * Classpath entries for {@link PackagedProgram} when building a JobGraph locally.
+     *
+     * @param includeFlinkDist keep {@code flink-dist} on the classpath; required for thin uploaded
+     *     JARs on Flink 1.20+ where runtime classes live in {@code flink-dist} rather than {@code
+     *     flink-core}. FLINK_SQL fat jars omit it to avoid snakeyaml clashes and rely on parent-first
+     *     delegation instead.
+     */
+    private static List<URL> jobGraphUserClassPaths(
+                                                    SubmitRequest submitRequest, boolean includeFlinkDist) {
+        List<URL> classPaths = new ArrayList<>(submitRequest.classPaths());
+        classPaths.removeIf(
+            url -> {
+                String name = url.getPath();
+                if (name.contains("flink-shaded-force-shading")) {
+                    return true;
+                }
+                return !includeFlinkDist && name.contains("flink-dist");
+            });
+        return classPaths;
+    }
+
     public Tuple2<PackagedProgram, JobGraph> getJobGraph(
                                                          Configuration flinkConfig, SubmitRequest submitRequest,
                                                          File jarFile) throws Exception {
@@ -570,32 +649,40 @@ public abstract class FlinkClientTrait extends LoggerSupport {
             }
         } else {
             builder.setJarFile(jarFile);
-            if (submitRequest.jobType() == FlinkJobType.FLINK_SQL) {
-                // The FLINK_SQL fat jar bundles only the SQL client and the shims it was built
-                // against; it carries none of the target Flink version's own jars, so those have to
-                // be handed to the program explicitly. Scoped to FLINK_SQL, unlike the blanket
-                // disable from https://github.com/apache/streampark/issues/3761, which was never
-                // verified against this job type.
-                builder.setUserClassPaths(Lists.newArrayList(submitRequest.classPaths()));
-                // ...and the StreamPark classes must come from the parent — this thread runs under
-                // the shims classloader for the *registered* Flink version, whereas the fat jar
-                // carries whichever shims it happened to be built with. Loading both ends in a
-                // LinkageError as soon as one references the other, and silently mixes Flink
-                // versions when it does not.
-                builder.setConfiguration(streamParkParentFirstConfig());
-            }
+            boolean flinkSqlJob = submitRequest.jobType() == FlinkJobType.FLINK_SQL;
+            // Thin user JARs (Flink examples, uploaded jobs) and FLINK_SQL fat jars both rely on the
+            // registered Flink version's lib/ at JobGraph build time. Parent-first delegation keeps
+            // org.apache.streampark.* on the shims classloader for SQL; uploaded JARs also need
+            // flink-dist when the target Flink version bundles runtime classes there (1.20+).
+            builder.setUserClassPaths(
+                jobGraphUserClassPaths(submitRequest, !flinkSqlJob));
+            builder.setConfiguration(flinkSqlParentFirstConfig());
         }
 
-        PackagedProgram packageProgram = builder.build();
-        JobGraph jobGraph =
-            PackagedProgramUtils.createJobGraph(
-                packageProgram,
-                flinkConfig,
-                getParallelism(submitRequest),
-                null,
-                false);
+        ClassLoader shimsClassLoader = Thread.currentThread().getContextClassLoader();
+        ClassLoader programParent =
+            submitRequest.jobType() == FlinkJobType.PYFLINK
+                ? shimsClassLoader
+                : packagedProgramParentClassLoader(shimsClassLoader);
+        Thread.currentThread().setContextClassLoader(programParent);
+        try {
+            PackagedProgram packageProgram = builder.build();
+            Configuration jobGraphConfig = new Configuration(flinkConfig);
+            if (submitRequest.jobType() != FlinkJobType.PYFLINK) {
+                jobGraphConfig.addAll(flinkSqlParentFirstConfig());
+            }
+            JobGraph jobGraph =
+                PackagedProgramUtils.createJobGraph(
+                    packageProgram,
+                    jobGraphConfig,
+                    getParallelism(submitRequest),
+                    null,
+                    false);
 
-        return new Tuple2<>(packageProgram, jobGraph);
+            return new Tuple2<>(packageProgram, jobGraph);
+        } finally {
+            Thread.currentThread().setContextClassLoader(shimsClassLoader);
+        }
     }
 
     public JobID getJobID(String jobId) throws CliArgsException {
@@ -856,6 +943,19 @@ public abstract class FlinkClientTrait extends LoggerSupport {
                     programArgs.add(submitRequest.appConf());
                 }
             } else if (shouldAddAppConf(submitRequest.appConf())) {
+                programArgs.add(paramKeyAppConf);
+                programArgs.add(submitRequest.appConf());
+            }
+        } else if (submitRequest.jobType() == FlinkJobType.FLINK_SQL) {
+            programArgs.add(paramKeyFlinkConf);
+            programArgs.add(submitRequest.flinkYaml());
+            programArgs.add(paramKeyAppName);
+            programArgs.add(DeflaterUtils.zipString(submitRequest.effectiveAppName()));
+            programArgs.add(paramKeyFlinkParallelism);
+            programArgs.add(getParallelism(submitRequest).toString());
+            programArgs.add(paramKeyFlinkSql);
+            programArgs.add(submitRequest.flinkSQL());
+            if (submitRequest.appConf() != null) {
                 programArgs.add(paramKeyAppConf);
                 programArgs.add(submitRequest.appConf());
             }

@@ -72,7 +72,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
     public FlinkSql getEffective(Long appId, boolean decode) {
         FlinkSql flinkSql = baseMapper.getEffective(appId);
         if (flinkSql != null && decode) {
-            flinkSql.setSql(DeflaterUtils.unzipString(flinkSql.getSql()));
+            flinkSql.setSql(DeflaterUtils.toPlainText(flinkSql.getSql()));
         }
         return flinkSql;
     }
@@ -90,7 +90,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
             .map(
                 flinkSql -> {
                     if (decode) {
-                        flinkSql.setSql(DeflaterUtils.unzipString(flinkSql.getSql()));
+                        flinkSql.setSql(DeflaterUtils.toPlainText(flinkSql.getSql()));
                     }
                     return flinkSql;
                 })
@@ -101,8 +101,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
     public void create(FlinkSql flinkSql) {
         Integer version = this.baseMapper.getLatestVersion(flinkSql.getAppId());
         flinkSql.setVersion(version == null ? 1 : version + 1);
-        String sql = DeflaterUtils.zipString(flinkSql.getSql());
-        flinkSql.setSql(sql);
+        flinkSql.setSql(DeflaterUtils.compressForStorage(flinkSql.getSql()));
         this.save(flinkSql);
         this.setCandidate(CandidateTypeEnum.NEW, flinkSql.getAppId(), flinkSql.getId());
     }

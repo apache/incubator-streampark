@@ -58,9 +58,15 @@ public final class FlinkClient {
     }
 
     public static SubmitResponse submit(SubmitRequest submitRequest) {
-        SecurityManager securityManager = System.getSecurityManager();
+        SecurityManager previousSecurityManager = System.getSecurityManager();
+        boolean exitGuardInstalled = false;
         try {
-            System.setSecurityManager(new ExitSecurityManager());
+            try {
+                System.setSecurityManager(new ExitSecurityManager());
+                exitGuardInstalled = true;
+            } catch (UnsupportedOperationException ignored) {
+                // JDK 17+ may reject SecurityManager unless -Djava.security.manager=allow is set.
+            }
             return invokeClient(
                 submitRequest,
                 submitRequest.flinkVersion(),
@@ -68,7 +74,9 @@ public final class FlinkClient {
                 "submit",
                 SubmitResponse.class);
         } finally {
-            System.setSecurityManager(securityManager);
+            if (exitGuardInstalled) {
+                System.setSecurityManager(previousSecurityManager);
+            }
         }
     }
 

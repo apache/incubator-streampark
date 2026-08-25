@@ -20,6 +20,7 @@ package org.apache.streampark.flink.packer.pipeline.impl;
 import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.fs.LfsOperator;
+import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.FlinkRemotePerJobBuildRequest;
@@ -53,6 +54,11 @@ public class FlinkRemoteBuildPipeline extends BuildPipeline {
     @Override
     public ShadedBuildResponse buildProcess() {
         if (request.skipBuild()) {
+            File userJar = new File(request.customFlinkUserJar());
+            if (!userJar.isFile()) {
+                logError("User jar not found for skipBuild: " + request.customFlinkUserJar());
+                return new ShadedBuildResponse(request.workspace(), request.customFlinkUserJar(), false);
+            }
             return new ShadedBuildResponse(request.workspace(), request.customFlinkUserJar());
         }
 
@@ -78,7 +84,7 @@ public class FlinkRemoteBuildPipeline extends BuildPipeline {
                     return new File(request.customFlinkUserJar());
                 });
 
-        List<String> mavenJars =
+        List<String> extraLibJars =
             execStep(
                 3,
                 () -> {
@@ -92,17 +98,26 @@ public class FlinkRemoteBuildPipeline extends BuildPipeline {
                         paths.addAll(request.dependencyInfo().extJarLibs());
                         return paths;
                     }
+                    if (request.flinkJobType() == FlinkJobType.FLINK_SQL) {
+                        List<File> snakeyaml =
+                            MavenTool.resolveArtifacts(
+                                Collections.singleton(new Artifact("org.yaml", "snakeyaml", "2.0")));
+                        return snakeyaml.stream()
+                            .map(File::getAbsolutePath)
+                            .collect(Collectors.toList());
+                    }
                     return Collections.<String>emptyList();
                 });
 
         execStep(
             4,
             () -> {
-                if (request.flinkJobType() == FlinkJobType.PYFLINK) {
+                if (request.flinkJobType() == FlinkJobType.PYFLINK
+                    || request.flinkJobType() == FlinkJobType.FLINK_SQL) {
                     FsOperator lfs = FsOperator.lfs();
                     String lib = request.workspace().concat("/lib");
                     lfs.mkdirsIfNotExists(lib);
-                    for (String jar : mavenJars) {
+                    for (String jar : extraLibJars) {
                         File originFile = new File(jar);
                         if (originFile.isFile()) {
                             lfs.copy(originFile.getAbsolutePath(), lib);

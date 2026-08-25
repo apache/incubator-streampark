@@ -74,6 +74,10 @@ public class EnvInitializer implements ApplicationRunner {
         "^streampark-flink-shims_flink-(1\\.1[7-9]|1\\.2[0-9]|2\\.[0-3])-(.*).jar$",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
+    private static final Pattern PATTERN_FLINK_SHIMS_BASE_JAR = Pattern.compile(
+        "^streampark-flink-shims-base(-v2)?-(.*)\\.jar$",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
     @SneakyThrows
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -184,6 +188,10 @@ public class EnvInitializer implements ApplicationRunner {
         String appShims = workspace.APP_SHIMS();
         fsOperator.delete(appShims);
 
+        File[] shimsBaseJars =
+            WebUtils.getAppLibDir().listFiles(
+                pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_BASE_JAR.pattern()));
+
         for (File file : shims) {
             Matcher matcher = PATTERN_FLINK_SHIMS_JAR.matcher(file.getName());
             if (matcher.matches()) {
@@ -192,7 +200,23 @@ public class EnvInitializer implements ApplicationRunner {
                 fsOperator.mkdirs(shimsPath);
                 log.info("load shims:{} to {}", file.getName(), shimsPath);
                 fsOperator.upload(file.getAbsolutePath(), shimsPath);
+                if (isFlink2MajorVersion(version) && shimsBaseJars != null) {
+                    uploadShimsBaseJars(fsOperator, shimsBaseJars, shimsPath);
+                }
             }
+        }
+    }
+
+    private static boolean isFlink2MajorVersion(String majorVersion) {
+        int dot = majorVersion.indexOf('.');
+        String major = dot < 0 ? majorVersion : majorVersion.substring(0, dot);
+        return "2".equals(major);
+    }
+
+    private void uploadShimsBaseJars(FsOperator fsOperator, File[] shimsBaseJars, String shimsPath) {
+        for (File baseJar : shimsBaseJars) {
+            log.info("load shims base:{} to {}", baseJar.getName(), shimsPath);
+            fsOperator.upload(baseJar.getAbsolutePath(), shimsPath);
         }
     }
 

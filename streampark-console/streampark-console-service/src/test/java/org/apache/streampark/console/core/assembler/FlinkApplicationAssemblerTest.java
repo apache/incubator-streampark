@@ -51,6 +51,18 @@ class FlinkApplicationAssemblerTest {
     }
 
     @Test
+    void shouldDefaultNullStartFlagsToFalse() {
+        FlinkAppStartRequest request = new FlinkAppStartRequest();
+        request.setId(1L);
+        request.setTeamId(100000L);
+
+        FlinkApplication app = FlinkApplicationAssembler.toEntity(request);
+
+        Assertions.assertFalse(app.getRestoreOrTriggerSavepoint());
+        Assertions.assertFalse(app.getAllowNonRestored());
+    }
+
+    @Test
     void shouldConvertStartRequestToEntity() {
         FlinkAppStartRequest request = new FlinkAppStartRequest();
         request.setId(1L);
