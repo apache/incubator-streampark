@@ -23,6 +23,7 @@ import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkJobType;
+import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.flink.client.bean.SubmitApplicationSpec;
 import org.apache.streampark.flink.client.bean.SubmitRequest;
 
@@ -143,6 +144,83 @@ class SubmitRequestTest {
     void allowNonRestoredStateShouldDefaultToFalse() {
         SubmitRequest request = createRequest(FlinkJobType.FLINK_JAR, null);
         assertThat(request.allowNonRestoredState()).isFalse();
+    }
+
+    @Test
+    void appPropertiesWithMemoryConfigFromYamlConf() {
+        String yamlContent =
+            "flink.property.jobmanager.memory.process.size: 2048m\n"
+                + "flink.property.taskmanager.memory.process.size: 4096m\n";
+        String appConf = "yaml://" + DeflaterUtils.zipString(yamlContent);
+        SubmitApplicationSpec application =
+            SubmitApplicationSpec.builder()
+                .jobType(FlinkJobType.FLINK_JAR)
+                .appConf(appConf)
+                .build();
+        SubmitRequest request =
+            new SubmitRequest(
+                FLINK_VERSION,
+                FlinkDeployMode.YARN_APPLICATION,
+                Collections.emptyMap(),
+                application,
+                null,
+                null,
+                null);
+
+        assertThat(request.appProperties())
+            .containsEntry("jobmanager.memory.process.size", "2048m")
+            .containsEntry("taskmanager.memory.process.size", "4096m");
+    }
+
+    @Test
+    void appPropertiesWithMemoryConfigFromJsonConf() {
+        String jmKey = ConfigKeys.KEY_FLINK_PROPERTY_PREFIX() + "jobmanager.memory.process.size";
+        String tmKey = ConfigKeys.KEY_FLINK_PROPERTY_PREFIX() + "taskmanager.memory.process.size";
+        String appConf = "json://{\"" + jmKey + "\":\"2g\",\"" + tmKey + "\":\"4g\"}";
+        SubmitApplicationSpec application =
+            SubmitApplicationSpec.builder()
+                .jobType(FlinkJobType.FLINK_JAR)
+                .appConf(appConf)
+                .build();
+        SubmitRequest request =
+            new SubmitRequest(
+                FLINK_VERSION,
+                FlinkDeployMode.YARN_APPLICATION,
+                Collections.emptyMap(),
+                application,
+                null,
+                null,
+                null);
+
+        assertThat(request.appProperties())
+            .containsEntry("jobmanager.memory.process.size", "2g")
+            .containsEntry("taskmanager.memory.process.size", "4g");
+    }
+
+    @Test
+    void appPropertiesWithMemoryConfigFromPropertiesConf() {
+        String propertiesContent =
+            "flink.property.jobmanager.memory.process.size=1024m\n"
+                + "flink.property.taskmanager.memory.process.size=2048m\n";
+        String appConf = "prop://" + DeflaterUtils.zipString(propertiesContent);
+        SubmitApplicationSpec application =
+            SubmitApplicationSpec.builder()
+                .jobType(FlinkJobType.FLINK_JAR)
+                .appConf(appConf)
+                .build();
+        SubmitRequest request =
+            new SubmitRequest(
+                FLINK_VERSION,
+                FlinkDeployMode.YARN_APPLICATION,
+                Collections.emptyMap(),
+                application,
+                null,
+                null,
+                null);
+
+        assertThat(request.appProperties())
+            .containsEntry("jobmanager.memory.process.size", "1024m")
+            .containsEntry("taskmanager.memory.process.size", "2048m");
     }
 
     private static SubmitRequest createRequest(FlinkJobType jobType, String appConf) {
