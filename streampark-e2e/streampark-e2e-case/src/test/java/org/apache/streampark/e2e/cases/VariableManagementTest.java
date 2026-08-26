@@ -17,101 +17,106 @@
 
 package org.apache.streampark.e2e.cases;
 
-import org.apache.streampark.e2e.core.StreamPark;
-import org.apache.streampark.e2e.pages.LoginPage;
-import org.apache.streampark.e2e.pages.resource.ResourcePage;
-import org.apache.streampark.e2e.pages.resource.VariablesPage;
+import org.apache.streampark.e2e.core.StreamParkApi;
+import org.apache.streampark.e2e.core.api.ApiClient;
+import org.apache.streampark.e2e.core.api.ApiResponse;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
+@StreamParkApi(composeFiles = "docker/basic/docker-compose.yaml")
 public class VariableManagementTest {
 
-    public static RemoteWebDriver browser;
+    public static ApiClient api;
 
     private static final String variableCode = "10000";
-
     private static final String variableValue = "3306";
-
     private static final String description = "MySQL default port";
-
-    private static final boolean isNotVisible = true;
 
     @BeforeAll
     public static void setup() {
-        new LoginPage(browser)
-            .login()
-            .goToNav(ResourcePage.class)
-            .goToTab(VariablesPage.class);
+        api.login();
     }
 
     @Test
     @Order(1)
     void testCreateVariable() {
-        final VariablesPage variablesPage = new VariablesPage(browser);
-        variablesPage.createVariable(variableCode, variableValue, description, isNotVisible);
+        ApiResponse response = api.postForm("/variable/post", variableParams(variableCode, variableValue, description));
+        assertThat(response.isSuccess()).isTrue();
 
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(variablesPage.variableList)
-                    .as("Variable list should contain newly-created variable")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(variableCode)));
+        ApiResponse list = variableList();
+        assertThat(api.pageRecordsContain(list, "variableCode", variableCode)).isTrue();
     }
 
     @Test
     @Order(2)
     void testCreateDuplicateVariable() {
-        final VariablesPage variablesPage = new VariablesPage(browser);
-        variablesPage.createVariable(variableCode, variableValue, description, isNotVisible);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(variablesPage.errorMessageList)
-                    .as("Variable Code Duplicated Error message should be displayed")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(
-                        "The variable code already exists.")));
-
-        variablesPage.errorMessageConfirmButton.click();
-        variablesPage.createVariableForm.buttonCancel.click();
+        ApiResponse response = api.postForm("/variable/post", variableParams(variableCode, variableValue, description));
+        assertThat(response.isSuccess()).isFalse();
+        assertThat(response.getMessage()).contains("The variable code already exists.");
     }
 
     @Test
     @Order(3)
     void testEditVariable() {
-        final VariablesPage variablesPage = new VariablesPage(browser);
         String editVariableValue = "6379";
         String editDescription = "Redis default port";
 
-        variablesPage.editVariable(variableCode, editVariableValue, editDescription, isNotVisible);
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(variablesPage.variableList)
-                    .as("Variable list should contain edited variable")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(editVariableValue))
-                    .anyMatch(it -> it.contains(editDescription)));
+        ApiResponse list = variableList();
+        Long id =
+            api.findInPageRecords(list, "variableCode", variableCode)
+                .map(node -> node.path("id").asLong())
+                .orElseThrow();
+
+        Map<String, String> params = variableParams(variableCode, editVariableValue, editDescription);
+        params.put("id", String.valueOf(id));
+
+        ApiResponse response = api.putForm("/variable/update", params);
+        assertThat(response.isSuccess()).isTrue();
+
+        list = variableList();
+        assertThat(api.pageRecordsContain(list, "variableValue", editVariableValue)).isTrue();
+        assertThat(api.pageRecordsContain(list, "description", editDescription)).isTrue();
     }
 
     @Test
     @Order(4)
     void testDeleteVariable() {
-        final VariablesPage variablesPage = new VariablesPage(browser);
+        ApiResponse list = variableList();
+        Long id =
+            api.findInPageRecords(list, "variableCode", variableCode)
+                .map(node -> node.path("id").asLong())
+                .orElseThrow();
 
-        variablesPage.deleteVariable(variableCode);
+        Map<String, String> params = new LinkedHashMap<>(api.teamParams());
+        params.put("id", String.valueOf(id));
 
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(variablesPage.variableList)
-                    .extracting(WebElement::getText)
-                    .noneMatch(it -> it.contains(variableCode)));
+        ApiResponse response = api.deleteForm("/variable/delete", params);
+        assertThat(response.isSuccess()).isTrue();
+
+        list = variableList();
+        assertThat(api.pageRecordsContain(list, "variableCode", variableCode)).isFalse();
+    }
+
+    private static ApiResponse variableList() {
+        Map<String, String> params = new LinkedHashMap<>(api.teamParams());
+        params.put("pageNum", "1");
+        params.put("pageSize", "50");
+        return api.postForm("/variable/page", params);
+    }
+
+    private static Map<String, String> variableParams(String code, String value, String variableDescription) {
+        Map<String, String> params = new LinkedHashMap<>(api.teamParams());
+        params.put("variableCode", code);
+        params.put("variableValue", value);
+        params.put("description", variableDescription);
+        params.put("desensitization", "true");
+        return params;
     }
 }

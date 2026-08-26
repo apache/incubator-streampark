@@ -17,88 +17,60 @@
 
 package org.apache.streampark.e2e.cases;
 
-import org.apache.streampark.e2e.core.StreamPark;
-import org.apache.streampark.e2e.pages.LoginPage;
-import org.apache.streampark.e2e.pages.common.Constants;
-import org.apache.streampark.e2e.pages.flink.ApacheFlinkPage;
-import org.apache.streampark.e2e.pages.flink.FlinkHomePage;
-import org.apache.streampark.e2e.pages.flink.clusters.ClusterDetailForm;
-import org.apache.streampark.e2e.pages.flink.clusters.FlinkClustersPage;
-import org.apache.streampark.e2e.pages.flink.clusters.RemoteForm;
+import org.apache.streampark.e2e.core.StreamParkApi;
+import org.apache.streampark.e2e.core.api.ApiClient;
+import org.apache.streampark.e2e.core.api.flink.FlinkApiConstants;
+import org.apache.streampark.e2e.core.api.flink.FlinkApiSupport;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@StreamPark(composeFiles = "docker/flink-1.18-on-remote/docker-compose.yaml")
+@StreamParkApi(composeFiles = "docker/flink-1.18-on-remote/docker-compose.yaml")
 public class Flink118OnRemoteClusterDeployTest {
 
-    public static RemoteWebDriver browser;
+    public static ApiClient api;
+
+    private static FlinkApiSupport flink;
 
     private static final String flinkName = "flink-1.18.1";
 
     private static final String flinkHome = "/opt/flink/";
 
-    private static final String flinkDescription = "description test";
+    private static final String clusterName = "flink_1.18.1_cluster_e2e";
 
-    private static final String flinkClusterName = "flink_1.18.1_cluster_e2e";
+    private static final String jobManagerUrl = "http://jobmanager:8081";
 
-    private static final String flinkJobManagerUrl = "http://jobmanager:8081";
+    private static long versionId;
 
-    private static final ClusterDetailForm.DeployMode deployMode = ClusterDetailForm.DeployMode.STANDALONE;
+    private static long clusterId;
 
     @BeforeAll
-    public static void setUp() {
-        FlinkHomePage flinkHomePage = new LoginPage(browser)
-            .login()
-            .goToNav(ApacheFlinkPage.class)
-            .goToTab(FlinkHomePage.class);
-
-        flinkHomePage.createFlinkHome(flinkName, flinkHome, flinkDescription);
-
-        flinkHomePage.goToNav(ApacheFlinkPage.class)
-            .goToTab(FlinkClustersPage.class);
+    public static void setup() {
+        api.login();
+        flink = new FlinkApiSupport(api);
+        flink.createFlinkEnv(flinkName, flinkHome, "description test");
+        versionId = flink.requireVersionId(flinkName);
     }
 
     @Test
     @Order(1)
     public void testCreateFlinkCluster() {
-        FlinkClustersPage flinkClustersPage = new FlinkClustersPage(browser);
-
-        flinkClustersPage.createFlinkCluster()
-            .<RemoteForm>addCluster(deployMode)
-            .jobManagerURL(flinkJobManagerUrl)
-            .clusterName(flinkClusterName)
-            .flinkVersion(flinkName)
-            .submit();
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(flinkClustersPage.flinkClusterList)
-                    .as("Flink clusters list should contain newly-created application")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(flinkClusterName)));
+        ObjectNode body = flink.baseClusterBody(clusterName, FlinkApiConstants.DEPLOY_STANDALONE, versionId);
+        body.put("address", jobManagerUrl);
+        clusterId = flink.createCluster(body);
+        assertThat(clusterId).isPositive();
     }
 
     @Test
     @Order(5)
     public void testDeleteFlinkCluster() {
-        final FlinkClustersPage flinkClustersPage = new FlinkClustersPage(browser);
-
-        flinkClustersPage.deleteFlinkCluster(flinkClusterName);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> {
-                    browser.navigate().refresh();
-                    Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
-                    assertThat(flinkClustersPage.flinkClusterList)
-                        .noneMatch(it -> it.getText().contains(flinkClusterName));
-                });
+        flink.deleteCluster(clusterId);
+        assertThatThrownBy(() -> flink.requireClusterId(clusterName))
+            .isInstanceOf(IllegalStateException.class);
     }
 }

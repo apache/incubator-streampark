@@ -17,98 +17,90 @@
 
 package org.apache.streampark.e2e.cases;
 
-import org.apache.streampark.e2e.core.StreamPark;
-import org.apache.streampark.e2e.pages.LoginPage;
-import org.apache.streampark.e2e.pages.system.SystemPage;
-import org.apache.streampark.e2e.pages.system.TeamManagementPage;
+import org.apache.streampark.e2e.core.StreamParkApi;
+import org.apache.streampark.e2e.core.api.ApiClient;
+import org.apache.streampark.e2e.core.api.ApiResponse;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
+@StreamParkApi(composeFiles = "docker/basic/docker-compose.yaml")
 public class TeamManagementTest {
 
-    public static RemoteWebDriver browser;
+    public static ApiClient api;
 
     private static final String newTeamName = "test_new_team";
-
     private static final String newTeamDescription = "test_new_team_description";
 
     @BeforeAll
     public static void setup() {
-        new LoginPage(browser)
-            .login()
-            .goToNav(SystemPage.class)
-            .goToTab(TeamManagementPage.class);
+        api.login();
     }
 
     @Test
     @Order(1)
     void testCreateTeam() {
-        final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
-        teamManagementPage.createTeam(newTeamName, newTeamDescription);
+        ApiResponse response = api.postForm("/team/post", teamParams(newTeamName, newTeamDescription));
+        assertThat(response.isSuccess()).isTrue();
 
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(teamManagementPage.teamList)
-                    .as("Team list should contain newly-created team")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(newTeamName)));
+        ApiResponse list = api.postForm("/team/list", api.params("pageNum", "1", "pageSize", "100"));
+        assertThat(api.pageRecordsContain(list, "teamName", newTeamName)).isTrue();
     }
 
     @Test
     @Order(2)
     void testCreateDuplicateTeam() {
-        final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
-        teamManagementPage.createTeam(newTeamName, newTeamDescription);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(teamManagementPage.errorMessageList)
-                    .as("Team Duplicated Error message should be displayed")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("Create team failed.")));
-
-        teamManagementPage.errorMessageConfirmButton.click();
-        teamManagementPage.createTeamForm.buttonCancel.click();
+        ApiResponse response = api.postForm("/team/post", teamParams(newTeamName, newTeamDescription));
+        assertThat(response.isSuccess()).isFalse();
+        assertThat(response.getMessage()).contains("Create team failed.");
     }
 
     @Test
     @Order(3)
     void testEditTeam() {
-        final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
         String editDescription = "edit_" + newTeamDescription;
+        ApiResponse list = api.postForm("/team/list", api.params("pageNum", "1", "pageSize", "100"));
+        Long teamId =
+            api.findInPageRecords(list, "teamName", newTeamName)
+                .map(node -> node.path("id").asLong())
+                .orElseThrow();
 
-        teamManagementPage.editTeam(newTeamName, editDescription);
+        Map<String, String> params = teamParams(newTeamName, editDescription);
+        params.put("id", String.valueOf(teamId));
 
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(teamManagementPage.teamList)
-                    .as("Team list should contain edited team")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(editDescription)));
+        ApiResponse response = api.putForm("/team/update", params);
+        assertThat(response.isSuccess()).isTrue();
+
+        list = api.postForm("/team/list", api.params("pageNum", "1", "pageSize", "100"));
+        assertThat(api.pageRecordsContain(list, "description", editDescription)).isTrue();
     }
 
     @Test
     @Order(4)
     void testDeleteTeam() {
-        final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
+        ApiResponse list = api.postForm("/team/list", api.params("pageNum", "1", "pageSize", "100"));
+        Long teamId =
+            api.findInPageRecords(list, "teamName", newTeamName)
+                .map(node -> node.path("id").asLong())
+                .orElseThrow();
 
-        teamManagementPage.deleteTeam(newTeamName);
+        ApiResponse response = api.deleteForm("/team/delete", api.params("id", String.valueOf(teamId)));
+        assertThat(response.isSuccess()).isTrue();
 
-        Awaitility.await()
-            .untilAsserted(
-                () -> {
-                    browser.navigate().refresh();
+        list = api.postForm("/team/list", api.params("pageNum", "1", "pageSize", "100"));
+        assertThat(api.pageRecordsContain(list, "teamName", newTeamName)).isFalse();
+    }
 
-                    assertThat(teamManagementPage.teamList)
-                        .noneMatch(it -> it.getText().contains(newTeamName));
-                });
+    private static Map<String, String> teamParams(String teamName, String description) {
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("teamName", teamName);
+        params.put("description", description);
+        return params;
     }
 }

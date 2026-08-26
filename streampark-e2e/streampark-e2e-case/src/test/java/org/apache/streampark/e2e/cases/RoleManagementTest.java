@@ -17,97 +17,84 @@
 
 package org.apache.streampark.e2e.cases;
 
-import org.apache.streampark.e2e.core.StreamPark;
-import org.apache.streampark.e2e.pages.LoginPage;
-import org.apache.streampark.e2e.pages.system.RoleManagementPage;
-import org.apache.streampark.e2e.pages.system.SystemPage;
+import org.apache.streampark.e2e.core.StreamParkApi;
+import org.apache.streampark.e2e.core.api.ApiClient;
+import org.apache.streampark.e2e.core.api.ApiResponse;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
+@StreamParkApi(composeFiles = "docker/basic/docker-compose.yaml")
 public class RoleManagementTest {
 
-    public static RemoteWebDriver browser;
+    public static ApiClient api;
 
     private static final String newRoleName = "new_role";
-
     private static final String newDescription = "new_description";
-
     private static final String existMenuName = "Apache Flink";
 
     @BeforeAll
     public static void setup() {
-        new LoginPage(browser)
-            .login()
-            .goToNav(SystemPage.class)
-            .goToTab(RoleManagementPage.class);
+        api.login();
     }
 
     @Test
     @Order(1)
     void testCreateRole() {
-        final RoleManagementPage roleManagementPage = new RoleManagementPage(browser);
-        roleManagementPage.createRole(newRoleName, newDescription, existMenuName);
+        ApiResponse response = api.postForm("/role/post", roleParams(newRoleName, newDescription, existMenuName));
+        assertThat(response.isSuccess()).isTrue();
 
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(roleManagementPage.roleList)
-                    .as("Role list should contain newly-created role")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(newRoleName)));
+        ApiResponse list = api.postForm("/role/list", api.params("pageNum", "1", "pageSize", "100"));
+        assertThat(api.pageRecordsContain(list, "roleName", newRoleName)).isTrue();
     }
 
     @Test
     @Order(2)
     void testCreateDuplicateRole() {
-        final RoleManagementPage roleManagementPage = new RoleManagementPage(browser);
-        roleManagementPage.createRole(newRoleName, newDescription, existMenuName);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(roleManagementPage.errorMessageList)
-                    .as("Role Name Duplicated Error message should be displayed")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(
-                        "Sorry, the role name already exists")));
-
-        roleManagementPage.createRoleForm.buttonCancel.click();
+        ApiResponse response = api.postForm("/role/post", roleParams(newRoleName, newDescription, existMenuName));
+        assertThat(response.isSuccess()).isFalse();
+        assertThat(response.getMessage()).contains("Sorry, the role name already exists");
     }
+
     @Test
     @Order(3)
     void testEditRole() {
-        final RoleManagementPage roleManagementPage = new RoleManagementPage(browser);
-
         String newEditDescription = newDescription + "_edit";
-        String newEditMenuName = "System";
-        roleManagementPage.editRole(newRoleName, newEditDescription, newEditMenuName);
+        Long roleId = api.findRoleIdByName(newRoleName).orElseThrow();
 
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(roleManagementPage.roleList)
-                    .as("Role list should contain edited role")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(newEditDescription)));
+        Map<String, String> params = roleParams(newRoleName, newEditDescription, "System");
+        params.put("roleId", String.valueOf(roleId));
+
+        ApiResponse response = api.putForm("/role/update", params);
+        assertThat(response.isSuccess()).isTrue();
+
+        ApiResponse list = api.postForm("/role/list", api.params("pageNum", "1", "pageSize", "100"));
+        assertThat(api.pageRecordsContain(list, "description", newEditDescription)).isTrue();
     }
 
     @Test
     @Order(4)
     void testDeleteRole() {
-        final RoleManagementPage roleManagementPage = new RoleManagementPage(browser);
+        Long roleId = api.findRoleIdByName(newRoleName).orElseThrow();
+        ApiResponse response = api.deleteForm("/role/delete", api.params("roleId", String.valueOf(roleId)));
+        assertThat(response.isSuccess()).isTrue();
 
-        roleManagementPage.deleteRole(newRoleName);
+        ApiResponse list = api.postForm("/role/list", api.params("pageNum", "1", "pageSize", "100"));
+        assertThat(api.pageRecordsContain(list, "roleName", newRoleName)).isFalse();
+    }
 
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(roleManagementPage.roleList)
-                    .extracting(WebElement::getText)
-                    .noneMatch(it -> it.contains(newRoleName)));
+    private static Map<String, String> roleParams(String roleName, String description, String menuTitle) {
+        String menuId = api.findMenuIdByTitle(menuTitle).orElseThrow();
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("roleName", roleName);
+        params.put("description", description);
+        params.put("menuId", menuId);
+        return params;
     }
 }

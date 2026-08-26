@@ -1,0 +1,78 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+services:
+  k3s:
+    image: rancher/k3s:v1.30.5-k3s1
+    hostname: k3s
+    command: server --disable=traefik --tls-san=k3s --write-kubeconfig-mode=666
+    privileged: true
+    environment:
+      - K3S_KUBECONFIG_OUTPUT=/output/kubeconfig.yaml
+      - K3S_KUBECONFIG_MODE=666
+    networks:
+      - e2e
+    volumes:
+      - k3s-server:/var/lib/rancher/k3s
+      - k3s-kubeconfig:/output
+    healthcheck:
+      test: [ "CMD", "kubectl", "get", "nodes" ]
+      interval: 5s
+      timeout: 5s
+      retries: 120
+
+  streampark:
+    image: apache/streampark-flink-1.17.2-on-k8s:ci
+    hostname: streampark
+    command:
+      - bash
+      - -c
+      - |
+        mkdir -p /root/.kube
+        sed 's/127.0.0.1/k3s/g; s/localhost/k3s/g' /output/kubeconfig.yaml > /root/.kube/config
+        chmod 600 /root/.kube/config
+        /streampark/bin/streampark.sh start_docker
+    networks:
+      - e2e
+    build:
+      context: ./
+    ports:
+      - "20000:10000"
+    environment:
+      - SPRING_PROFILES_ACTIVE=h2
+      - TZ=Asia/Shanghai
+    volumes:
+      - k3s-kubeconfig:/output:ro
+      - ${HOME}/streampark_build_logs:/tmp/streampark/logs/build_logs/
+      - /var/run/docker.sock:/var/run/docker.sock
+    privileged: true
+    restart: unless-stopped
+    depends_on:
+      k3s:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "http://streampark:10000" ]
+      interval: 5s
+      timeout: 5s
+      retries: 120
+
+networks:
+  e2e:
+
+volumes:
+  k3s-server:
+  k3s-kubeconfig:

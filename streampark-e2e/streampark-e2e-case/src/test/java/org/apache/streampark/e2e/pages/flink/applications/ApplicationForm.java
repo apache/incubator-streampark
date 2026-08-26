@@ -32,6 +32,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.List;
 
+import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementDeleteAndInput;
+
 @Getter
 public final class ApplicationForm {
 
@@ -60,6 +62,15 @@ public final class ApplicationForm {
 
     @FindBy(xpath = "//div[contains(@codefield, 'yarnSessionClusterId')]//div[contains(@class, 'ant-select-selector')]")
     public WebElement buttonFlinkClusterDropdown;
+
+    @FindBy(xpath = "//div[contains(@codefield, 'k8sSessionClusterId')]//div[contains(@class, 'ant-select-selector')]")
+    public WebElement buttonK8sSessionClusterDropdown;
+
+    @FindBy(xpath = "//div[contains(@codefield, 'k8sNamespace')]//input")
+    public WebElement inputK8sNamespace;
+
+    @FindBy(xpath = "//div[contains(@codefield, 'flinkImage')]//input")
+    public WebElement inputFlinkImage;
 
     @FindBy(className = "ant-select-item-option-content")
     private List<WebElement> selectFlinkCluster;
@@ -238,6 +249,32 @@ public final class ApplicationForm {
                     String.format("Flink cluster not found: %s", flinkClusterName)))
             .click();
 
+        return this;
+    }
+
+    @SneakyThrows
+    public ApplicationForm k8sSessionCluster(String flinkClusterName) {
+        new Actions(driver).moveToElement(buttonK8sSessionClusterDropdown).build().perform();
+        buttonK8sSessionClusterDropdown.click();
+        Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
+        selectFlinkCluster.stream()
+            .filter(e -> e.getText().contains(flinkClusterName))
+            .findFirst()
+            .orElseThrow(
+                () -> new IllegalArgumentException(
+                    String.format("Flink cluster not found: %s", flinkClusterName)))
+            .click();
+
+        return this;
+    }
+
+    public ApplicationForm k8sNamespace(String k8sNamespace) {
+        WebElementDeleteAndInput(inputK8sNamespace, k8sNamespace);
+        return this;
+    }
+
+    public ApplicationForm flinkImage(String flinkImage) {
+        WebElementDeleteAndInput(inputFlinkImage, flinkImage);
         return this;
     }
 
