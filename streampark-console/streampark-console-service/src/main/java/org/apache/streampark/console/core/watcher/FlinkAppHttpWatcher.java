@@ -36,6 +36,7 @@ import org.apache.streampark.console.core.metrics.flink.JobsOverview;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
 import org.apache.streampark.console.core.service.FlinkClusterService;
+import org.apache.streampark.console.core.service.GravitinoLineageService;
 import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationActionService;
@@ -98,6 +99,9 @@ public class FlinkAppHttpWatcher {
 
     @Autowired
     private SavepointService savepointService;
+
+    @Autowired
+    private GravitinoLineageService gravitinoLineageService;
 
     // track interval every 5 seconds
     public static final Duration WATCHING_INTERVAL = Duration.ofSeconds(5);
@@ -441,7 +445,8 @@ public class FlinkAppHttpWatcher {
 
     private void doPersistMetrics(FlinkApplication application, boolean stopWatch) {
         Long appId = application.getId();
-        if (FlinkAppStateEnum.isEndState(application.getState())) {
+        boolean isEndState = FlinkAppStateEnum.isEndState(application.getState());
+        if (isEndState) {
             application.setOverview(null);
             application.setTotalTM(null);
             application.setTotalSlot(null);
@@ -461,7 +466,16 @@ public class FlinkAppHttpWatcher {
         if (!nowEvent.equals(event)) {
             PREVIOUS_STATUS.put(appId, nowEvent);
             applicationManageService.persistMetrics(application);
+            if (isEndState) {
+                gravitinoLineageService.emitTerminal(appId, isLineageSuccessState(application.getState()));
+            }
         }
+    }
+
+    /** FINISHED/SUCCEEDED report OpenLineage COMPLETE; every other end state reports FAIL. */
+    boolean isLineageSuccessState(Integer state) {
+        FlinkAppStateEnum flinkAppState = FlinkAppStateEnum.getState(state);
+        return flinkAppState == FlinkAppStateEnum.FINISHED || flinkAppState == FlinkAppStateEnum.SUCCEEDED;
     }
 
     /**
