@@ -61,7 +61,7 @@ class FlinkDockerfileTemplateTest {
         String expected =
             "FROM 1.13-scala_2.11\n"
                 + "RUN mkdir -p $FLINK_HOME/usrlib\n"
-                + "COPY lib $FLINK_HOME/lib/\n"
+                + "COPY lib/. $FLINK_HOME/lib/\n"
                 + "COPY WordCountSQL.jar $FLINK_HOME/usrlib/WordCountSQL.jar\n";
         assertEquals(expected, template.offerDockerfileContent());
     }
@@ -74,7 +74,7 @@ class FlinkDockerfileTemplateTest {
         String expected =
             "FROM 1.13-scala_2.11\n"
                 + "RUN mkdir -p $FLINK_HOME/usrlib\n"
-                + "COPY lib $FLINK_HOME/lib/\n"
+                + "COPY lib/. $FLINK_HOME/lib/\n"
                 + "COPY WordCountSQL.jar $FLINK_HOME/usrlib/WordCountSQL.jar\n";
         File outFile = template.writeDockerfile();
         assertEquals("Dockerfile", outFile.getName());
@@ -89,7 +89,7 @@ class FlinkDockerfileTemplateTest {
         String expected =
             "FROM 1.13-scala_2.11\n"
                 + "RUN mkdir -p $FLINK_HOME/usrlib\n"
-                + "COPY lib $FLINK_HOME/lib/\n"
+                + "COPY lib/. $FLINK_HOME/lib/\n"
                 + "COPY WordCountSQL.jar $FLINK_HOME/usrlib/WordCountSQL.jar\n";
         File outFile = template.writeDockerfile("Dockerfile");
         assertEquals("Dockerfile", outFile.getName());

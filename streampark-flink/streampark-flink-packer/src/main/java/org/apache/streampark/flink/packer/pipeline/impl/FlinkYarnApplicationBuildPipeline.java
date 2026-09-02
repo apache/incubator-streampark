@@ -19,19 +19,16 @@ package org.apache.streampark.flink.packer.pipeline.impl;
 
 import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.fs.FsOperator;
-import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 import org.apache.streampark.flink.packer.maven.MavenTool;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
+import org.apache.streampark.flink.packer.pipeline.FlinkSqlDependencySupport;
 import org.apache.streampark.flink.packer.pipeline.FlinkYarnApplicationBuildRequest;
 import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
 import org.apache.streampark.flink.packer.pipeline.SimpleBuildResponse;
 import org.apache.streampark.flink.packer.pipeline.YarnJarUploader;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /** Building pipeline for flink yarn application mode */
 public class FlinkYarnApplicationBuildPipeline extends BuildPipeline {
@@ -59,23 +56,7 @@ public class FlinkYarnApplicationBuildPipeline extends BuildPipeline {
                 || request.flinkJobType() == FlinkJobType.PYFLINK;
         DependencyInfo dependencyInfo = request.dependencyInfo();
         if (request.flinkJobType() == FlinkJobType.FLINK_SQL) {
-            Set<String> extJarLibs = new HashSet<>(dependencyInfo.extJarLibs());
-            String appHome = System.getProperty("app.home", "/streampark");
-            File snakeyaml = new File(appHome, "lib/snakeyaml-2.0.jar");
-            if (snakeyaml.isFile()) {
-                extJarLibs.add(snakeyaml.getAbsolutePath());
-            } else {
-                try {
-                    MavenTool.resolveArtifacts(
-                        Collections.singleton(new Artifact("org.yaml", "snakeyaml", "2.0")))
-                        .stream()
-                        .map(File::getAbsolutePath)
-                        .forEach(extJarLibs::add);
-                } catch (Exception e) {
-                    throw new IllegalStateException("Failed to resolve snakeyaml for Flink SQL yarn application", e);
-                }
-            }
-            dependencyInfo = new DependencyInfo(dependencyInfo.mavenArts(), extJarLibs);
+            dependencyInfo = FlinkSqlDependencySupport.withSnakeyaml(dependencyInfo);
             buildAndUploadSqlFatJar();
         }
         runYarnSqlBuildSteps(
