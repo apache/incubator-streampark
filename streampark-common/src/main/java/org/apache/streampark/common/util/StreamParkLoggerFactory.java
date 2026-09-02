@@ -29,7 +29,7 @@ import org.apache.streampark.shaded.org.slf4j.ILoggerFactory;
 import org.apache.streampark.shaded.org.slf4j.spi.LoggerFactoryBinder;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
@@ -97,26 +97,25 @@ public final class StreamParkLoggerFactory implements LoggerFactoryBinder {
         public void configureByResource(URL url) {
             AssertUtils.notNull(url, "URL argument cannot be null");
             String path = url.getPath();
-            if (path.endsWith("xml")) {
-                JoranConfigurator configurator = new JoranConfigurator();
-                configurator.setContext(loggerContext);
-                try {
-                    String text =
-                        FileUtils.readFile(new File(path))
-                            .replaceAll("org.slf4j", SHADED_PACKAGE + ".org.slf4j")
-                            .replaceAll("ch.qos.logback", SHADED_PACKAGE + ".ch.qos.logback")
-                            .replaceAll("org.apache.log4j", SHADED_PACKAGE + ".org.apache.log4j");
-                    ByteArrayInputStream input =
-                        new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
-                    configurator.doConfigure(input);
-                } catch (Exception e) {
-                    throw new LogbackException("Failed to configure logger context from " + url, e);
-                }
-            } else {
+            if (path == null || !path.endsWith("xml")) {
                 throw new LogbackException(
                     "Unexpected filename extension of file ["
                         + url
                         + "]. Should be .xml");
+            }
+            JoranConfigurator configurator = new JoranConfigurator();
+            configurator.setContext(loggerContext);
+            try (InputStream inputStream = url.openStream()) {
+                String text =
+                    new String(inputStream.readAllBytes(), StandardCharsets.UTF_8)
+                        .replaceAll("org.slf4j", SHADED_PACKAGE + ".org.slf4j")
+                        .replaceAll("ch.qos.logback", SHADED_PACKAGE + ".ch.qos.logback")
+                        .replaceAll("org.apache.log4j", SHADED_PACKAGE + ".org.apache.log4j");
+                ByteArrayInputStream input =
+                    new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
+                configurator.doConfigure(input);
+            } catch (Exception e) {
+                throw new LogbackException("Failed to configure logger context from " + url, e);
             }
         }
     }

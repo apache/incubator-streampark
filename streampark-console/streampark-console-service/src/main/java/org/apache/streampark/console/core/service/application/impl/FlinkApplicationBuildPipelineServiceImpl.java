@@ -367,8 +367,9 @@ public class FlinkApplicationBuildPipelineServiceImpl
                     yarnProvidedPath = app.getAppHome();
                     localWorkspace = app.getLocalAppHome();
                 }
-                FlinkYarnApplicationBuildRequest yarnAppRequest = buildFlinkYarnApplicationBuildRequest(app, mainClass,
-                    localWorkspace, yarnProvidedPath);
+                FlinkYarnApplicationBuildRequest yarnAppRequest =
+                    buildFlinkYarnApplicationBuildRequest(
+                        app, mainClass, localWorkspace, yarnProvidedPath, flinkEnv);
                 log.info("Submit params to building pipeline : {}", yarnAppRequest);
                 return FlinkYarnApplicationBuildPipeline.of(yarnAppRequest);
             case YARN_PER_JOB:
@@ -400,13 +401,21 @@ public class FlinkApplicationBuildPipelineServiceImpl
                                                                                    @Nonnull FlinkApplication app,
                                                                                    String mainClass,
                                                                                    String localWorkspace,
-                                                                                   String yarnProvidedPath) {
+                                                                                   String yarnProvidedPath,
+                                                                                   FlinkEnv flinkEnv) {
+        String sqlDistJar = ServiceHelper.getFlinkSqlClientJar(flinkEnv);
+        String localSqlClientJar =
+            Workspace.local().APP_CLIENT().concat("/").concat(sqlDistJar);
         return new FlinkYarnApplicationBuildRequest(
             app.getJobName(),
             mainClass,
+            app.getLocalAppHome(),
             localWorkspace,
             yarnProvidedPath,
+            localSqlClientJar,
             app.getJobTypeEnum(),
+            app.getDeployModeEnum(),
+            flinkEnv.getFlinkVersion(),
             getMergedDependencyInfo(app));
     }
 

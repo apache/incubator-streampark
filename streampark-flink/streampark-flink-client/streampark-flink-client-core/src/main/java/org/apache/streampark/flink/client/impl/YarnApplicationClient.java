@@ -69,8 +69,10 @@ public final class YarnApplicationClient extends YarnClientTrait {
         providedLibs.add(hdfsWorkspace.appJars());
 
         if (submitRequest.jobType() == FlinkJobType.FLINK_SQL) {
-            providedLibs.add(
-                WORKSPACE.APP_SHIMS() + "/flink-" + submitRequest.flinkVersion().majorVersion());
+            // Flink SQL yarn-application builds a fat jar that already shades version-specific
+            // shims. Adding the HDFS shims directory here makes parent-first classloading pick
+            // shims-base ahead of shims-base-v2 and breaks Flink 2.x (NoSuchMethodError on
+            // FlinkConfiguration).
             String jobLib = WORKSPACE.APP_WORKSPACE() + "/" + submitRequest.id() + "/lib";
             try {
                 if (HdfsUtils.exists(jobLib)) {

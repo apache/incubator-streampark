@@ -106,7 +106,7 @@ public class FlinkHadoopDockerfileTemplate extends FlinkDockerfileTemplateTrait 
         dockerfile
             .append("COPY ")
             .append(extraLibName())
-            .append(" ")
+            .append("/. ")
             .append(FLINK_HOME)
             .append("/lib/\n")
             .append("COPY ")

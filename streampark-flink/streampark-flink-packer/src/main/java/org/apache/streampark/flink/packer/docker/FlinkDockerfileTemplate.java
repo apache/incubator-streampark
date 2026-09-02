@@ -62,7 +62,7 @@ public class FlinkDockerfileTemplate extends FlinkDockerfileTemplateTrait {
     public String offerDockerfileContent() {
         return "FROM " + flinkBaseImage + "\n"
             + "RUN mkdir -p " + FLINK_HOME + "/usrlib\n"
-            + "COPY " + extraLibName() + " " + FLINK_HOME + "/lib/\n"
+            + "COPY " + extraLibName() + "/. " + FLINK_HOME + "/lib/\n"
             + "COPY " + mainJarName() + " " + FLINK_HOME + "/usrlib/" + mainJarName() + "\n";
     }
 }

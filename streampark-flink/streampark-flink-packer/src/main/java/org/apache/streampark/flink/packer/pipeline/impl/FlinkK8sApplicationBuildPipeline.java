@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.packer.pipeline.impl;
 
+import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.flink.kubernetes.PodTemplateTool;
 import org.apache.streampark.flink.kubernetes.ingress.IngressController;
@@ -24,6 +25,7 @@ import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.docker.FlinkDockerfileTemplate;
 import org.apache.streampark.flink.packer.docker.FlinkDockerfileTemplateTrait;
 import org.apache.streampark.flink.packer.docker.FlinkHadoopDockerfileTemplate;
+import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse;
 import org.apache.streampark.flink.packer.pipeline.FlinkK8sApplicationBuildRequest;
@@ -33,6 +35,8 @@ import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -94,12 +98,24 @@ public class FlinkK8sApplicationBuildPipeline extends AbstractK8sApplicationBuil
                     logInfo("Output shaded flink job jar: " + jar.getAbsolutePath());
                     return jar;
                 });
-        final Set<String> extJarLibs = request.dependencyInfo().extJarLibs();
-
         Object[] dockerResult =
             execStep(
                 4,
                 () -> {
+                    Set<String> extJarLibs = new HashSet<>(request.dependencyInfo().extJarLibs());
+                    if (request.flinkJobType() == FlinkJobType.FLINK_SQL) {
+                        String appHome = System.getProperty("app.home", "/streampark");
+                        File snakeyaml = new File(appHome, "lib/snakeyaml-2.0.jar");
+                        if (snakeyaml.isFile()) {
+                            extJarLibs.add(snakeyaml.getAbsolutePath());
+                        } else {
+                            MavenTool.resolveArtifacts(
+                                Collections.singleton(new Artifact("org.yaml", "snakeyaml", "2.0")))
+                                .stream()
+                                .map(File::getAbsolutePath)
+                                .forEach(extJarLibs::add);
+                        }
+                    }
                     FlinkDockerfileTemplateTrait template;
                     if (request.integrateWithHadoop()) {
                         template =

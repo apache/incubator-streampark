@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -145,7 +146,7 @@ public final class MavenTool extends LoggerSupport {
                 "[StreamPark] streampark-packer: failed to delete existing uber jar: "
                     + outFatJarPath);
         }
-        Set<File> jarSet = new HashSet<>();
+        Set<File> jarSet = new LinkedHashSet<>();
         for (String lib : jarLibs) {
             File libFile = new File(lib);
             if (!libFile.exists()) {
@@ -156,11 +157,14 @@ public final class MavenTool extends LoggerSupport {
             } else if (libFile.isDirectory()) {
                 File[] files = libFile.listFiles();
                 if (files != null) {
+                    List<File> dirJars = new ArrayList<>();
                     for (File f : files) {
                         if (isJarFile(f)) {
-                            jarSet.add(f);
+                            dirJars.add(f);
                         }
                     }
+                    dirJars.sort(ShimJarMergeOrder.COMPARATOR);
+                    jarSet.addAll(dirJars);
                 }
             }
         }

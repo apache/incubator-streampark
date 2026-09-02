@@ -48,7 +48,7 @@ public final class SqlClient {
     public static void main(String[] args) {
         List<String> arguments = new ArrayList<>(Arrays.asList(args));
 
-        ParameterTool parameterTool = ParameterTool.fromArgs(args);
+        FlinkParameterToolBridge parameterTool = FlinkParameterToolBridge.fromArgs(args);
 
         String sqlKey = ConfigKeys.KEY_FLINK_SQL();
         String sql = parameterTool.get(sqlKey);
@@ -69,7 +69,7 @@ public final class SqlClient {
 
         String defaultMode = RuntimeExecutionMode.STREAMING.name();
         String mode =
-            resolveExecutionMode(parameterTool, sets, arguments, defaultMode);
+            resolveExecutionMode(parameterTool::get, sets, arguments, defaultMode);
 
         switch (mode) {
             case "STREAMING":
@@ -87,6 +87,14 @@ public final class SqlClient {
 
     static String resolveExecutionMode(
                                        ParameterTool parameterTool,
+                                       List<SqlCommandCall> sets,
+                                       List<String> arguments,
+                                       String defaultMode) {
+        return resolveExecutionMode(parameterTool::get, sets, arguments, defaultMode);
+    }
+
+    static String resolveExecutionMode(
+                                       ParameterLookup parameterTool,
                                        List<SqlCommandCall> sets,
                                        List<String> arguments,
                                        String defaultMode) {
@@ -118,6 +126,16 @@ public final class SqlClient {
         }
         arguments.add("-D" + ExecutionOptions.RUNTIME_MODE.key() + "=" + runtimeMode);
         return runtimeMode;
+    }
+
+    @FunctionalInterface
+    interface ParameterLookup {
+
+        String get(String key, String defaultValue);
+
+        default String get(String key) {
+            return get(key, null);
+        }
     }
 
     private static final class BatchSqlApp {

@@ -661,8 +661,11 @@ public class FlinkApplicationActionServiceImpl
                         : String.format("yaml://%s", applicationConfig.getContent());
                 // 3) client
                 if (FlinkDeployMode.YARN_APPLICATION == deployModeEnum) {
-                    String clientPath = Workspace.remote().APP_CLIENT();
-                    flinkUserJar = String.format("%s/%s", clientPath, sqlDistJar);
+                    flinkUserJar =
+                        application.getAppHome()
+                            + "/streampark-flinkjob_"
+                            + application.getJobName().replaceAll("\\s+", "_")
+                            + ".jar";
                 }
                 break;
 

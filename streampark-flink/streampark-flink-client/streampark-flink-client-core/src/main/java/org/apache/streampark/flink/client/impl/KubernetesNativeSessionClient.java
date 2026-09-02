@@ -119,9 +119,9 @@ public final class KubernetesNativeSessionClient extends KubernetesNativeClientT
                         flinkConfig,
                         jarFile,
                         () -> getK8sClusterDescriptor(flinkConfig)
-                            .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
+                            .retrieve(flinkConfig.get(KubernetesConfigOptions.CLUSTER_ID))
                             .getClusterClient(),
-                        () -> flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID));
+                        () -> flinkConfig.get(KubernetesConfigOptions.CLUSTER_ID));
                 logInfo(
                     "[flink-submit] flink job has been submitted. "
                         + flinkConfIdentifierInfo(flinkConfig)

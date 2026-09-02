@@ -17,30 +17,44 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
+import org.apache.streampark.common.conf.FlinkVersion;
+import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 
-public class FlinkYarnApplicationBuildRequest implements BuildParam {
+public class FlinkYarnApplicationBuildRequest implements FlinkBuildParam {
 
     private final String appName;
     private final String mainClass;
+    private final String localAppHome;
     private final String localWorkspace;
     private final String yarnProvidedPath;
+    private final String customFlinkUserJar;
     private final FlinkJobType flinkJobType;
+    private final FlinkDeployMode deployMode;
+    private final FlinkVersion flinkVersion;
     private final DependencyInfo dependencyInfo;
 
     public FlinkYarnApplicationBuildRequest(
                                             String appName,
                                             String mainClass,
+                                            String localAppHome,
                                             String localWorkspace,
                                             String yarnProvidedPath,
+                                            String customFlinkUserJar,
                                             FlinkJobType flinkJobType,
+                                            FlinkDeployMode deployMode,
+                                            FlinkVersion flinkVersion,
                                             DependencyInfo dependencyInfo) {
         this.appName = appName;
         this.mainClass = mainClass;
+        this.localAppHome = localAppHome;
         this.localWorkspace = localWorkspace;
         this.yarnProvidedPath = yarnProvidedPath;
+        this.customFlinkUserJar = customFlinkUserJar;
         this.flinkJobType = flinkJobType;
+        this.deployMode = deployMode;
+        this.flinkVersion = flinkVersion;
         this.dependencyInfo = dependencyInfo;
     }
 
@@ -54,6 +68,40 @@ public class FlinkYarnApplicationBuildRequest implements BuildParam {
         return mainClass;
     }
 
+    @Override
+    public String workspace() {
+        return localAppHome;
+    }
+
+    @Override
+    public FlinkDeployMode deployMode() {
+        return deployMode;
+    }
+
+    @Override
+    public FlinkJobType flinkJobType() {
+        return flinkJobType;
+    }
+
+    @Override
+    public FlinkVersion flinkVersion() {
+        return flinkVersion;
+    }
+
+    @Override
+    public DependencyInfo dependencyInfo() {
+        return dependencyInfo;
+    }
+
+    @Override
+    public String customFlinkUserJar() {
+        return customFlinkUserJar;
+    }
+
+    public String localAppHome() {
+        return localAppHome;
+    }
+
     public String localWorkspace() {
         return localWorkspace;
     }
@@ -62,11 +110,10 @@ public class FlinkYarnApplicationBuildRequest implements BuildParam {
         return yarnProvidedPath;
     }
 
-    public FlinkJobType flinkJobType() {
-        return flinkJobType;
-    }
-
-    public DependencyInfo dependencyInfo() {
-        return dependencyInfo;
+    public String remoteAppHome() {
+        if (yarnProvidedPath.endsWith("/lib")) {
+            return yarnProvidedPath.substring(0, yarnProvidedPath.length() - 4);
+        }
+        return yarnProvidedPath;
     }
 }
