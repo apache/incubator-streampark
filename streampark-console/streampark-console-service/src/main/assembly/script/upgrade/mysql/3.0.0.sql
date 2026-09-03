@@ -15,11 +15,18 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.system.mapper;
+use streampark;
 
-import org.apache.streampark.console.system.entity.Role;
+-- Map legacy team-admin membership to the built-in ADMIN user type before dropping role tables.
+update `t_user` u
+    inner join `t_member` m on u.`user_id` = m.`user_id`
+set u.`user_type` = 1
+where m.`role_id` = 100002;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+delete from `t_menu`
+where `type` = '1'
+   or `path` in ('/system/menu', '/system/role', '/system/team', '/system/member', '/system/token');
 
-public interface RoleMapper extends BaseMapper<Role> {
-}
+drop table if exists `t_role_menu`;
+drop table if exists `t_member`;
+drop table if exists `t_role`;
