@@ -52,7 +52,7 @@ class DependencyUtilsTest {
 
     @Disabled("Disabled due to unstable performance.")
     @Test
-    public void resolveFlinkConnector() throws Exception {
+    void resolveFlinkConnector() throws Exception {
 
         Artifact artifact = new Artifact("com.ververica", "flink-connector-mysql-cdc", "2.4.1", null);
 
@@ -123,13 +123,6 @@ class DependencyUtilsTest {
             return value.toString().replace("PT", "").toLowerCase();
         }
         return value.toString();
-    }
-
-    @Test
-    public void testDuration() {
-        String s = "PT30H";
-        Duration duration = Duration.parse(s);
-        System.out.println(duration.getSeconds());
     }
 
     private List<String> getConnectorFactory(File connector) throws Exception {

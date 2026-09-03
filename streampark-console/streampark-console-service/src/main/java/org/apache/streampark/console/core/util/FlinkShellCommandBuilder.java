@@ -226,7 +226,7 @@ public final class FlinkShellCommandBuilder {
             org.apache.commons.cli.CommandLine line = PARSER.parse(FLINK_OPTIONS, args, false);
             for (org.apache.commons.cli.Option option : line.getOptions()) {
                 String key = "-" + option.getLongOpt().trim();
-                optionMap.put(key, option.hasArg() ? option.getValue() : true);
+                optionMap.put(key, option.hasArg() ? option.getValue() : Boolean.TRUE);
             }
         } catch (org.apache.commons.cli.ParseException e) {
             throw new ConfigException("Invalid program launcher arguments", e);

@@ -222,61 +222,68 @@ public final class YamlParser {
         String lineSeparator = text.contains("\r\n") ? "\r\n" : "\n";
         String[] lines = text.split("\\r?\\n", -1);
         StringBuilder normalized = new StringBuilder(text.length());
-        for (int index = 0; index < lines.length; index++) {
+        int index = 0;
+        while (index < lines.length) {
             String currentLine = lines[index];
             Matcher matcher = EMPTY_VALUE_PROPERTY.matcher(currentLine);
-            if (!matcher.matches()) {
+            FoldBlock block =
+                matcher.matches() ? findFoldBlock(lines, index, indent(currentLine)) : null;
+            if (block == null) {
                 appendLine(normalized, currentLine, lineSeparator, index < lines.length - 1);
-                continue;
-            }
-
-            int currentIndent = indent(currentLine);
-            int nextIndex = index + 1;
-            List<String> scalarEntries = new ArrayList<>();
-            boolean structuredChild = false;
-
-            // A property without an inline value may either own nested YAML or contain plain text
-            // entered on following lines. Inspect the entire indented region before modifying it.
-            while (nextIndex < lines.length) {
-                String childLine = lines[nextIndex];
-                if (isBlank(childLine)) {
-                    nextIndex++;
-                    continue;
+                index++;
+            } else {
+                normalized
+                    .append(matcher.group(1))
+                    .append(matcher.group(2).trim())
+                    .append(": ")
+                    .append(String.join(" ", block.entries));
+                if (block.end < lines.length) {
+                    normalized.append(lineSeparator);
                 }
-                if (indent(childLine) <= currentIndent) {
-                    break;
-                }
-                String trimmedChild = childLine.trim();
-                if (trimmedChild.startsWith("#")) {
-                    nextIndex++;
-                    continue;
-                }
-                if (isStructured(trimmedChild)) {
-                    // Never partially fold a mapping or sequence. Leaving the original block intact
-                    // allows the strict parser to retain its structure on the next attempt.
-                    structuredChild = true;
-                    break;
-                }
-                scalarEntries.add(trimmedChild);
-                nextIndex++;
+                index = block.end;
             }
-
-            if (scalarEntries.isEmpty() || structuredChild) {
-                appendLine(normalized, currentLine, lineSeparator, index < lines.length - 1);
-                continue;
-            }
-
-            normalized
-                .append(matcher.group(1))
-                .append(matcher.group(2).trim())
-                .append(": ")
-                .append(String.join(" ", scalarEntries));
-            if (nextIndex < lines.length) {
-                normalized.append(lineSeparator);
-            }
-            index = nextIndex - 1;
         }
         return normalized.toString();
+    }
+
+    /** Finds plain indented lines that may be folded into a scalar property. */
+    private static FoldBlock findFoldBlock(String[] lines, int index, int parentIndent) {
+        int next = index + 1;
+        List<String> entries = new ArrayList<>();
+        // A property without an inline value may own nested YAML or editor-style plain text. The
+        // entire indented region is inspected before any line is modified.
+        while (next < lines.length) {
+            String child = lines[next];
+            if (isBlank(child)) {
+                next++;
+            } else if (indent(child) <= parentIndent) {
+                break;
+            } else {
+                String trimmed = child.trim();
+                if (trimmed.startsWith("#")) {
+                    next++;
+                } else if (isStructured(trimmed)) {
+                    // Nested mappings and sequences must remain untouched for the strict parser.
+                    return null;
+                } else {
+                    entries.add(trimmed);
+                    next++;
+                }
+            }
+        }
+        return entries.isEmpty() ? null : new FoldBlock(next, entries);
+    }
+
+    /** Immutable description of a scalar continuation region. */
+    private static final class FoldBlock {
+
+        private final int end;
+        private final List<String> entries;
+
+        private FoldBlock(int end, List<String> entries) {
+            this.end = end;
+            this.entries = entries;
+        }
     }
 
     private static Map<String, Object> parseBytes(byte[] bytes) {
@@ -311,10 +318,8 @@ public final class YamlParser {
             Object value = entry.getValue();
             if (value instanceof Map) {
                 flatten((Map<?, ?>) value, key, target);
-            } else if (value != null) {
-                if (target.putIfAbsent(key, value) != null) {
-                    throw new ConfigException("Duplicate configuration key: " + key);
-                }
+            } else if (value != null && target.putIfAbsent(key, value) != null) {
+                throw new ConfigException("Duplicate configuration key: " + key);
             }
         }
     }

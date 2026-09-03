@@ -286,29 +286,35 @@ public final class FlinkConfigurationUtils {
             lineNumber++;
             int commentStart = line.indexOf('#');
             String content = (commentStart < 0 ? line : line.substring(0, commentStart)).trim();
-            if (content.isEmpty()) {
-                continue;
+            if (!content.isEmpty()) {
+                parseLegacyLine(configuration, content, resourceName, lineNumber);
             }
-            String[] entry = content.split(": ", 2);
-            if (entry.length != 2) {
-                LOG.warn(
-                    "Ignoring invalid Flink configuration line {}:{}; expected 'key: value'",
-                    resourceName,
-                    lineNumber);
-                continue;
-            }
-            String key = entry[0].trim();
-            String value = entry[1].trim();
-            if (key.isEmpty() || value.isEmpty()) {
-                LOG.warn(
-                    "Ignoring empty Flink configuration entry at {}:{}",
-                    resourceName,
-                    lineNumber);
-                continue;
-            }
-            configuration.put(key, value);
         }
         return configuration;
+    }
+
+    /** Parses one non-empty legacy Flink configuration line. */
+    private static void parseLegacyLine(
+                                        Map<String, String> configuration,
+                                        String content,
+                                        String resourceName,
+                                        int lineNumber) {
+        int separator = content.indexOf(": ");
+        if (separator < 0) {
+            LOG.warn(
+                "Ignoring invalid Flink configuration line {}:{}; expected 'key: value'",
+                resourceName,
+                lineNumber);
+            return;
+        }
+        String key = content.substring(0, separator).trim();
+        String value = content.substring(separator + 2).trim();
+        if (key.isEmpty() || value.isEmpty()) {
+            LOG.warn(
+                "Ignoring empty Flink configuration entry at {}:{}", resourceName, lineNumber);
+            return;
+        }
+        configuration.put(key, value);
     }
 
     private static void logConfiguration(String action, Map<String, String> configuration) {

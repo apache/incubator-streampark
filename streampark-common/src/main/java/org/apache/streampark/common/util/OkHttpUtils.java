@@ -86,38 +86,44 @@ public final class OkHttpUtils {
 
     /** Retries transient failures only for methods whose requests are safe to replay. */
     private static Interceptor newRetryInterceptor() {
-        return chain -> {
-            Request request = chain.request();
-            if (!isRetryableMethod(request.method())) {
-                return chain.proceed(request);
-            }
+        return OkHttpUtils::retry;
+    }
 
-            Response response = null;
-            for (int attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
-                try {
-                    response = chain.proceed(request);
-                    if (response.isSuccessful()
-                        || !isRetryableStatus(response.code())
-                        || attempt == MAX_RETRY_ATTEMPTS) {
-                        return response;
-                    }
-                    response.close();
-                    response = null;
-                } catch (IOException e) {
-                    if (attempt == MAX_RETRY_ATTEMPTS) {
-                        throw e;
-                    }
+    private static Response retry(Interceptor.Chain chain) throws IOException {
+        Request request = chain.request();
+        if (!isRetryableMethod(request.method())) {
+            return chain.proceed(request);
+        }
+        for (int attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
+            try {
+                Response response = chain.proceed(request);
+                if (!shouldRetry(response, attempt)) {
+                    return response;
                 }
-
-                try {
-                    Thread.sleep((1L << attempt) * 1000L);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new IOException("Interrupted while retrying HTTP request", e);
+                response.close();
+            } catch (IOException e) {
+                if (attempt == MAX_RETRY_ATTEMPTS) {
+                    throw e;
                 }
             }
-            throw new IOException("HTTP retry loop ended without a response");
-        };
+            pause(attempt);
+        }
+        throw new IOException("HTTP retry loop ended without a response");
+    }
+
+    private static boolean shouldRetry(Response response, int attempt) {
+        return !response.isSuccessful()
+            && isRetryableStatus(response.code())
+            && attempt < MAX_RETRY_ATTEMPTS;
+    }
+
+    private static void pause(int attempt) throws IOException {
+        try {
+            Thread.sleep((1L << attempt) * 1000L);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Interrupted while retrying HTTP request", e);
+        }
     }
 
     private static boolean isRetryableMethod(String method) {

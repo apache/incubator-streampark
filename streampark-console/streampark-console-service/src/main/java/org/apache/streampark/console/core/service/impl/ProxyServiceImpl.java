@@ -54,6 +54,8 @@ import java.util.Arrays;
 @Service
 public class ProxyServiceImpl implements ProxyService {
 
+    private static final String PROXY_PATH = "/proxy/";
+
     @Autowired
     private FlinkClusterService flinkClusterService;
 
@@ -73,7 +75,7 @@ public class ProxyServiceImpl implements ProxyService {
             case YARN_PER_JOB:
             case YARN_APPLICATION:
             case YARN_SESSION:
-                url = YarnUtils.getRMWebAppProxyURL() + "/proxy/" + app.getClusterId();
+                url = YarnUtils.getRMWebAppProxyURL() + PROXY_PATH + app.getClusterId();
                 proxyYarnRequest(
                     request,
                     response,
@@ -110,7 +112,7 @@ public class ProxyServiceImpl implements ProxyService {
         switch (app.getDeployModeEnum()) {
             case YARN_CLIENT:
             case YARN_CLUSTER:
-                String url = YarnUtils.getRMWebAppProxyURL() + "/proxy/" + app.getClusterId();
+                String url = YarnUtils.getRMWebAppProxyURL() + PROXY_PATH + app.getClusterId();
                 proxyYarnRequest(
                     request,
                     response,
@@ -132,7 +134,7 @@ public class ProxyServiceImpl implements ProxyService {
             unavailableResponse(response, "The yarn application id is null.");
             return;
         }
-        String url = YarnUtils.getRMWebAppProxyURL() + "/proxy/" + yarnId + "/";
+        String url = YarnUtils.getRMWebAppProxyURL() + PROXY_PATH + yarnId + "/";
         proxyYarnRequest(
             request,
             response,

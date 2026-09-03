@@ -37,6 +37,8 @@ import java.util.Map;
 @Setter
 public class MavenConfig {
 
+    private static final String DATABASE_SETTING = "database setting";
+
     /** File path for Maven settings. */
     private String mvnSettings;
 
@@ -84,19 +86,19 @@ public class MavenConfig {
     public void updateConfig() {
 
         if (StringUtils.isNotBlank(mvnSettings)) {
-            GlobalConfiguration.set(MavenOptions.SETTINGS_PATH, mvnSettings, "database setting");
+            GlobalConfiguration.set(MavenOptions.SETTINGS_PATH, mvnSettings, DATABASE_SETTING);
         }
 
         if (StringUtils.isNotBlank(mvnRepository)) {
-            GlobalConfiguration.set(MavenOptions.REPOSITORY_URL, mvnRepository, "database setting");
+            GlobalConfiguration.set(MavenOptions.REPOSITORY_URL, mvnRepository, DATABASE_SETTING);
         }
 
         if (StringUtils.isNotBlank(mvnAuthUser)) {
-            GlobalConfiguration.set(MavenOptions.USER_NAME, mvnAuthUser, "database setting");
+            GlobalConfiguration.set(MavenOptions.USER_NAME, mvnAuthUser, DATABASE_SETTING);
         }
 
         if (StringUtils.isNotBlank(mvnAuthPassword)) {
-            GlobalConfiguration.set(MavenOptions.PASSWORD, mvnAuthPassword, "database setting");
+            GlobalConfiguration.set(MavenOptions.PASSWORD, mvnAuthPassword, DATABASE_SETTING);
         }
     }
 }

@@ -17,7 +17,6 @@
 
 package org.apache.streampark.common.configuration;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -30,9 +29,7 @@ import java.util.function.Predicate;
  *
  * @param <T> value type
  */
-public final class ConfigOption<T> implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public final class ConfigOption<T> {
 
     private final String key;
     private final ConfigValueType<T> valueType;

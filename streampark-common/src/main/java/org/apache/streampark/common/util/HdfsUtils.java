@@ -168,19 +168,6 @@ public final class HdfsUtils {
         }
     }
 
-    public static String fileMd5(String fileName) throws IOException {
-        Path path = getPath(fileName);
-        FSDataInputStream in = HadoopUtils.hdfs().open(path);
-        try {
-            // MD5 is used for non-cryptographic file integrity checks only.
-            @SuppressWarnings("java:S4790")
-            String digest = DigestUtils.md5Hex(in);
-            return digest;
-        } finally {
-            in.close();
-        }
-    }
-
     /**
      * Returns the SHA-256 digest of an HDFS file.
      *

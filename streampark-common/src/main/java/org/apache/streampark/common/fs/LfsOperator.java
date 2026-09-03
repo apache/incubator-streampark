@@ -21,7 +21,6 @@ import org.apache.streampark.common.util.Utils;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -181,21 +180,6 @@ public final class LfsOperator {
                 throw new IllegalStateException(
                     "[StreamPark] Failed to copyDir " + srcPath + " to " + dstPath, e);
             }
-        }
-    }
-
-    public static String fileMd5(String path) {
-        if (path == null || path.isEmpty()) {
-            throw new IllegalArgumentException("[StreamPark] LFsOperator.fileMd5: file must not be null.");
-        }
-        File file = new File(path);
-        if (!file.exists()) {
-            throw new IllegalArgumentException("[StreamPark] LFsOperator.fileMd5: file must exists.");
-        }
-        try (FileInputStream inputStream = new FileInputStream(path)) {
-            return DigestUtils.md5Hex(IOUtils.toByteArray(inputStream));
-        } catch (IOException e) {
-            throw new IllegalStateException("[StreamPark] Failed to compute md5 for: " + path, e);
         }
     }
 

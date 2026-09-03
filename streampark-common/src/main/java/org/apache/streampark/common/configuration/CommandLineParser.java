@@ -49,13 +49,10 @@ public final class CommandLineParser {
     public static Configuration parse(String[] arguments) {
         Objects.requireNonNull(arguments, "arguments must not be null");
         Map<String, Object> values = new LinkedHashMap<>();
-        for (int index = 0; index < arguments.length; index++) {
+        int index = 0;
+        while (index < arguments.length) {
             String token = Objects.requireNonNull(arguments[index], "argument must not be null");
-            if (!token.startsWith(LONG_OPTION_PREFIX) || token.length() == LONG_OPTION_PREFIX.length()) {
-                throw new ConfigException("Expected a --key argument but found '" + token + "'");
-            }
-
-            String expression = token.substring(LONG_OPTION_PREFIX.length());
+            String expression = optionExpression(token);
             int separator = expression.indexOf('=');
             String key;
             Object value;
@@ -64,13 +61,16 @@ public final class CommandLineParser {
             if (separator >= 0) {
                 key = expression.substring(0, separator);
                 value = expression.substring(separator + 1);
+                index++;
             } else {
                 key = expression;
                 if (index + 1 < arguments.length
                     && !arguments[index + 1].startsWith(LONG_OPTION_PREFIX)) {
-                    value = arguments[++index];
+                    value = arguments[index + 1];
+                    index += 2;
                 } else {
                     value = true;
+                    index++;
                 }
             }
             if (key.trim().isEmpty()) {
@@ -83,5 +83,13 @@ public final class CommandLineParser {
         return Configuration.builder()
             .add("command line", ConfigSource.COMMAND_LINE, values)
             .build();
+    }
+
+    private static String optionExpression(String token) {
+        if (!token.startsWith(LONG_OPTION_PREFIX)
+            || token.length() == LONG_OPTION_PREFIX.length()) {
+            throw new ConfigException("Expected a --key argument but found '" + token + "'");
+        }
+        return token.substring(LONG_OPTION_PREFIX.length());
     }
 }

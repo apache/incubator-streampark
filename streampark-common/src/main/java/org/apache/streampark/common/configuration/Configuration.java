@@ -40,6 +40,8 @@ import java.util.Optional;
 public final class Configuration implements ReadableConfig, Serializable {
 
     private static final long serialVersionUID = 1L;
+    private static final String NULL_KEY = "key must not be null";
+    private static final String NULL_OPTION = "option must not be null";
     private static final Configuration EMPTY = new Configuration(Collections.emptyMap());
 
     private final Map<String, Value> values;
@@ -90,7 +92,7 @@ public final class Configuration implements ReadableConfig, Serializable {
 
     @Override
     public <T> Optional<T> getOptional(ConfigOption<T> option) {
-        Objects.requireNonNull(option, "option must not be null");
+        Objects.requireNonNull(option, NULL_OPTION);
         // The canonical key always wins over fallbacks. Fallbacks are declaration-time migration
         // metadata and never copied into the effective snapshot.
         String resolvedKey = resolveKey(option);
@@ -118,7 +120,7 @@ public final class Configuration implements ReadableConfig, Serializable {
 
     @Override
     public boolean contains(ConfigOption<?> option) {
-        return resolveKey(Objects.requireNonNull(option, "option must not be null")) != null;
+        return resolveKey(Objects.requireNonNull(option, NULL_OPTION)) != null;
     }
 
     /**
@@ -130,7 +132,7 @@ public final class Configuration implements ReadableConfig, Serializable {
      * @return whether the key is present
      */
     public boolean containsKey(String key) {
-        return values.containsKey(Objects.requireNonNull(key, "key must not be null"));
+        return values.containsKey(Objects.requireNonNull(key, NULL_KEY));
     }
 
     /**
@@ -152,7 +154,7 @@ public final class Configuration implements ReadableConfig, Serializable {
      * @return canonical string representation, or an empty optional when absent
      */
     public Optional<String> getOptionalString(String key) {
-        Value value = values.get(Objects.requireNonNull(key, "key must not be null"));
+        Value value = values.get(Objects.requireNonNull(key, NULL_KEY));
         return value == null
             ? Optional.empty()
             : Optional.of(ConfigValueTypes.formatUnknown(value.rawValue));
@@ -165,7 +167,7 @@ public final class Configuration implements ReadableConfig, Serializable {
      * @return effective value origin, or an empty optional when absent
      */
     public Optional<ConfigOrigin> origin(String key) {
-        Value value = values.get(Objects.requireNonNull(key, "key must not be null"));
+        Value value = values.get(Objects.requireNonNull(key, NULL_KEY));
         return value == null ? Optional.empty() : Optional.of(value.origin);
     }
 
@@ -289,6 +291,17 @@ public final class Configuration implements ReadableConfig, Serializable {
         return value;
     }
 
+    private static Serializable serializableValue(Object value) {
+        Object immutable = immutableValue(value);
+        if (!(immutable instanceof Serializable)) {
+            throw new ConfigException(
+                "Configuration value of type "
+                    + immutable.getClass().getName()
+                    + " is not serializable");
+        }
+        return (Serializable) immutable;
+    }
+
     @Override
     public String toString() {
         return toRedactedMap().toString();
@@ -298,11 +311,11 @@ public final class Configuration implements ReadableConfig, Serializable {
 
         private static final long serialVersionUID = 1L;
 
-        private final Object rawValue;
+        private final Serializable rawValue;
         private final ConfigOrigin origin;
 
         private Value(Object rawValue, ConfigOrigin origin) {
-            this.rawValue = immutableValue(rawValue);
+            this.rawValue = serializableValue(rawValue);
             this.origin = origin;
         }
     }

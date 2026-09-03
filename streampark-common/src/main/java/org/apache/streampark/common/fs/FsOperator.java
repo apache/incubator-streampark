@@ -66,11 +66,6 @@ public abstract class FsOperator {
         }
 
         @Override
-        public String fileMd5(String path) {
-            return LfsOperator.fileMd5(path);
-        }
-
-        @Override
         public String fileSha256(String path) {
             return LfsOperator.fileSha256(path);
         }
@@ -117,11 +112,6 @@ public abstract class FsOperator {
         @Override
         public void move(String srcPath, String dstPath) {
             HdfsOperator.move(srcPath, dstPath);
-        }
-
-        @Override
-        public String fileMd5(String path) {
-            return HdfsOperator.fileMd5(path);
         }
 
         @Override
@@ -185,8 +175,6 @@ public abstract class FsOperator {
     public abstract void copyDir(String srcPath, String dstPath, boolean delSrc, boolean overwrite);
 
     public abstract void move(String srcPath, String dstPath);
-
-    public abstract String fileMd5(String path);
 
     /**
      * Returns the SHA-256 digest of a file for collision-resistant content comparison.

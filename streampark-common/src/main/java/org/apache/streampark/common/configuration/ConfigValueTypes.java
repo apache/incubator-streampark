@@ -128,7 +128,7 @@ final class ConfigValueTypes {
             long longValue = number.longValue();
             // Number#longValue silently truncates floating-point input. Comparing the round-trip
             // value rejects that lossy coercion before it reaches an integral option.
-            if (Double.compare(number.doubleValue(), (double) longValue) != 0) {
+            if (Double.compare(number.doubleValue(), longValue) != 0) {
                 throw new IllegalArgumentException("expected an integral number");
             }
             return longValue;

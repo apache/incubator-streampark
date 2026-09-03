@@ -45,11 +45,13 @@ public final class JvmOptionsParser {
     public static Configuration parse(String options) {
         List<String> tokens = CommandLineTokenizer.tokenize(options);
         Map<String, Object> properties = new LinkedHashMap<>();
-        for (int index = 0; index < tokens.size(); index++) {
+        int index = 0;
+        while (index < tokens.size()) {
             String token = tokens.get(index);
             String expression;
             if (PREFIX.equals(token)) {
-                if (++index >= tokens.size()) {
+                index++;
+                if (index >= tokens.size()) {
                     throw new ConfigException("-D must be followed by key=value");
                 }
                 expression = tokens.get(index);
@@ -68,6 +70,7 @@ public final class JvmOptionsParser {
             if (properties.putIfAbsent(key, value) != null) {
                 throw new ConfigException("Duplicate JVM property: " + key);
             }
+            index++;
         }
         return Configuration.builder()
             .add("JVM options", ConfigSource.COMMAND_LINE, properties)

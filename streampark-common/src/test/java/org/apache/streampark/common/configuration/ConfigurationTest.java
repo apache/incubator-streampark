@@ -19,6 +19,8 @@ package org.apache.streampark.common.configuration;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -209,6 +211,25 @@ class ConfigurationTest {
         pending.add("pending-b");
 
         assertThat(loader.load().get(hosts)).containsExactly("pending-a");
+    }
+
+    @Test
+    void enforceSerializableValues() throws Exception {
+        Map<String, Object> invalid = Collections.singletonMap("invalid", new Object());
+        assertThatThrownBy(
+            () -> Configuration.builder().add("test", ConfigSource.FILE, invalid))
+                .isInstanceOf(ConfigException.class)
+                .hasMessageContaining("not serializable");
+
+        Configuration configuration =
+            Configuration.builder()
+                .add("test", ConfigSource.FILE, Map.of("name", "orders"))
+                .build();
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (ObjectOutputStream output = new ObjectOutputStream(bytes)) {
+            output.writeObject(configuration);
+        }
+        assertThat(bytes.size()).isPositive();
     }
 
     @Test

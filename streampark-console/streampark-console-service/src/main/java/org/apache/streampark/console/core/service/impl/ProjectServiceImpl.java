@@ -325,7 +325,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         } catch (Exception e) {
             log.error("List project conf failed", e);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     /** Resolves a request-supplied module below the project's distribution directory. */

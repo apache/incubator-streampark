@@ -146,6 +146,14 @@ public final class WebUtils {
                             HttpUrl url,
                             HttpServletRequest request,
                             HttpServletResponse response) throws IOException {
+        Request upstreamRequest = buildProxyRequest(url, request, requestHeaders(request));
+        try (Response upstream = OkHttpUtils.call(upstreamRequest)) {
+            writeProxyResponse(upstream, response);
+        }
+    }
+
+    /** Copies end-to-end request headers while excluding proxy and browser security metadata. */
+    private static Headers requestHeaders(HttpServletRequest request) {
         Headers.Builder headersBuilder = new Headers.Builder();
         Set<String> skippedHeaders =
             skippedHeaders(request.getHeader("Connection"), REQUEST_SKIP_HEADERS);
@@ -162,20 +170,32 @@ public final class WebUtils {
                     continue;
                 }
                 Enumeration<String> values = request.getHeaders(headerName);
-                if (values == null) {
-                    continue;
-                }
-                while (values.hasMoreElements()) {
-                    String value = values.nextElement();
-                    if (value != null) {
-                        headersBuilder.add(headerName, value);
-                    }
+                if (values != null) {
+                    addHeaderValues(headersBuilder, headerName, values);
                 }
             }
         }
+        return headersBuilder.build();
+    }
 
-        Request.Builder requestBuilder =
-            new Request.Builder().url(url).headers(headersBuilder.build());
+    private static void addHeaderValues(
+                                        Headers.Builder headers,
+                                        String name,
+                                        Enumeration<String> values) {
+        while (values.hasMoreElements()) {
+            String value = values.nextElement();
+            if (value != null) {
+                headers.add(name, value);
+            }
+        }
+    }
+
+    /** Creates the replayable OkHttp request used by the shared client. */
+    private static Request buildProxyRequest(
+                                             HttpUrl url,
+                                             HttpServletRequest request,
+                                             Headers headers) throws IOException {
+        Request.Builder requestBuilder = new Request.Builder().url(url).headers(headers);
         // OkHttp derives Host and Content-Length from the upstream URL and replayable request body.
         String method = request.getMethod();
         if (HttpMethod.GET.matches(method) || HttpMethod.HEAD.matches(method)) {
@@ -188,10 +208,7 @@ public final class WebUtils {
                     : null;
             requestBuilder.method(method, RequestBody.create(content, contentType));
         }
-
-        try (Response upstream = OkHttpUtils.call(requestBuilder.build())) {
-            writeProxyResponse(upstream, response);
-        }
+        return requestBuilder.build();
     }
 
     private static void writeProxyResponse(
