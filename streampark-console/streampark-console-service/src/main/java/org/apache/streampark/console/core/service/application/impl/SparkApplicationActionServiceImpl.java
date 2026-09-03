@@ -442,19 +442,20 @@ public class SparkApplicationActionServiceImpl
                 appConf = applicationConfig == null
                     ? null
                     : String.format("yaml://%s", applicationConfig.getContent());
-                Resource resource = resourceService.findByResourceName(application.getTeamId(), application.getJar());
+                Resource pythonResource =
+                    resourceService.findByResourceName(application.getTeamId(), application.getJar());
 
                 ApiAlertException.throwIfNull(
-                    resource, "pyflink file can't be null, start application failed.");
+                    pythonResource, "pyflink file can't be null, start application failed.");
 
                 ApiAlertException.throwIfNull(
-                    resource.getFilePath(), "pyflink file can't be null, start application failed.");
+                    pythonResource.getFilePath(), "pyflink file can't be null, start application failed.");
 
                 ApiAlertException.throwIfFalse(
-                    resource.getFilePath().endsWith(Constants.PYTHON_SUFFIX),
+                    pythonResource.getFilePath().endsWith(Constants.PYTHON_SUFFIX),
                     "pyflink format error, must be a \".py\" suffix, start application failed.");
 
-                sparkUserJar = resource.getFilePath();
+                sparkUserJar = pythonResource.getFilePath();
                 break;
 
             case SPARK_JAR:
@@ -496,13 +497,15 @@ public class SparkApplicationActionServiceImpl
                         case APACHE_SPARK:
                             sparkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
                             if (!FsOperator.hdfs().exists(sparkUserJar)) {
-                                resource = resourceService.findByResourceName(
-                                    application.getTeamId(), application.getJar());
-                                if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
+                                Resource jarResource =
+                                    resourceService.findByResourceName(
+                                        application.getTeamId(), application.getJar());
+                                if (jarResource != null
+                                    && StringUtils.isNotBlank(jarResource.getFilePath())) {
                                     sparkUserJar = String.format(
                                         "%s/%s",
                                         application.getAppHome(),
-                                        new File(resource.getFilePath()).getName());
+                                        new File(jarResource.getFilePath()).getName());
                                 }
                             }
                             break;

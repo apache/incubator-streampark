@@ -703,20 +703,20 @@ public class FlinkApplicationActionServiceImpl
                 break;
 
             case PYFLINK:
-                Resource resource =
+                Resource pythonResource =
                     resourceService.findByResourceName(application.getTeamId(), application.getJar());
 
                 ApiAlertException.throwIfNull(
-                    resource, "pyflink file can't be null, start application failed.");
+                    pythonResource, "pyflink file can't be null, start application failed.");
 
                 ApiAlertException.throwIfNull(
-                    resource.getFilePath(), "pyflink file can't be null, start application failed.");
+                    pythonResource.getFilePath(), "pyflink file can't be null, start application failed.");
 
                 ApiAlertException.throwIfFalse(
-                    resource.getFilePath().endsWith(Constants.PYTHON_SUFFIX),
+                    pythonResource.getFilePath().endsWith(Constants.PYTHON_SUFFIX),
                     "pyflink format error, must be a \".py\" suffix, start application failed.");
 
-                flinkUserJar = resource.getFilePath();
+                flinkUserJar = pythonResource.getFilePath();
                 break;
 
             case FLINK_JAR:
@@ -762,14 +762,16 @@ public class FlinkApplicationActionServiceImpl
                         case APACHE_FLINK:
                             flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
                             if (!FsOperator.hdfs().exists(flinkUserJar)) {
-                                resource =
+                                Resource jarResource =
                                     resourceService.findByResourceName(
                                         application.getTeamId(), application.getJar());
-                                if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
+                                if (jarResource != null
+                                    && StringUtils.isNotBlank(jarResource.getFilePath())) {
                                     flinkUserJar =
                                         String.format(
                                             "%s/%s",
-                                            application.getAppHome(), new File(resource.getFilePath()).getName());
+                                            application.getAppHome(),
+                                            new File(jarResource.getFilePath()).getName());
                                 }
                             }
                             break;

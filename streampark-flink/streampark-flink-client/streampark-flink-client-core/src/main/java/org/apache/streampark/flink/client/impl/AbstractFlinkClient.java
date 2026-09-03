@@ -106,7 +106,7 @@ public abstract class AbstractFlinkClient extends LoggerSupport {
             return (FlinkException) throwable;
         }
         if (throwable instanceof Exception) {
-            return new FlinkException((Exception) throwable);
+            return new FlinkException(throwable);
         }
         return new FlinkException(throwable.getMessage(), throwable);
     }
