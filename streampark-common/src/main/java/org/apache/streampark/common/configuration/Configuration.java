@@ -378,7 +378,7 @@ public final class Configuration implements ReadableConfig, Serializable {
          * @throws ConfigException when the value violates the option constraint
          */
         public <T> Builder set(ConfigOption<T> option, T value, String originName) {
-            Objects.requireNonNull(option, "option must not be null").validate(value);
+            Objects.requireNonNull(option, NULL_OPTION).validate(value);
             mergeValue(
                 option.key(),
                 new Value(value, ConfigOrigin.of(ConfigSource.RUNTIME, originName)));
@@ -392,7 +392,7 @@ public final class Configuration implements ReadableConfig, Serializable {
          * @return this builder
          */
         public Builder remove(String key) {
-            values.remove(Objects.requireNonNull(key, "key must not be null"));
+            values.remove(Objects.requireNonNull(key, NULL_KEY));
             return this;
         }
 
