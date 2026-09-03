@@ -141,6 +141,19 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
+        <!-- Workspace initialization requires Hadoop classes during MavenTool tests. -->
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client-runtime</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- jackson-->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
