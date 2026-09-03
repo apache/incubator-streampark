@@ -24,15 +24,15 @@ import org.apache.flink.core.execution.SavepointFormatType;
 import java.util.concurrent.CompletableFuture;
 
 /** Flink 1.19 cluster client with native/canonical savepoint format support. */
-public class FlinkClusterClient<T> extends FlinkClientTrait<T> {
+public class FlinkClusterClient<T> extends AbstractFlinkClient<T> {
 
     public FlinkClusterClient(ClusterClient<T> clusterClient) {
         super(clusterClient);
     }
 
     @Override
-    public CompletableFuture<String> triggerSavepoint(
-                                                      JobID jobID, String savepointDir, boolean nativeFormat) {
+    public CompletableFuture<String> triggerSavepoint(JobID jobID,
+                                                      String savepointDir, boolean nativeFormat) {
         return clusterClient.triggerSavepoint(
             jobID,
             savepointDir,
@@ -40,8 +40,9 @@ public class FlinkClusterClient<T> extends FlinkClientTrait<T> {
     }
 
     @Override
-    public CompletableFuture<String> cancelWithSavepoint(
-                                                         JobID jobID, String savepointDirectory, boolean nativeFormat) {
+    public CompletableFuture<String> cancelWithSavepoint(JobID jobID,
+                                                         String savepointDirectory,
+                                                         boolean nativeFormat) {
         return clusterClient.cancelWithSavepoint(
             jobID,
             savepointDirectory,
@@ -49,8 +50,7 @@ public class FlinkClusterClient<T> extends FlinkClientTrait<T> {
     }
 
     @Override
-    public CompletableFuture<String> stopWithSavepoint(
-                                                       JobID jobID,
+    public CompletableFuture<String> stopWithSavepoint(JobID jobID,
                                                        boolean advanceToEndOfEventTime,
                                                        String savepointDirectory,
                                                        boolean nativeFormat) {

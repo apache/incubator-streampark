@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.configuration.Constants;
+import org.apache.streampark.common.configuration.Workspace;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
@@ -85,8 +85,6 @@ import java.util.ServiceLoader;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
-
-import static org.apache.streampark.common.enums.StorageType.LFS;
 
 @Slf4j
 @Service
@@ -225,7 +223,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
         String filePath = String.format(
             "%s/%d/%s",
-            Workspace.local().APP_UPLOADS(),
+            Workspace.LOCAL.uploads,
             findResource.getTeamId(),
             findResource.getResourceName());
 
@@ -300,7 +298,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
     @Override
     public List<String> listHistoryUploadJars() {
-        return Arrays.stream(LfsOperator.listDir(Workspace.of(LFS).APP_UPLOADS()))
+        return Arrays.stream(LfsOperator.listDir(Workspace.LOCAL.uploads))
             .filter(File::isFile)
             .sorted(Comparator.comparingLong(File::lastModified).reversed())
             .map(File::getName)
@@ -466,7 +464,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     }
 
     private void transferTeamResource(Long teamId, String resourcePath) {
-        String teamUploads = String.format("%s/%d", Workspace.local().APP_UPLOADS(), teamId);
+        String teamUploads = String.format("%s/%d", Workspace.LOCAL.uploads, teamId);
         if (!FsOperator.lfs().exists(teamUploads)) {
             FsOperator.lfs().mkdirs(teamUploads);
         }

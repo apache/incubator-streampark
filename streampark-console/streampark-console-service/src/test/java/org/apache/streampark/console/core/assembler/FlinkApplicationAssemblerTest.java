@@ -84,6 +84,7 @@ class FlinkApplicationAssemblerTest {
         app.setId(10L);
         app.setJobName("sql-job");
         app.setState(0);
+        app.setFlinkSql("encoded-sql");
 
         FlinkAppResponse response = FlinkApplicationAssembler.toResponse(app);
 
@@ -91,6 +92,7 @@ class FlinkApplicationAssemblerTest {
         Assertions.assertEquals(10L, response.getId());
         Assertions.assertEquals("sql-job", response.getJobName());
         Assertions.assertEquals(0, response.getState());
+        Assertions.assertEquals("encoded-sql", response.getFlinkSql());
     }
 
     @Test

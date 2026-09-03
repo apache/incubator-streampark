@@ -17,10 +17,11 @@
 
 package org.apache.streampark.flink.packer.maven;
 
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.InternalConfigHolder;
-import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.configuration.Configuration;
+import org.apache.streampark.common.configuration.Constants;
+import org.apache.streampark.common.configuration.GlobalConfiguration;
+import org.apache.streampark.common.configuration.Workspace;
+import org.apache.streampark.common.configuration.option.MavenOptions;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.LoggerSupport;
 import org.apache.streampark.common.util.Utils;
@@ -79,18 +80,18 @@ public final class MavenTool extends LoggerSupport {
     }
 
     private static List<RemoteRepository> getRemoteRepos() {
+        Configuration configuration = GlobalConfiguration.current();
         RemoteRepository.Builder builder =
             new RemoteRepository.Builder(
                 "central",
                 Constants.DEFAULT,
-                InternalConfigHolder.get(CommonConfig.MAVEN_REMOTE_URL()));
+                configuration.get(MavenOptions.REPOSITORY_URL));
         RemoteRepository remoteRepository;
-        if (InternalConfigHolder.get(CommonConfig.MAVEN_AUTH_USER()) == null
-            || InternalConfigHolder.get(CommonConfig.MAVEN_AUTH_PASSWORD()) == null) {
+        String username = configuration.getOptional(MavenOptions.USER_NAME).orElse(null);
+        String password = configuration.getOptional(MavenOptions.PASSWORD).orElse(null);
+        if (username == null || password == null) {
             remoteRepository = builder.build();
         } else {
-            String username = InternalConfigHolder.get(CommonConfig.MAVEN_AUTH_USER());
-            String password = InternalConfigHolder.get(CommonConfig.MAVEN_AUTH_PASSWORD());
             org.eclipse.aether.repository.Authentication authentication =
                 new AuthenticationBuilder()
                     .addUsername(username)
@@ -268,7 +269,7 @@ public final class MavenTool extends LoggerSupport {
     private static MavenEndpoint getMavenEndpoint() {
         org.eclipse.aether.impl.DefaultServiceLocator locator =
             MavenRepositorySystemUtils.newServiceLocator();
-        LocalRepository localRepo = new LocalRepository(Workspace.MAVEN_LOCAL_PATH());
+        LocalRepository localRepo = new LocalRepository(Workspace.MAVEN_LOCAL_PATH);
 
         locator.addService(
             RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);

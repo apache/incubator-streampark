@@ -30,6 +30,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Objects;
@@ -86,37 +87,42 @@ public class FlinkSql {
         this.createTime = new Date();
     }
 
+    /**
+     * Converts the persisted SQL representation to plain text.
+     *
+     * @throws IllegalStateException if the persisted value is not valid compressed SQL
+     */
     public void decode() {
-        this.setSql(DeflaterUtils.toPlainText(this.sql));
+        if (this.sql == null) {
+            return;
+        }
+        String decodedSql = DeflaterUtils.unzipString(this.sql);
+        if (decodedSql == null) {
+            throw new IllegalStateException("Failed to decompress Flink SQL id=" + this.id);
+        }
+        this.sql = decodedSql;
     }
 
-    public void setToApplication(FlinkApplication application) {
-        String encode = Base64.getEncoder().encodeToString(this.sql.getBytes());
-        application.setFlinkSql(encode);
+    /** Copies decoded SQL to a Flink application using the API transport representation. */
+    public void applyToApplication(FlinkApplication application) {
+        application.setFlinkSql(
+            Base64.getEncoder().encodeToString(this.sql.getBytes(StandardCharsets.UTF_8)));
         application.setDependency(this.dependency);
         application.setTeamResource(this.teamResource);
         application.setSqlId(this.id);
     }
 
-    public void setToApplication(SparkApplication application) {
-        String encode = Base64.getEncoder().encodeToString(this.sql.getBytes());
-        application.setSparkSql(encode);
-        application.setDependency(this.dependency);
-        application.setTeamResource(this.teamResource);
-        application.setSqlId(this.id);
-    }
-
+    /** Compares decoded SQL and dependency metadata with another version. */
     public ChangeTypeEnum checkChange(FlinkSql target) {
         if (target == null) {
             return ChangeTypeEnum.NONE;
         }
         // 1) determine if sql statement has changed
-        String sourceSql =
-            StringUtils.trimToEmpty(DeflaterUtils.toPlainText(this.getSql()));
+        String sourceSql = StringUtils.trimToEmpty(this.getSql());
         String targetSql =
             target.getSql() == null
                 ? sourceSql
-                : StringUtils.trimToEmpty(DeflaterUtils.toPlainText(target.getSql()));
+                : StringUtils.trimToEmpty(target.getSql());
         boolean sqlDifference = !sourceSql.equals(targetSql);
         // 2) determine if dependency has changed
         Dependency thisDependency = Dependency.toDependency(this.getDependency());
@@ -140,7 +146,10 @@ public class FlinkSql {
         return ChangeTypeEnum.NONE;
     }
 
+    /** Replaces SQL with the Base64-encoded plain text required by the API. */
     public void base64Encode() {
-        this.sql = Base64.getEncoder().encodeToString(DeflaterUtils.unzipString(this.sql).getBytes());
+        decode();
+        this.sql =
+            Base64.getEncoder().encodeToString(this.sql.getBytes(StandardCharsets.UTF_8));
     }
 }

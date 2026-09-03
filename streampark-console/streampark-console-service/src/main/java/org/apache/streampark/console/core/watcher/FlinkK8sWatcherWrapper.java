@@ -17,16 +17,17 @@
 
 package org.apache.streampark.console.core.watcher;
 
+import org.apache.streampark.common.configuration.JvmOptionsParser;
 import org.apache.streampark.common.enums.FlinkDeployMode;
-import org.apache.streampark.common.util.FlinkConfigurationUtils;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
-import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
-import org.apache.streampark.flink.kubernetes.FlinkK8sWatcherFactory;
+import org.apache.streampark.console.core.util.FlinkEnvUtils;
+import org.apache.streampark.flink.kubernetes.FlinkKubernetesWatcher;
+import org.apache.streampark.flink.kubernetes.FlinkKubernetesWatcherFactory;
 import org.apache.streampark.flink.kubernetes.FlinkTrackConfig;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
@@ -81,9 +82,10 @@ public class FlinkK8sWatcherWrapper {
 
     /** Register FlinkTrackMonitor bean for tracking flink job on kubernetes. */
     @Bean(destroyMethod = "close")
-    public FlinkK8sWatcher registerFlinkK8sWatcher() {
+    public FlinkKubernetesWatcher registerFlinkK8sWatcher() {
         // lazy start tracking monitor
-        FlinkK8sWatcher flinkK8sWatcher = FlinkK8sWatcherFactory.createInstance(FlinkTrackConfig.fromConfigHub(), true);
+        FlinkKubernetesWatcher flinkK8sWatcher =
+            FlinkKubernetesWatcherFactory.createInstance(FlinkTrackConfig.fromConfiguration(), true);
         initFlinkK8sWatcher(flinkK8sWatcher);
 
         /*
@@ -97,7 +99,7 @@ public class FlinkK8sWatcherWrapper {
         return flinkK8sWatcher;
     }
 
-    private void initFlinkK8sWatcher(@Nonnull FlinkK8sWatcher trackMonitor) {
+    private void initFlinkK8sWatcher(@Nonnull FlinkKubernetesWatcher trackMonitor) {
         // register change event listener
         trackMonitor.registerListener(flinkK8sChangeEventListener);
         // recovery tracking list
@@ -126,10 +128,10 @@ public class FlinkK8sWatcherWrapper {
 
     public TrackId toTrackId(FlinkApplication app) {
         FlinkEnv flinkEnv = flinkEnvService.getById(app.getVersionId());
-        Properties properties = flinkEnv.getFlinkConfig();
+        Properties properties = FlinkEnvUtils.properties(flinkEnv);
 
-        Map<String, String> dynamicProperties = FlinkConfigurationUtils
-            .extractDynamicPropertiesAsJava(app.getDynamicProperties());
+        Map<String, String> dynamicProperties =
+            JvmOptionsParser.parse(app.getDynamicProperties()).toMap();
         String archiveDir = dynamicProperties.get(JobManagerOptions.ARCHIVE_DIR.key());
         if (archiveDir != null) {
             properties.put(JobManagerOptions.ARCHIVE_DIR.key(), archiveDir);

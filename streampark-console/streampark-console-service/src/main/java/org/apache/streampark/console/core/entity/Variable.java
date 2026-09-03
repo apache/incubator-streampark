@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.configuration.Constants;
 import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
 
 import com.baomidou.mybatisplus.annotation.IdType;

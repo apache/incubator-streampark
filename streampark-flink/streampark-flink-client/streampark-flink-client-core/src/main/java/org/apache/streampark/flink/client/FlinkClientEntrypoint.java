@@ -18,16 +18,7 @@
 package org.apache.streampark.flink.client;
 
 import org.apache.streampark.common.enums.FlinkDeployMode;
-import org.apache.streampark.flink.client.bean.CancelRequest;
-import org.apache.streampark.flink.client.bean.CancelResponse;
-import org.apache.streampark.flink.client.bean.DeployRequest;
-import org.apache.streampark.flink.client.bean.DeployResponse;
-import org.apache.streampark.flink.client.bean.SavepointResponse;
-import org.apache.streampark.flink.client.bean.ShutDownRequest;
-import org.apache.streampark.flink.client.bean.ShutDownResponse;
-import org.apache.streampark.flink.client.bean.SubmitRequest;
-import org.apache.streampark.flink.client.bean.SubmitResponse;
-import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
+import org.apache.streampark.flink.client.impl.AbstractFlinkClient;
 import org.apache.streampark.flink.client.impl.KubernetesNativeApplicationClient;
 import org.apache.streampark.flink.client.impl.KubernetesNativeSessionClient;
 import org.apache.streampark.flink.client.impl.LocalClient;
@@ -35,7 +26,16 @@ import org.apache.streampark.flink.client.impl.RemoteClient;
 import org.apache.streampark.flink.client.impl.YarnApplicationClient;
 import org.apache.streampark.flink.client.impl.YarnPerJobClient;
 import org.apache.streampark.flink.client.impl.YarnSessionClient;
-import org.apache.streampark.flink.client.trait.FlinkClientTrait;
+import org.apache.streampark.flink.client.request.CancelRequest;
+import org.apache.streampark.flink.client.request.DeployRequest;
+import org.apache.streampark.flink.client.request.ShutdownRequest;
+import org.apache.streampark.flink.client.request.SubmitRequest;
+import org.apache.streampark.flink.client.request.TriggerSavepointRequest;
+import org.apache.streampark.flink.client.response.CancelResponse;
+import org.apache.streampark.flink.client.response.DeployResponse;
+import org.apache.streampark.flink.client.response.SavepointResponse;
+import org.apache.streampark.flink.client.response.ShutdownResponse;
+import org.apache.streampark.flink.client.response.SubmitResponse;
 
 import org.apache.flink.util.FlinkException;
 
@@ -45,7 +45,8 @@ import java.util.Map;
 /** Entry point for Flink client operations routed by deploy mode. */
 public final class FlinkClientEntrypoint {
 
-    private static final Map<FlinkDeployMode, FlinkClientTrait> CLIENTS = new EnumMap<>(FlinkDeployMode.class);
+    private static final Map<FlinkDeployMode, AbstractFlinkClient> CLIENTS =
+        new EnumMap<>(FlinkDeployMode.class);
 
     static {
         CLIENTS.put(FlinkDeployMode.LOCAL, LocalClient.INSTANCE);
@@ -66,30 +67,33 @@ public final class FlinkClientEntrypoint {
     @FunctionalInterface
     private interface ClientInvoker<R> {
 
-        R invoke(FlinkClientTrait client) throws FlinkException;
+        R invoke(AbstractFlinkClient client) throws FlinkException;
     }
 
     private static <R> R invokeClient(
                                       FlinkDeployMode deployMode,
                                       ClientInvoker<R> invoker,
                                       String action) throws FlinkException {
-        FlinkClientTrait client = CLIENTS.get(deployMode);
+        AbstractFlinkClient client = CLIENTS.get(deployMode);
         if (client != null) {
             return invoker.invoke(client);
         }
         throw new UnsupportedOperationException("Unsupported " + deployMode + " " + action);
     }
 
+    /** Submits an application through the client selected by its deploy mode. */
     public static SubmitResponse submit(SubmitRequest submitRequest) throws FlinkException {
         return invokeClient(
             submitRequest.deployMode(), client -> client.submit(submitRequest), "submit");
     }
 
+    /** Cancels a running job through the client selected by its deploy mode. */
     public static CancelResponse cancel(CancelRequest cancelRequest) throws FlinkException {
         return invokeClient(
             cancelRequest.deployMode(), client -> client.cancel(cancelRequest), "cancel");
     }
 
+    /** Triggers a savepoint through the client selected by its deploy mode. */
     public static SavepointResponse triggerSavepoint(TriggerSavepointRequest savepointRequest) throws FlinkException {
         return invokeClient(
             savepointRequest.deployMode(),
@@ -97,6 +101,7 @@ public final class FlinkClientEntrypoint {
             "triggerSavepoint");
     }
 
+    /** Deploys a persistent session cluster. */
     public static DeployResponse deploy(DeployRequest deployRequest) throws Exception {
         if (deployRequest.deployMode() == FlinkDeployMode.YARN_SESSION) {
             return YarnSessionClient.INSTANCE.deploy(deployRequest);
@@ -108,14 +113,15 @@ public final class FlinkClientEntrypoint {
             "Unsupported " + deployRequest.deployMode() + " deploy cluster ");
     }
 
-    public static ShutDownResponse shutdown(ShutDownRequest shutDownRequest) throws Exception {
-        if (shutDownRequest.deployMode() == FlinkDeployMode.YARN_SESSION) {
-            return YarnSessionClient.INSTANCE.shutdown(shutDownRequest);
+    /** Shuts down a persistent session cluster. */
+    public static ShutdownResponse shutdown(ShutdownRequest shutdownRequest) throws Exception {
+        if (shutdownRequest.deployMode() == FlinkDeployMode.YARN_SESSION) {
+            return YarnSessionClient.INSTANCE.shutdown(shutdownRequest);
         }
-        if (shutDownRequest.deployMode() == FlinkDeployMode.KUBERNETES_NATIVE_SESSION) {
-            return KubernetesNativeSessionClient.INSTANCE.shutdown(shutDownRequest);
+        if (shutdownRequest.deployMode() == FlinkDeployMode.KUBERNETES_NATIVE_SESSION) {
+            return KubernetesNativeSessionClient.INSTANCE.shutdown(shutdownRequest);
         }
         throw new UnsupportedOperationException(
-            "Unsupported " + shutDownRequest.deployMode() + " shutdown cluster ");
+            "Unsupported " + shutdownRequest.deployMode() + " shutdown cluster ");
     }
 }

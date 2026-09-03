@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.bean;
 
-import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.configuration.Workspace;
 import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.util.JacksonUtils;
@@ -67,7 +67,7 @@ public class Dependency {
             return false;
         }
         File localJar = WebUtils.getAppTempDir();
-        File localUploads = new File(Workspace.local().APP_UPLOADS());
+        File localUploads = new File(Workspace.LOCAL.uploads);
         Set<String> otherJars = new HashSet<>(other.jar);
         for (String jarName : jar) {
             if (!otherJars.contains(jarName)
@@ -81,7 +81,7 @@ public class Dependency {
     public DependencyInfo toJarPackDeps() {
         List<Artifact> mvnArts = toArtifact();
         List<String> extJars = this.jar.stream()
-            .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
+            .map(jar -> Workspace.LOCAL.uploads + "/" + jar)
             .collect(Collectors.toList());
         return new DependencyInfo(mvnArts, extJars);
     }

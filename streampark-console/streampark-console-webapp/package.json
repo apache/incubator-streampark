@@ -1,6 +1,6 @@
 {
   "name": "streampark-webapp",
-  "version": "3.0.0-SNAPSHOT",
+  "version": "3.0.0",
   "author": {
     "name": "streampark",
     "url": "https://streampark.apache.org"

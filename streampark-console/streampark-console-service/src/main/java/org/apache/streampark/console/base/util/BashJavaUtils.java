@@ -17,9 +17,10 @@
 
 package org.apache.streampark.console.base.util;
 
-import org.apache.streampark.common.conf.FlinkVersion;
+import org.apache.streampark.common.configuration.ConfigurationParser;
+import org.apache.streampark.common.core.FlinkVersion;
 import org.apache.streampark.common.util.FileUtils;
-import org.apache.streampark.common.util.PropertiesUtils;
+import org.apache.streampark.common.util.FlinkConfigurationUtils;
 
 import org.apache.commons.io.output.NullOutputStream;
 
@@ -49,7 +50,7 @@ public class BashJavaUtils {
             case "--get_yaml":
                 String key = actionArgs[0];
                 String conf = actionArgs[1];
-                Map<String, String> confMap = PropertiesUtils.fromYamlFileAsJava(conf);
+                Map<String, String> confMap = ConfigurationParser.parse(Paths.get(conf)).toMap();
                 String value = confMap.get(key);
                 System.out.println(value);
                 break;
@@ -82,10 +83,9 @@ public class BashJavaUtils {
                 System.setOut(new PrintStream(new NullOutputStream()));
 
                 String version = flinkVersion.majorVersion();
-                float ver = Float.parseFloat(version);
-                File yaml = new File(flinkHome, ver < 1.19f ? "/conf/flink-conf.yaml" : "/conf/config.yaml");
-
-                Map<String, String> config = PropertiesUtils.fromYamlFileAsJava(yaml.getAbsolutePath());
+                Map<String, String> config =
+                    FlinkConfigurationUtils.loadConfiguration(
+                        new File(flinkHome, "conf").getAbsolutePath(), version);
                 String flinkPort = config.getOrDefault("rest.port", "8081");
                 System.setOut(originalOut);
                 System.out.println(

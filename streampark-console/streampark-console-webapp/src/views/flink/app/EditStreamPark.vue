@@ -295,6 +295,7 @@
       isSetConfig = true;
     }
     const defaultFormValue = { isSetConfig, configOverride };
+    const flinkSqlContent = res.flinkSql ? decodeByBase64(res.flinkSql) : '';
     configOptions.forEach((item) => {
       Object.assign(defaultFormValue, {
         [item.key]: item.defaultValue,
@@ -305,7 +306,7 @@
       jobType: res.jobType,
       appType: res.appType,
       deployMode: res.deployMode,
-      flinkSql: res.flinkSql ? decodeByBase64(res.flinkSql) : '',
+      flinkSql: flinkSqlContent,
       dependency: '',
       module: res.module,
       configId,
@@ -316,17 +317,16 @@
       project: app.projectId,
       ...defaultFormValue,
     });
-    nextTick(() => {
-      unref(flinkSql)?.setContent(decodeByBase64(res.flinkSql));
-
-      setTimeout(() => {
-        unref(dependencyRef)?.setDefaultValue(JSON.parse(res.dependency || '{}'));
-        unref(podTemplateRef)?.handleChoicePodTemplate('ptVisual', res.k8sPodTemplate);
-        unref(podTemplateRef)?.handleChoicePodTemplate('jmPtVisual', res.k8sJmPodTemplate);
-        unref(podTemplateRef)?.handleChoicePodTemplate('tmPtVisual', res.k8sTmPodTemplate);
-      }, 1000);
-    });
     handleReset();
+    await nextTick();
+    unref(flinkSql)?.setContent(flinkSqlContent);
+
+    setTimeout(() => {
+      unref(dependencyRef)?.setDefaultValue(JSON.parse(res.dependency || '{}'));
+      unref(podTemplateRef)?.handleChoicePodTemplate('ptVisual', res.k8sPodTemplate);
+      unref(podTemplateRef)?.handleChoicePodTemplate('jmPtVisual', res.k8sJmPodTemplate);
+      unref(podTemplateRef)?.handleChoicePodTemplate('tmPtVisual', res.k8sTmPodTemplate);
+    }, 1000);
   }
 
   function handleMergely(configOverride: string) {

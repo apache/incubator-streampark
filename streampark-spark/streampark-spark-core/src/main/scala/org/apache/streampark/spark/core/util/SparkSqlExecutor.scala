@@ -17,9 +17,11 @@
 
 package org.apache.streampark.spark.core.util
 
-import org.apache.streampark.common.conf.ConfigKeys._
-import org.apache.streampark.common.util.{DeflaterUtils, Logger, PropertiesUtils}
+import org.apache.streampark.common.configuration.{CommandLineParser, ConfigurationParser}
+import org.apache.streampark.common.configuration.option.ApplicationOptions
+import org.apache.streampark.common.util.{DeflaterUtils, Logger}
 import org.apache.streampark.common.util.Implicits._
+import org.apache.streampark.spark.configuration.SparkRuntimeOptions
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.SparkConf
@@ -52,10 +54,14 @@ object SparkSqlExecutor extends Logger {
 
     val context = checkpoint match {
       case "" =>
-        new StreamingContext(sparkSession.sparkContext, Seconds(sparkConf.get(KEY_SPARK_BATCH_DURATION).toInt))
+        new StreamingContext(
+          sparkSession.sparkContext,
+          Seconds(sparkConf.get(SparkRuntimeOptions.BATCH_DURATION_SECONDS.key).toInt))
       case checkpointPath =>
         def createContext(): StreamingContext =
-          new StreamingContext(sparkSession.sparkContext, Seconds(sparkConf.get(KEY_SPARK_BATCH_DURATION).toInt))
+          new StreamingContext(
+            sparkSession.sparkContext,
+            Seconds(sparkConf.get(SparkRuntimeOptions.BATCH_DURATION_SECONDS.key).toInt))
         val tmpContext =
           StreamingContext.getOrCreate(checkpointPath, createContext _, createOnError = createOnError)
         tmpContext.checkpoint(checkpointPath)
@@ -81,9 +87,8 @@ object SparkSqlExecutor extends Logger {
   }
 
   private def executeSql(args: Array[String], sparkSession: SparkSession): Unit = {
-    val parameterTool = ParameterTool.fromArgs(args)
     val sparkSql = {
-      val sql = parameterTool.get(KEY_SPARK_SQL())
+      val sql = CommandLineParser.parse(args).get(ApplicationOptions.SQL)
       require(StringUtils.isNotBlank(sql), "Usage: spark sql cannot be null")
       Try(DeflaterUtils.unzipString(sql)) match {
         case Success(value) => value
@@ -122,7 +127,7 @@ object SparkSqlExecutor extends Logger {
         case "--createOnError" :: _ :: tail =>
           argv = tail
         case Nil =>
-        case other :: value :: tail if other.startsWith(PARAM_PREFIX) =>
+        case other :: value :: tail if other.startsWith(CommandLineParser.LONG_OPTION_PREFIX) =>
           userArgs += other.drop(2) -> value
           argv = tail
         case tail =>
@@ -132,25 +137,18 @@ object SparkSqlExecutor extends Logger {
     }
 
     if (conf != null) {
-      val localConf = conf.split("\\.").last match {
-        case "conf" => PropertiesUtils.fromHoconFile(conf)
-        case "properties" => PropertiesUtils.fromPropertiesFile(conf)
-        case "yaml" | "yml" => PropertiesUtils.fromYamlFile(conf)
-        case _ =>
-          throw new IllegalArgumentException(
-            "[StreamPark] Usage: config file error,must be [properties|yaml|conf]")
-      }
+      val localConf = ConfigurationParser.parse(java.nio.file.Paths.get(conf)).toMap.asScala
       localConf.foreach(arg => sparkConf.set(arg._1, arg._2))
     }
     userArgs.foreach(arg => sparkConf.set(arg._1, arg._2))
 
-    val appMain = sparkConf.get(KEY_SPARK_MAIN_CLASS, "org.apache.streampark.spark.cli.SqlClient")
+    val appMain = sparkConf.get(SparkRuntimeOptions.MAIN_CLASS.key, "org.apache.streampark.spark.cli.SqlClient")
     if (appMain == null) {
-      logError(s"[StreamPark] parameter: $KEY_SPARK_MAIN_CLASS must not be empty!")
+      logError(s"[StreamPark] parameter: ${SparkRuntimeOptions.MAIN_CLASS.key} must not be empty!")
       System.exit(1)
     }
 
-    val appName = sparkConf.get(KEY_SPARK_APP_NAME, null) match {
+    val appName = sparkConf.get(SparkRuntimeOptions.APPLICATION_NAME.key, null) match {
       case null | "" => appMain
       case name => name
     }

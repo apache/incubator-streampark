@@ -89,7 +89,7 @@ public class FlinkApplicationBackupServiceImpl
         // If necessary, perform the backup first
         if (bakParam.isBackup()) {
             application.setBackUpDescription(bakParam.getDescription());
-            if (application.isFlinkSql()) {
+            if (application.isFlinkSqlJob()) {
                 FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
                 backup(application, flinkSql);
             } else {
@@ -107,7 +107,7 @@ public class FlinkApplicationBackupServiceImpl
             effectiveService.saveOrUpdate(
                 bakParam.getAppId(), EffectiveTypeEnum.CONFIG, bakParam.getId());
             // if flink sql task, will be rollback sql and dependencies
-            if (application.isFlinkSql()) {
+            if (application.isFlinkSqlJob()) {
                 effectiveService.saveOrUpdate(
                     bakParam.getAppId(), EffectiveTypeEnum.FLINKSQL, bakParam.getSqlId());
             }
@@ -141,7 +141,7 @@ public class FlinkApplicationBackupServiceImpl
         if (!backUpPages.getRecords().isEmpty()) {
             FlinkApplicationBackup backup = backUpPages.getRecords().get(0);
             String path = backup.getPath();
-            appParam.getFsOperator().move(path, appParam.getWorkspace().APP_WORKSPACE());
+            appParam.getFsOperator().move(path, appParam.getWorkspace().workspace);
             super.removeById(backup.getId());
         }
     }
@@ -154,10 +154,9 @@ public class FlinkApplicationBackupServiceImpl
                 .getFsOperator()
                 .delete(
                     appParam
-                        .getWorkspace()
-                        .APP_BACKUPS()
-                        .concat("/")
-                        .concat(appParam.getId().toString()));
+                        .getWorkspace().backups
+                            .concat("/")
+                            .concat(appParam.getId().toString()));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

@@ -28,6 +28,10 @@
     <artifactId>streampark-flink-shims-base</artifactId>
     <name>StreamPark : Flink Shims Base</name>
 
+    <properties>
+        <flink.version>1.18.0</flink.version>
+    </properties>
+
     <dependencies>
 
         <dependency>

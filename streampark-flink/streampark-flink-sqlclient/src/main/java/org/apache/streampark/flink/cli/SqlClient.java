@@ -17,27 +17,32 @@
 
 package org.apache.streampark.flink.cli;
 
-import org.apache.streampark.common.conf.ConfigKeys;
+import org.apache.streampark.common.configuration.CommandLineParser;
+import org.apache.streampark.common.configuration.Configuration;
+import org.apache.streampark.common.configuration.ConfigurationFormat;
+import org.apache.streampark.common.configuration.ConfigurationParser;
+import org.apache.streampark.common.configuration.FlinkOptions;
+import org.apache.streampark.common.configuration.option.ApplicationOptions;
+import org.apache.streampark.common.configuration.option.CoreOptions;
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.common.util.SystemPropertyUtils;
+import org.apache.streampark.flink.configuration.FlinkJobParameters;
+import org.apache.streampark.flink.core.FlinkTableInitializer;
 import org.apache.streampark.flink.core.SqlCommand;
 import org.apache.streampark.flink.core.SqlCommandCall;
 import org.apache.streampark.flink.core.SqlCommandParser;
 import org.apache.streampark.flink.core.StreamTableContext;
-import org.apache.streampark.flink.core.StreamTableEnvConfig;
 import org.apache.streampark.flink.core.TableContext;
-import org.apache.streampark.flink.core.TableEnvConfig;
+import org.apache.streampark.flink.core.bean.StreamTableContextSpec;
+import org.apache.streampark.flink.core.bean.TableContextSpec;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.RuntimeExecutionMode;
-import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.ExecutionOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /** Flink SQL job CLI entry point. */
 public final class SqlClient {
@@ -48,10 +53,9 @@ public final class SqlClient {
     public static void main(String[] args) {
         List<String> arguments = new ArrayList<>(Arrays.asList(args));
 
-        ParameterTool parameterTool = ParameterTool.fromArgs(args);
+        FlinkJobParameters parameters = FlinkJobParameters.of(CommandLineParser.parse(args));
 
-        String sqlKey = ConfigKeys.KEY_FLINK_SQL();
-        String sql = parameterTool.get(sqlKey);
+        String sql = parameters.get(ApplicationOptions.SQL);
         if (StringUtils.isBlank(sql)) {
             throw new IllegalArgumentException("Usage: flink sql cannot be null");
         }
@@ -68,8 +72,7 @@ public final class SqlClient {
         }
 
         String defaultMode = RuntimeExecutionMode.STREAMING.name();
-        String mode =
-            resolveExecutionMode(parameterTool, sets, arguments, defaultMode);
+        String mode = resolveExecutionMode(parameters, sets, arguments, defaultMode);
 
         switch (mode) {
             case "STREAMING":
@@ -86,7 +89,7 @@ public final class SqlClient {
     }
 
     static String resolveExecutionMode(
-                                       ParameterTool parameterTool,
+                                       FlinkJobParameters parameters,
                                        List<SqlCommandCall> sets,
                                        List<String> arguments,
                                        String defaultMode) {
@@ -94,30 +97,59 @@ public final class SqlClient {
             if (setCall.operands.length >= 2
                 && ExecutionOptions.RUNTIME_MODE.key().equals(setCall.operands[0])) {
                 String runtimeMode = setCall.operands[1].toUpperCase();
-                arguments.add("-D" + ExecutionOptions.RUNTIME_MODE.key() + "=" + runtimeMode);
+                setArgument(arguments, ExecutionOptions.RUNTIME_MODE.key(), runtimeMode);
                 return runtimeMode;
             }
         }
 
-        String configuredMode = parameterTool.get(ExecutionOptions.RUNTIME_MODE.key(), null);
+        String configuredMode = parameters.get(ExecutionOptions.RUNTIME_MODE.key(), null);
         if (configuredMode != null) {
             return configuredMode;
         }
 
-        String appConf = parameterTool.get(ConfigKeys.KEY_APP_CONF(), null);
+        String appConf = parameters.getOptional(FlinkOptions.APPLICATION_CONFIG).orElse(null);
         String runtimeMode;
         if (appConf == null) {
             runtimeMode = defaultMode;
         } else {
-            Map<String, String> parameter =
-                PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(appConf.substring(7)));
+            Configuration applicationConfiguration = parseApplicationConfiguration(appConf);
             runtimeMode =
-                parameter
-                    .getOrDefault(ConfigKeys.KEY_FLINK_TABLE_MODE(), defaultMode)
+                applicationConfiguration
+                    .getOptional(FlinkOptions.TABLE_MODE)
+                    .orElse(defaultMode)
                     .toUpperCase();
         }
-        arguments.add("-D" + ExecutionOptions.RUNTIME_MODE.key() + "=" + runtimeMode);
+        setArgument(arguments, ExecutionOptions.RUNTIME_MODE.key(), runtimeMode);
         return runtimeMode;
+    }
+
+    private static Configuration parseApplicationConfiguration(String resource) {
+        if (resource.startsWith("yaml://")) {
+            return ConfigurationParser.parse(
+                DeflaterUtils.unzipString(resource.substring("yaml://".length())),
+                ConfigurationFormat.YAML,
+                "inline SQL application configuration");
+        }
+        return ConfigurationParser.parse(java.nio.file.Path.of(resource));
+    }
+
+    private static void setArgument(List<String> arguments, String key, String value) {
+        String option = CommandLineParser.LONG_OPTION_PREFIX + key;
+        for (int index = 0; index < arguments.size(); index++) {
+            if (option.equals(arguments.get(index))) {
+                if (index + 1 < arguments.size()) {
+                    arguments.set(index + 1, value);
+                    return;
+                }
+                break;
+            }
+            if (arguments.get(index).startsWith(option + "=")) {
+                arguments.set(index, option + "=" + value);
+                return;
+            }
+        }
+        arguments.add(option);
+        arguments.add(value);
     }
 
     private static final class BatchSqlApp {
@@ -126,9 +158,10 @@ public final class SqlClient {
         }
 
         static void run(String[] args) {
-            SystemPropertyUtils.setAppHome(ConfigKeys.KEY_APP_HOME(), SqlClient.class);
-            TableContext context = new TableContext(new TableEnvConfig(args, null));
-            context.sql(null);
+            SystemPropertyUtils.setAppHome(CoreOptions.APP_HOME.key(), SqlClient.class);
+            TableContextSpec contextConfig = FlinkTableInitializer.initializeTable(args);
+            TableContext context = new TableContext(contextConfig);
+            context.sql();
             context.start();
         }
     }
@@ -139,10 +172,10 @@ public final class SqlClient {
         }
 
         static void run(String[] args) {
-            SystemPropertyUtils.setAppHome(ConfigKeys.KEY_APP_HOME(), SqlClient.class);
-            StreamTableContext context =
-                new StreamTableContext(new StreamTableEnvConfig(args, null, null));
-            context.sql(null);
+            SystemPropertyUtils.setAppHome(CoreOptions.APP_HOME.key(), SqlClient.class);
+            StreamTableContextSpec contextConfig = FlinkTableInitializer.initializeStreamTable(args);
+            StreamTableContext context = new StreamTableContext(contextConfig);
+            context.sql();
             context.start();
         }
     }

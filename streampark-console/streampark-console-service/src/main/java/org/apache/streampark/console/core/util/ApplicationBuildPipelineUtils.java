@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.util;
 
-import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.configuration.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
@@ -128,7 +128,7 @@ public final class ApplicationBuildPipelineUtils {
         if (dependencyObject.getJar().isEmpty()) {
             return;
         }
-        String localUploads = Workspace.local().APP_UPLOADS();
+        String localUploads = Workspace.LOCAL.uploads;
         for (String jar : dependencyObject.getJar()) {
             File localJar = new File(WebUtils.getAppTempDir(), jar);
             File uploadJar = new File(localUploads, jar);
@@ -292,6 +292,6 @@ public final class ApplicationBuildPipelineUtils {
             .getJar()
             .forEach(
                 jar -> jarLibs.add(
-                    String.format("%s/%d/%s", Workspace.local().APP_UPLOADS(), teamId, jar)));
+                    String.format("%s/%d/%s", Workspace.LOCAL.uploads, teamId, jar)));
     }
 }

@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
-import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.configuration.Workspace;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.AutoCloseUtils;
 
@@ -50,7 +50,7 @@ public final class YarnJarUploader {
             fsOperator.copy(originFile.getAbsolutePath(), target);
             return;
         }
-        String uploadFile = Workspace.remote().APP_UPLOADS() + "/" + originFile.getName();
+        String uploadFile = Workspace.REMOTE.uploads + "/" + originFile.getName();
         if (fsOperator.exists(uploadFile)) {
             AutoCloseUtils.using(
                 new FileInputStream(originFile),

@@ -17,13 +17,6 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.conf.ConfigKeys;
-import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.common.util.PropertiesUtils;
-import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
-
-import org.apache.commons.collections.MapUtils;
-
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -31,20 +24,13 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.Nullable;
-
-import java.util.Base64;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
+/** Persistent version of an application's user-supplied Flink configuration. */
 @Getter
 @Setter
 @TableName("t_flink_config")
-@Slf4j
 public class FlinkApplicationConfig {
 
     @TableId(type = IdType.AUTO)
@@ -71,77 +57,4 @@ public class FlinkApplicationConfig {
     private Boolean latest;
 
     private transient boolean effective = false;
-
-    public void setToApplication(FlinkApplication application) {
-        String unzipString = DeflaterUtils.unzipString(content);
-        String encode = Base64.getEncoder().encodeToString(unzipString.getBytes());
-        application.setConfig(encode);
-        application.setConfigId(this.id);
-        application.setFormat(this.format);
-    }
-
-    public void setToApplication(SparkApplication application) {
-        String unzipString = DeflaterUtils.unzipString(content);
-        String encode = Base64.getEncoder().encodeToString(unzipString.getBytes());
-        application.setConfig(encode);
-        application.setConfigId(this.id);
-        application.setFormat(this.format);
-    }
-
-    public Map<String, String> readConfig() {
-        Map<String, String> configs = renderConfigs();
-
-        if (MapUtils.isNotEmpty(configs)) {
-            return configs.entrySet().stream()
-                .collect(
-                    Collectors.toMap(
-                        entry -> {
-                            String key = entry.getKey();
-                            if (key.startsWith(
-                                ConfigKeys.KEY_FLINK_OPTION_PREFIX())) {
-                                key = key.substring(
-                                    ConfigKeys.KEY_FLINK_OPTION_PREFIX()
-                                        .length());
-                            } else if (key.startsWith(ConfigKeys
-                                .KEY_FLINK_PROPERTY_PREFIX())) {
-                                key = key.substring(ConfigKeys
-                                    .KEY_FLINK_PROPERTY_PREFIX()
-                                    .length());
-                            } else if (key.startsWith(
-                                ConfigKeys.KEY_FLINK_TABLE_PREFIX())) {
-                                key = key.substring(ConfigKeys
-                                    .KEY_FLINK_TABLE_PREFIX().length());
-                            } else if (key.startsWith(
-                                ConfigKeys.KEY_APP_PREFIX())) {
-                                key = key.substring(ConfigKeys.KEY_APP_PREFIX()
-                                    .length());
-                            } else if (key.startsWith(
-                                ConfigKeys.KEY_SQL_PREFIX())) {
-                                key = key.substring(ConfigKeys.KEY_SQL_PREFIX()
-                                    .length());
-                            }
-                            return key;
-                        },
-                        Map.Entry::getValue));
-        }
-        return new HashMap<>();
-    }
-
-    @Nullable
-    private Map<String, String> renderConfigs() {
-        ConfigFileTypeEnum fileType = ConfigFileTypeEnum.of(this.format);
-        if (fileType == null) {
-            return null;
-        }
-        switch (fileType) {
-            case YAML:
-                return PropertiesUtils.fromYamlTextAsJava(DeflaterUtils.unzipString(this.content));
-            case PROPERTIES:
-                return PropertiesUtils.fromPropertiesTextAsJava(DeflaterUtils.unzipString(this.content));
-            case HOCON:
-                return PropertiesUtils.fromHoconTextAsJava(DeflaterUtils.unzipString(this.content));
-            default:
-                return new HashMap<>();
-        }
-    }
 }

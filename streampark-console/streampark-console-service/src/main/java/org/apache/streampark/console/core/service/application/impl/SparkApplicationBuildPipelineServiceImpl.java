@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
-import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.configuration.Constants;
+import org.apache.streampark.common.configuration.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.SparkDeployMode;
 import org.apache.streampark.common.util.AssertUtils;
@@ -175,7 +175,7 @@ public class SparkApplicationBuildPipelineServiceImpl
 
                     applicationInfoService.checkEnv(app);
 
-                    String appUploads = app.getWorkspace().APP_UPLOADS();
+                    String appUploads = app.getWorkspace().uploads;
                     ApplicationBuildPipelineUtils.prepareBuildResources(
                         app.isSparkJarOrPySparkJob(),
                         () -> ApplicationBuildPipelineUtils.prepareJarJobHome(
@@ -365,10 +365,10 @@ public class SparkApplicationBuildPipelineServiceImpl
             case SPARK_SQL:
                 String sqlDistJar = ServiceHelper.getSparkSqlClientJar(sparkEnv);
                 if (app.getDeployModeEnum() == SparkDeployMode.YARN_CLUSTER) {
-                    String clientPath = Workspace.remote().APP_CLIENT();
+                    String clientPath = Workspace.REMOTE.client;
                     return String.format("%s/%s", clientPath, sqlDistJar);
                 }
-                return Workspace.local().APP_CLIENT().concat("/").concat(sqlDistJar);
+                return Workspace.LOCAL.client.concat("/").concat(sqlDistJar);
             default:
                 throw new UnsupportedOperationException(
                     "[StreamPark] unsupported JobType: " + app.getJobTypeEnum());

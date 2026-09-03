@@ -17,8 +17,9 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
-import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.configuration.Constants;
+import org.apache.streampark.common.configuration.Workspace;
+import org.apache.streampark.common.core.FlinkVersion;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.util.AssertUtils;
@@ -48,6 +49,8 @@ import org.apache.streampark.console.core.service.application.FlinkApplicationCo
 import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.core.util.ApplicationBuildPipelineUtils;
+import org.apache.streampark.console.core.util.FlinkApplicationConfigUtils;
+import org.apache.streampark.console.core.util.FlinkEnvUtils;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
@@ -169,7 +172,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
             return true;
         }
         // rollback
-        if (app.isNeedRollback() && app.isFlinkSql()) {
+        if (app.isNeedRollback() && app.isFlinkSqlJob()) {
             flinkSqlService.rollback(app);
         }
 
@@ -207,7 +210,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
 
                     applicationInfoService.checkEnv(app);
 
-                    String appUploads = app.getWorkspace().APP_UPLOADS();
+                    String appUploads = app.getWorkspace().uploads;
                     ApplicationBuildPipelineUtils.prepareBuildResources(
                         app.isFlinkJarOrPyFlink(),
                         () -> ApplicationBuildPipelineUtils.prepareJarJobHome(
@@ -238,20 +241,20 @@ public class FlinkApplicationBuildPipelineServiceImpl
                         ApplicationBuildPipelineUtils.applySuccessfulRelease(
                             app,
                             () -> {
-                                if (app.isFlinkSql()) {
+                                if (app.isFlinkSqlJob()) {
                                     applicationManageService.toEffective(app);
                                 } else if (app.isStreamParkType()) {
                                     FlinkApplicationConfig config =
                                         applicationConfigService.getLatest(app.getId());
                                     if (config != null) {
-                                        config.setToApplication(app);
+                                        FlinkApplicationConfigUtils.applyTo(config, app);
                                         applicationConfigService.toEffective(
                                             app.getId(), app.getConfigId());
                                     }
                                 }
                             });
                         if (!app.isNeedRollback()) {
-                            if (app.isFlinkSql() && newFlinkSql != null) {
+                            if (app.isFlinkSqlJob() && newFlinkSql != null) {
                                 backUpService.backup(app, newFlinkSql);
                             } else {
                                 backUpService.backup(app, null);
@@ -328,9 +331,10 @@ public class FlinkApplicationBuildPipelineServiceImpl
         String checkEnvErrorMessage = "Check flink env failed, please check the flink version of this job";
         FlinkEnv env = flinkEnvService.getByIdOrDefault(app.getVersionId());
         ApiAlertException.throwIfNull(env, checkEnvErrorMessage);
-        boolean checkVersion = env.getFlinkVersion().checkVersion(false);
+        FlinkVersion flinkVersion = FlinkEnvUtils.version(env);
+        boolean checkVersion = flinkVersion.checkVersion(false);
         ApiAlertException.throwIfFalse(
-            checkVersion, "Unsupported flink version:" + env.getFlinkVersion().version());
+            checkVersion, "Unsupported flink version:" + flinkVersion.version());
 
         // 2) check env
         boolean envOk = applicationInfoService.checkEnv(app);
@@ -424,7 +428,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
             flinkUserJar,
             app.getDeployModeEnum(),
             app.getJobTypeEnum(),
-            flinkEnv.getFlinkVersion(),
+            FlinkEnvUtils.version(flinkEnv),
             getMergedDependencyInfo(app),
             app.getJobName(),
             app.getK8sNamespace(),
@@ -452,7 +456,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
             flinkUserJar,
             app.getDeployModeEnum(),
             app.getJobTypeEnum(),
-            flinkEnv.getFlinkVersion(),
+            FlinkEnvUtils.version(flinkEnv),
             getMergedDependencyInfo(app),
             app.getClusterId(),
             app.getK8sNamespace());
@@ -472,7 +476,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
             app.isFlinkJar(),
             app.getDeployModeEnum(),
             app.getJobTypeEnum(),
-            flinkEnv.getFlinkVersion(),
+            FlinkEnvUtils.version(flinkEnv),
             getMergedDependencyInfo(app));
     }
 
@@ -498,10 +502,10 @@ public class FlinkApplicationBuildPipelineServiceImpl
             case FLINK_SQL:
                 String sqlDistJar = ServiceHelper.getFlinkSqlClientJar(flinkEnv);
                 if (app.getDeployModeEnum() == FlinkDeployMode.YARN_APPLICATION) {
-                    String clientPath = Workspace.remote().APP_CLIENT();
+                    String clientPath = Workspace.REMOTE.client;
                     return String.format("%s/%s", clientPath, sqlDistJar);
                 }
-                return Workspace.local().APP_CLIENT().concat("/").concat(sqlDistJar);
+                return Workspace.LOCAL.client.concat("/").concat(sqlDistJar);
             default:
                 throw new UnsupportedOperationException(
                     "[StreamPark] unsupported JobType: " + app.getJobTypeEnum());

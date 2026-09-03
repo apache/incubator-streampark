@@ -17,8 +17,8 @@
 
 package org.apache.streampark.flink.kubernetes;
 
-import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates;
-import org.apache.streampark.spark.kubernetes.model.SparkK8sPodTemplates;
+import org.apache.streampark.flink.kubernetes.model.KubernetesPodTemplates;
+import org.apache.streampark.spark.kubernetes.model.SparkKubernetesPodTemplates;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -56,9 +56,9 @@ public final class PodTemplateTool {
      * @param podTemplates flink kubernetes pod templates
      * @return Map[k8s pod template option, template file output path]
      */
-    public static K8sPodTemplateFiles preparePodTemplateFiles(
-                                                              String buildWorkspace,
-                                                              K8sPodTemplates podTemplates) throws IOException {
+    public static KubernetesPodTemplateFiles preparePodTemplateFiles(
+                                                                     String buildWorkspace,
+                                                                     KubernetesPodTemplates podTemplates) throws IOException {
         File workspaceDir = new File(buildWorkspace);
         if (!workspaceDir.exists()) {
             workspaceDir.mkdir();
@@ -68,7 +68,7 @@ public final class PodTemplateTool {
         writeTemplate(buildWorkspace, podTemplates.podTemplate(), KUBERNETES_POD_TEMPLATE, podTempleMap);
         writeTemplate(buildWorkspace, podTemplates.jmPodTemplate(), KUBERNETES_JM_POD_TEMPLATE, podTempleMap);
         writeTemplate(buildWorkspace, podTemplates.tmPodTemplate(), KUBERNETES_TM_POD_TEMPLATE, podTempleMap);
-        return new K8sPodTemplateFiles(Collections.unmodifiableMap(podTempleMap));
+        return new KubernetesPodTemplateFiles(Collections.unmodifiableMap(podTempleMap));
     }
 
     /**
@@ -78,9 +78,9 @@ public final class PodTemplateTool {
      * @param podTemplates spark kubernetes pod templates
      * @return Map[k8s pod template option, template file output path]
      */
-    public static K8sPodTemplateFiles preparePodTemplateFiles(
-                                                              String buildWorkspace,
-                                                              SparkK8sPodTemplates podTemplates) throws IOException {
+    public static KubernetesPodTemplateFiles preparePodTemplateFiles(
+                                                                     String buildWorkspace,
+                                                                     SparkKubernetesPodTemplates podTemplates) throws IOException {
         File workspaceDir = new File(buildWorkspace);
         if (!workspaceDir.exists()) {
             workspaceDir.mkdir();
@@ -90,7 +90,7 @@ public final class PodTemplateTool {
         writeTemplate(buildWorkspace, podTemplates.driverPodTemplate(), KUBERNETES_DRIVER_POD_TEMPLATE, podTempleMap);
         writeTemplate(
             buildWorkspace, podTemplates.executorPodTemplate(), KUBERNETES_EXECUTOR_POD_TEMPLATE, podTempleMap);
-        return new K8sPodTemplateFiles(Collections.unmodifiableMap(podTempleMap));
+        return new KubernetesPodTemplateFiles(Collections.unmodifiableMap(podTempleMap));
     }
 
     private static void writeTemplate(

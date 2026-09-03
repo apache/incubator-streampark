@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.bean;
 
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.InternalConfigHolder;
+import org.apache.streampark.common.configuration.GlobalConfiguration;
+import org.apache.streampark.common.configuration.option.MavenOptions;
 import org.apache.streampark.console.core.entity.Setting;
 import org.apache.streampark.console.core.service.SettingService;
 
@@ -49,28 +49,28 @@ public class MavenConfig {
     /** Password for Maven authentication. */
     private String mvnAuthPassword;
 
-    /** */
+    /** Creates Maven configuration from settings stored by the console service. */
     public static MavenConfig fromSetting() {
         MavenConfig mavenConfig = new MavenConfig();
         Map<String, Setting> settings = SettingService.SETTINGS;
-        if (settings.containsKey(CommonConfig.MAVEN_SETTINGS_PATH().key())) {
+        if (settings.containsKey(MavenOptions.SETTINGS_PATH.key())) {
             mavenConfig.setMvnSettings(
-                settings.get(CommonConfig.MAVEN_SETTINGS_PATH().key()).getSettingValue());
+                settings.get(MavenOptions.SETTINGS_PATH.key()).getSettingValue());
         }
 
-        if (settings.containsKey(CommonConfig.MAVEN_REMOTE_URL().key())) {
+        if (settings.containsKey(MavenOptions.REPOSITORY_URL.key())) {
             mavenConfig.setMvnRepository(
-                settings.get(CommonConfig.MAVEN_REMOTE_URL().key()).getSettingValue());
+                settings.get(MavenOptions.REPOSITORY_URL.key()).getSettingValue());
         }
 
-        if (settings.containsKey(CommonConfig.MAVEN_AUTH_USER().key())) {
+        if (settings.containsKey(MavenOptions.USER_NAME.key())) {
             mavenConfig.setMvnAuthUser(
-                settings.get(CommonConfig.MAVEN_AUTH_USER().key()).getSettingValue());
+                settings.get(MavenOptions.USER_NAME.key()).getSettingValue());
         }
 
-        if (settings.containsKey(CommonConfig.MAVEN_AUTH_PASSWORD().key())) {
+        if (settings.containsKey(MavenOptions.PASSWORD.key())) {
             mavenConfig.setMvnAuthPassword(
-                settings.get(CommonConfig.MAVEN_AUTH_PASSWORD().key()).getSettingValue());
+                settings.get(MavenOptions.PASSWORD.key()).getSettingValue());
         }
 
         return mavenConfig;
@@ -84,19 +84,19 @@ public class MavenConfig {
     public void updateConfig() {
 
         if (StringUtils.isNotBlank(mvnSettings)) {
-            InternalConfigHolder.set(CommonConfig.MAVEN_SETTINGS_PATH(), mvnSettings);
+            GlobalConfiguration.set(MavenOptions.SETTINGS_PATH, mvnSettings, "database setting");
         }
 
         if (StringUtils.isNotBlank(mvnRepository)) {
-            InternalConfigHolder.set(CommonConfig.MAVEN_REMOTE_URL(), mvnRepository);
+            GlobalConfiguration.set(MavenOptions.REPOSITORY_URL, mvnRepository, "database setting");
         }
 
         if (StringUtils.isNotBlank(mvnAuthUser)) {
-            InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_USER(), mvnAuthUser);
+            GlobalConfiguration.set(MavenOptions.USER_NAME, mvnAuthUser, "database setting");
         }
 
         if (StringUtils.isNotBlank(mvnAuthPassword)) {
-            InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_PASSWORD(), mvnAuthPassword);
+            GlobalConfiguration.set(MavenOptions.PASSWORD, mvnAuthPassword, "database setting");
         }
     }
 }

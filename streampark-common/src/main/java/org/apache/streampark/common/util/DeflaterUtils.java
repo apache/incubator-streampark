@@ -17,11 +17,8 @@
 
 package org.apache.streampark.common.util;
 
-import org.apache.streampark.shaded.org.slf4j.Logger;
-
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
@@ -29,72 +26,99 @@ import java.util.zip.Inflater;
 
 public final class DeflaterUtils {
 
-    private static final Logger LOG =
-        StreamParkLoggerFactory.loggerFactory().getLogger(DeflaterUtils.class.getName());
+    private static final int BUFFER_SIZE = 256;
+    private static final int MAX_NESTED_COMPRESSION_DEPTH = 16;
 
     private DeflaterUtils() {
     }
 
+    /** Compresses UTF-8 text and returns its Base64 representation. */
     public static String zipString(String text) {
-        if (StringUtils.isBlank(text)) {
+        if (text == null || text.isEmpty()) {
             return "";
         }
         Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION);
-        deflater.setInput(text.getBytes());
-        deflater.finish();
-        byte[] bytes = new byte[256];
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(256);
-        while (!deflater.finished()) {
-            int length = deflater.deflate(bytes);
-            outputStream.write(bytes, 0, length);
+        try {
+            deflater.setInput(text.getBytes(StandardCharsets.UTF_8));
+            deflater.finish();
+            byte[] buffer = new byte[BUFFER_SIZE];
+            ByteArrayOutputStream output = new ByteArrayOutputStream(BUFFER_SIZE);
+            while (!deflater.finished()) {
+                int length = deflater.deflate(buffer);
+                output.write(buffer, 0, length);
+            }
+            return Base64.getEncoder().encodeToString(output.toByteArray());
+        } finally {
+            deflater.end();
         }
-        deflater.end();
-        return Base64.getEncoder().encodeToString(outputStream.toByteArray());
     }
 
-    public static String unzipString(String zipString) {
-        byte[] decode;
+    /** Decompresses Base64-encoded UTF-8 text, or returns {@code null} for invalid input. */
+    public static String unzipString(String compressedText) {
+        if (compressedText == null) {
+            return null;
+        }
+        if (compressedText.isEmpty()) {
+            return "";
+        }
+
+        byte[] compressedBytes;
         try {
-            decode = Base64.getDecoder().decode(zipString);
+            compressedBytes = Base64.getDecoder().decode(compressedText);
         } catch (IllegalArgumentException e) {
             return null;
         }
+
         Inflater inflater = new Inflater();
-        inflater.setInput(decode);
-        byte[] bytes = new byte[256];
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(256);
+        inflater.setInput(compressedBytes);
+        byte[] buffer = new byte[BUFFER_SIZE];
+        ByteArrayOutputStream output = new ByteArrayOutputStream(BUFFER_SIZE);
         try {
             while (!inflater.finished()) {
-                int length = inflater.inflate(bytes);
-                outputStream.write(bytes, 0, length);
+                int length = inflater.inflate(buffer);
+                if (length > 0) {
+                    output.write(buffer, 0, length);
+                    continue;
+                }
+                if (inflater.finished()) {
+                    break;
+                }
+                if (inflater.needsInput() || inflater.needsDictionary()) {
+                    return null;
+                }
+                // Inflater made no progress and cannot request more input. Treat it as corrupt.
+                return null;
             }
         } catch (DataFormatException e) {
-            LOG.warn("Failed to unzip string", e);
             return null;
         } finally {
             inflater.end();
         }
-        return outputStream.toString();
+        return new String(output.toByteArray(), StandardCharsets.UTF_8);
     }
 
-    /** Returns plain text, repeatedly decoding when the input is compressed multiple times. */
+    /**
+     * Returns plain text while accepting legacy values that were stored without compression or
+     * compressed more than once.
+     */
     public static String toPlainText(String text) {
-        if (StringUtils.isBlank(text)) {
+        if (text == null || text.isEmpty()) {
             return text;
         }
         String current = text;
-        while (true) {
+        for (int depth = 0; depth < MAX_NESTED_COMPRESSION_DEPTH; depth++) {
             String decoded = unzipString(current);
-            if (decoded == null) {
+            if (decoded == null || decoded.equals(current)) {
                 return current;
             }
             current = decoded;
         }
+        return current;
     }
 
-    /** Stores SQL/conf text as a single compressed blob regardless of input encoding. */
+    /** Normalizes plain or legacy nested-compressed text to one compressed representation. */
     public static String compressForStorage(String text) {
-        if (StringUtils.isBlank(text)) {
+        if (text == null || text.isEmpty()) {
             return "";
         }
         return zipString(toPlainText(text));

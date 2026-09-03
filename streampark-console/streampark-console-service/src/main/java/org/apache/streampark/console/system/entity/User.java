@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.entity;
 
-import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.configuration.Constants;
 import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.core.enums.UserTypeEnum;

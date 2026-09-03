@@ -32,8 +32,8 @@ import org.apache.streampark.console.core.mapper.SparkApplicationMapper;
 import org.apache.streampark.console.core.runner.EnvInitializer;
 import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
+import org.apache.streampark.console.core.util.FlinkShellCommandBuilder;
 import org.apache.streampark.console.core.watcher.SparkAppHttpWatcher;
-import org.apache.streampark.flink.core.conf.ParameterCli;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -248,7 +248,7 @@ public class SparkApplicationInfoServiceImpl
         String[] args = new String[2];
         args[0] = "--name";
         args[1] = appConfig;
-        return ParameterCli.read(args);
+        return FlinkShellCommandBuilder.read(args);
     }
 
     /**

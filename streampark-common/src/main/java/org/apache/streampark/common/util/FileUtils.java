@@ -256,7 +256,7 @@ public final class FileUtils {
     }
 
     public static String readFile(String filename) throws IOException {
-        return SafePathUtils.readConfigFile(filename);
+        return PathUtils.readFileAsString(filename);
     }
 
     public static String readFile(File file) throws IOException {

@@ -30,6 +30,12 @@
     <dependencies>
 
         <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${jupiter.version}</version>
@@ -47,12 +53,6 @@
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -107,6 +107,13 @@
             <artifactId>httpclient5</artifactId>
         </dependency>
 
+        <!-- OkHttp is supplied by applications that use the shared HTTP utility. -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-resolver</artifactId>
@@ -126,6 +133,7 @@
             <artifactId>streampark-shaded-jackson</artifactId>
             <version>${streampark.shaded.version}</version>
         </dependency>
+
     </dependencies>
 
     <build>

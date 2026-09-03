@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
-import org.apache.streampark.common.conf.ConfigKeys;
-import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.configuration.Constants;
+import org.apache.streampark.common.configuration.Workspace;
+import org.apache.streampark.common.configuration.option.ApplicationOptions;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.SparkDeployMode;
 import org.apache.streampark.common.enums.SparkJobType;
@@ -63,6 +63,7 @@ import org.apache.streampark.spark.client.bean.CancelRequest;
 import org.apache.streampark.spark.client.bean.CancelResponse;
 import org.apache.streampark.spark.client.bean.SubmitRequest;
 import org.apache.streampark.spark.client.bean.SubmitResponse;
+import org.apache.streampark.spark.configuration.SparkOptions;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -292,7 +293,7 @@ public class SparkApplicationActionServiceImpl
             // Get the sql of the replaced placeholder
             String realSql = variableService.replaceVariable(application.getTeamId(), sparkSql.getSql());
             sparkSql.setSql(DeflaterUtils.zipString(realSql));
-            extraParameter.put(ConfigKeys.KEY_SPARK_SQL(null), sparkSql.getSql());
+            extraParameter.put(ApplicationOptions.SQL.key(), sparkSql.getSql());
         }
 
         Tuple2<String, String> userJarAndAppConf = getUserJarAndAppConf(sparkEnv, application);
@@ -303,10 +304,10 @@ public class SparkApplicationActionServiceImpl
         if (SparkDeployMode.isYarnMode(application.getDeployModeEnum())) {
             buildResult = new ShadedBuildResponse(null, sparkUserJar, true);
             if (StringUtils.isNotBlank(application.getYarnQueueName())) {
-                extraParameter.put(ConfigKeys.KEY_SPARK_YARN_QUEUE_NAME(), application.getYarnQueueName());
+                extraParameter.put(SparkOptions.YARN_QUEUE_NAME.key(), application.getYarnQueueName());
             }
             if (StringUtils.isNotBlank(application.getYarnQueueLabel())) {
-                extraParameter.put(ConfigKeys.KEY_SPARK_YARN_QUEUE_LABEL(), application.getYarnQueueLabel());
+                extraParameter.put(SparkOptions.YARN_QUEUE_LABEL.key(), application.getYarnQueueLabel());
             }
         }
 
@@ -432,7 +433,7 @@ public class SparkApplicationActionServiceImpl
                     : String.format("yaml://%s", applicationConfig.getContent());
                 // 3) client
                 if (SparkDeployMode.YARN_CLUSTER == deployModeEnum) {
-                    String clientPath = Workspace.remote().APP_CLIENT();
+                    String clientPath = Workspace.REMOTE.client;
                     sparkUserJar = String.format("%s/%s", clientPath, sqlDistJar);
                 }
                 break;
@@ -476,7 +477,7 @@ public class SparkApplicationActionServiceImpl
                         case APACHE_SPARK:
                             appConf = String.format(
                                 "json://{\"%s\":\"%s\"}",
-                                ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
+                                ApplicationOptions.MAIN_CLASS.key(), application.getMainClass());
                             break;
                         default:
                             throw new IllegalArgumentException(

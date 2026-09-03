@@ -21,7 +21,6 @@ import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.runtime.state.FunctionInitializationContext;
-import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions;
 import org.apache.flink.util.TimeUtils;
 
 import java.io.File;
@@ -32,6 +31,8 @@ import java.util.stream.Collectors;
 
 /** Flink utility methods. */
 public final class FlinkUtils {
+
+    private static final String CHECKPOINT_INTERVAL_KEY = "execution.checkpointing.interval";
 
     private FlinkUtils() {
     }
@@ -72,8 +73,7 @@ public final class FlinkUtils {
     public static boolean isCheckpointEnabled(Map<String, String> map) {
         Duration checkpointInterval =
             TimeUtils.parseDuration(
-                map.getOrDefault(
-                    ExecutionCheckpointingOptions.CHECKPOINTING_INTERVAL.key(), "0ms"));
+                map.getOrDefault(CHECKPOINT_INTERVAL_KEY, "0ms"));
         return checkpointInterval.toMillis() > 0;
     }
 }

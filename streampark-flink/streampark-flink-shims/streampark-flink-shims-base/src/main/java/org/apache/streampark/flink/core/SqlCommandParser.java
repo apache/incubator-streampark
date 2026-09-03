@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
 
 /** Parser for Flink SQL commands. */
 public final class SqlCommandParser {
@@ -100,26 +99,19 @@ public final class SqlCommandParser {
     }
 
     private static Optional<SqlCommandCall> parseLine(SqlSegment sqlSegment) {
-        SqlCommand sqlCommand = SqlCommand.get(sqlSegment.sql.trim());
-        if (sqlCommand == null) {
-            return Optional.empty();
+        String statement = sqlSegment.sql.trim();
+        for (SqlCommand command : SqlCommand.values()) {
+            Optional<String[]> operands = command.parseOperands(statement);
+            if (operands.isPresent()) {
+                return Optional.of(
+                    new SqlCommandCall(
+                        sqlSegment.start,
+                        sqlSegment.end,
+                        command,
+                        operands.get(),
+                        statement));
+            }
         }
-
-        Matcher matcher = sqlCommand.getMatcher();
-        String[] groups = new String[matcher.groupCount()];
-        for (int i = 0; i < groups.length; i++) {
-            groups[i] = matcher.group(i + 1);
-        }
-
-        return sqlCommand
-            .getConverter()
-            .convert(groups)
-            .map(
-                operands -> new SqlCommandCall(
-                    sqlSegment.start,
-                    sqlSegment.end,
-                    sqlCommand,
-                    operands,
-                    sqlSegment.sql.trim()));
+        return Optional.empty();
     }
 }

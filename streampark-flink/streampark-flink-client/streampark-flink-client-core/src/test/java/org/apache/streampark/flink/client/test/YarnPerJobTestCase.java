@@ -17,9 +17,9 @@
 
 package org.apache.streampark.flink.client.test;
 
+import org.apache.streampark.common.configuration.FlinkRunOption;
 import org.apache.streampark.common.util.StreamParkLoggerFactory;
-import org.apache.streampark.flink.client.bean.SubmitResponse;
-import org.apache.streampark.flink.core.conf.FlinkRunOption;
+import org.apache.streampark.flink.client.response.SubmitResponse;
 
 import org.apache.streampark.shaded.org.slf4j.Logger;
 

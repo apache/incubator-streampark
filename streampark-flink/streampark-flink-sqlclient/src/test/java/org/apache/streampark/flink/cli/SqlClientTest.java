@@ -17,21 +17,22 @@
 
 package org.apache.streampark.flink.cli;
 
-import org.apache.streampark.common.conf.ConfigKeys;
+import org.apache.streampark.common.configuration.CommandLineParser;
+import org.apache.streampark.common.configuration.FlinkOptions;
+import org.apache.streampark.common.configuration.option.ApplicationOptions;
+import org.apache.streampark.common.util.DeflaterUtils;
+import org.apache.streampark.flink.configuration.FlinkJobParameters;
 import org.apache.streampark.flink.core.SqlCommand;
 import org.apache.streampark.flink.core.SqlCommandCall;
 
 import org.apache.flink.api.common.RuntimeExecutionMode;
-import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.ExecutionOptions;
 
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -52,27 +53,27 @@ class SqlClientTest {
 
         String mode =
             SqlClient.resolveExecutionMode(
-                ParameterTool.fromArgs(new String[0]),
+                FlinkJobParameters.of(CommandLineParser.parse(new String[0])),
                 sets,
                 arguments,
                 RuntimeExecutionMode.STREAMING.name());
 
         assertEquals("BATCH", mode);
-        assertTrue(
-            arguments.contains("-D" + ExecutionOptions.RUNTIME_MODE.key() + "=BATCH"));
+        assertTrue(arguments.contains("--" + ExecutionOptions.RUNTIME_MODE.key()));
+        assertTrue(arguments.contains("BATCH"));
     }
 
     @Test
     void resolveExecutionModeFromDynamicProperty() {
         List<String> arguments = new ArrayList<>();
-        Map<String, String> properties = new HashMap<>();
-        properties.put(ExecutionOptions.RUNTIME_MODE.key(), "BATCH");
-        ParameterTool parameterTool =
-            ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(properties));
+        FlinkJobParameters parameters =
+            FlinkJobParameters.of(
+                CommandLineParser.parse(
+                    new String[]{"--" + ExecutionOptions.RUNTIME_MODE.key(), "BATCH"}));
 
         String mode =
             SqlClient.resolveExecutionMode(
-                parameterTool,
+                parameters,
                 Collections.emptyList(),
                 arguments,
                 RuntimeExecutionMode.STREAMING.name());
@@ -84,21 +85,22 @@ class SqlClientTest {
     @Test
     void resolveExecutionModeFromAppConfYaml() {
         List<String> arguments = new ArrayList<>();
-        String yamlContent = ConfigKeys.KEY_FLINK_TABLE_MODE() + ": batch\n";
-        String appConf = "yaml://" + org.apache.streampark.common.util.DeflaterUtils.zipString(yamlContent);
-        Map<String, String> params = new HashMap<>();
-        params.put(ConfigKeys.KEY_APP_CONF(), appConf);
-        ParameterTool parameterTool = ParameterTool.fromMap(params);
+        String yamlContent = FlinkOptions.TABLE_MODE.key() + ": batch\n";
+        String appConf = "yaml://" + DeflaterUtils.zipString(yamlContent);
+        FlinkJobParameters parameters =
+            FlinkJobParameters.of(
+                CommandLineParser.parse(
+                    new String[]{"--" + ApplicationOptions.CONFIG.key(), appConf}));
 
         String mode =
             SqlClient.resolveExecutionMode(
-                parameterTool,
+                parameters,
                 Collections.emptyList(),
                 arguments,
                 RuntimeExecutionMode.STREAMING.name());
 
         assertEquals("BATCH", mode);
-        assertTrue(
-            arguments.contains("-D" + ExecutionOptions.RUNTIME_MODE.key() + "=BATCH"));
+        assertTrue(arguments.contains("--" + ExecutionOptions.RUNTIME_MODE.key()));
+        assertTrue(arguments.contains("BATCH"));
     }
 }

@@ -17,8 +17,9 @@
 
 package org.apache.streampark.spark.client.proxy
 
-import org.apache.streampark.common.conf.{ConfigKeys, SparkVersion}
-import org.apache.streampark.common.constants.Constants
+import org.apache.streampark.common.configuration.Constants
+import org.apache.streampark.common.configuration.option.CoreOptions
+import org.apache.streampark.common.core.SparkVersion
 import org.apache.streampark.common.util.{ChildFirstClassLoader, ClassLoaderObjectInputStream, ClassLoaderUtils, Logger}
 import org.apache.streampark.common.util.Implicits._
 
@@ -102,10 +103,10 @@ object SparkShimsProxy extends Logger {
   }
 
   private def addShimsUrls(sparkVersion: SparkVersion, addShimUrl: File => Unit): Unit = {
-    val appHome = System.getProperty(ConfigKeys.KEY_APP_HOME)
+    val appHome = System.getProperty(CoreOptions.APP_HOME.key)
     require(
       appHome != null,
-      String.format("%s is not found on System env.", ConfigKeys.KEY_APP_HOME))
+      String.format("%s is not found on System env.", CoreOptions.APP_HOME.key))
 
     val libPath = new File(s"$appHome/lib")
     require(libPath.exists())

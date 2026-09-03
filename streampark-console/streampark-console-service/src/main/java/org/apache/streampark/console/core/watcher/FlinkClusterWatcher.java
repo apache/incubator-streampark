@@ -17,13 +17,13 @@
 
 package org.apache.streampark.console.core.watcher;
 
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.InternalConfigHolder;
+import org.apache.streampark.common.configuration.GlobalConfiguration;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.YarnUtils;
+import org.apache.streampark.console.base.config.ConsoleOptions;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.metrics.flink.Overview;
@@ -134,7 +134,8 @@ public class FlinkClusterWatcher {
             cluster.setAllJobs(applicationInfoService.countByClusterId(cluster.getId()));
             cluster.setAffectedJobs(
                 applicationInfoService.countAffectedByClusterId(
-                    cluster.getId(), InternalConfigHolder.get(CommonConfig.SPRING_PROFILES_ACTIVE())));
+                    cluster.getId(),
+                    GlobalConfiguration.current().get(ConsoleOptions.DATABASE_DIALECT)));
             cluster.setClusterState(state.getState());
             cluster.setEndTime(new Date());
             alertService.alert(

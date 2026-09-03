@@ -18,13 +18,15 @@
 package org.apache.streampark.flink.client.impl;
 
 import org.apache.streampark.common.enums.FlinkDeployMode;
-import org.apache.streampark.flink.client.bean.CancelRequest;
-import org.apache.streampark.flink.client.bean.CancelResponse;
-import org.apache.streampark.flink.client.bean.SavepointResponse;
-import org.apache.streampark.flink.client.bean.SubmitRequest;
-import org.apache.streampark.flink.client.bean.SubmitResponse;
-import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
-import org.apache.streampark.flink.client.trait.KubernetesNativeClientTrait;
+import org.apache.streampark.common.util.Tuple2;
+import org.apache.streampark.flink.client.bean.SubmitRequestResolver;
+import org.apache.streampark.flink.client.configuration.FlinkConfigurationOps;
+import org.apache.streampark.flink.client.request.CancelRequest;
+import org.apache.streampark.flink.client.request.SubmitRequest;
+import org.apache.streampark.flink.client.request.TriggerSavepointRequest;
+import org.apache.streampark.flink.client.response.CancelResponse;
+import org.apache.streampark.flink.client.response.SavepointResponse;
+import org.apache.streampark.flink.client.response.SubmitResponse;
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse;
 
 import org.apache.commons.lang3.StringUtils;
@@ -40,10 +42,8 @@ import org.apache.flink.util.FlinkException;
 
 import com.google.common.collect.Lists;
 
-import scala.Tuple2;
-
 /** Kubernetes native application mode submit. */
-public final class KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
+public final class KubernetesNativeApplicationClient extends AbstractKubernetesNativeClient {
 
     public static final KubernetesNativeApplicationClient INSTANCE =
         new KubernetesNativeApplicationClient();
@@ -52,7 +52,9 @@ public final class KubernetesNativeApplicationClient extends KubernetesNativeCli
     }
 
     @Override
-    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws FlinkException {
+    protected SubmitResponse doSubmit(SubmitRequest submitRequest,
+                                      Configuration flinkConfig) throws FlinkException {
+
         if (StringUtils.isBlank(submitRequest.clusterId())) {
             throw new IllegalArgumentException(
                 String.format(
@@ -62,56 +64,56 @@ public final class KubernetesNativeApplicationClient extends KubernetesNativeCli
 
         return callAsFlinkException(
             () -> {
-                submitRequest.checkBuildResult();
+                SubmitRequestResolver.validateBuildResult(submitRequest);
 
                 DockerImageBuildResponse buildResult =
                     (DockerImageBuildResponse) submitRequest.buildResult();
 
-                FlinkConfigurationOps.safeSet(
+                FlinkConfigurationOps.setIfPresent(
                     flinkConfig,
                     PipelineOptions.JARS,
                     Lists.newArrayList(buildResult.dockerInnerMainJarPath()));
-                FlinkConfigurationOps.safeSet(
+                FlinkConfigurationOps.setIfPresent(
                     flinkConfig, KubernetesConfigOptions.CONTAINER_IMAGE, buildResult.flinkImageTag());
 
                 Tuple2<KubernetesClusterDescriptor, ClusterSpecification> descriptorAndSpec =
                     getK8sClusterDescriptorAndSpecification(flinkConfig);
-                KubernetesClusterDescriptor clusterDescriptor = descriptorAndSpec._1();
-                ClusterSpecification clusterSpecification = descriptorAndSpec._2();
+                KubernetesClusterDescriptor clusterDescriptor = descriptorAndSpec._1;
+                ClusterSpecification clusterSpecification = descriptorAndSpec._2;
+                ClusterClient<String> clusterClient = null;
+                try {
+                    ApplicationConfiguration applicationConfig =
+                        ApplicationConfiguration.fromConfiguration(flinkConfig);
 
-                ApplicationConfiguration applicationConfig =
-                    ApplicationConfiguration.fromConfiguration(flinkConfig);
-                ClusterClient<String> clusterClient =
-                    clusterDescriptor
-                        .deployApplicationCluster(clusterSpecification, applicationConfig)
-                        .getClusterClient();
+                    clusterClient =
+                        clusterDescriptor
+                            .deployApplicationCluster(clusterSpecification, applicationConfig)
+                            .getClusterClient();
 
-                String clusterId = clusterClient.getClusterId();
-                SubmitResponse result =
-                    new SubmitResponse(
-                        clusterId,
+                    logInfo("[flink-submit] Flink job submitted. " + flinkConfIdentifierInfo(flinkConfig));
+                    return new SubmitResponse(
+                        clusterClient.getClusterId(),
                         flinkConfig.toMap(),
                         submitRequest.jobId(),
                         clusterClient.getWebInterfaceURL());
-                logInfo(
-                    "[flink-submit] flink job has been submitted. "
-                        + flinkConfIdentifierInfo(flinkConfig));
-
-                closeSubmit(submitRequest, clusterDescriptor, clusterClient);
-                return result;
+                } finally {
+                    closeSubmissionResources(submitRequest, clusterClient, clusterDescriptor);
+                }
             });
     }
 
     @Override
-    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConf) throws FlinkException {
+    protected CancelResponse doCancel(
+                                      CancelRequest cancelRequest,
+                                      Configuration flinkConf) throws FlinkException {
         setK8sDeployTarget(flinkConf, FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION);
         return super.doCancel(cancelRequest, flinkConf);
     }
 
     @Override
-    public SavepointResponse doTriggerSavepoint(
-                                                TriggerSavepointRequest request,
-                                                Configuration flinkConf) throws FlinkException {
+    protected SavepointResponse doTriggerSavepoint(
+                                                   TriggerSavepointRequest request,
+                                                   Configuration flinkConf) throws FlinkException {
         setK8sDeployTarget(flinkConf, FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION);
         return super.doTriggerSavepoint(request, flinkConf);
     }

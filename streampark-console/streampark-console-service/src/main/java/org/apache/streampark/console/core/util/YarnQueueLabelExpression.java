@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.util;
 
-import org.apache.streampark.common.conf.ConfigKeys;
+import org.apache.streampark.common.configuration.option.DeploymentOptions;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -109,8 +109,9 @@ public class YarnQueueLabelExpression {
         Map<String, String> queueLabelMap = new HashMap<>(2);
         yarnQueueLabelExpression
             .getLabelExpression()
-            .ifPresent(labelExp -> queueLabelMap.put(ConfigKeys.KEY_YARN_APP_NODE_LABEL(), labelExp));
-        queueLabelMap.put(ConfigKeys.KEY_YARN_APP_QUEUE(), yarnQueueLabelExpression.queue);
+            .ifPresent(
+                labelExp -> queueLabelMap.put(DeploymentOptions.YARN_NODE_LABEL.key(), labelExp));
+        queueLabelMap.put(DeploymentOptions.YARN_QUEUE.key(), yarnQueueLabelExpression.queue);
         return queueLabelMap;
     }
 }

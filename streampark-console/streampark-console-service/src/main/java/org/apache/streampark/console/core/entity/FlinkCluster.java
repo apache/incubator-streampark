@@ -17,12 +17,12 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.conf.ConfigKeys;
+import org.apache.streampark.common.configuration.JvmOptionsParser;
+import org.apache.streampark.common.configuration.option.DeploymentOptions;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkDeployMode;
-import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
+import org.apache.streampark.common.enums.FlinkKubernetesRestExposedType;
 import org.apache.streampark.common.enums.ResolveOrder;
-import org.apache.streampark.common.util.FlinkConfigurationUtils;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.util.YarnQueueLabelExpression;
@@ -120,8 +120,8 @@ public class FlinkCluster implements Serializable {
     private transient Integer affectedJobs = 0;
 
     @JsonIgnore
-    public FlinkK8sRestExposedType getK8sRestExposedTypeEnum() {
-        return FlinkK8sRestExposedType.of(this.k8sRestExposedType);
+    public FlinkKubernetesRestExposedType getK8sRestExposedTypeEnum() {
+        return FlinkKubernetesRestExposedType.of(this.k8sRestExposedType);
     }
 
     @JsonIgnore
@@ -142,7 +142,7 @@ public class FlinkCluster implements Serializable {
         }
         Map<String, Object> optionMap = JacksonUtils.read(this.options, Map.class);
         if (FlinkDeployMode.YARN_SESSION == getFlinkDeployModeEnum()) {
-            optionMap.put(ConfigKeys.KEY_YARN_APP_NAME(), this.clusterName);
+            optionMap.put(DeploymentOptions.YARN_APPLICATION_NAME.key(), this.clusterName);
             optionMap.putAll(YarnQueueLabelExpression.getQueueLabelMap(yarnQueue));
         }
         optionMap.entrySet().removeIf(entry -> entry.getValue() == null);
@@ -181,7 +181,7 @@ public class FlinkCluster implements Serializable {
     public Map<String, Object> getProperties() {
         Map<String, Object> propertyMap = new HashMap<>();
         Map<String, String> dynamicPropertyMap =
-            FlinkConfigurationUtils.extractDynamicPropertiesAsJava(this.getDynamicProperties());
+            JvmOptionsParser.parse(this.getDynamicProperties()).toMap();
         propertyMap.putAll(this.getOptionMap());
         propertyMap.putAll(dynamicPropertyMap);
         ResolveOrder resolveOrder = ResolveOrder.of(this.getResolveOrder());

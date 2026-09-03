@@ -85,7 +85,7 @@ public final class Utils {
 
     public static void requireCheckJarFile(URL jar) throws IOException {
         try (
-            InputStream in = SafePathUtils.openJarFile(jar);
+            InputStream in = PathUtils.openJarFile(jar);
             JarInputStream ignored = new JarInputStream(new BufferedInputStream(in))) {
             // verify jar is readable
         } catch (IOException e) {
@@ -95,7 +95,7 @@ public final class Utils {
 
     public static Manifest getJarManifest(File jarFile) throws IOException {
         try (
-            InputStream in = SafePathUtils.openJarFile(jarFile.toURI().toURL());
+            InputStream in = PathUtils.openJarFile(jarFile.toURI().toURL());
             JarInputStream jarInputStream = new JarInputStream(new BufferedInputStream(in))) {
             return jarInputStream.getManifest();
         }
@@ -231,7 +231,7 @@ public final class Utils {
         System.out.println("      ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<        ");
         System.out.println("     /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/ ____/\\__,_/_/  /_/|_|   ");
         System.out.println("                                       /_/                        \n\n");
-        System.out.println("    Version:  3.0.0-SNAPSHOT                                          ");
+        System.out.println("    Version:  3.0.0                                          ");
         System.out.println("    WebSite:  https://streampark.apache.org                           ");
         System.out.println("    GitHub :  https://github.com/apache/streampark                    ");
         System.out.println("    Info   :  " + info + "                                 ");

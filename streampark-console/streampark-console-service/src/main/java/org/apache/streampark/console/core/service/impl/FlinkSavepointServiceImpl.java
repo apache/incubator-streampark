@@ -17,11 +17,11 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.configuration.JvmOptionsParser;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
-import org.apache.streampark.common.util.FlinkConfigurationUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
@@ -43,13 +43,14 @@ import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.application.ApplicationLogService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationConfigService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
+import org.apache.streampark.console.core.util.FlinkApplicationConfigUtils;
+import org.apache.streampark.console.core.util.FlinkEnvUtils;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
-import org.apache.streampark.flink.client.bean.JobClientTarget;
-import org.apache.streampark.flink.client.bean.SavepointResponse;
-import org.apache.streampark.flink.client.bean.SavepointTriggerOptions;
-import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
+import org.apache.streampark.flink.client.request.JobClientTarget;
+import org.apache.streampark.flink.client.request.TriggerSavepointRequest;
+import org.apache.streampark.flink.client.response.SavepointResponse;
 import org.apache.streampark.flink.util.FlinkUtils;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -155,10 +156,9 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
             return savepointPath;
         }
 
-        // 3) If the savepoint is not obtained above, try to obtain the savepoint path according to the
-        // deployment type (remote|on yarn)
-        // 3.1) At the remote mode, request the flink webui interface to get the savepoint path
-        // 3.2) At the yarn or k8s mode, then read the savepoint in flink-conf.yml in the bound flink
+        // 3) If no explicit path is configured, resolve it from the deployment target. Remote
+        // clusters expose the value through the REST API; YARN and Kubernetes deployments use the
+        // configuration stored for their bound Flink environment.
         return getSavepointFromDeployLayer(application);
     }
 
@@ -228,7 +228,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
         try {
             appParam
                 .getFsOperator()
-                .delete(appParam.getWorkspace().APP_SAVEPOINTS().concat("/").concat(appId.toString()));
+                .delete(appParam.getWorkspace().savepoints.concat("/").concat(appId.toString()));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -333,59 +333,62 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
     }
 
     /**
-     * Try to get the savepoint config item from the dynamic properties.
+     * Returns the savepoint directory declared by a dynamic property.
      *
-     * @param dynamicProps dynamic properties string.
-     * @return the value of the savepoint in the dynamic properties.
+     * @param dynamicProps JVM-style dynamic properties
+     * @return configured savepoint directory, or {@code null} when absent
      */
     @VisibleForTesting
     @Nullable
     public String getSavepointFromDynamicProps(String dynamicProps) {
-        return FlinkConfigurationUtils.extractDynamicPropertiesAsJava(dynamicProps).get(SAVEPOINT_DIRECTORY.key());
+        return JvmOptionsParser.parse(dynamicProps)
+            .getOptionalString(SAVEPOINT_DIRECTORY.key())
+            .orElse(null);
     }
 
     /**
-     * Try to obtain the savepoint path If it is a streampark|flinksql type task. See if Application
-     * conf is configured when the task is defined, if checkpoints are configured and enabled, read
-     * `state.savepoints.dir`.
+     * Returns the effective savepoint directory for a managed StreamPark or Flink SQL job.
      *
-     * @param application the target application.
-     * @return the value of the savepoint if existed.
+     * <p>The directory is used only when checkpointing is enabled in the effective application
+     * configuration.
+     *
+     * @param application target application
+     * @return configured savepoint directory, or {@code null} when not applicable
      */
     @VisibleForTesting
     @Nullable
     public String getSavepointFromConfig(FlinkApplication application) {
-        if (!application.isStreamParkType() && !application.isFlinkSql()) {
+        if (!application.isStreamParkType() && !application.isFlinkSqlJob()) {
             return null;
         }
         FlinkApplicationConfig applicationConfig = configService.getEffective(application.getId());
         if (applicationConfig == null) {
             return null;
         }
-        Map<String, String> configMap = applicationConfig.readConfig();
+        Map<String, String> configMap = FlinkApplicationConfigUtils.read(applicationConfig);
         return FlinkUtils.isCheckpointEnabled(configMap)
             ? configMap.get(SAVEPOINT_DIRECTORY.key())
             : null;
     }
 
     /**
-     * Try to obtain the savepoint path according to the eployment type (remote|on yarn). At the
-     * remote mode, request the flink webui interface to get the savepoint path At the yarn or k8s
-     * mode, then read the savepoint in flink-conf.yml in the bound flink
+     * Resolves the savepoint directory from the deployment target.
      *
-     * @param application the target application.
-     * @return the value of the savepoint if existed.
+     * <p>Remote deployments read the active cluster configuration. YARN and Kubernetes
+     * deployments read the configuration captured from their bound Flink environment.
+     *
+     * @param application target application
+     * @return configured savepoint directory, or {@code null} when none is defined
      */
     @VisibleForTesting
     @Nullable
     public String getSavepointFromDeployLayer(FlinkApplication application) throws JsonProcessingException {
-        // At the yarn or k8s mode, then read the savepoint in flink-conf.yml in the bound flink
         if (!FlinkDeployMode.isRemoteMode(application.getDeployMode())) {
             FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
-            return flinkEnv.convertFlinkYamlAsMap().get(SAVEPOINT_DIRECTORY.key());
+            return FlinkEnvUtils.configuration(flinkEnv).get(SAVEPOINT_DIRECTORY.key());
         }
 
-        // At the remote mode, request the flink webui interface to get the savepoint path
+        // Remote deployments use the live cluster configuration reported by the Flink REST API.
         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
         AssertUtils.notNull(
             cluster,
@@ -397,12 +400,12 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
         return config.isEmpty() ? null : config.get(SAVEPOINT_DIRECTORY.key());
     }
 
-    /**
-     * Try get the 'state.checkpoints.num-retained' from the dynamic properties.
-     */
+    /** Returns a valid positive checkpoint-retention override from dynamic properties. */
     private Optional<Integer> tryGetChkNumRetainedFromDynamicProps(String dynamicProps) {
         String rawCfgValue =
-            FlinkConfigurationUtils.extractDynamicPropertiesAsJava(dynamicProps).get(MAX_RETAINED_CHECKPOINTS.key());
+            JvmOptionsParser.parse(dynamicProps)
+                .getOptionalString(MAX_RETAINED_CHECKPOINTS.key())
+                .orElse(null);
         if (StringUtils.isBlank(rawCfgValue)) {
             return Optional.empty();
         }
@@ -411,24 +414,21 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
             if (value > 0) {
                 return Optional.of(value);
             }
-            log.warn(
-                "This value of dynamicProperties key: state.checkpoints.num-retained is invalid, must be greater than 0");
+            log.warn("Dynamic property {} must be greater than 0", MAX_RETAINED_CHECKPOINTS.key());
         } catch (NumberFormatException e) {
-            log.error(
-                "This value of dynamicProperties key: state.checkpoints.num-retained invalid, must be number");
+            log.warn("Dynamic property {} must be numeric", MAX_RETAINED_CHECKPOINTS.key());
         }
         return Optional.empty();
     }
 
-    /**
-     * Try get the 'state.checkpoints.num-retained' from the flink env.
-     */
+    /** Returns the checkpoint-retention limit from the bound Flink environment. */
     private int getChkNumRetainedFromFlinkEnv(
                                               @Nonnull FlinkEnv flinkEnv, @Nonnull FlinkApplication application) {
-        String flinkConfNumRetained = flinkEnv.convertFlinkYamlAsMap().get(MAX_RETAINED_CHECKPOINTS.key());
+        String flinkConfNumRetained =
+            FlinkEnvUtils.configuration(flinkEnv).get(MAX_RETAINED_CHECKPOINTS.key());
         if (StringUtils.isBlank(flinkConfNumRetained)) {
             log.info(
-                "The application: {} is not set {} in dynamicProperties or value is invalid, and flink-conf.yaml is the same problem of flink env: {}, default value: {} will be use.",
+                "The application: {} does not define a valid {} in dynamic properties or the Flink configuration for environment {}; using default value {}.",
                 application.getJobName(),
                 MAX_RETAINED_CHECKPOINTS.key(),
                 flinkEnv.getFlinkHome(),
@@ -441,13 +441,13 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
                 return value;
             }
             log.warn(
-                "The value of key: state.checkpoints.num-retained in flink-conf.yaml is invalid, must be greater than 0, default value: {} will be used",
+                "The value of state.checkpoints.num-retained in the Flink configuration must be greater than 0; using default value {}",
                 MAX_RETAINED_CHECKPOINTS.defaultValue());
         } catch (NumberFormatException e) {
             log.error(
-                "The value of key: state.checkpoints.num-retained in flink-conf.yaml is invalid, must be number, flink env: {}, default value: {} will be used",
+                "The value of state.checkpoints.num-retained in Flink environment {} must be numeric; using default value {}",
                 flinkEnv.getFlinkHome(),
-                flinkConfNumRetained);
+                MAX_RETAINED_CHECKPOINTS.defaultValue());
         }
         return MAX_RETAINED_CHECKPOINTS.defaultValue();
     }
@@ -502,10 +502,11 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
 
         return new TriggerSavepointRequest(
             application.getId(),
-            flinkEnv.getFlinkVersion(),
+            FlinkEnvUtils.version(flinkEnv),
             application.getDeployModeEnum(),
             properties,
             new JobClientTarget(clusterId, application.getJobId(), application.getK8sNamespace()),
-            new SavepointTriggerOptions(customSavepoint, nativeFormat));
+            customSavepoint,
+            nativeFormat);
     }
 }

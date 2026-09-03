@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.packer;
 
-import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.configuration.Workspace;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 import org.apache.streampark.flink.packer.maven.MavenTool;
@@ -52,7 +52,7 @@ class MavenToolTest {
 
     @BeforeAll
     static void beforeAll() throws Exception {
-        FileUtils.forceMkdir(new File(Workspace.MAVEN_LOCAL_PATH()));
+        FileUtils.forceMkdir(new File(Workspace.MAVEN_LOCAL_PATH));
         File output = new File(OUTPUT_DIR);
         FileUtils.deleteDirectory(output);
         FileUtils.forceMkdir(output);

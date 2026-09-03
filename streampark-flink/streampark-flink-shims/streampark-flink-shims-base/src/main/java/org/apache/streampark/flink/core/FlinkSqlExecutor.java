@@ -17,24 +17,24 @@
 
 package org.apache.streampark.flink.core;
 
-import org.apache.streampark.common.conf.ConfigKeys;
+import org.apache.streampark.common.configuration.option.ApplicationOptions;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.StreamParkLoggerFactory;
+import org.apache.streampark.flink.configuration.FlinkJobParameters;
 
 import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.ExecutionOptions;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableResult;
-import org.apache.flink.table.api.TableSchema;
+import org.apache.flink.table.catalog.ResolvedSchema;
 import org.apache.flink.types.Row;
 
 import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -56,17 +56,29 @@ public final class FlinkSqlExecutor {
     private FlinkSqlExecutor() {
     }
 
-    public static void executeSql(String sql, ParameterTool parameter, TableEnvironment context) {
-        executeSql(sql, parameter, context, null);
+    /** Executes SQL configured by the default application SQL key. */
+    public static void executeSql(
+                                  FlinkJobParameters parameter,
+                                  TableEnvironment context) {
+        executeSql(null, parameter, context, null);
     }
 
+    /** Executes SQL configured by the supplied parameter key. */
     public static void executeSql(
-                                  String sql,
-                                  ParameterTool parameter,
+                                  String sqlKey,
+                                  FlinkJobParameters parameter,
+                                  TableEnvironment context) {
+        executeSql(sqlKey, parameter, context, null);
+    }
+
+    /** Executes SQL configured by the supplied parameter key and reports metadata to a callback. */
+    public static void executeSql(
+                                  String sqlKey,
+                                  FlinkJobParameters parameter,
                                   TableEnvironment context,
-                                  Consumer<String> callbackFunc) {
-        String flinkSql = resolveSql(sql, parameter);
-        ExecutionContext ctx = new ExecutionContext(context, callbackFunc, parameter);
+                                  Consumer<String> callback) {
+        String flinkSql = resolveSql(sqlKey, parameter);
+        ExecutionContext ctx = new ExecutionContext(context, parameter, callback);
         List<SqlCommandCall> calls = SqlCommandParser.parseSQL(flinkSql, null);
         for (SqlCommandCall call : calls) {
             processCommand(call, ctx);
@@ -74,11 +86,11 @@ public final class FlinkSqlExecutor {
         finishExecution(flinkSql, ctx);
     }
 
-    private static String resolveSql(String sql, ParameterTool parameter) {
+    private static String resolveSql(String sqlKey, FlinkJobParameters parameter) {
         String flinkSql =
-            StringUtils.isBlank(sql)
-                ? parameter.get(ConfigKeys.KEY_FLINK_SQL())
-                : parameter.get(sql);
+            StringUtils.isBlank(sqlKey)
+                ? parameter.get(ApplicationOptions.SQL)
+                : parameter.get(sqlKey);
         if (StringUtils.isBlank(flinkSql)) {
             throw new IllegalArgumentException("verify failed: flink sql cannot be empty");
         }
@@ -163,16 +175,20 @@ public final class FlinkSqlExecutor {
 
     private static void describeTable(SqlCommandCall call, ExecutionContext ctx) {
         String args = firstOperand(call);
-        TableSchema schema = ctx.context.scan(args).getSchema();
+        ResolvedSchema schema = ctx.context.from(args).getResolvedSchema();
+        ctx.callback.accept(formatSchema(schema));
+    }
+
+    static String formatSchema(ResolvedSchema schema) {
         StringBuilder builder = new StringBuilder();
         builder.append("Column\tType\n");
-        for (int i = 0; i <= schema.getFieldCount(); i++) {
-            builder.append(schema.getFieldName(i).get())
+        for (int i = 0; i < schema.getColumnCount(); i++) {
+            builder.append(schema.getColumnNames().get(i))
                 .append("\t")
-                .append(schema.getFieldDataType(i).get())
+                .append(schema.getColumnDataTypes().get(i))
                 .append("\n");
         }
-        ctx.callback.accept(builder.toString());
+        return builder.toString();
     }
 
     private static void explainSql(SqlCommandCall call, ExecutionContext ctx) {
@@ -193,24 +209,15 @@ public final class FlinkSqlExecutor {
 
     private static void resetConfig(SqlCommandCall call, ExecutionContext ctx) {
         String args = firstOperand(call);
-        try {
-            java.lang.reflect.Field confDataField =
-                Configuration.class.getDeclaredField("confData");
-            confDataField.setAccessible(true);
-            @SuppressWarnings("unchecked")
-            HashMap<String, Object> confData =
-                (HashMap<String, Object>) confDataField.get(ctx.context.getConfig().getConfiguration());
-            synchronized (confData) {
-                if (call.command == SqlCommand.RESET) {
-                    confData.remove(args);
-                } else {
-                    confData.clear();
-                }
+        Configuration configuration = ctx.context.getConfig().getConfiguration();
+        if (call.command == SqlCommand.RESET) {
+            configuration.removeKey(args);
+        } else {
+            for (String key : new HashSet<>(configuration.keySet())) {
+                configuration.removeKey(key);
             }
-            LOG.info("{}: {}", call.command.getName(), args);
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException("Failed to reset Flink table configuration", e);
         }
+        LOG.info("{}: {}", call.command.getName(), args);
     }
 
     private static void warnStatementSet(SqlCommandCall call, ExecutionContext ctx) {
@@ -270,24 +277,18 @@ public final class FlinkSqlExecutor {
 
         private final TableEnvironment context;
         private final Consumer<String> callback;
-        private final ParameterTool parameter;
+        private final FlinkJobParameters parameter;
         private final org.apache.flink.table.api.StatementSet statementSet;
         private boolean hasInsert;
 
         private ExecutionContext(
-                                 TableEnvironment context, Consumer<String> callbackFunc,
-                                 ParameterTool parameter) {
+                                 TableEnvironment context,
+                                 FlinkJobParameters parameter,
+                                 Consumer<String> callback) {
             this.context = context;
             this.parameter = parameter;
             this.statementSet = context.createStatementSet();
-            this.callback =
-                r -> {
-                    if (callbackFunc != null) {
-                        callbackFunc.accept(r);
-                    } else {
-                        LOG.info(r);
-                    }
-                };
+            this.callback = callback == null ? LOG::info : callback;
         }
     }
 }

@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console;
 
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.ConfigKeys;
+import org.apache.streampark.common.configuration.option.CoreOptions;
+import org.apache.streampark.common.configuration.option.WorkspaceOptions;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkCluster;
@@ -43,13 +43,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-/** base tester. */
+/** Shared Spring context and isolated workspace for Console service tests. */
 @Slf4j
 @EnableScheduling
 @ActiveProfiles("test")
 @AutoConfigureTestEntityManager
-@SpringBootTest(classes = StreamParkConsoleBootstrap.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = {
-        "server.port=10000",
+@SpringBootTest(classes = StreamParkConsoleBootstrap.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
         "spring.application.name=Apache StreamPark",
         "spring.main.banner-mode=false",
         "spring.aop.proxy-target-class=true",
@@ -84,9 +83,9 @@ public abstract class SpringUnitTestBase {
         String mockedHome = tempPath.getAbsolutePath();
         Path localWorkspace = Files.createDirectories(new File(mockedHome + "/localWorkspace").toPath());
 
-        System.setProperty(ConfigKeys.KEY_APP_HOME(), mockedHome);
+        System.setProperty(CoreOptions.APP_HOME.key(), mockedHome);
         System.setProperty(
-            CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
+            WorkspaceOptions.LOCAL_ROOT.key(),
             localWorkspace.toAbsolutePath().toString());
 
         Files.createDirectories(new File(mockedHome + "/temp").toPath());
@@ -94,7 +93,7 @@ public abstract class SpringUnitTestBase {
         LOG.info(
             "Complete mock EnvInitializer init, app home: {}, {}: {}",
             tempPath.getAbsolutePath(),
-            CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
+            WorkspaceOptions.LOCAL_ROOT.key(),
             localWorkspace.toAbsolutePath());
     }
 

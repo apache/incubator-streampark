@@ -40,11 +40,11 @@ import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
+import org.apache.streampark.console.core.util.FlinkShellCommandBuilder;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
 import org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper;
-import org.apache.streampark.flink.core.conf.ParameterCli;
-import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
+import org.apache.streampark.flink.kubernetes.FlinkKubernetesWatcher;
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper;
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
 
@@ -100,7 +100,7 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
     private EnvInitializer envInitializer;
 
     @Autowired
-    private FlinkK8sWatcher k8SFlinkTrackMonitor;
+    private FlinkKubernetesWatcher k8SFlinkTrackMonitor;
 
     @Autowired
     private FlinkClusterService flinkClusterService;
@@ -414,7 +414,7 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
         String[] args = new String[2];
         args[0] = "--name";
         args[1] = appConfig;
-        return ParameterCli.read(args);
+        return FlinkShellCommandBuilder.read(args);
     }
 
     /**

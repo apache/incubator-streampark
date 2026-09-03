@@ -17,12 +17,12 @@
 
 package org.apache.streampark.spark.client.impl
 
-import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.enums.SparkDeployMode
 import org.apache.streampark.common.util.{HadoopUtils, YarnUtils}
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.spark.client.`trait`.SparkClientTrait
 import org.apache.streampark.spark.client.bean._
+import org.apache.streampark.spark.configuration.SparkOptions
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.yarn.api.records.ApplicationId
@@ -166,12 +166,15 @@ object YarnClient extends SparkClientTrait {
   }
 
   private def setYarnQueue(submitRequest: SubmitRequest): Unit = {
-    if (submitRequest.hasExtra(KEY_SPARK_YARN_QUEUE_NAME)) {
-      submitRequest.appProperties.put(KEY_SPARK_YARN_QUEUE, submitRequest.getExtra(KEY_SPARK_YARN_QUEUE_NAME).asInstanceOf[String])
+    if (submitRequest.hasExtra(SparkOptions.YARN_QUEUE_NAME.key)) {
+      submitRequest.appProperties.put(
+        SparkOptions.YARN_QUEUE.key,
+        submitRequest.getExtra(SparkOptions.YARN_QUEUE_NAME.key).asInstanceOf[String])
     }
-    if (submitRequest.hasExtra(KEY_SPARK_YARN_QUEUE_LABEL)) {
-      submitRequest.appProperties.put(KEY_SPARK_YARN_AM_NODE_LABEL, submitRequest.getExtra(KEY_SPARK_YARN_QUEUE_LABEL).asInstanceOf[String])
-      submitRequest.appProperties.put(KEY_SPARK_YARN_EXECUTOR_NODE_LABEL, submitRequest.getExtra(KEY_SPARK_YARN_QUEUE_LABEL).asInstanceOf[String])
+    if (submitRequest.hasExtra(SparkOptions.YARN_QUEUE_LABEL.key)) {
+      val nodeLabel = submitRequest.getExtra(SparkOptions.YARN_QUEUE_LABEL.key).asInstanceOf[String]
+      submitRequest.appProperties.put(SparkOptions.YARN_AM_NODE_LABEL.key, nodeLabel)
+      submitRequest.appProperties.put(SparkOptions.YARN_EXECUTOR_NODE_LABEL.key, nodeLabel)
     }
   }
 }

@@ -18,8 +18,8 @@
 package org.apache.streampark.flink.kubernetes.helper;
 
 import org.apache.streampark.common.util.LoggerSupport;
-import org.apache.streampark.flink.kubernetes.DefaultFlinkK8sWatcher;
-import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
+import org.apache.streampark.flink.kubernetes.DefaultFlinkKubernetesWatcher;
+import org.apache.streampark.flink.kubernetes.FlinkKubernetesWatcher;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -35,7 +35,7 @@ public final class KubernetesWatcherHelper extends LoggerSupport {
     }
 
     // print job status cache size info
-    public static void watchJobStatusCacheSize(FlinkK8sWatcher k8sWatcher) {
+    public static void watchJobStatusCacheSize(FlinkKubernetesWatcher k8sWatcher) {
         new Timer()
             .scheduleAtFixedRate(
                 timerTask(
@@ -49,7 +49,7 @@ public final class KubernetesWatcherHelper extends LoggerSupport {
     }
 
     // print agg flink cluster metrics cache detail
-    public static void watchAggClusterMetricsCache(FlinkK8sWatcher k8sWatcher) {
+    public static void watchAggClusterMetricsCache(FlinkKubernetesWatcher k8sWatcher) {
         new Timer()
             .scheduleAtFixedRate(
                 timerTask(
@@ -63,8 +63,8 @@ public final class KubernetesWatcherHelper extends LoggerSupport {
     }
 
     // print all cluster metrics for each flink cluster
-    public static void watchClusterMetricsCache(FlinkK8sWatcher k8sWatcher) {
-        DefaultFlinkK8sWatcher watcher = (DefaultFlinkK8sWatcher) k8sWatcher;
+    public static void watchClusterMetricsCache(FlinkKubernetesWatcher k8sWatcher) {
+        DefaultFlinkKubernetesWatcher watcher = (DefaultFlinkKubernetesWatcher) k8sWatcher;
         new Timer()
             .scheduleAtFixedRate(
                 timerTask(
@@ -80,7 +80,7 @@ public final class KubernetesWatcherHelper extends LoggerSupport {
     }
 
     // print job cache detail
-    public static void watchJobStatusCache(FlinkK8sWatcher k8sWatcher) {
+    public static void watchJobStatusCache(FlinkKubernetesWatcher k8sWatcher) {
         new Timer()
             .scheduleAtFixedRate(
                 timerTask(
@@ -96,7 +96,7 @@ public final class KubernetesWatcherHelper extends LoggerSupport {
     }
 
     // print trackId cache detail
-    public static void watchTrackIdsCache(FlinkK8sWatcher k8sWatcher) {
+    public static void watchTrackIdsCache(FlinkKubernetesWatcher k8sWatcher) {
         new Timer()
             .scheduleAtFixedRate(
                 timerTask(
@@ -109,7 +109,7 @@ public final class KubernetesWatcherHelper extends LoggerSupport {
                 1500);
     }
 
-    public static void watchTrackIdsCacheSize(FlinkK8sWatcher k8sWatcher) {
+    public static void watchTrackIdsCacheSize(FlinkKubernetesWatcher k8sWatcher) {
         new Timer()
             .scheduleAtFixedRate(
                 timerTask(
@@ -122,8 +122,8 @@ public final class KubernetesWatcherHelper extends LoggerSupport {
                 1500);
     }
 
-    public static void watchK8sEventCache(FlinkK8sWatcher k8sWatcher) {
-        DefaultFlinkK8sWatcher watcher = (DefaultFlinkK8sWatcher) k8sWatcher;
+    public static void watchK8sEventCache(FlinkKubernetesWatcher k8sWatcher) {
+        DefaultFlinkKubernetesWatcher watcher = (DefaultFlinkKubernetesWatcher) k8sWatcher;
         new Timer()
             .scheduleAtFixedRate(
                 timerTask(

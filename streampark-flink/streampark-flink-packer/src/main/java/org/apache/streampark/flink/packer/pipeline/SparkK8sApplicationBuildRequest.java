@@ -17,12 +17,12 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
-import org.apache.streampark.common.conf.SparkVersion;
+import org.apache.streampark.common.core.SparkVersion;
 import org.apache.streampark.common.enums.SparkDeployMode;
 import org.apache.streampark.common.enums.SparkJobType;
 import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
-import org.apache.streampark.spark.kubernetes.model.SparkK8sPodTemplates;
+import org.apache.streampark.spark.kubernetes.model.SparkKubernetesPodTemplates;
 
 public class SparkK8sApplicationBuildRequest implements BuildParam {
 
@@ -36,7 +36,7 @@ public class SparkK8sApplicationBuildRequest implements BuildParam {
     private final DependencyInfo dependencyInfo;
     private final String k8sNamespace;
     private final String sparkBaseImage;
-    private final SparkK8sPodTemplates sparkPodTemplate;
+    private final SparkKubernetesPodTemplates sparkPodTemplate;
     private final boolean integrateWithHadoop;
     private final DockerConf dockerConfig;
 
@@ -51,7 +51,7 @@ public class SparkK8sApplicationBuildRequest implements BuildParam {
                                            DependencyInfo dependencyInfo,
                                            String k8sNamespace,
                                            String sparkBaseImage,
-                                           SparkK8sPodTemplates sparkPodTemplate,
+                                           SparkKubernetesPodTemplates sparkPodTemplate,
                                            boolean integrateWithHadoop,
                                            DockerConf dockerConfig) {
         this.appName = appName;
@@ -111,7 +111,7 @@ public class SparkK8sApplicationBuildRequest implements BuildParam {
         return sparkBaseImage;
     }
 
-    public SparkK8sPodTemplates sparkPodTemplate() {
+    public SparkKubernetesPodTemplates sparkPodTemplate() {
         return sparkPodTemplate;
     }
 

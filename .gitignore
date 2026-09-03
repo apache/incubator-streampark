@@ -47,3 +47,4 @@ hs_err_pid*
 **/node
 dist/
 dist-license-check/
+.pnpm-store

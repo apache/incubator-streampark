@@ -17,46 +17,34 @@
 
 package org.apache.streampark.flink.client;
 
-import org.apache.streampark.common.conf.FlinkVersion;
-import org.apache.streampark.flink.client.bean.CancelRequest;
-import org.apache.streampark.flink.client.bean.CancelResponse;
-import org.apache.streampark.flink.client.bean.DeployRequest;
-import org.apache.streampark.flink.client.bean.DeployResponse;
-import org.apache.streampark.flink.client.bean.SavepointResponse;
-import org.apache.streampark.flink.client.bean.ShutDownRequest;
-import org.apache.streampark.flink.client.bean.ShutDownResponse;
-import org.apache.streampark.flink.client.bean.SubmitRequest;
-import org.apache.streampark.flink.client.bean.SubmitResponse;
-import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
+import org.apache.streampark.common.core.FlinkVersion;
+import org.apache.streampark.flink.client.request.CancelRequest;
+import org.apache.streampark.flink.client.request.DeployRequest;
+import org.apache.streampark.flink.client.request.ShutdownRequest;
+import org.apache.streampark.flink.client.request.SubmitRequest;
+import org.apache.streampark.flink.client.request.TriggerSavepointRequest;
+import org.apache.streampark.flink.client.response.CancelResponse;
+import org.apache.streampark.flink.client.response.DeployResponse;
+import org.apache.streampark.flink.client.response.SavepointResponse;
+import org.apache.streampark.flink.client.response.ShutdownResponse;
+import org.apache.streampark.flink.client.response.SubmitResponse;
 import org.apache.streampark.flink.proxy.FlinkShimsProxy;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.Permission;
 
+/** Public facade for version-isolated Flink client operations. */
 public final class FlinkClient {
 
     private static final String FLINK_CLIENT_ENTRYPOINT_CLASS =
         "org.apache.streampark.flink.client.FlinkClientEntrypoint";
 
-    private static final String SUBMIT_REQUEST =
-        "org.apache.streampark.flink.client.bean.SubmitRequest";
-
-    private static final String DEPLOY_REQUEST =
-        "org.apache.streampark.flink.client.bean.DeployRequest";
-
-    private static final String CANCEL_REQUEST =
-        "org.apache.streampark.flink.client.bean.CancelRequest";
-
-    private static final String SHUTDOWN_REQUEST =
-        "org.apache.streampark.flink.client.bean.ShutDownRequest";
-
-    private static final String SAVEPOINT_REQUEST =
-        "org.apache.streampark.flink.client.bean.TriggerSavepointRequest";
-
     private FlinkClient() {
     }
 
+    /** Submits a Flink job using the version and deployment mode in the request. */
     public static SubmitResponse submit(SubmitRequest submitRequest) {
         SecurityManager previousSecurityManager = System.getSecurityManager();
         boolean exitGuardInstalled = false;
@@ -70,7 +58,7 @@ public final class FlinkClient {
             return invokeClient(
                 submitRequest,
                 submitRequest.flinkVersion(),
-                SUBMIT_REQUEST,
+                SubmitRequest.class,
                 "submit",
                 SubmitResponse.class);
         } finally {
@@ -80,30 +68,42 @@ public final class FlinkClient {
         }
     }
 
+    /** Cancels a running Flink job. */
     public static CancelResponse cancel(CancelRequest stopRequest) {
         return invokeClient(
-            stopRequest, stopRequest.flinkVersion(), CANCEL_REQUEST, "cancel", CancelResponse.class);
+            stopRequest,
+            stopRequest.flinkVersion(),
+            CancelRequest.class,
+            "cancel",
+            CancelResponse.class);
     }
 
+    /** Deploys a Flink session cluster. */
     public static DeployResponse deploy(DeployRequest deployRequest) {
         return invokeClient(
-            deployRequest, deployRequest.flinkVersion(), DEPLOY_REQUEST, "deploy", DeployResponse.class);
+            deployRequest,
+            deployRequest.flinkVersion(),
+            DeployRequest.class,
+            "deploy",
+            DeployResponse.class);
     }
 
-    public static ShutDownResponse shutdown(ShutDownRequest shutDownRequest) {
+    /** Shuts down a Flink session cluster. */
+    public static ShutdownResponse shutdown(ShutdownRequest shutdownRequest) {
         return invokeClient(
-            shutDownRequest,
-            shutDownRequest.flinkVersion(),
-            SHUTDOWN_REQUEST,
+            shutdownRequest,
+            shutdownRequest.flinkVersion(),
+            ShutdownRequest.class,
             "shutdown",
-            ShutDownResponse.class);
+            ShutdownResponse.class);
     }
 
+    /** Triggers a savepoint for a running Flink job. */
     public static SavepointResponse triggerSavepoint(TriggerSavepointRequest savepointRequest) {
         return invokeClient(
             savepointRequest,
             savepointRequest.flinkVersion(),
-            SAVEPOINT_REQUEST,
+            TriggerSavepointRequest.class,
             "triggerSavepoint",
             SavepointResponse.class);
     }
@@ -111,7 +111,7 @@ public final class FlinkClient {
     private static <R> R invokeClient(
                                       Object request,
                                       FlinkVersion flinkVersion,
-                                      String requestClassName,
+                                      Class<?> requestType,
                                       String methodName,
                                       Class<R> responseType) {
         flinkVersion.checkVersion();
@@ -120,7 +120,7 @@ public final class FlinkClient {
             classLoader -> {
                 try {
                     Class<?> entrypointClass = classLoader.loadClass(FLINK_CLIENT_ENTRYPOINT_CLASS);
-                    Class<?> requestClass = classLoader.loadClass(requestClassName);
+                    Class<?> requestClass = classLoader.loadClass(requestType.getName());
                     Method method = entrypointClass.getDeclaredMethod(methodName, requestClass);
                     method.setAccessible(true);
                     Object shimsRequest =
@@ -149,5 +149,27 @@ public final class FlinkClient {
             throw (Error) cause;
         }
         return new IllegalStateException("Failed to invoke Flink client method", e);
+    }
+
+    /** Prevents submitted user code from terminating the console JVM. */
+    static final class ExitSecurityManager extends SecurityManager {
+
+        @Override
+        public void checkExit(int status) {
+            throw new SecurityException(
+                "System.exit("
+                    + status
+                    + ") was called in your Flink job; the job has been stopped");
+        }
+
+        @Override
+        public void checkPermission(Permission permission) {
+            // Allow all operations except System.exit.
+        }
+
+        @Override
+        public void checkPermission(Permission permission, Object context) {
+            // Allow all operations except System.exit.
+        }
     }
 }

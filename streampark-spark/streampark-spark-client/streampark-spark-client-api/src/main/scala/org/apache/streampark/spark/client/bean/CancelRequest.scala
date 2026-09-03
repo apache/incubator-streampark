@@ -17,7 +17,7 @@
 
 package org.apache.streampark.spark.client.bean
 
-import org.apache.streampark.common.conf.SparkVersion
+import org.apache.streampark.common.core.SparkVersion
 import org.apache.streampark.common.enums.SparkDeployMode
 import org.apache.streampark.common.util.Implicits.JavaMap
 

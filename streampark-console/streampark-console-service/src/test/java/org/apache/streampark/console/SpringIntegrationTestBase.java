@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console;
 
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.ConfigKeys;
+import org.apache.streampark.common.configuration.option.CoreOptions;
+import org.apache.streampark.common.configuration.option.WorkspaceOptions;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.SystemPropertyUtils;
 
@@ -108,15 +108,15 @@ public abstract class SpringIntegrationTestBase {
         Path localWorkspace = Files.createDirectories(new File(tempAbsPath, DEFAULT_LOCAL_WORKSPACE_DIR_NAME).toPath());
 
         appHome = new File(tempAbsPath, DEFAULT_APP_HOME_DIR_NAME).getAbsolutePath();
-        System.setProperty(ConfigKeys.KEY_APP_HOME(), appHome);
+        System.setProperty(CoreOptions.APP_HOME.key(), appHome);
         System.setProperty(
-            CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
+            WorkspaceOptions.LOCAL_ROOT.key(),
             localWorkspace.toAbsolutePath().toString());
 
         LOG.info(
             "Complete mock EnvInitializer init, app home: {}, {}: {}",
             appHome,
-            CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
+            WorkspaceOptions.LOCAL_ROOT.key(),
             localWorkspace.toAbsolutePath());
     }
 

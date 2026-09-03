@@ -17,17 +17,18 @@
 
 package org.apache.streampark.flink.client.impl;
 
-import org.apache.streampark.flink.client.bean.CancelRequest;
-import org.apache.streampark.flink.client.bean.CancelResponse;
-import org.apache.streampark.flink.client.bean.SavepointResponse;
-import org.apache.streampark.flink.client.bean.SubmitRequest;
-import org.apache.streampark.flink.client.bean.SubmitResponse;
-import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
-import org.apache.streampark.flink.client.trait.FlinkClientTrait;
+import org.apache.streampark.flink.client.bean.FlinkJobGraphBuilder;
+import org.apache.streampark.flink.client.bean.SubmitRequestResolver;
+import org.apache.streampark.flink.client.configuration.FlinkConfigurationOps;
+import org.apache.streampark.flink.client.request.CancelRequest;
+import org.apache.streampark.flink.client.request.SubmitRequest;
+import org.apache.streampark.flink.client.request.TriggerSavepointRequest;
+import org.apache.streampark.flink.client.response.CancelResponse;
+import org.apache.streampark.flink.client.response.SavepointResponse;
+import org.apache.streampark.flink.client.response.SubmitResponse;
 
 import org.apache.flink.client.deployment.executors.RemoteExecutor;
 import org.apache.flink.client.program.MiniClusterClient;
-import org.apache.flink.client.program.PackagedProgram;
 import org.apache.flink.configuration.ConfigConstants;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.DeploymentOptions;
@@ -35,15 +36,12 @@ import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.configuration.TaskManagerOptions;
-import org.apache.flink.runtime.jobgraph.JobGraph;
 import org.apache.flink.runtime.minicluster.MiniCluster;
 import org.apache.flink.runtime.minicluster.MiniClusterConfiguration;
 import org.apache.flink.util.FlinkException;
 
-import scala.Tuple2;
-
 /** Submit Flink jobs to a local mini cluster. */
-public final class LocalClient extends FlinkClientTrait {
+public final class LocalClient extends AbstractFlinkClient {
 
     public static final LocalClient INSTANCE = new LocalClient();
 
@@ -51,42 +49,52 @@ public final class LocalClient extends FlinkClientTrait {
     }
 
     @Override
-    public void setConfig(SubmitRequest submitRequest, Configuration flinkConfig) {
-        FlinkConfigurationOps.safeSet(flinkConfig, PipelineOptions.NAME, submitRequest.effectiveAppName());
+    protected void setConfig(SubmitRequest submitRequest, Configuration flinkConfig) {
+        FlinkConfigurationOps.setIfPresent(
+            flinkConfig,
+            PipelineOptions.NAME,
+            SubmitRequestResolver.effectiveApplicationName(submitRequest));
         logEffectiveSubmitConfiguration(flinkConfig);
     }
 
     @Override
-    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws FlinkException {
+    protected SubmitResponse doSubmit(
+                                      SubmitRequest submitRequest,
+                                      Configuration flinkConfig) throws FlinkException {
         return callAsFlinkException(
             () -> {
-                Tuple2<PackagedProgram, JobGraph> programJobGraph =
-                    getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile());
-                PackagedProgram packageProgram = programJobGraph._1();
-                JobGraph jobGraph = programJobGraph._2();
-                MiniClusterClient client = createLocalCluster(flinkConfig);
-                String jobId = client.submitJob(jobGraph).get().toString();
-                SubmitResponse resp =
-                    new SubmitResponse(jobId, flinkConfig.toMap(), jobId, client.getWebInterfaceURL());
-                closeSubmit(submitRequest, packageProgram, client);
-                return resp;
+                FlinkJobGraphBuilder.Result job = buildJobGraph(
+                    flinkConfig,
+                    submitRequest,
+                    SubmitRequestResolver.userJarFile(submitRequest));
+                MiniClusterClient client = null;
+                try {
+                    client = createLocalCluster(flinkConfig);
+                    String jobId = client.submitJob(job.jobGraph()).get().toString();
+                    return new SubmitResponse(
+                        jobId, flinkConfig.toMap(), jobId, client.getWebInterfaceURL());
+                } finally {
+                    closeSubmissionResources(submitRequest, job.program(), client);
+                }
             });
     }
 
     @Override
-    public SavepointResponse doTriggerSavepoint(
-                                                TriggerSavepointRequest savepointRequest,
-                                                Configuration flinkConfig) throws FlinkException {
+    protected SavepointResponse doTriggerSavepoint(
+                                                   TriggerSavepointRequest savepointRequest,
+                                                   Configuration flinkConfig) throws FlinkException {
         return RemoteClient.INSTANCE.doTriggerSavepoint(savepointRequest, flinkConfig);
     }
 
     @Override
-    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig) throws FlinkException {
+    protected CancelResponse doCancel(
+                                      CancelRequest cancelRequest,
+                                      Configuration flinkConfig) throws FlinkException {
         return RemoteClient.INSTANCE.doCancel(cancelRequest, flinkConfig);
     }
 
     private MiniClusterClient createLocalCluster(Configuration flinkConfig) throws Exception {
-        FlinkConfigurationOps.safeSet(flinkConfig, JobManagerOptions.PORT, 0);
+        FlinkConfigurationOps.setIfPresent(flinkConfig, JobManagerOptions.PORT, 0);
 
         int numTaskManagers =
             flinkConfig.getInteger(
@@ -107,11 +115,11 @@ public final class LocalClient extends FlinkClientTrait {
         String host = "localhost";
         int port = cluster.getRestAddress().get().getPort();
 
-        FlinkConfigurationOps.safeSet(flinkConfig, JobManagerOptions.ADDRESS, host);
-        FlinkConfigurationOps.safeSet(flinkConfig, JobManagerOptions.PORT, port);
-        FlinkConfigurationOps.safeSet(flinkConfig, RestOptions.ADDRESS, host);
-        FlinkConfigurationOps.safeSet(flinkConfig, RestOptions.PORT, port);
-        FlinkConfigurationOps.safeSet(flinkConfig, DeploymentOptions.TARGET, RemoteExecutor.NAME);
+        FlinkConfigurationOps.setIfPresent(flinkConfig, JobManagerOptions.ADDRESS, host);
+        FlinkConfigurationOps.setIfPresent(flinkConfig, JobManagerOptions.PORT, port);
+        FlinkConfigurationOps.setIfPresent(flinkConfig, RestOptions.ADDRESS, host);
+        FlinkConfigurationOps.setIfPresent(flinkConfig, RestOptions.PORT, port);
+        FlinkConfigurationOps.setIfPresent(flinkConfig, DeploymentOptions.TARGET, RemoteExecutor.NAME);
 
         logInfo(String.format("%nStarting local Flink cluster (host: localhost, port: %d).%n", port));
 

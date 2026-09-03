@@ -17,13 +17,14 @@
 
 package org.apache.streampark.spark.client.bean
 
-import org.apache.streampark.common.conf.{SparkVersion, Workspace}
-import org.apache.streampark.common.conf.ConfigKeys._
-import org.apache.streampark.common.constants.Constants
+import org.apache.streampark.common.configuration.{ConfigurationFormat, ConfigurationParser, Constants}
+import org.apache.streampark.common.configuration.Workspace
+import org.apache.streampark.common.core.SparkVersion
 import org.apache.streampark.common.enums._
-import org.apache.streampark.common.util.{DeflaterUtils, HdfsUtils, PropertiesUtils}
+import org.apache.streampark.common.util.{DeflaterUtils, HdfsUtils}
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.packer.pipeline.{BuildResult, ShadedBuildResponse}
+import org.apache.streampark.spark.configuration.SparkOptions
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.collections.MapUtils
@@ -57,7 +58,7 @@ case class SubmitRequest(
     "spark.executor.instances" -> "2")
 
   lazy val sparkParameterMap: Map[String, String] = getParameterMap(
-    KEY_SPARK_PROPERTY_PREFIX)
+    SparkOptions.PROPERTY_PREFIX.value)
 
   lazy val appMain: String = this.jobType match {
     case SparkJobType.SPARK_SQL => Constants.STREAMPARK_SPARKSQL_CLIENT_CLASS
@@ -88,9 +89,9 @@ case class SubmitRequest(
     } else {
       lazy val content = DeflaterUtils.unzipString(this.appConf.trim.drop(7))
       val map = format match {
-        case "yaml://" => PropertiesUtils.fromYamlText(content)
-        case "conf://" => PropertiesUtils.fromHoconText(content)
-        case "prop://" => PropertiesUtils.fromPropertiesText(content)
+        case "yaml://" => parseConfig(content, ConfigurationFormat.YAML, "inline YAML")
+        case "conf://" => parseConfig(content, ConfigurationFormat.HOCON, "inline HOCON")
+        case "prop://" => parseConfig(content, ConfigurationFormat.PROPERTIES, "inline properties")
         case "hdfs://" =>
           /**
            * If the configuration file is HDFS mode, you need to copy the HDFS related configuration
@@ -99,9 +100,9 @@ case class SubmitRequest(
           val text = HdfsUtils.read(this.appConf)
           val extension = this.appConf.split("\\.").last.toLowerCase
           extension match {
-            case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
-            case "conf" => PropertiesUtils.fromHoconText(text)
-            case "properties" => PropertiesUtils.fromPropertiesText(text)
+            case "yml" | "yaml" => parseConfig(text, ConfigurationFormat.YAML, this.appConf)
+            case "conf" => parseConfig(text, ConfigurationFormat.HOCON, this.appConf)
+            case "properties" => parseConfig(text, ConfigurationFormat.PROPERTIES, this.appConf)
             case _ =>
               throw new IllegalArgumentException(
                 "[StreamPark] Usage: application config format error,must be [yaml|conf|properties]")
@@ -115,6 +116,12 @@ case class SubmitRequest(
     }
   }
 
+  private def parseConfig(
+      content: String,
+      format: ConfigurationFormat,
+      origin: String): Map[String, String] =
+    ConfigurationParser.parse(content, format, origin).toMap.asScala.toMap
+
   @throws[IOException]
   private def isSymlink(file: File): Boolean = {
     if (file == null) throw new NullPointerException("File must not be null")
@@ -127,7 +134,7 @@ case class SubmitRequest(
      * The spark version and configuration in the native spark and hdfs must be kept exactly the
      * same.
      */
-    val workspace = Workspace.remote
+    val workspace = Workspace.REMOTE
     val sparkHome = sparkVersion.sparkHome
     val sparkHomeDir = new File(sparkHome)
     val sparkName = if (isSymlink(sparkHomeDir)) {
@@ -135,13 +142,13 @@ case class SubmitRequest(
     } else {
       sparkHomeDir.getName
     }
-    val sparkHdfsHome = s"${workspace.APP_SPARK}/$sparkName"
+    val sparkHdfsHome = s"${workspace.spark}/$sparkName"
     HdfsWorkspace(
       sparkName,
       sparkHome,
       sparkLib = s"$sparkHdfsHome/jars",
       sparkPlugins = s"$sparkHdfsHome/plugins",
-      appJars = workspace.APP_JARS)
+      appJars = workspace.jars)
   }
 
   @throws[Exception]

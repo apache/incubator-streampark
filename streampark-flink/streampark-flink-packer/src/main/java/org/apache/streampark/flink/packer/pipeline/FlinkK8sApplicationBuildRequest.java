@@ -17,10 +17,10 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
-import org.apache.streampark.common.conf.FlinkVersion;
+import org.apache.streampark.common.core.FlinkVersion;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkJobType;
-import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates;
+import org.apache.streampark.flink.kubernetes.model.KubernetesPodTemplates;
 import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 
@@ -37,7 +37,7 @@ public class FlinkK8sApplicationBuildRequest implements FlinkK8sBuildParam {
     private final String clusterId;
     private final String k8sNamespace;
     private final String flinkBaseImage;
-    private final K8sPodTemplates flinkPodTemplate;
+    private final KubernetesPodTemplates flinkPodTemplate;
     private final boolean integrateWithHadoop;
     private final DockerConf dockerConfig;
     private final String ingressTemplate;
@@ -54,7 +54,7 @@ public class FlinkK8sApplicationBuildRequest implements FlinkK8sBuildParam {
                                            String clusterId,
                                            String k8sNamespace,
                                            String flinkBaseImage,
-                                           K8sPodTemplates flinkPodTemplate,
+                                           KubernetesPodTemplates flinkPodTemplate,
                                            boolean integrateWithHadoop,
                                            DockerConf dockerConfig,
                                            String ingressTemplate) {
@@ -129,7 +129,7 @@ public class FlinkK8sApplicationBuildRequest implements FlinkK8sBuildParam {
         return flinkBaseImage;
     }
 
-    public K8sPodTemplates flinkPodTemplate() {
+    public KubernetesPodTemplates flinkPodTemplate() {
         return flinkPodTemplate;
     }
 

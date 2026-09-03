@@ -36,7 +36,6 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,6 +43,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @Slf4j
 @Validated
@@ -67,41 +67,47 @@ public class ProxyController {
     private MemberService memberService;
 
     @GetMapping("{type}/{id}/assets/**")
-    public ResponseEntity<?> proxyFlinkAssets(HttpServletRequest request, @PathVariable("type") String type,
-                                              @PathVariable("id") Long id) throws Exception {
-        return proxy(type, request, id);
+    public void proxyFlinkAssets(HttpServletRequest request, HttpServletResponse response,
+                                 @PathVariable("type") String type, @PathVariable("id") Long id) throws Exception {
+        proxy(type, request, response, id);
     }
 
     @GetMapping("{type}/{id}/**")
     @RequiresPermissions("app:view")
-    public ResponseEntity<?> proxyFlink(HttpServletRequest request, @PathVariable("type") String type,
-                                        @PathVariable("id") Long id) throws Exception {
-        return proxy(type, request, id);
+    public void proxyFlink(HttpServletRequest request, HttpServletResponse response,
+                           @PathVariable("type") String type, @PathVariable("id") Long id) throws Exception {
+        proxy(type, request, response, id);
     }
 
-    private ResponseEntity<?> proxy(String type, HttpServletRequest request, Long id) throws Exception {
+    private void proxy(String type, HttpServletRequest request, HttpServletResponse response,
+                       Long id) throws Exception {
         ApplicationLog log;
         switch (type) {
             case "flink":
                 FlinkApplication flinkApplication = flinkApplicationManageService.getApp(id);
                 checkProxyApp(flinkApplication.getTeamId());
-                return proxyService.proxyFlink(request, flinkApplication);
+                proxyService.proxyFlink(request, response, flinkApplication);
+                return;
             case "spark":
                 SparkApplication sparkApplication = sparkApplicationManageService.getApp(id);
                 checkProxyApp(sparkApplication.getTeamId());
-                return proxyService.proxySpark(request, sparkApplication);
+                proxyService.proxySpark(request, response, sparkApplication);
+                return;
             case "flink_cluster":
-                return proxyService.proxyFlinkCluster(request, id);
+                proxyService.proxyFlinkCluster(request, response, id);
+                return;
             case "history":
                 log = logService.getById(id);
                 checkProxyAppLog(log);
-                return proxyService.proxyHistory(request, log);
+                proxyService.proxyHistory(request, response, log);
+                return;
             case "yarn":
                 log = logService.getById(id);
                 checkProxyAppLog(log);
-                return proxyService.proxyYarn(request, log);
+                proxyService.proxyYarn(request, response, log);
+                return;
             default:
-                return ResponseEntity.notFound().build();
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 

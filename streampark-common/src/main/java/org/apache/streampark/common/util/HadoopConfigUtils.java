@@ -17,9 +17,8 @@
 
 package org.apache.streampark.common.util;
 
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.ConfigKeys;
-import org.apache.streampark.common.conf.InternalConfigHolder;
+import org.apache.streampark.common.configuration.GlobalConfiguration;
+import org.apache.streampark.common.configuration.option.HadoopOptions;
 import org.apache.streampark.common.fs.LfsOperator;
 
 import java.io.File;
@@ -27,12 +26,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 
 import scala.Option;
 
@@ -45,43 +42,37 @@ public final class HadoopConfigUtils {
     private static final String[] HIVE_CLIENT_CONF_FILES =
         {"core-site.xml", "hdfs-site.xml", "hive-site.xml"};
 
-    private static final Map<String, String> KERBEROS_CONF = loadKerberosConf();
-
-    public static final String HADOOP_USER_NAME =
-        InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME());
-
+    /** Returns the Hadoop user from the current configuration snapshot. */
     public static String hadoopUserName() {
-        return HADOOP_USER_NAME;
+        return GlobalConfiguration.current().get(HadoopOptions.USER_NAME);
     }
 
-    public static final String KERBEROS_DEBUG =
-        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_DEBUG(), "false");
+    /** Returns whether Kerberos authentication is enabled. */
+    public static boolean kerberosEnabled() {
+        return GlobalConfiguration.current().get(HadoopOptions.KERBEROS_ENABLED);
+    }
 
-    public static final boolean KERBEROS_ENABLE =
-        Boolean.parseBoolean(
-            KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_ENABLE(), "false"));
+    /** Returns whether Kerberos login diagnostics are enabled. */
+    public static boolean kerberosDebug() {
+        return GlobalConfiguration.current().get(HadoopOptions.KERBEROS_DEBUG);
+    }
 
-    public static final String KERBEROS_PRINCIPAL =
-        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_PRINCIPAL(), "").trim();
+    /** Returns the configured Kerberos principal. */
+    public static String kerberosPrincipal() {
+        return GlobalConfiguration.current().get(HadoopOptions.KERBEROS_PRINCIPAL).trim();
+    }
 
-    public static final String KERBEROS_KEYTAB =
-        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_KEYTAB(), "").trim();
+    /** Returns the configured Kerberos keytab path. */
+    public static String kerberosKeytab() {
+        return GlobalConfiguration.current().get(HadoopOptions.KERBEROS_KEYTAB).trim();
+    }
 
-    public static final String KERBEROS_KRB5 =
-        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_KRB5_CONF(), "");
+    /** Returns the configured krb5.conf path. */
+    public static String kerberosKrb5() {
+        return GlobalConfiguration.current().get(HadoopOptions.KERBEROS_KRB5).trim();
+    }
 
     private HadoopConfigUtils() {
-    }
-
-    private static Map<String, String> loadKerberosConf() {
-        Properties props = System.getProperties();
-        Map<String, String> map = new HashMap<>();
-        for (String key : props.stringPropertyNames()) {
-            if (key.startsWith("security.kerberos")) {
-                map.put(key, props.getProperty(key));
-            }
-        }
-        return map;
     }
 
     public static Option<String> getSystemHadoopConfDir() {

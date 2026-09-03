@@ -31,13 +31,14 @@ import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
+import org.apache.streampark.console.core.util.FlinkEnvUtils;
 import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
-import org.apache.streampark.flink.client.bean.DeployRequest;
-import org.apache.streampark.flink.client.bean.DeployResponse;
-import org.apache.streampark.flink.client.bean.KubernetesDeployParam;
-import org.apache.streampark.flink.client.bean.ShutDownRequest;
-import org.apache.streampark.flink.client.bean.ShutDownResponse;
+import org.apache.streampark.flink.client.request.DeployRequest;
+import org.apache.streampark.flink.client.request.KubernetesDeploySpec;
+import org.apache.streampark.flink.client.request.ShutdownRequest;
+import org.apache.streampark.flink.client.response.DeployResponse;
+import org.apache.streampark.flink.client.response.ShutdownResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -246,8 +247,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         FlinkCluster flinkCluster = this.getById(cluster.getId());
 
         try {
-            ShutDownResponse shutDownResponse = shutdownInternal(flinkCluster, flinkCluster.getClusterId());
-            ApiAlertException.throwIfNull(shutDownResponse, "Get shutdown response failed");
+            ShutdownResponse shutdownResponse = shutdownInternal(flinkCluster, flinkCluster.getClusterId());
+            ApiAlertException.throwIfNull(shutdownResponse, "Get shutdown response failed");
             flinkCluster.setClusterState(ClusterState.CANCELED.getState());
             flinkCluster.setEndTime(new Date());
             updateById(flinkCluster);
@@ -410,27 +411,27 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             && !yarnQueueService.isDefaultQueue(cluster.getYarnQueue());
     }
 
-    private ShutDownResponse shutdownInternal(FlinkCluster flinkCluster,
+    private ShutdownResponse shutdownInternal(FlinkCluster flinkCluster,
                                               String clusterId) throws InterruptedException, ExecutionException, TimeoutException {
-        ShutDownRequest stopRequest = new ShutDownRequest(
-            flinkEnvService.getById(flinkCluster.getVersionId()).getFlinkVersion(),
+        ShutdownRequest stopRequest = new ShutdownRequest(
+            FlinkEnvUtils.version(flinkEnvService.getById(flinkCluster.getVersionId())),
             flinkCluster.getFlinkDeployModeEnum(),
             flinkCluster.getProperties(),
             clusterId,
             flinkCluster.getId(),
-            getKubernetesDeployDesc(flinkCluster, "shutdown"));
-        Future<ShutDownResponse> future = executorService.submit(() -> FlinkClient.shutdown(stopRequest));
+            getKubernetesDeploySpec(flinkCluster, "shutdown"));
+        Future<ShutdownResponse> future = executorService.submit(() -> FlinkClient.shutdown(stopRequest));
         return future.get(60, TimeUnit.SECONDS);
     }
 
     private DeployResponse deployInternal(FlinkCluster flinkCluster) throws InterruptedException, ExecutionException, TimeoutException {
         DeployRequest deployRequest = new DeployRequest(
-            flinkEnvService.getById(flinkCluster.getVersionId()).getFlinkVersion(),
+            FlinkEnvUtils.version(flinkEnvService.getById(flinkCluster.getVersionId())),
             flinkCluster.getFlinkDeployModeEnum(),
             flinkCluster.getProperties(),
             flinkCluster.getClusterId(),
             flinkCluster.getId(),
-            getKubernetesDeployDesc(flinkCluster, "start"));
+            getKubernetesDeploySpec(flinkCluster, "start"));
         log.info("Deploy cluster request {}", deployRequest);
         Future<DeployResponse> future = executorService.submit(() -> FlinkClient.deploy(deployRequest));
         return future.get(60, TimeUnit.SECONDS);
@@ -450,14 +451,14 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     }
 
     @Nullable
-    private KubernetesDeployParam getKubernetesDeployDesc(
-                                                          @Nonnull FlinkCluster flinkCluster, String action) {
+    private KubernetesDeploySpec getKubernetesDeploySpec(
+                                                         @Nonnull FlinkCluster flinkCluster, String action) {
         FlinkDeployMode deployModeEnum = flinkCluster.getFlinkDeployModeEnum();
         switch (deployModeEnum) {
             case YARN_SESSION:
                 break;
             case KUBERNETES_NATIVE_SESSION:
-                return new KubernetesDeployParam(
+                return new KubernetesDeploySpec(
                     flinkCluster.getClusterId(),
                     flinkCluster.getK8sNamespace(),
                     flinkCluster.getK8sConf(),

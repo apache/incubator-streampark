@@ -17,8 +17,6 @@
 
 package org.apache.streampark.flink.core;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -99,7 +97,7 @@ public enum SqlCommand {
                 return Optional.empty();
             }
             if (groups[0] == null) {
-                return Optional.of(new String[]{cleanUp(groups[0])});
+                return Optional.of(new String[0]);
             }
             return Optional.of(new String[]{cleanUp(groups[1]), cleanUp(groups[2])});
         }),
@@ -125,8 +123,8 @@ public enum SqlCommand {
 
     private final String name;
     private final String regex;
+    private final Pattern pattern;
     private final SqlCommandConverter converter;
-    private Matcher matcher;
 
     SqlCommand(String name, String regex) {
         this(name, regex, SqlCommandConverters.DEFAULT);
@@ -135,6 +133,7 @@ public enum SqlCommand {
     SqlCommand(String name, String regex, SqlCommandConverter converter) {
         this.name = name;
         this.regex = regex;
+        this.pattern = Pattern.compile(regex, PATTERN_FLAGS);
         this.converter = converter;
     }
 
@@ -151,17 +150,21 @@ public enum SqlCommand {
         return converter;
     }
 
-    public Matcher getMatcher() {
-        return matcher;
+    public boolean matches(String input) {
+        return pattern.matcher(input).matches();
     }
 
-    public boolean matches(String input) {
-        if (StringUtils.isBlank(regex)) {
-            return false;
+    Optional<String[]> parseOperands(String input) {
+        Matcher matcher = pattern.matcher(input);
+        if (!matcher.matches()) {
+            return Optional.empty();
         }
-        Pattern pattern = Pattern.compile(regex, PATTERN_FLAGS);
-        matcher = pattern.matcher(input);
-        return matcher.matches();
+
+        String[] groups = new String[matcher.groupCount()];
+        for (int i = 0; i < groups.length; i++) {
+            groups[i] = matcher.group(i + 1);
+        }
+        return converter.convert(groups);
     }
 
     /** Resolve the first matching command for the given statement. */

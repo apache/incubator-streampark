@@ -18,11 +18,11 @@
 package org.apache.streampark.flink.kubernetes.watcher;
 
 import org.apache.streampark.flink.kubernetes.ChangeEventBus;
-import org.apache.streampark.flink.kubernetes.FlinkK8sWatchController;
+import org.apache.streampark.flink.kubernetes.FlinkKubernetesWatchController;
 import org.apache.streampark.flink.kubernetes.JobStatusWatcherConfig;
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sDeployMode;
+import org.apache.streampark.flink.kubernetes.enums.FlinkKubernetesDeployMode;
 import org.apache.streampark.flink.kubernetes.event.FlinkJobStatusChangeEvent;
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper;
 import org.apache.streampark.flink.kubernetes.model.ClusterKey;
@@ -62,14 +62,14 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
     private static final String TRACK_IDS_SUFFIX = ", trackIds=";
 
     private final JobStatusWatcherConfig conf;
-    private final FlinkK8sWatchController watchController;
+    private final FlinkKubernetesWatchController watchController;
     private final ChangeEventBus eventBus;
 
     private ScheduledFuture<?> timerSchedule;
 
     public FlinkJobStatusWatcher(
                                  JobStatusWatcherConfig conf,
-                                 FlinkK8sWatchController watchController,
+                                 FlinkKubernetesWatchController watchController,
                                  ChangeEventBus eventBus) {
         this.conf = conf;
         this.watchController = watchController;
@@ -112,7 +112,7 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
 
             Set<CompletableFuture<Optional<JobStatusCV>>> appFuture =
                 trackIds.stream()
-                    .filter(id -> id.executeMode() == FlinkK8sDeployMode.APPLICATION)
+                    .filter(id -> id.executeMode() == FlinkKubernetesDeployMode.APPLICATION)
                     .map(
                         id -> CompletableFuture
                             .supplyAsync(() -> touchApplicationJob(id), watchExecutor)
@@ -129,7 +129,7 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
 
             Set<TrackId> sessionIds =
                 trackIds.stream()
-                    .filter(id -> id.executeMode() == FlinkK8sDeployMode.SESSION)
+                    .filter(id -> id.executeMode() == FlinkKubernetesDeployMode.SESSION)
                     .collect(Collectors.toSet());
             Set<TrackId> sessionCluster = new HashSet<>();
             for (TrackId sessionId : sessionIds) {

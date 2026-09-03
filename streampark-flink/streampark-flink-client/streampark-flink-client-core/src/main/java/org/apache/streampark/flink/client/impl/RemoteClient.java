@@ -18,15 +18,17 @@
 package org.apache.streampark.flink.client.impl;
 
 import org.apache.streampark.common.util.ClassLoaderUtils;
-import org.apache.streampark.flink.client.bean.CancelRequest;
-import org.apache.streampark.flink.client.bean.CancelResponse;
-import org.apache.streampark.flink.client.bean.SavepointRequestTrait;
-import org.apache.streampark.flink.client.bean.SavepointResponse;
-import org.apache.streampark.flink.client.bean.SubmitRequest;
-import org.apache.streampark.flink.client.bean.SubmitResponse;
-import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
-import org.apache.streampark.flink.client.tool.FlinkSessionSubmitHelper;
-import org.apache.streampark.flink.client.trait.FlinkClientTrait;
+import org.apache.streampark.common.util.Tuple2;
+import org.apache.streampark.flink.client.bean.SessionClusterRestClient;
+import org.apache.streampark.flink.client.bean.SubmitRequestResolver;
+import org.apache.streampark.flink.client.configuration.FlinkConfigurationOps;
+import org.apache.streampark.flink.client.request.CancelRequest;
+import org.apache.streampark.flink.client.request.SavepointRequest;
+import org.apache.streampark.flink.client.request.SubmitRequest;
+import org.apache.streampark.flink.client.request.TriggerSavepointRequest;
+import org.apache.streampark.flink.client.response.CancelResponse;
+import org.apache.streampark.flink.client.response.SavepointResponse;
+import org.apache.streampark.flink.client.response.SubmitResponse;
 
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.client.deployment.ClusterClientFactory;
@@ -41,10 +43,8 @@ import org.apache.flink.util.FlinkException;
 
 import java.io.File;
 
-import scala.Tuple2;
-
 /** Submit Flink jobs to a remote standalone cluster. */
-public final class RemoteClient extends FlinkClientTrait {
+public final class RemoteClient extends AbstractFlinkClient {
 
     public static final RemoteClient INSTANCE = new RemoteClient();
 
@@ -52,23 +52,27 @@ public final class RemoteClient extends FlinkClientTrait {
     }
 
     @Override
-    public void setConfig(SubmitRequest submitRequest, Configuration flinkConfig) {
+    protected void setConfig(SubmitRequest submitRequest, Configuration flinkConfig) {
         // no extra configuration
     }
 
     @Override
-    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws FlinkException {
+    protected SubmitResponse doSubmit(
+                                      SubmitRequest submitRequest,
+                                      Configuration flinkConfig) throws FlinkException {
         return callAsFlinkException(
             () -> trySubmit(
                 submitRequest,
                 flinkConfig,
-                submitRequest.userJarFile(),
+                SubmitRequestResolver.userJarFile(submitRequest),
                 this::jobGraphSubmit,
                 this::restApiSubmit));
     }
 
     @Override
-    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig) throws FlinkException {
+    protected CancelResponse doCancel(
+                                      CancelRequest cancelRequest,
+                                      Configuration flinkConfig) throws FlinkException {
         return executeClientAction(
             cancelRequest,
             flinkConfig,
@@ -76,9 +80,9 @@ public final class RemoteClient extends FlinkClientTrait {
     }
 
     @Override
-    public SavepointResponse doTriggerSavepoint(
-                                                TriggerSavepointRequest savepointRequest,
-                                                Configuration flinkConfig) throws FlinkException {
+    protected SavepointResponse doTriggerSavepoint(
+                                                   TriggerSavepointRequest savepointRequest,
+                                                   Configuration flinkConfig) throws FlinkException {
         return executeClientAction(
             savepointRequest,
             flinkConfig,
@@ -86,62 +90,63 @@ public final class RemoteClient extends FlinkClientTrait {
     }
 
     /** Submit flink session job via rest api. */
-    public SubmitResponse restApiSubmit(
-                                        SubmitRequest submitRequest,
-                                        Configuration flinkConfig,
-                                        File fatJar) throws FlinkException {
+    private SubmitResponse restApiSubmit(
+                                         SubmitRequest submitRequest,
+                                         Configuration flinkConfig,
+                                         File fatJar) throws FlinkException {
         return callAsFlinkException(
             () -> {
                 Tuple2<StandaloneClusterId, StandaloneClusterDescriptor> standAloneDescriptor =
                     getStandAloneClusterDescriptor(flinkConfig);
-                StandaloneClusterId yarnClusterId = standAloneDescriptor._1();
-                StandaloneClusterDescriptor clusterDescriptor = standAloneDescriptor._2();
-
-                ClusterClient<StandaloneClusterId> client =
-                    clusterDescriptor.retrieve(yarnClusterId).getClusterClient();
-                String jobId =
-                    FlinkSessionSubmitHelper.submitViaRestApi(
-                        client.getWebInterfaceURL(), fatJar, flinkConfig);
-                logInfo(
-                    String.format(
-                        "%s mode submit by restApi, WebInterfaceURL %s, jobId: %s",
-                        submitRequest.deployMode(), client.getWebInterfaceURL(), jobId));
-                SubmitResponse resp =
-                    new SubmitResponse(null, flinkConfig.toMap(), jobId, client.getWebInterfaceURL());
-                closeSubmit(submitRequest, client, clusterDescriptor);
-                return resp;
+                StandaloneClusterId yarnClusterId = standAloneDescriptor._1;
+                StandaloneClusterDescriptor clusterDescriptor = standAloneDescriptor._2;
+                ClusterClient<StandaloneClusterId> client = null;
+                try {
+                    client = clusterDescriptor.retrieve(yarnClusterId).getClusterClient();
+                    String jobId =
+                        SessionClusterRestClient.submit(
+                            client.getWebInterfaceURL(), fatJar, flinkConfig);
+                    logInfo(
+                        String.format(
+                            "%s mode submit by REST API, WebInterfaceURL %s, jobId: %s",
+                            submitRequest.deployMode(), client.getWebInterfaceURL(), jobId));
+                    return new SubmitResponse(
+                        null, flinkConfig.toMap(), jobId, client.getWebInterfaceURL());
+                } finally {
+                    closeSubmissionResources(submitRequest, client, clusterDescriptor);
+                }
             });
     }
 
     /** Submit flink session job with building JobGraph via Standalone ClusterClient api. */
-    public SubmitResponse jobGraphSubmit(
-                                         SubmitRequest submitRequest,
-                                         Configuration flinkConfig,
-                                         File jarFile) throws FlinkException {
+    private SubmitResponse jobGraphSubmit(
+                                          SubmitRequest submitRequest,
+                                          Configuration flinkConfig,
+                                          File jarFile) throws FlinkException {
         Tuple2<StandaloneClusterId, StandaloneClusterDescriptor> standAloneDescriptor =
             getStandAloneClusterDescriptor(flinkConfig);
         return submitJobGraphToCluster(
             submitRequest,
             flinkConfig,
             jarFile,
-            () -> standAloneDescriptor._2().retrieve(standAloneDescriptor._1()).getClusterClient(),
+            () -> standAloneDescriptor._2.retrieve(standAloneDescriptor._1).getClusterClient(),
             () -> null,
-            standAloneDescriptor._2());
+            standAloneDescriptor._2);
     }
 
-    private <O, R extends SavepointRequestTrait> O executeClientAction(
-                                                                       R request,
-                                                                       Configuration flinkConfig,
-                                                                       ClientAction<O> actFunc) throws FlinkException {
+    private <O, R extends SavepointRequest> O executeClientAction(
+                                                                  R request,
+                                                                  Configuration flinkConfig,
+                                                                  ClientAction<O> actFunc) throws FlinkException {
         return callAsFlinkException(
             () -> {
-                FlinkConfigurationOps.safeSet(
+                FlinkConfigurationOps.setIfPresent(
                     flinkConfig, DeploymentOptions.TARGET, request.deployMode().getName());
-                FlinkConfigurationOps.safeSet(
+                FlinkConfigurationOps.setIfPresent(
                     flinkConfig,
                     RestOptions.ADDRESS,
                     request.properties().get(RestOptions.ADDRESS.key()).toString());
-                FlinkConfigurationOps.safeSet(
+                FlinkConfigurationOps.setIfPresent(
                     flinkConfig,
                     RestOptions.PORT,
                     Integer.parseInt(
@@ -150,12 +155,12 @@ public final class RemoteClient extends FlinkClientTrait {
                 Tuple2<StandaloneClusterId, StandaloneClusterDescriptor> descriptor =
                     getStandAloneClusterDescriptor(flinkConfig);
                 ClusterClient<StandaloneClusterId> clusterClient =
-                    descriptor._2().retrieve(descriptor._1()).getClusterClient();
+                    descriptor._2.retrieve(descriptor._1).getClusterClient();
                 try {
                     return actFunc.apply(JobID.fromHexString(request.jobId()), clusterClient);
                 } finally {
                     clusterClient.close();
-                    descriptor._2().close();
+                    descriptor._2.close();
                 }
             },
             e -> {
