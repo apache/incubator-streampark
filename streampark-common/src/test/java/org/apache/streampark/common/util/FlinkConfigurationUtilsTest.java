@@ -160,7 +160,11 @@ class FlinkConfigurationUtilsTest {
     void readLegacyFileAsUtf8() throws Exception {
         Path file =
             temporaryDirectory.resolve(FlinkConfigurationUtils.LEGACY_FLINK_CONF_FILENAME);
-        Files.writeString(file, "pipeline.name: \u4e2d\u6587\u4f5c\u4e1a\n", StandardCharsets.UTF_8);
+        Files.writeString(
+            file,
+            "# comment-only lines must be ignored\n"
+                + "pipeline.name: \u4e2d\u6587\u4f5c\u4e1a\n",
+            StandardCharsets.UTF_8);
 
         Map<String, String> configuration =
             FlinkConfigurationUtils.loadConfigurationFromFile(file.toFile());

@@ -62,6 +62,18 @@ class FlinkSqlTest {
     }
 
     @Test
+    void keepNullSqlUnchanged() {
+        FlinkSql flinkSql = flinkSql(null);
+        FlinkApplication application = new FlinkApplication();
+
+        flinkSql.base64Encode();
+        flinkSql.applyToApplication(application);
+
+        assertThat(flinkSql.getSql()).isNull();
+        assertThat(application.getFlinkSql()).isNull();
+    }
+
+    @Test
     void shouldRejectCorruptPersistedSql() {
         FlinkSql flinkSql = flinkSql("not-compressed-sql");
 

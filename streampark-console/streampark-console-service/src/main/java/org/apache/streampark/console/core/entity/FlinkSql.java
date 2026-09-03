@@ -106,7 +106,9 @@ public class FlinkSql {
     /** Copies decoded SQL to a Flink application using the API transport representation. */
     public void applyToApplication(FlinkApplication application) {
         application.setFlinkSql(
-            Base64.getEncoder().encodeToString(this.sql.getBytes(StandardCharsets.UTF_8)));
+            this.sql == null
+                ? null
+                : Base64.getEncoder().encodeToString(this.sql.getBytes(StandardCharsets.UTF_8)));
         application.setDependency(this.dependency);
         application.setTeamResource(this.teamResource);
         application.setSqlId(this.id);
@@ -149,6 +151,9 @@ public class FlinkSql {
     /** Replaces SQL with the Base64-encoded plain text required by the API. */
     public void base64Encode() {
         decode();
+        if (this.sql == null) {
+            return;
+        }
         this.sql =
             Base64.getEncoder().encodeToString(this.sql.getBytes(StandardCharsets.UTF_8));
     }

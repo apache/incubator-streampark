@@ -19,6 +19,7 @@ package org.apache.streampark.console.base.util;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import okhttp3.HttpUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -83,7 +84,7 @@ class WebUtilsTest {
         request.addHeader("Connection", "keep-alive, X-Request-Hop");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        WebUtils.http(endpoint, request, response);
+        WebUtils.http(HttpUrl.get(endpoint), request, response);
 
         assertThat(method.get()).isEqualTo("POST");
         assertThat(requestBody.get()).isEqualTo("{\"name\":\"streampark\"}");
@@ -93,6 +94,7 @@ class WebUtilsTest {
         assertThat(response.getHeader("X-Upstream")).isEqualTo("ok");
         assertThat(response.getHeader("Allow")).isEqualTo("GET, POST");
         assertThat(response.getHeader("X-Upstream-Hop")).isNull();
+        assertThat(response.getHeader("Access-Control-Allow-Origin")).isNull();
         assertThat(response.getContentAsString()).isEqualTo("upstream response");
     }
 

@@ -25,7 +25,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -393,9 +395,24 @@ class LfsOperatorTest {
     }
 
     @Test
-    void testfileMd5() {
+    void rejectInvalidDigestPaths() {
         assertThrows(IllegalArgumentException.class, () -> LfsOperator.fileMd5(null));
         assertThrows(IllegalArgumentException.class, () -> LfsOperator.fileMd5(""));
         assertThrows(IllegalArgumentException.class, () -> LfsOperator.fileMd5("ttt/144514.dat"));
+        assertThrows(IllegalArgumentException.class, () -> LfsOperator.fileSha256(null));
+        assertThrows(IllegalArgumentException.class, () -> LfsOperator.fileSha256(""));
+        assertThrows(IllegalArgumentException.class, () -> LfsOperator.fileSha256("ttt/144514.dat"));
+    }
+
+    @Test
+    void computeSha256() throws Exception {
+        withTempDir(
+            outputDir -> {
+                byte[] content = "streampark".getBytes(StandardCharsets.UTF_8);
+                Path file = Paths.get(outputDir, "artifact.jar");
+                Files.write(file, content);
+
+                assertEquals(DigestUtils.sha256Hex(content), LfsOperator.fileSha256(file.toString()));
+            });
     }
 }

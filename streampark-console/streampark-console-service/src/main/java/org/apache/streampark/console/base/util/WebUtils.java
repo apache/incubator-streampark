@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import okhttp3.Headers;
+import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -134,9 +135,15 @@ public final class WebUtils {
         return getAppDir(PLUGINS);
     }
 
-    /** Proxies a request and streams the upstream response to the servlet response. */
+    /**
+     * Proxies a request to a prevalidated upstream URL and streams its response.
+     *
+     * <p>The caller constructs {@link HttpUrl} from a trusted upstream authority. Request paths and
+     * query parameters must be added through {@link HttpUrl.Builder}, which prevents them from
+     * being reinterpreted as a different host.
+     */
     public static void http(
-                            String url,
+                            HttpUrl url,
                             HttpServletRequest request,
                             HttpServletResponse response) throws IOException {
         Headers.Builder headersBuilder = new Headers.Builder();
@@ -191,7 +198,6 @@ public final class WebUtils {
                                            Response upstream, HttpServletResponse downstream) throws IOException {
         copyProxyResponseHeaders(upstream, downstream);
         downstream.setStatus(upstream.code());
-        downstream.setHeader("Access-Control-Allow-Origin", "*");
         if (HttpMethod.HEAD.matches(upstream.request().method())) {
             return;
         }

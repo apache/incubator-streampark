@@ -65,7 +65,7 @@ public final class YamlParser {
 
     private static final String LENIENT_SCALAR_PREFIXES = "!&*%@`|>";
     private static final Pattern EMPTY_VALUE_PROPERTY =
-        Pattern.compile("^(\\s*)([^\\s#][^:]*):(?:\\s*(#.*)?)?$");
+        Pattern.compile("^(\\s*)([^\\s#][^:]*):\\s*(#.*)?$");
     private static final Pattern STRUCTURED_CHILD =
         Pattern.compile("^[^#\\-][^:]*:(?:$|\\s.*)$");
     private static final Pattern BLOCK_SCALAR_HEADER =

@@ -255,12 +255,8 @@ public final class FileUtils {
         }
     }
 
-    public static String readFile(String filename) throws IOException {
-        return PathUtils.readFileAsString(filename);
-    }
-
     public static String readFile(File file) throws IOException {
-        return readFile(file.getPath());
+        return Files.readString(file.toPath(), StandardCharsets.UTF_8);
     }
 
     public static void writeFile(String content, File file) throws IOException {

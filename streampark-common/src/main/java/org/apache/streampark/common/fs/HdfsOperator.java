@@ -127,6 +127,25 @@ public final class HdfsOperator {
         }
     }
 
+    /**
+     * Returns the SHA-256 digest of an HDFS file.
+     *
+     * @param path HDFS file path
+     * @return lowercase hexadecimal SHA-256 digest
+     */
+    public static String fileSha256(String path) {
+        if (path == null || path.isEmpty()) {
+            throw new IllegalArgumentException(
+                "[StreamPark] HdfsOperator.fileSha256: file must not be null.");
+        }
+        try {
+            return HdfsUtils.fileSha256(toHdfsPath(path));
+        } catch (IOException e) {
+            throw new IllegalStateException(
+                "[StreamPark] Failed to compute SHA-256 for: " + path, e);
+        }
+    }
+
     private static String toHdfsPath(String path) {
         if (path.startsWith("hdfs://")) {
             return path;

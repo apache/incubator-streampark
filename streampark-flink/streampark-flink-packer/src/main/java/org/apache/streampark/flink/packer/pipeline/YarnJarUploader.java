@@ -56,7 +56,7 @@ public final class YarnJarUploader {
                 new FileInputStream(originFile),
                 inputStream -> {
                     try {
-                        if (!DigestUtils.md5Hex(inputStream).equals(fsOperator.fileMd5(uploadFile))) {
+                        if (!DigestUtils.sha256Hex(inputStream).equals(fsOperator.fileSha256(uploadFile))) {
                             fsOperator.upload(originFile.getAbsolutePath(), uploadFile);
                         }
                     } catch (IOException e) {

@@ -18,78 +18,44 @@
 package org.apache.streampark.common.util;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Objects;
 
-/** Path resolution helpers for user-supplied file locations. */
+/** Resolves untrusted paths within an explicitly trusted directory. */
 public final class PathUtils {
 
     private PathUtils() {
     }
 
-    public static Path resolvePath(String filename) {
-        validateFilename(filename);
-        Path base = Paths.get("").toAbsolutePath().normalize();
-        Path resolved = base.resolve(filename).normalize();
-        if (!Paths.get(filename).isAbsolute() && !resolved.startsWith(base)) {
-            throw new IllegalArgumentException("invalid file path: " + filename);
+    /**
+     * Resolves an existing path without allowing it to escape {@code directory}. Absolute paths
+     * are accepted only when they remain inside the trusted directory. Both paths are resolved
+     * through symbolic links before the final containment check.
+     *
+     * @param directory trusted parent directory
+     * @param child untrusted relative or absolute path
+     * @return normalized path contained by the trusted directory
+     * @throws IOException when canonical path resolution fails or the child escapes the directory
+     */
+    public static Path resolveChild(Path directory, String child) throws IOException {
+        Objects.requireNonNull(directory, "directory must not be null");
+        if (child == null || child.trim().isEmpty()) {
+            throw new IOException("child path must not be blank");
+        }
+
+        Path lexicalRoot = directory.toAbsolutePath().normalize();
+        Path requested = Path.of(child);
+        Path candidate = requested.isAbsolute()
+            ? requested.normalize()
+            : lexicalRoot.resolve(requested).normalize();
+        if (!candidate.startsWith(lexicalRoot)) {
+            throw new IOException("Path escapes trusted directory: " + child);
+        }
+        Path root = lexicalRoot.toRealPath();
+        Path resolved = candidate.toRealPath();
+        if (!resolved.startsWith(root)) {
+            throw new IOException("Path escapes trusted directory: " + child);
         }
         return resolved;
-    }
-
-    public static InputStream openFile(String filename) throws IOException {
-        validateFilename(filename);
-        Path base = Paths.get("").toAbsolutePath().normalize();
-        Path resolved = base.resolve(filename).normalize();
-        if (!Paths.get(filename).isAbsolute() && !resolved.startsWith(base)) {
-            throw new IOException("invalid file path: " + filename);
-        }
-        return Files.newInputStream(resolved); // NOSONAR javasecurity:S2083 - path validated via Path.resolve above
-    }
-
-    public static String readFileAsString(String filename) throws IOException {
-        Path resolved = resolvePath(filename);
-        // NOSONAR javasecurity:S2083 - path validated via
-        // Path.resolve above
-        return Files.readString(resolved, StandardCharsets.UTF_8);
-    }
-
-    public static Path resolveJarPath(java.net.URL jar) throws IOException {
-        try {
-            String location = jar.toString();
-            if (location.contains("..")) {
-                throw new IOException("JAR file path is invalid " + jar);
-            }
-            Path base = Paths.get("").toAbsolutePath().normalize();
-            return base.resolve(Paths.get(jar.toURI())).normalize();
-        } catch (Exception e) {
-            throw new IOException("JAR file path is invalid " + jar, e);
-        }
-    }
-
-    public static InputStream openJarFile(java.net.URL jar) throws IOException {
-        String location = jar.toString();
-        if (location.contains("..")) {
-            throw new IOException("JAR file path is invalid " + jar);
-        }
-        try {
-            Path base = Paths.get("").toAbsolutePath().normalize();
-            Path resolved = base.resolve(Paths.get(jar.toURI())).normalize();
-            return Files.newInputStream(resolved); // NOSONAR javasecurity:S2083 - path validated via Path.resolve above
-        } catch (Exception e) {
-            throw new IOException("JAR file path is invalid " + jar, e);
-        }
-    }
-
-    private static void validateFilename(String filename) {
-        if (filename == null || filename.isEmpty()) {
-            throw new IllegalArgumentException("filename must not be blank");
-        }
-        if (filename.contains("..")) {
-            throw new IllegalArgumentException("invalid file path: " + filename);
-        }
     }
 }

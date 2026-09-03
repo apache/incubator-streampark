@@ -199,6 +199,30 @@ public final class LfsOperator {
         }
     }
 
+    /**
+     * Returns the SHA-256 digest of a local file.
+     *
+     * @param path local file path
+     * @return lowercase hexadecimal SHA-256 digest
+     */
+    public static String fileSha256(String path) {
+        if (path == null || path.isEmpty()) {
+            throw new IllegalArgumentException(
+                "[StreamPark] LFsOperator.fileSha256: file must not be null.");
+        }
+        File file = new File(path);
+        if (!file.exists()) {
+            throw new IllegalArgumentException(
+                "[StreamPark] LFsOperator.fileSha256: file must exist.");
+        }
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            return DigestUtils.sha256Hex(inputStream);
+        } catch (IOException e) {
+            throw new IllegalStateException(
+                "[StreamPark] Failed to compute SHA-256 for: " + path, e);
+        }
+    }
+
     /** Force delete directory and recreate it. */
     public static void mkCleanDirs(String path) {
         delete(path);

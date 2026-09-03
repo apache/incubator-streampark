@@ -284,7 +284,8 @@ public final class FlinkConfigurationUtils {
         int lineNumber = 0;
         while ((line = reader.readLine()) != null) {
             lineNumber++;
-            String content = line.split("#", 2)[0].trim();
+            int commentStart = line.indexOf('#');
+            String content = (commentStart < 0 ? line : line.substring(0, commentStart)).trim();
             if (content.isEmpty()) {
                 continue;
             }

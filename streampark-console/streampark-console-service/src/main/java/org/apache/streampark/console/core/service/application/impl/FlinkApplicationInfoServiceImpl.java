@@ -17,10 +17,12 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
+import org.apache.streampark.common.configuration.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.HadoopUtils;
+import org.apache.streampark.common.util.PathUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -65,6 +67,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Base64;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -413,7 +417,7 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
     public String getYarnName(String appConfig) {
         String[] args = new String[2];
         args[0] = "--name";
-        args[1] = appConfig;
+        args[1] = resolveProjectConfig(appConfig).toString();
         return FlinkShellCommandBuilder.read(args);
     }
 
@@ -458,9 +462,18 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
 
     @Override
     public String readConf(String appConfig) throws IOException {
-        File file = new File(appConfig);
+        File file = resolveProjectConfig(appConfig).toFile();
         String conf = org.apache.streampark.common.util.FileUtils.readFile(file);
-        return Base64.getEncoder().encodeToString(conf.getBytes());
+        return Base64.getEncoder().encodeToString(conf.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /** Resolves a client-selected configuration within managed project distributions. */
+    private Path resolveProjectConfig(String appConfig) {
+        try {
+            return PathUtils.resolveChild(Path.of(Workspace.APP_LOCAL_DIST), appConfig);
+        } catch (IOException exception) {
+            throw new ApiDetailException("Invalid project configuration path", exception);
+        }
     }
 
     @Override

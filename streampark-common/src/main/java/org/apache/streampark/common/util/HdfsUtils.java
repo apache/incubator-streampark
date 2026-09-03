@@ -181,6 +181,20 @@ public final class HdfsUtils {
         }
     }
 
+    /**
+     * Returns the SHA-256 digest of an HDFS file.
+     *
+     * @param fileName HDFS file path
+     * @return lowercase hexadecimal SHA-256 digest
+     * @throws IOException when the file cannot be read
+     */
+    public static String fileSha256(String fileName) throws IOException {
+        Path path = getPath(fileName);
+        try (FSDataInputStream input = HadoopUtils.hdfs().open(path)) {
+            return DigestUtils.sha256Hex(input);
+        }
+    }
+
     public static void downToLocal(String hdfsPath, String localPath) throws IOException {
         Path path = getPath(hdfsPath);
         FSDataInputStream input = HadoopUtils.hdfs().open(path);

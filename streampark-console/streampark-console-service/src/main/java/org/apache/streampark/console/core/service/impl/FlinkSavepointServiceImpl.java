@@ -473,7 +473,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
             .eq(FlinkSavepoint::getType, CHECKPOINT.get())
             .orderByDesc(FlinkSavepoint::getTriggerTime)
             .page(
-                new Page<>(1, cpThreshold + 1));
+                new Page<>(1, cpThreshold + 1L));
 
         if (CollectionUtils.isEmpty(savepointPage.getRecords())
             || savepointPage.getRecords().size() <= cpThreshold) {

@@ -17,7 +17,6 @@
 
 package org.apache.streampark.common.configuration;
 
-import org.apache.streampark.common.util.PathUtils;
 import org.apache.streampark.common.util.YamlParser;
 
 import com.typesafe.config.Config;
@@ -29,6 +28,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -69,7 +69,7 @@ public final class ConfigurationParser {
      */
     public static Configuration parse(Path path, ConfigurationFormat format) {
         Objects.requireNonNull(path, "path must not be null");
-        try (InputStream inputStream = PathUtils.openFile(path.toString())) {
+        try (InputStream inputStream = Files.newInputStream(path)) {
             return parse(inputStream, format, path.toAbsolutePath().normalize().toString());
         } catch (IOException e) {
             throw new ConfigException("Cannot read configuration file " + path, e);
