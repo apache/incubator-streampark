@@ -1,0 +1,35 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: E2E Required Check Compatibility
+
+on:
+  pull_request:
+  push:
+    branches:
+      - dev
+
+# The retired E2E workflow remains a required check on dev until the .asf.yaml change in this PR
+# is merged and synchronized to GitHub branch protection. Remove this compatibility workflow after
+# that synchronization completes.
+jobs:
+  result:
+    name: E2E - Result
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report retired E2E status
+        run: echo "The legacy E2E suite is retired for the StreamPark 3.0 architecture transition."
