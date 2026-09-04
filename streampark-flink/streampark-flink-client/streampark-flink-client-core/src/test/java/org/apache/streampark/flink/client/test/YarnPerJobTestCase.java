@@ -58,7 +58,7 @@ import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** perJob to submit jobs programmatically */
+/** Compatibility harness for programmatic submission through Flink's legacy YARN per-job API. */
 public final class YarnPerJobTestCase {
 
     private static final Logger LOG =
@@ -73,32 +73,6 @@ public final class YarnPerJobTestCase {
     private static Method deployInternalMethod;
 
     private YarnPerJobTestCase() {
-    }
-
-    private static void ensureInitialized() {
-        if (deployInternalMethod != null) {
-            return;
-        }
-        String flinkHome = Objects.requireNonNull(System.getenv("FLINK_HOME"), "FLINK_HOME must be set");
-        LOG.info("flinkHome: {}", flinkHome);
-        flinkDefaultConfiguration = GlobalConfiguration.loadConfiguration(flinkHome + "/conf");
-        try {
-            customCommandLines =
-                CliFrontend.loadCustomCommandLines(flinkDefaultConfiguration, flinkHome + "/conf");
-            Class<?>[] paramClass =
-                new Class<?>[]{
-                        ClusterSpecification.class,
-                        String.class,
-                        String.class,
-                        JobGraph.class,
-                        boolean.class
-                };
-            deployInternalMethod =
-                YarnClusterDescriptor.class.getDeclaredMethod("deployInternal", paramClass);
-            deployInternalMethod.setAccessible(true);
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to initialize YARN integration harness", e);
-        }
     }
 
     @Test
@@ -131,23 +105,7 @@ public final class YarnPerJobTestCase {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private static ClusterClientProvider<ApplicationId> deployInternal(
-                                                                       YarnClusterDescriptor clusterDescriptor,
-                                                                       ClusterSpecification clusterSpecification,
-                                                                       String applicationName,
-                                                                       String yarnClusterEntrypoint,
-                                                                       JobGraph jobGraph,
-                                                                       Boolean detached) throws Exception {
-        return (ClusterClientProvider<ApplicationId>) deployInternalMethod.invoke(
-            clusterDescriptor,
-            clusterSpecification,
-            applicationName,
-            yarnClusterEntrypoint,
-            jobGraph,
-            detached);
-    }
-
+    /** Runs a manual submission against the Flink installation identified by {@code FLINK_HOME}. */
     public static void main(String[] args) throws Exception {
         ensureInitialized();
         String flinkHome = System.getenv("FLINK_HOME");
@@ -245,5 +203,50 @@ public final class YarnPerJobTestCase {
         } finally {
             clusterDescriptor.close();
         }
+    }
+
+    /** Initializes the reflective Flink YARN entry point only when the manual harness is used. */
+    private static void ensureInitialized() {
+        if (deployInternalMethod != null) {
+            return;
+        }
+        String flinkHome = Objects.requireNonNull(System.getenv("FLINK_HOME"), "FLINK_HOME must be set");
+        LOG.info("flinkHome: {}", flinkHome);
+        flinkDefaultConfiguration = GlobalConfiguration.loadConfiguration(flinkHome + "/conf");
+        try {
+            customCommandLines =
+                CliFrontend.loadCustomCommandLines(flinkDefaultConfiguration, flinkHome + "/conf");
+            Class<?>[] paramClass =
+                new Class<?>[]{
+                        ClusterSpecification.class,
+                        String.class,
+                        String.class,
+                        JobGraph.class,
+                        boolean.class
+                };
+            deployInternalMethod =
+                YarnClusterDescriptor.class.getDeclaredMethod("deployInternal", paramClass);
+            deployInternalMethod.setAccessible(true);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to initialize YARN integration harness", e);
+        }
+    }
+
+    /** Invokes the non-public YARN per-job deployment method retained by supported Flink 1.x. */
+    @SuppressWarnings("unchecked")
+    private static ClusterClientProvider<ApplicationId> deployInternal(
+                                                                       YarnClusterDescriptor clusterDescriptor,
+                                                                       ClusterSpecification clusterSpecification,
+                                                                       String jobName,
+                                                                       String yarnClusterEntrypoint,
+                                                                       JobGraph jobGraph,
+                                                                       Boolean detached) throws Exception {
+        return (ClusterClientProvider<ApplicationId>) deployInternalMethod.invoke(
+            clusterDescriptor,
+            clusterSpecification,
+            jobName,
+            yarnClusterEntrypoint,
+            jobGraph,
+            detached);
     }
 }

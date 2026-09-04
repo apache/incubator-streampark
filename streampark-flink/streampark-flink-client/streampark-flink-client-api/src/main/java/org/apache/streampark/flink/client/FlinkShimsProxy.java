@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.proxy;
+package org.apache.streampark.flink.client;
 
 import org.apache.streampark.common.configuration.Constants;
 import org.apache.streampark.common.configuration.option.CoreOptions;
@@ -35,6 +35,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -93,39 +94,55 @@ public final class FlinkShimsProxy extends LoggerSupport {
     private FlinkShimsProxy() {
     }
 
-    private static Pattern getFlinkShimsResourcePattern(String majorVersion) {
-        return Pattern.compile(
-            "flink-(.*)-" + majorVersion + "(.*).jar",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-    }
-
     /**
-     * Get shimsClassLoader to execute for java/scala API (SAM {@link Function}).
+     * Executes an operation inside the classloader for the requested Flink version.
      *
-     * @param flinkVersion flinkVersion
-     * @param func execute function
-     * @param <T> return type
-     * @return result of func
+     * @param flinkVersion target Flink installation and version
+     * @param operation operation that must resolve target-version classes
+     * @param <T> operation result type
+     * @return result returned by the operation
      */
-    public static <T> T proxy(FlinkVersion flinkVersion, Function<ClassLoader, T> func) {
+    public static <T> T proxy(
+                              FlinkVersion flinkVersion,
+                              Function<ClassLoader, T> operation) {
         ClassLoader shimsClassLoader = getFlinkShimsClassLoader(flinkVersion);
-        return ClassLoaderUtils.runAsClassLoader(shimsClassLoader, () -> func.apply(shimsClassLoader));
+        return ClassLoaderUtils.runAsClassLoader(
+            shimsClassLoader, () -> operation.apply(shimsClassLoader));
     }
 
     /**
-     * Get ClassLoader to verify sql.
+     * Executes SQL validation with the target Flink table libraries available.
      *
-     * @param flinkVersion flinkVersion
-     * @param func execute function
-     * @param <T> return type
-     * @return result of func
+     * @param flinkVersion target Flink installation and version
+     * @param operation validation operation
+     * @param <T> operation result type
+     * @return result returned by the operation
      */
-    public static <T> T proxyVerifySql(FlinkVersion flinkVersion, Function<ClassLoader, T> func) {
+    public static <T> T proxyVerifySql(
+                                       FlinkVersion flinkVersion,
+                                       Function<ClassLoader, T> operation) {
         ClassLoader shimsClassLoader = getVerifySqlLibClassLoader(flinkVersion);
-        return ClassLoaderUtils.runAsClassLoader(shimsClassLoader, () -> func.apply(shimsClassLoader));
+        return ClassLoaderUtils.runAsClassLoader(
+            shimsClassLoader, () -> operation.apply(shimsClassLoader));
     }
 
-    public static <T> T getObject(ClassLoader loader, Object obj,
+    /**
+     * Copies a serializable value into the type space of another classloader.
+     *
+     * <p>Flink runtime objects must not cross the shims boundary. Stable StreamPark request and
+     * response types use this method to transfer values without sharing their defining classes.
+     *
+     * @param loader classloader that must define the copied value
+     * @param obj serializable source value
+     * @param type target type loaded in the destination type space
+     * @param <T> copied value type
+     * @return deserialized value owned by the destination classloader
+     * @throws IOException if the value cannot be serialized or read
+     * @throws ClassNotFoundException if the destination loader cannot resolve a serialized type
+     */
+    public static <T> T getObject(
+                                  ClassLoader loader,
+                                  Object obj,
                                   Class<T> type) throws IOException, ClassNotFoundException {
         try (
             ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
@@ -141,6 +158,14 @@ public final class FlinkShimsProxy extends LoggerSupport {
         }
     }
 
+    /** Builds the pattern used to keep the selected concrete shim child-first. */
+    private static Pattern getFlinkShimsResourcePattern(String majorVersion) {
+        return Pattern.compile(
+            "flink-(.*)-" + majorVersion + "(.*).jar",
+            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    }
+
+    /** Returns the cached SQL-validation classloader for a concrete Flink version. */
     private static ClassLoader getVerifySqlLibClassLoader(FlinkVersion flinkVersion) {
         LOG.logInfo("Add verify sql lib,flink version: " + flinkVersion);
         return VERIFY_SQL_CLASS_LOADER_CACHE.computeIfAbsent(
@@ -160,12 +185,14 @@ public final class FlinkShimsProxy extends LoggerSupport {
             });
     }
 
+    /** Keeps target Flink jars child-first while excluding the selected shim artifact itself. */
     private static boolean loadJarFilter(String jarName, FlinkVersion flinkVersion) {
         Pattern childFirstPattern = getFlinkShimsResourcePattern(flinkVersion.majorVersion());
         return FLINK_JAR_PATTERN.matcher(jarName).matches()
             && !childFirstPattern.matcher(jarName).matches();
     }
 
+    /** Adds compatible StreamPark integration artifacts in deterministic filename order. */
     private static void addShimsUrls(FlinkVersion flinkVersion, Consumer<File> addShimUrl) {
         String appHome = System.getProperty(CoreOptions.APP_HOME.key());
         if (appHome == null) {
@@ -197,9 +224,11 @@ public final class FlinkShimsProxy extends LoggerSupport {
                 LOG.logInfo(includeReason + jarName);
             }
         }
+        matched.sort(Comparator.comparing(File::getName));
         matched.forEach(addShimUrl);
     }
 
+    /** Returns the inclusion reason for a compatible integration artifact, or {@code null}. */
     static String matchShimIncludeReason(
                                          String jarName, String majorVersion, String scalaVersion) {
         if (jarName.startsWith(FLINK_SHIMS_PREFIX)) {
@@ -234,6 +263,7 @@ public final class FlinkShimsProxy extends LoggerSupport {
         return null;
     }
 
+    /** Returns the cached submission classloader for a concrete Flink version. */
     private static ClassLoader getFlinkShimsClassLoader(FlinkVersion flinkVersion) {
         LOG.logInfo("add flink shims urls classloader,flink version: " + flinkVersion);
         return SHIMS_CLASS_LOADER_CACHE.computeIfAbsent(
@@ -273,6 +303,7 @@ public final class FlinkShimsProxy extends LoggerSupport {
         return urls;
     }
 
+    /** Creates a child-first loader whose parent owns stable StreamPark boundary types. */
     private static ClassLoader createClassLoader(
                                                  FlinkVersion flinkVersion,
                                                  List<URL> urls) {
@@ -283,6 +314,7 @@ public final class FlinkShimsProxy extends LoggerSupport {
             jarName -> loadJarFilter(jarName, flinkVersion));
     }
 
+    /** Collects matching jars from a Flink installation directory in deterministic order. */
     private static List<URL> getFlinkHomeLib(
                                              String flinkHome,
                                              String childDir,
@@ -295,6 +327,7 @@ public final class FlinkShimsProxy extends LoggerSupport {
         if (files == null) {
             return Collections.emptyList();
         }
+        Arrays.sort(files, Comparator.comparing(File::getName));
         List<URL> urls = new ArrayList<>();
         for (File f : files) {
             if (filterFun.test(f)) {
@@ -304,6 +337,7 @@ public final class FlinkShimsProxy extends LoggerSupport {
         return urls;
     }
 
+    /** Converts a local artifact path to a classloader URL with contextual failure reporting. */
     private static URL toUrl(File file) {
         try {
             return file.toURI().toURL();

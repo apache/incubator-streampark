@@ -20,8 +20,7 @@ package org.apache.streampark.flink.client.impl;
 import org.apache.streampark.common.util.Tuple2;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.flink.client.bean.FlinkJobGraphBuilder;
-import org.apache.streampark.flink.client.bean.SubmitRequestResolver;
-import org.apache.streampark.flink.client.configuration.FlinkConfigurationOps;
+import org.apache.streampark.flink.client.bean.ResolvedSubmitRequest;
 import org.apache.streampark.flink.client.request.CancelRequest;
 import org.apache.streampark.flink.client.request.SubmitRequest;
 import org.apache.streampark.flink.client.response.CancelResponse;
@@ -40,7 +39,7 @@ import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
-/** Yarn per-job mode submit. */
+/** Submits and manages Flink jobs in the legacy YARN per-job deployment mode. */
 public final class YarnPerJobClient extends AbstractYarnClient {
 
     public static final YarnPerJobClient INSTANCE = new YarnPerJobClient();
@@ -48,23 +47,25 @@ public final class YarnPerJobClient extends AbstractYarnClient {
     private YarnPerJobClient() {
     }
 
+    /** Configures attached per-job deployment and cluster shutdown semantics. */
     @Override
-    protected void setConfig(SubmitRequest submitRequest, Configuration flinkConfig) {
-        super.setConfig(submitRequest, flinkConfig);
-        FlinkConfigurationOps.setIfPresent(
-            flinkConfig, DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName());
-        FlinkConfigurationOps.setIfPresent(flinkConfig, DeploymentOptions.ATTACHED, true);
-        FlinkConfigurationOps.setIfPresent(flinkConfig, DeploymentOptions.SHUTDOWN_IF_ATTACHED, true);
+    protected void setConfig(ResolvedSubmitRequest resolved, Configuration flinkConfig) {
+        super.setConfig(resolved, flinkConfig);
+        flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName());
+        flinkConfig.set(DeploymentOptions.ATTACHED, true);
+        flinkConfig.set(DeploymentOptions.SHUTDOWN_IF_ATTACHED, true);
 
         logEffectiveSubmitConfiguration(flinkConfig);
     }
 
+    /** Deploys one YARN cluster around the request's JobGraph. */
     @Override
     protected SubmitResponse doSubmit(
-                                      SubmitRequest submitRequest,
+                                      ResolvedSubmitRequest resolved,
                                       Configuration flinkConfig) throws FlinkException {
+        SubmitRequest submitRequest = resolved.request();
 
-        return callAsFlinkException(
+        return execute(
             () -> {
                 String flinkHome = submitRequest.flinkVersion().getFlinkHome();
 
@@ -84,14 +85,14 @@ public final class YarnPerJobClient extends AbstractYarnClient {
                     job =
                         buildJobGraph(
                             flinkConfig,
-                            submitRequest,
-                            SubmitRequestResolver.userJarFile(submitRequest));
+                            resolved,
+                            resolved.getUserJarFile());
                     JobGraph jobGraph = job.jobGraph();
                     clusterClient =
                         deployInternal(
                             clusterDescriptor,
                             clusterSpecification,
-                            SubmitRequestResolver.effectiveApplicationName(submitRequest),
+                            resolved.getJobName(),
                             YarnJobClusterEntrypoint.class.getName(),
                             jobGraph,
                             true)
@@ -105,7 +106,6 @@ public final class YarnPerJobClient extends AbstractYarnClient {
                         clusterClient.getWebInterfaceURL());
                 } finally {
                     closeSubmissionResources(
-                        submitRequest,
                         job == null ? null : job.program(),
                         clusterClient,
                         clusterDescriptor);
@@ -113,11 +113,12 @@ public final class YarnPerJobClient extends AbstractYarnClient {
             });
     }
 
+    /** Cancels the job and then terminates its dedicated YARN cluster. */
     @Override
     protected CancelResponse doCancel(
                                       CancelRequest cancelRequest,
                                       Configuration flinkConfig) throws FlinkException {
-        return callAsFlinkException(
+        return execute(
             () -> {
                 CancelResponse response = super.doCancel(cancelRequest, flinkConfig);
                 Tuple2<ApplicationId, YarnClusterDescriptor> yarnClusterDescriptor =

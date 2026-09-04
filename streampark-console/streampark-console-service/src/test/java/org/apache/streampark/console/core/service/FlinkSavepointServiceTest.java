@@ -21,7 +21,7 @@ import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.common.util.FlinkConfigurationUtils;
+import org.apache.streampark.common.util.FlinkConfigurationLoader;
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkApplicationConfig;
@@ -150,7 +150,7 @@ class FlinkSavepointServiceTest extends SpringUnitTestBase {
         flinkEnv.setScalaVersion("2.12");
         Path confDir = Files.createDirectories(flinkHome.resolve("conf"));
         Files.writeString(
-            confDir.resolve(FlinkConfigurationUtils.LEGACY_FLINK_CONF_FILENAME),
+            confDir.resolve(FlinkConfigurationLoader.LEGACY_FLINK_CONF_FILENAME),
             SAVEPOINT_DIRECTORY.key() + ": hdfs:///test");
         FlinkEnvUtils.sync(flinkEnv);
         flinkEnvService.save(flinkEnv);

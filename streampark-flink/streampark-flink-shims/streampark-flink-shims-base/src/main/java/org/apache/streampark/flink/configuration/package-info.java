@@ -20,7 +20,7 @@
  *
  * <p>StreamPark application options and native Flink configuration remain separate until the
  * initializer creates a {@link org.apache.streampark.flink.configuration.FlinkRuntimeConfiguration}
- * for a concrete job. {@link FlinkConfigurationUtils}
+ * for a concrete job. {@link FlinkConfigurationLoader}
  * normalizes Flink's legacy and standard YAML file formats before those views are assembled.
  *
  * <p>Installations before Flink 1.19 use flat {@code flink-conf.yaml}. Flink 1.19 and 1.20 prefer
@@ -30,4 +30,4 @@
  */
 package org.apache.streampark.flink.configuration;
 
-import org.apache.streampark.common.util.FlinkConfigurationUtils;
+import org.apache.streampark.common.util.FlinkConfigurationLoader;

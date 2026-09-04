@@ -19,24 +19,23 @@ package org.apache.streampark.flink.client.request;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ClientRequestUtilsTest {
 
     @Test
-    void convertNonSerializableValues() {
+    void rejectsNonSerializableValues() {
         Map<String, Object> input = new HashMap<>();
         input.put("serializable", "value");
         input.put("custom", new Object());
 
-        Map<String, Serializable> result = ClientRequestUtils.toSerializableMap(input);
-
-        assertThat(result).containsEntry("serializable", "value");
-        assertThat(result.get("custom")).isNotNull();
+        assertThatThrownBy(() -> ClientRequestUtils.toSerializableMap(input))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("custom");
     }
 
     @Test

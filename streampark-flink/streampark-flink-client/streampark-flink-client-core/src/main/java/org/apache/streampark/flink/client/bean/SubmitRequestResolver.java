@@ -19,16 +19,12 @@ package org.apache.streampark.flink.client.bean;
 
 import org.apache.streampark.common.configuration.ConfigurationFormat;
 import org.apache.streampark.common.configuration.ConfigurationParser;
-import org.apache.streampark.common.configuration.Constants;
 import org.apache.streampark.common.configuration.FlinkOptions;
 import org.apache.streampark.common.configuration.Workspace;
-import org.apache.streampark.common.configuration.option.ApplicationOptions;
 import org.apache.streampark.common.enums.FlinkDeployMode;
-import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.HdfsUtils;
-import org.apache.streampark.flink.client.configuration.FlinkSavepointOptions;
 import org.apache.streampark.flink.client.request.SubmitRequest;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
@@ -36,21 +32,25 @@ import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 import org.apache.streampark.shaded.com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.streampark.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings;
-
-import javax.annotation.Nullable;
-
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-/** Resolves runtime submission values from the serialized client request. */
+/**
+ * Parses transport-oriented submission fields into an immutable request snapshot.
+ *
+ * <p>Job configuration is decoded exactly once. The returned snapshot owns all derived
+ * values used by configuration assembly and deployment clients, preventing repeated HDFS reads or
+ * inconsistent results within one submission.
+ */
 public final class SubmitRequestResolver {
 
     private static final int CONFIG_SCHEME_LENGTH = 7;
@@ -58,130 +58,41 @@ public final class SubmitRequestResolver {
     private SubmitRequestResolver() {
     }
 
-    /** Returns application properties without their transport prefix. */
-    public static Map<String, String> applicationProperties(SubmitRequest request) {
-        return getParameters(request, FlinkOptions.PROPERTY_PREFIX.value());
+    /**
+     * Resolves a request from one job-configuration read.
+     *
+     * @param request serialized submission request
+     * @return immutable values derived from the request
+     */
+    public static ResolvedSubmitRequest resolve(SubmitRequest request) {
+        Objects.requireNonNull(request, "request must not be null");
+        Map<String, String> jobConfig =
+            request.appConf() == null
+                ? Collections.emptyMap()
+                : loadJobConfig(request.appConf());
+        String jobName = resolveJobName(request, jobConfig);
+        AssertUtils.hasText(jobName, "Flink job name must not be blank");
+        validateBuildResult(request, jobName);
+        return new ResolvedSubmitRequest(
+            request,
+            jobConfig,
+            jobName,
+            resolveUserJar(request),
+            resolveClassPath(request));
     }
 
-    /** Returns application options without their transport prefix. */
-    public static Map<String, String> applicationOptions(SubmitRequest request) {
-        return getParameters(request, FlinkOptions.OPTION_PREFIX.value());
-    }
-
-    /** Resolves the application entry class for the submitted job type. */
-    @Nullable
-    public static String applicationMain(SubmitRequest request) {
-        if (request.jobType() == FlinkJobType.FLINK_SQL) {
-            return Constants.STREAMPARK_FLINKSQL_CLIENT_CLASS;
+    /** Resolves the explicit job name or the configured pipeline-name fallback. */
+    private static String resolveJobName(SubmitRequest request, Map<String, String> jobConfig) {
+        if (request.appName() != null) {
+            return request.appName();
         }
-        if (request.jobType() == FlinkJobType.PYFLINK) {
-            return Constants.PYTHON_FLINK_DRIVER_CLASS_NAME;
-        }
-        String mainClass =
-            applicationProperties(request).get(FlinkOptions.APPLICATION_MAIN_CLASS.key());
-        if (mainClass == null && request.appConf() != null) {
-            mainClass =
-                loadApplicationConfig(request.appConf())
-                    .get(FlinkOptions.APPLICATION_MAIN_CLASS.key());
-        }
-        return mainClass;
+        String propertyKey = FlinkOptions.PROPERTY_PREFIX.value() + FlinkOptions.PIPELINE_NAME.key();
+        return jobConfig.get(propertyKey);
     }
 
-    /** Resolves the explicit or configured application name. */
-    @Nullable
-    public static String effectiveApplicationName(SubmitRequest request) {
-        return request.appName() == null
-            ? applicationProperties(request).get(FlinkOptions.PIPELINE_NAME.key())
-            : request.appName();
-    }
-
-    /** Returns the application-specific libraries available in the local workspace. */
-    public static List<URL> libraries(SubmitRequest request) {
-        File libDir =
-            new File(
-                new File(Workspace.LOCAL.workspace, String.valueOf(request.id())), "lib");
-        File[] files = libDir.listFiles();
-        if (files == null) {
-            return Collections.emptyList();
-        }
-        List<URL> urls = new ArrayList<>(files.length);
-        for (File file : files) {
-            try {
-                urls.add(file.toURI().toURL());
-            } catch (MalformedURLException e) {
-                throw new IllegalArgumentException("Invalid library path: " + file, e);
-            }
-        }
-        return urls;
-    }
-
-    /** Builds the complete user-code classpath for submission. */
-    public static List<URL> classPaths(SubmitRequest request) {
-        try {
-            List<URL> classPaths = new ArrayList<>(request.flinkVersion().getFlinkLibs());
-            classPaths.addAll(libraries(request));
-            return classPaths;
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to resolve the Flink submission classpath", e);
-        }
-    }
-
-    /** Returns the SQL payload carried by a Flink SQL request. */
-    @Nullable
-    public static String flinkSql(SubmitRequest request) {
-        Map<String, Object> extraParameter = request.extraParameter();
-        Object sql = extraParameter.get(ApplicationOptions.SQL.key());
-        return sql == null ? null : sql.toString();
-    }
-
-    /** Returns whether state not represented in a savepoint may be skipped. */
-    public static boolean allowNonRestoredState(SubmitRequest request) {
-        Object value =
-            request.properties().get(FlinkSavepointOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key());
-        return value != null && Boolean.parseBoolean(value.toString());
-    }
-
-    /** Creates Flink restore settings from the request savepoint options. */
-    public static SavepointRestoreSettings savepointRestoreSettings(SubmitRequest request) {
-        if (request.savePoint() == null || request.savePoint().isEmpty()) {
-            return SavepointRestoreSettings.none();
-        }
-        return SavepointRestoreSettings.forPath(
-            request.savePoint(), allowNonRestoredState(request));
-    }
-
-    /** Resolves the built user JAR for deployment modes that upload a local artifact. */
-    @Nullable
-    public static File userJarFile(SubmitRequest request) {
-        if (request.deployMode() == FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION) {
-            return null;
-        }
-        validateBuildResult(request);
-        ShadedBuildResponse buildResult = request.buildResult().as(ShadedBuildResponse.class);
-        String shadedJarPath = buildResult.shadedJarPath();
-        return shadedJarPath == null ? null : new File(shadedJarPath);
-    }
-
-    /** Returns whether the target Flink version safely supports closing packaged programs. */
-    public static boolean canSafelyClosePackagedProgram(SubmitRequest request) {
-        String[] parts = request.flinkVersion().version().split("\\.");
-        if (parts.length < 3) {
-            return false;
-        }
-        try {
-            int major = Integer.parseInt(parts[0].trim());
-            int minor = Integer.parseInt(parts[1].trim());
-            int patch = Integer.parseInt(parts[2].trim());
-            return major >= 1 && (minor > 12 || (minor == 12 && patch >= 2));
-        } catch (NumberFormatException ignored) {
-            return false;
-        }
-    }
-
-    /** Verifies that the application artifact was built successfully before submission. */
-    public static void validateBuildResult(SubmitRequest request) {
+    /** Verifies build state once before any configuration or deployment work begins. */
+    private static void validateBuildResult(SubmitRequest request, String jobName) {
         BuildResult buildResult = request.buildResult();
-        String applicationName = effectiveApplicationName(request);
         String target =
             FlinkDeployMode.isKubernetesMode(request.deployMode())
                 ? ", clusterId="
@@ -192,48 +103,100 @@ public final class SubmitRequestResolver {
         AssertUtils.required(
             buildResult != null,
             "[flink-submit] current job "
-                + applicationName
+                + jobName
                 + " was not yet built; build result is empty"
                 + target);
         AssertUtils.required(
             buildResult.pass(),
-            "[flink-submit] current job " + applicationName + " build failed" + target);
+            "[flink-submit] current job " + jobName + " build failed" + target);
     }
 
-    private static Map<String, String> getParameters(SubmitRequest request, String prefix) {
-        if (request.appConf() == null) {
-            return Collections.emptyMap();
+    /** Captures the built user JAR for modes that upload a local artifact. */
+    private static File resolveUserJar(SubmitRequest request) {
+        if (request.deployMode() == FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION) {
+            return null;
         }
-        return filterByPrefix(loadApplicationConfig(request.appConf()), prefix);
+        ShadedBuildResponse buildResult = request.buildResult().as(ShadedBuildResponse.class);
+        String shadedJarPath = buildResult.shadedJarPath();
+        AssertUtils.hasText(shadedJarPath, "Built user JAR path must not be blank");
+        return new File(shadedJarPath);
     }
 
-    private static Map<String, String> loadApplicationConfig(String appConf) {
+    /** Captures the deterministic user-code classpath only for JobGraph deployment modes. */
+    private static List<URL> resolveClassPath(SubmitRequest request) {
+        if (!usesJobGraph(request.deployMode())) {
+            return Collections.emptyList();
+        }
+        try {
+            List<URL> classPath = new ArrayList<>(request.flinkVersion().getFlinkLibs());
+            classPath.sort(Comparator.comparing(URL::toExternalForm));
+            classPath.addAll(listJobLibraries(request));
+            return Collections.unmodifiableList(classPath);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to resolve the Flink submission classpath", e);
+        }
+    }
+
+    /** Returns whether the deployment builds and submits a JobGraph in this client. */
+    private static boolean usesJobGraph(FlinkDeployMode deployMode) {
+        return deployMode == FlinkDeployMode.LOCAL
+            || deployMode == FlinkDeployMode.REMOTE
+            || deployMode == FlinkDeployMode.YARN_SESSION
+            || deployMode == FlinkDeployMode.YARN_PER_JOB;
+    }
+
+    /** Lists job-specific libraries from the local workspace in deterministic order. */
+    private static List<URL> listJobLibraries(SubmitRequest request) {
+        File libDir =
+            new File(new File(Workspace.LOCAL.workspace, String.valueOf(request.id())), "lib");
+        File[] files = libDir.listFiles();
+        if (files == null) {
+            return Collections.emptyList();
+        }
+        Arrays.sort(files, Comparator.comparing(File::getName));
+        List<URL> urls = new ArrayList<>(files.length);
+        for (File file : files) {
+            try {
+                urls.add(file.toURI().toURL());
+            } catch (MalformedURLException e) {
+                throw new IllegalArgumentException("Invalid job library path: " + file, e);
+            }
+        }
+        return urls;
+    }
+
+    /** Dispatches job configuration parsing from its explicit transport scheme. */
+    private static Map<String, String> loadJobConfig(String appConf) {
         if (appConf.length() < CONFIG_SCHEME_LENGTH) {
-            throw invalidConfigFormat(appConf);
+            throw createInvalidConfigException(appConf);
         }
         String scheme = appConf.substring(0, CONFIG_SCHEME_LENGTH);
         switch (scheme) {
             case "json://":
-                return parseJson(appConf.substring(CONFIG_SCHEME_LENGTH));
+                return parseJsonConfig(appConf.substring(CONFIG_SCHEME_LENGTH));
             case "yaml://":
-                return parseConfig(decompress(appConf), ConfigurationFormat.YAML, "inline YAML");
+                return parseConfigContent(
+                    decompressConfig(appConf), ConfigurationFormat.YAML, "inline YAML");
             case "conf://":
-                return parseConfig(decompress(appConf), ConfigurationFormat.HOCON, "inline HOCON");
+                return parseConfigContent(
+                    decompressConfig(appConf), ConfigurationFormat.HOCON, "inline HOCON");
             case "prop://":
-                return parseConfig(
-                    decompress(appConf), ConfigurationFormat.PROPERTIES, "inline properties");
+                return parseConfigContent(
+                    decompressConfig(appConf), ConfigurationFormat.PROPERTIES, "inline properties");
             case "hdfs://":
-                return parseHdfs(appConf);
+                return parseHdfsConfig(appConf);
             default:
-                throw invalidConfigFormat(appConf);
+                throw createInvalidConfigException(appConf);
         }
     }
 
-    private static String decompress(String appConf) {
+    /** Expands a compressed inline configuration after removing its transport scheme. */
+    private static String decompressConfig(String appConf) {
         return DeflaterUtils.unzipString(appConf.trim().substring(CONFIG_SCHEME_LENGTH));
     }
 
-    private static Map<String, String> parseJson(String json) {
+    /** Parses the legacy JSON transport form and discards null entries. */
+    private static Map<String, String> parseJsonConfig(String json) {
         try {
             Map<String, String> values =
                 new ObjectMapper()
@@ -243,55 +206,46 @@ public final class SubmitRequestResolver {
                 .filter(entry -> entry.getValue() != null)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         } catch (Exception e) {
-            throw new IllegalArgumentException("Failed to parse JSON application configuration", e);
+            throw new IllegalArgumentException("Failed to parse JSON job configuration", e);
         }
     }
 
-    private static Map<String, String> parseHdfs(String appConf) {
+    /** Reads an HDFS configuration and selects its parser from the file extension. */
+    private static Map<String, String> parseHdfsConfig(String appConf) {
         try {
             String text = HdfsUtils.read(appConf);
             String extension = appConf.substring(appConf.lastIndexOf('.') + 1).toLowerCase();
             switch (extension) {
                 case "yml":
                 case "yaml":
-                    return parseConfig(text, ConfigurationFormat.YAML, appConf);
+                    return parseConfigContent(text, ConfigurationFormat.YAML, appConf);
                 case "conf":
-                    return parseConfig(text, ConfigurationFormat.HOCON, appConf);
+                    return parseConfigContent(text, ConfigurationFormat.HOCON, appConf);
                 case "properties":
-                    return parseConfig(text, ConfigurationFormat.PROPERTIES, appConf);
+                    return parseConfigContent(text, ConfigurationFormat.PROPERTIES, appConf);
                 default:
                     throw new IllegalArgumentException(
-                        "HDFS application configuration must be YAML, HOCON, or properties");
+                        "HDFS job configuration must be YAML, HOCON, or properties");
             }
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
             throw new IllegalStateException(
-                "Failed to read HDFS application configuration: " + appConf, e);
+                "Failed to read HDFS job configuration: " + appConf, e);
         }
     }
 
-    private static Map<String, String> parseConfig(
-                                                   String content,
-                                                   ConfigurationFormat format,
-                                                   String origin) {
+    /** Parses a configuration document through the common immutable configuration pipeline. */
+    private static Map<String, String> parseConfigContent(
+                                                          String content,
+                                                          ConfigurationFormat format,
+                                                          String origin) {
         return ConfigurationParser.parse(content, format, origin).toMap();
     }
 
-    private static Map<String, String> filterByPrefix(
-                                                      Map<String, String> values, String prefix) {
-        Map<String, String> result = new HashMap<>();
-        for (Map.Entry<String, String> entry : values.entrySet()) {
-            String value = entry.getValue();
-            if (entry.getKey().startsWith(prefix) && value != null && !value.isEmpty()) {
-                result.put(entry.getKey().substring(prefix.length()), value);
-            }
-        }
-        return result;
-    }
-
-    private static IllegalArgumentException invalidConfigFormat(String appConf) {
+    /** Creates a consistent failure for unsupported or truncated transport schemes. */
+    private static IllegalArgumentException createInvalidConfigException(String appConf) {
         return new IllegalArgumentException(
-            "Unsupported application configuration format: " + appConf);
+            "Unsupported job configuration format: " + appConf);
     }
 }

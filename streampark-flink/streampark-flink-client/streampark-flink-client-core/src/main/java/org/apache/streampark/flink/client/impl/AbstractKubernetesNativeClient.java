@@ -20,11 +20,11 @@ package org.apache.streampark.flink.client.impl;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkKubernetesRestExposedType;
 import org.apache.streampark.common.util.Tuple2;
-import org.apache.streampark.flink.client.configuration.FlinkConfigurationOps;
+import org.apache.streampark.flink.client.bean.ResolvedSubmitRequest;
+import org.apache.streampark.flink.client.request.AbstractSavepointRequest;
 import org.apache.streampark.flink.client.request.CancelRequest;
 import org.apache.streampark.flink.client.request.SavepointRequest;
 import org.apache.streampark.flink.client.request.SubmitRequest;
-import org.apache.streampark.flink.client.request.TriggerSavepointRequest;
 import org.apache.streampark.flink.client.response.CancelResponse;
 import org.apache.streampark.flink.client.response.SavepointResponse;
 import org.apache.streampark.flink.kubernetes.PodTemplateTool;
@@ -50,16 +50,21 @@ import java.util.Map;
 /** Base implementation for Kubernetes native deployment clients. */
 public abstract class AbstractKubernetesNativeClient extends AbstractFlinkClient {
 
+    /** Adds Kubernetes identity, exposure, pod-template, and configuration-directory options. */
     @Override
-    protected void setConfig(SubmitRequest submitRequest, Configuration flinkConfig) {
-        FlinkConfigurationOps.setIfPresent(
-            flinkConfig, KubernetesConfigOptions.CLUSTER_ID, submitRequest.clusterId());
-        FlinkConfigurationOps.setIfPresent(
-            flinkConfig, KubernetesConfigOptions.NAMESPACE, submitRequest.kubernetesNamespace());
-        FlinkConfigurationOps.setIfPresent(
-            flinkConfig,
+    protected void setConfig(ResolvedSubmitRequest resolved, Configuration flinkConfig) {
+        SubmitRequest submitRequest = resolved.request();
+
+        if (StringUtils.isNotEmpty(submitRequest.clusterId())) {
+            flinkConfig.set(KubernetesConfigOptions.CLUSTER_ID, submitRequest.clusterId());
+        }
+        if (StringUtils.isNotEmpty(submitRequest.kubernetesNamespace())) {
+            flinkConfig.set(
+                KubernetesConfigOptions.NAMESPACE, submitRequest.kubernetesNamespace());
+        }
+        flinkConfig.set(
             KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE,
-            covertToServiceExposedType(submitRequest.flinkRestExposedType()));
+            convertServiceExposedType(submitRequest.flinkRestExposedType()));
 
         if (submitRequest.buildResult() != null
             && submitRequest.deployMode() == FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION) {
@@ -68,33 +73,29 @@ public abstract class AbstractKubernetesNativeClient extends AbstractFlinkClient
             Map<String, String> podTemplatePaths = buildResult.podTemplatePaths();
             if (podTemplatePaths != null) {
                 for (Map.Entry<String, String> entry : podTemplatePaths.entrySet()) {
+                    if (StringUtils.isEmpty(entry.getValue())) {
+                        continue;
+                    }
                     if (PodTemplateTool.KUBERNETES_POD_TEMPLATE.key().equals(entry.getKey())) {
-                        FlinkConfigurationOps.setIfPresent(
-                            flinkConfig,
-                            KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE,
-                            entry.getValue());
+                        flinkConfig.set(
+                            KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE, entry.getValue());
                     } else if (PodTemplateTool.KUBERNETES_JM_POD_TEMPLATE
                         .key()
                         .equals(entry.getKey())) {
-                        FlinkConfigurationOps.setIfPresent(
-                            flinkConfig,
-                            KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE,
-                            entry.getValue());
+                        flinkConfig.set(
+                            KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE, entry.getValue());
                     } else if (PodTemplateTool.KUBERNETES_TM_POD_TEMPLATE
                         .key()
                         .equals(entry.getKey())) {
-                        FlinkConfigurationOps.setIfPresent(
-                            flinkConfig,
-                            KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE,
-                            entry.getValue());
+                        flinkConfig.set(
+                            KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE, entry.getValue());
                     }
                 }
             }
         }
 
         if (!flinkConfig.contains(DeploymentOptionsInternal.CONF_DIR)) {
-            FlinkConfigurationOps.setIfPresent(
-                flinkConfig,
+            flinkConfig.set(
                 DeploymentOptionsInternal.CONF_DIR,
                 submitRequest.flinkVersion().getFlinkHome() + "/conf");
         }
@@ -106,10 +107,7 @@ public abstract class AbstractKubernetesNativeClient extends AbstractFlinkClient
         logEffectiveSubmitConfiguration(flinkConfig);
     }
 
-    protected void setK8sDeployTarget(Configuration flinkConf, FlinkDeployMode deployMode) {
-        FlinkConfigurationOps.setIfPresent(flinkConf, DeploymentOptions.TARGET, deployMode.getName());
-    }
-
+    /** Cancels a Kubernetes job and removes its application cluster when required. */
     @Override
     protected CancelResponse doCancel(
                                       CancelRequest cancelRequest,
@@ -118,7 +116,7 @@ public abstract class AbstractKubernetesNativeClient extends AbstractFlinkClient
             cancelRequest,
             flinkConfig,
             (jobId, client) -> {
-                String resp = callAsFlinkException(() -> cancelJob(cancelRequest, jobId, client));
+                String resp = execute(() -> cancelJob(cancelRequest, jobId, client));
                 if (cancelRequest.deployMode() == FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION) {
                     client.shutDownCluster();
                 }
@@ -126,9 +124,10 @@ public abstract class AbstractKubernetesNativeClient extends AbstractFlinkClient
             });
     }
 
+    /** Triggers a savepoint through the target Kubernetes cluster client. */
     @Override
     protected SavepointResponse doTriggerSavepoint(
-                                                   TriggerSavepointRequest savepointRequest,
+                                                   SavepointRequest savepointRequest,
                                                    Configuration flinkConfig) throws FlinkException {
         return executeClientAction(
             savepointRequest,
@@ -136,8 +135,37 @@ public abstract class AbstractKubernetesNativeClient extends AbstractFlinkClient
             (jobId, clusterClient) -> toSavepointResponse(savepointRequest, jobId, clusterClient));
     }
 
+    /** Creates the descriptor and resource specification used for Kubernetes deployment. */
+    protected final Tuple2<KubernetesClusterDescriptor, ClusterSpecification> createClusterDescriptorAndSpec(Configuration flinkConfig) {
+        KubernetesClusterClientFactory clientFactory = new KubernetesClusterClientFactory();
+        KubernetesClusterDescriptor clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig);
+        ClusterSpecification clusterSpecification = clientFactory.getClusterSpecification(flinkConfig);
+        return new Tuple2<>(clusterDescriptor, clusterSpecification);
+    }
+
+    /** Formats the deployment identity included in Kubernetes submission logs. */
+    protected String flinkConfIdentifierInfo(@Nonnull Configuration conf) {
+        return "deployMode="
+            + conf.get(DeploymentOptions.TARGET)
+            + ", clusterId="
+            + conf.get(KubernetesConfigOptions.CLUSTER_ID)
+            + ", "
+            + "namespace="
+            + conf.get(KubernetesConfigOptions.NAMESPACE);
+    }
+
+    /** Resolves an explicit kubeconfig path or the current user's default path. */
+    protected final String getDefaultKubernetesConf(String k8sConf) {
+        String homePath = System.getProperty("user.home");
+        if (k8sConf != null) {
+            return k8sConf.replace("~", homePath);
+        }
+        return homePath.concat("/.kube/config");
+    }
+
+    /** Executes a job action against the cluster identified by the serialized request. */
     private <O> O executeClientAction(
-                                      SavepointRequest request,
+                                      AbstractSavepointRequest request,
                                       Configuration flinkConfig,
                                       ClientAction<O> actFunc) throws FlinkException {
         String hints =
@@ -149,16 +177,14 @@ public abstract class AbstractKubernetesNativeClient extends AbstractFlinkClient
                     + flinkConfig.get(DeploymentOptions.TARGET));
         }
 
-        FlinkConfigurationOps.setIfPresent(
-            flinkConfig, KubernetesConfigOptions.CLUSTER_ID, request.clusterId());
-        FlinkConfigurationOps.setIfPresent(
-            flinkConfig, KubernetesConfigOptions.NAMESPACE, request.kubernetesNamespace());
+        flinkConfig.set(KubernetesConfigOptions.CLUSTER_ID, request.clusterId());
+        flinkConfig.set(KubernetesConfigOptions.NAMESPACE, request.kubernetesNamespace());
 
         KubernetesClusterDescriptor clusterDescriptor = null;
         ClusterClient<String> client = null;
 
         try {
-            clusterDescriptor = getK8sClusterDescriptor(flinkConfig);
+            clusterDescriptor = getClusterDescriptor(flinkConfig);
             client =
                 clusterDescriptor
                     .retrieve(
@@ -174,7 +200,7 @@ public abstract class AbstractKubernetesNativeClient extends AbstractFlinkClient
             throw e;
         } catch (Exception e) {
             logClientActionFailure(hints, flinkConfig, request, e);
-            throw asFlinkException(e);
+            throw mapException(e);
         } finally {
             if (client != null) {
                 client.close();
@@ -185,10 +211,11 @@ public abstract class AbstractKubernetesNativeClient extends AbstractFlinkClient
         }
     }
 
+    /** Logs the complete cluster identity when a Kubernetes job action fails. */
     private void logClientActionFailure(
                                         String hints,
                                         Configuration flinkConfig,
-                                        SavepointRequest request,
+                                        AbstractSavepointRequest request,
                                         Exception e) {
         logError(
             hints
@@ -199,40 +226,8 @@ public abstract class AbstractKubernetesNativeClient extends AbstractFlinkClient
             e);
     }
 
-    protected final Tuple2<KubernetesClusterDescriptor, ClusterSpecification> getK8sClusterDescriptorAndSpecification(Configuration flinkConfig) {
-        KubernetesClusterClientFactory clientFactory = new KubernetesClusterClientFactory();
-        KubernetesClusterDescriptor clusterDescriptor =
-            clientFactory.createClusterDescriptor(flinkConfig);
-        ClusterSpecification clusterSpecification =
-            clientFactory.getClusterSpecification(flinkConfig);
-        return new Tuple2<>(clusterDescriptor, clusterSpecification);
-    }
-
-    protected final KubernetesClusterDescriptor getK8sClusterDescriptor(
-                                                                        Configuration flinkConfig) {
-        KubernetesClusterClientFactory clientFactory = new KubernetesClusterClientFactory();
-        return clientFactory.createClusterDescriptor(flinkConfig);
-    }
-
-    protected String flinkConfIdentifierInfo(@Nonnull Configuration conf) {
-        return "deployMode="
-            + conf.get(DeploymentOptions.TARGET)
-            + ", clusterId="
-            + conf.get(KubernetesConfigOptions.CLUSTER_ID)
-            + ", "
-            + "namespace="
-            + conf.get(KubernetesConfigOptions.NAMESPACE);
-    }
-
-    protected final String getDefaultKubernetesConf(String k8sConf) {
-        String homePath = System.getProperty("user.home");
-        if (k8sConf != null) {
-            return k8sConf.replace("~", homePath);
-        }
-        return homePath.concat("/.kube/config");
-    }
-
-    private ServiceExposedType covertToServiceExposedType(FlinkKubernetesRestExposedType exposedType) {
+    /** Maps StreamPark's stable REST exposure enum to the target Flink enum. */
+    private ServiceExposedType convertServiceExposedType(FlinkKubernetesRestExposedType exposedType) {
         if (exposedType == FlinkKubernetesRestExposedType.CLUSTER_IP) {
             return ServiceExposedType.ClusterIP;
         }
@@ -243,6 +238,13 @@ public abstract class AbstractKubernetesNativeClient extends AbstractFlinkClient
             return ServiceExposedType.LoadBalancer;
         }
         return ServiceExposedType.LoadBalancer;
+    }
+
+    /** Creates a descriptor for an existing Kubernetes cluster operation. */
+    private final KubernetesClusterDescriptor getClusterDescriptor(
+                                                                   Configuration flinkConfig) {
+        KubernetesClusterClientFactory clientFactory = new KubernetesClusterClientFactory();
+        return clientFactory.createClusterDescriptor(flinkConfig);
     }
 
     @FunctionalInterface

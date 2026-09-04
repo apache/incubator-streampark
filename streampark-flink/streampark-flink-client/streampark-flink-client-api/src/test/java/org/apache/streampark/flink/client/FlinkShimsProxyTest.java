@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.proxy;
+package org.apache.streampark.flink.client;
 
 import org.apache.streampark.common.configuration.option.CoreOptions;
 import org.apache.streampark.common.core.FlinkVersion;

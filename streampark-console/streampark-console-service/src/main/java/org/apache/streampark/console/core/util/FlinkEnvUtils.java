@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.util;
 import org.apache.streampark.common.configuration.ConfigException;
 import org.apache.streampark.common.core.FlinkVersion;
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.common.util.FlinkConfigurationUtils;
+import org.apache.streampark.common.util.FlinkConfigurationLoader;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.core.entity.FlinkEnv;
@@ -84,7 +84,7 @@ public final class FlinkEnvUtils {
 
     /** Parses the stored YAML using the format selected when it was synchronized. */
     public static Map<String, String> configuration(FlinkEnv environment) {
-        return FlinkConfigurationUtils.loadConfigurationFromString(
+        return FlinkConfigurationLoader.loadConfigurationFromString(
             yaml(environment), isStandardYaml(environment));
     }
 
@@ -128,18 +128,18 @@ public final class FlinkEnvUtils {
         }
         // Rows written before the marker was introduced use the selection rule of their registered
         // Flink installation. Newly synchronized rows are independent of later filesystem changes.
-        return FlinkConfigurationUtils.usesStandardYaml(
+        return FlinkConfigurationLoader.usesStandardYaml(
             Path.of(target.getFlinkHome(), "conf").toString(), target.getVersion());
     }
 
     private static String readConfiguration(String flinkHome, String flinkVersion) {
         try {
             File file =
-                FlinkConfigurationUtils.resolveConfigurationFile(
+                FlinkConfigurationLoader.resolveConfigurationFile(
                     Path.of(flinkHome, "conf").toString(), flinkVersion);
             String yaml = Files.readString(file.toPath(), StandardCharsets.UTF_8);
             String prefix =
-                FlinkConfigurationUtils.isStandardYaml(file) ? STANDARD_PREFIX : LEGACY_PREFIX;
+                FlinkConfigurationLoader.isStandardYaml(file) ? STANDARD_PREFIX : LEGACY_PREFIX;
             return prefix + DeflaterUtils.zipString(yaml);
         } catch (ConfigException e) {
             throw new ApiAlertException(e.getMessage(), e);

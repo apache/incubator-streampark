@@ -23,7 +23,12 @@ import javax.annotation.Nullable;
 
 import java.io.Serializable;
 
-/** Cluster deployment context for Flink submit requests. */
+/**
+ * Optional cluster deployment context for a Flink submit request.
+ *
+ * <p>The context contains deployment-platform identity only; application metadata remains in
+ * {@link SubmitApplicationSpec}.
+ */
 public final class SubmitClusterSpec implements Serializable {
 
     private static final long serialVersionUID = 1L;

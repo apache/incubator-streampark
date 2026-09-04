@@ -17,73 +17,41 @@
 
 package org.apache.streampark.flink.client.request;
 
-import org.apache.streampark.common.configuration.Constants;
 import org.apache.streampark.common.core.FlinkVersion;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 
 import javax.annotation.Nullable;
 
-import java.io.Serializable;
 import java.util.Map;
 
-/** Base request for job operations that can create a savepoint. */
-public abstract class SavepointRequest implements Serializable {
+/** Request to trigger a savepoint for a running Flink job. */
+public final class SavepointRequest extends AbstractSavepointRequest {
 
     private static final long serialVersionUID = 1L;
 
-    private final long id;
-    private final FlinkVersion flinkVersion;
-    private final FlinkDeployMode deployMode;
-    private final Map<String, Serializable> properties;
-    private final JobClientTarget target;
+    private final String savepointPath;
+    private final boolean nativeFormat;
 
-    protected SavepointRequest(
-                               long id,
-                               FlinkVersion flinkVersion,
-                               FlinkDeployMode deployMode,
-                               @Nullable Map<String, Object> properties,
-                               JobClientTarget target) {
-        this.id = id;
-        this.flinkVersion = flinkVersion;
-        this.deployMode = deployMode;
-        this.properties = ClientRequestUtils.toSerializableMap(properties);
-        this.target = target;
+    public SavepointRequest(
+                            long id,
+                            FlinkVersion flinkVersion,
+                            FlinkDeployMode deployMode,
+                            @Nullable Map<String, Object> properties,
+                            JobClientTarget target,
+                            @Nullable String savepointPath,
+                            boolean nativeFormat) {
+        super(id, flinkVersion, deployMode, properties, target);
+        this.savepointPath = savepointPath;
+        this.nativeFormat = nativeFormat;
     }
 
-    public long id() {
-        return id;
+    @Override
+    public String savepointPath() {
+        return savepointPath;
     }
 
-    public FlinkVersion flinkVersion() {
-        return flinkVersion;
-    }
-
-    public FlinkDeployMode deployMode() {
-        return deployMode;
-    }
-
-    public Map<String, Object> properties() {
-        return ClientRequestUtils.copyPropertiesMap(properties);
-    }
-
-    public String clusterId() {
-        return target.clusterId();
-    }
-
-    public String jobId() {
-        return target.jobId();
-    }
-
-    public boolean withSavepoint() {
-        return true;
-    }
-
-    public abstract String savepointPath();
-
-    public abstract boolean nativeFormat();
-
-    public String kubernetesNamespace() {
-        String namespace = target.kubernetesNamespace();
-        return namespace == null ? Constants.DEFAULT : namespace;
+    @Override
+    public boolean nativeFormat() {
+        return nativeFormat;
     }
 }

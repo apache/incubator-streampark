@@ -25,8 +25,14 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Map;
 
-/** Base request for operations on a Flink session cluster. */
-public abstract class ClusterRequest implements Serializable {
+/**
+ * Serializable base request for operations on a Flink session cluster.
+ *
+ * <p>Property values are validated and copied at construction because requests cross the
+ * version-isolated client classloader boundary. Accessors return defensive map copies so one
+ * operation cannot mutate a request observed by another operation.
+ */
+public abstract class AbstractClusterRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,13 +44,13 @@ public abstract class ClusterRequest implements Serializable {
     @Nullable
     private final KubernetesDeploySpec kubernetesDeploySpec;
 
-    protected ClusterRequest(
-                             FlinkVersion flinkVersion,
-                             FlinkDeployMode deployMode,
-                             @Nullable Map<String, Object> properties,
-                             String clusterId,
-                             long id,
-                             @Nullable KubernetesDeploySpec kubernetesDeploySpec) {
+    protected AbstractClusterRequest(
+                                     FlinkVersion flinkVersion,
+                                     FlinkDeployMode deployMode,
+                                     @Nullable Map<String, Object> properties,
+                                     String clusterId,
+                                     long id,
+                                     @Nullable KubernetesDeploySpec kubernetesDeploySpec) {
         this.flinkVersion = flinkVersion;
         this.deployMode = deployMode;
         this.properties = ClientRequestUtils.toSerializableMap(properties);

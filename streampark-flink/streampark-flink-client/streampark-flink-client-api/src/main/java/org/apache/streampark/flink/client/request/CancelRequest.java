@@ -25,7 +25,7 @@ import javax.annotation.Nullable;
 import java.util.Map;
 
 /** Request to cancel a Flink job, optionally creating a savepoint first. */
-public final class CancelRequest extends SavepointRequest {
+public final class CancelRequest extends AbstractSavepointRequest {
 
     private static final long serialVersionUID = 1L;
 

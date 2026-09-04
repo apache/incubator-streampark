@@ -28,9 +28,9 @@ import org.apache.streampark.flink.client.impl.YarnPerJobClient;
 import org.apache.streampark.flink.client.impl.YarnSessionClient;
 import org.apache.streampark.flink.client.request.CancelRequest;
 import org.apache.streampark.flink.client.request.DeployRequest;
+import org.apache.streampark.flink.client.request.SavepointRequest;
 import org.apache.streampark.flink.client.request.ShutdownRequest;
 import org.apache.streampark.flink.client.request.SubmitRequest;
-import org.apache.streampark.flink.client.request.TriggerSavepointRequest;
 import org.apache.streampark.flink.client.response.CancelResponse;
 import org.apache.streampark.flink.client.response.DeployResponse;
 import org.apache.streampark.flink.client.response.SavepointResponse;
@@ -64,24 +64,7 @@ public final class FlinkClientEntrypoint {
     private FlinkClientEntrypoint() {
     }
 
-    @FunctionalInterface
-    private interface ClientInvoker<R> {
-
-        R invoke(AbstractFlinkClient client) throws FlinkException;
-    }
-
-    private static <R> R invokeClient(
-                                      FlinkDeployMode deployMode,
-                                      ClientInvoker<R> invoker,
-                                      String action) throws FlinkException {
-        AbstractFlinkClient client = CLIENTS.get(deployMode);
-        if (client != null) {
-            return invoker.invoke(client);
-        }
-        throw new UnsupportedOperationException("Unsupported " + deployMode + " " + action);
-    }
-
-    /** Submits an application through the client selected by its deploy mode. */
+    /** Submits a job through the client selected by its deploy mode. */
     public static SubmitResponse submit(SubmitRequest submitRequest) throws FlinkException {
         return invokeClient(
             submitRequest.deployMode(), client -> client.submit(submitRequest), "submit");
@@ -94,7 +77,7 @@ public final class FlinkClientEntrypoint {
     }
 
     /** Triggers a savepoint through the client selected by its deploy mode. */
-    public static SavepointResponse triggerSavepoint(TriggerSavepointRequest savepointRequest) throws FlinkException {
+    public static SavepointResponse triggerSavepoint(SavepointRequest savepointRequest) throws FlinkException {
         return invokeClient(
             savepointRequest.deployMode(),
             client -> client.triggerSavepoint(savepointRequest),
@@ -123,5 +106,23 @@ public final class FlinkClientEntrypoint {
         }
         throw new UnsupportedOperationException(
             "Unsupported " + shutdownRequest.deployMode() + " shutdown cluster ");
+    }
+
+    /** Resolves the deployment client and applies a job-level operation to it. */
+    private static <R> R invokeClient(
+                                      FlinkDeployMode deployMode,
+                                      ClientInvoker<R> invoker,
+                                      String action) throws FlinkException {
+        AbstractFlinkClient client = CLIENTS.get(deployMode);
+        if (client != null) {
+            return invoker.invoke(client);
+        }
+        throw new UnsupportedOperationException("Unsupported " + deployMode + " " + action);
+    }
+
+    @FunctionalInterface
+    private interface ClientInvoker<R> {
+
+        R invoke(AbstractFlinkClient client) throws FlinkException;
     }
 }

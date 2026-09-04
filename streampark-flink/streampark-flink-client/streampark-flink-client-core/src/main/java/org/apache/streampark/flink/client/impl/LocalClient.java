@@ -18,11 +18,10 @@
 package org.apache.streampark.flink.client.impl;
 
 import org.apache.streampark.flink.client.bean.FlinkJobGraphBuilder;
-import org.apache.streampark.flink.client.bean.SubmitRequestResolver;
-import org.apache.streampark.flink.client.configuration.FlinkConfigurationOps;
+import org.apache.streampark.flink.client.bean.ResolvedSubmitRequest;
 import org.apache.streampark.flink.client.request.CancelRequest;
+import org.apache.streampark.flink.client.request.SavepointRequest;
 import org.apache.streampark.flink.client.request.SubmitRequest;
-import org.apache.streampark.flink.client.request.TriggerSavepointRequest;
 import org.apache.streampark.flink.client.response.CancelResponse;
 import org.apache.streampark.flink.client.response.SavepointResponse;
 import org.apache.streampark.flink.client.response.SubmitResponse;
@@ -40,7 +39,7 @@ import org.apache.flink.runtime.minicluster.MiniCluster;
 import org.apache.flink.runtime.minicluster.MiniClusterConfiguration;
 import org.apache.flink.util.FlinkException;
 
-/** Submit Flink jobs to a local mini cluster. */
+/** Submits and manages Flink jobs in an embedded local cluster. */
 public final class LocalClient extends AbstractFlinkClient {
 
     public static final LocalClient INSTANCE = new LocalClient();
@@ -48,25 +47,25 @@ public final class LocalClient extends AbstractFlinkClient {
     private LocalClient() {
     }
 
+    /** Adds the resolved job name used by the embedded cluster. */
     @Override
-    protected void setConfig(SubmitRequest submitRequest, Configuration flinkConfig) {
-        FlinkConfigurationOps.setIfPresent(
-            flinkConfig,
-            PipelineOptions.NAME,
-            SubmitRequestResolver.effectiveApplicationName(submitRequest));
+    protected void setConfig(ResolvedSubmitRequest resolved, Configuration flinkConfig) {
+        flinkConfig.set(PipelineOptions.NAME, resolved.getJobName());
         logEffectiveSubmitConfiguration(flinkConfig);
     }
 
+    /** Creates an embedded cluster and submits the request's JobGraph. */
     @Override
     protected SubmitResponse doSubmit(
-                                      SubmitRequest submitRequest,
+                                      ResolvedSubmitRequest resolved,
                                       Configuration flinkConfig) throws FlinkException {
-        return callAsFlinkException(
+        SubmitRequest submitRequest = resolved.request();
+        return execute(
             () -> {
                 FlinkJobGraphBuilder.Result job = buildJobGraph(
                     flinkConfig,
-                    submitRequest,
-                    SubmitRequestResolver.userJarFile(submitRequest));
+                    resolved,
+                    resolved.getUserJarFile());
                 MiniClusterClient client = null;
                 try {
                     client = createLocalCluster(flinkConfig);
@@ -74,18 +73,20 @@ public final class LocalClient extends AbstractFlinkClient {
                     return new SubmitResponse(
                         jobId, flinkConfig.toMap(), jobId, client.getWebInterfaceURL());
                 } finally {
-                    closeSubmissionResources(submitRequest, job.program(), client);
+                    closeSubmissionResources(job.program(), client);
                 }
             });
     }
 
+    /** Delegates savepoint access to the standalone cluster protocol. */
     @Override
     protected SavepointResponse doTriggerSavepoint(
-                                                   TriggerSavepointRequest savepointRequest,
+                                                   SavepointRequest savepointRequest,
                                                    Configuration flinkConfig) throws FlinkException {
         return RemoteClient.INSTANCE.doTriggerSavepoint(savepointRequest, flinkConfig);
     }
 
+    /** Delegates cancellation to the standalone cluster protocol. */
     @Override
     protected CancelResponse doCancel(
                                       CancelRequest cancelRequest,
@@ -93,8 +94,9 @@ public final class LocalClient extends AbstractFlinkClient {
         return RemoteClient.INSTANCE.doCancel(cancelRequest, flinkConfig);
     }
 
+    /** Creates and starts the mini cluster used for one local submission. */
     private MiniClusterClient createLocalCluster(Configuration flinkConfig) throws Exception {
-        FlinkConfigurationOps.setIfPresent(flinkConfig, JobManagerOptions.PORT, 0);
+        flinkConfig.set(JobManagerOptions.PORT, 0);
 
         int numTaskManagers =
             flinkConfig.getInteger(
@@ -115,11 +117,11 @@ public final class LocalClient extends AbstractFlinkClient {
         String host = "localhost";
         int port = cluster.getRestAddress().get().getPort();
 
-        FlinkConfigurationOps.setIfPresent(flinkConfig, JobManagerOptions.ADDRESS, host);
-        FlinkConfigurationOps.setIfPresent(flinkConfig, JobManagerOptions.PORT, port);
-        FlinkConfigurationOps.setIfPresent(flinkConfig, RestOptions.ADDRESS, host);
-        FlinkConfigurationOps.setIfPresent(flinkConfig, RestOptions.PORT, port);
-        FlinkConfigurationOps.setIfPresent(flinkConfig, DeploymentOptions.TARGET, RemoteExecutor.NAME);
+        flinkConfig.set(JobManagerOptions.ADDRESS, host);
+        flinkConfig.set(JobManagerOptions.PORT, port);
+        flinkConfig.set(RestOptions.ADDRESS, host);
+        flinkConfig.set(RestOptions.PORT, port);
+        flinkConfig.set(DeploymentOptions.TARGET, RemoteExecutor.NAME);
 
         logInfo(String.format("%nStarting local Flink cluster (host: localhost, port: %d).%n", port));
 

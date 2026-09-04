@@ -38,7 +38,7 @@ class FlinkConfigurationUtilsTest {
 
     @Test
     void loadNestedYamlAndPreserveLists() throws Exception {
-        Path configFile = temporaryDirectory.resolve(FlinkConfigurationUtils.FLINK_CONF_FILENAME);
+        Path configFile = temporaryDirectory.resolve(FlinkConfigurationLoader.FLINK_CONF_FILENAME);
         Files.writeString(
             configFile,
             "env:\n"
@@ -49,7 +49,7 @@ class FlinkConfigurationUtilsTest {
                 + "  namespaces: [primary, secondary]\n");
 
         Map<String, String> configuration =
-            FlinkConfigurationUtils.loadConfigurationFromFile(configFile.toFile());
+            FlinkConfigurationLoader.loadConfigurationFromFile(configFile.toFile());
 
         assertThat(configuration.get("env.java.opts.all"))
             .isEqualTo("--add-opens=java.base/java.util=ALL-UNNAMED");
@@ -60,17 +60,17 @@ class FlinkConfigurationUtilsTest {
     @Test
     void selectOnlyLegacyYamlBeforeFlink119() throws Exception {
         Files.writeString(
-            temporaryDirectory.resolve(FlinkConfigurationUtils.LEGACY_FLINK_CONF_FILENAME),
+            temporaryDirectory.resolve(FlinkConfigurationLoader.LEGACY_FLINK_CONF_FILENAME),
             "pipeline.name: legacy\n");
         Files.writeString(
-            temporaryDirectory.resolve(FlinkConfigurationUtils.FLINK_CONF_FILENAME),
+            temporaryDirectory.resolve(FlinkConfigurationLoader.FLINK_CONF_FILENAME),
             "pipeline:\n  name: standard\n");
 
         Map<String, String> configuration =
-            FlinkConfigurationUtils.loadConfiguration(
+            FlinkConfigurationLoader.loadConfiguration(
                 temporaryDirectory.toString(), "1.18.2");
 
-        assertThat(FlinkConfigurationUtils.usesStandardYaml(
+        assertThat(FlinkConfigurationLoader.usesStandardYaml(
             temporaryDirectory.toString(), "1.18.2")).isFalse();
         assertThat(configuration.get("pipeline.name")).isEqualTo("legacy");
     }
@@ -78,26 +78,26 @@ class FlinkConfigurationUtilsTest {
     @Test
     void selectFlink119YamlByPrecedence() throws Exception {
         Path legacyFile =
-            temporaryDirectory.resolve(FlinkConfigurationUtils.LEGACY_FLINK_CONF_FILENAME);
+            temporaryDirectory.resolve(FlinkConfigurationLoader.LEGACY_FLINK_CONF_FILENAME);
         Files.writeString(legacyFile, "pipeline.name: legacy\n");
         Files.writeString(
-            temporaryDirectory.resolve(FlinkConfigurationUtils.FLINK_CONF_FILENAME),
+            temporaryDirectory.resolve(FlinkConfigurationLoader.FLINK_CONF_FILENAME),
             "pipeline:\n  name: standard\n");
 
-        assertThat(FlinkConfigurationUtils.usesStandardYaml(
+        assertThat(FlinkConfigurationLoader.usesStandardYaml(
             temporaryDirectory.toString(), "1.19.0")).isFalse();
         assertThat(
-            FlinkConfigurationUtils.loadConfiguration(
+            FlinkConfigurationLoader.loadConfiguration(
                 temporaryDirectory.toString(), "1.19.0")
                 .get("pipeline.name"))
                     .isEqualTo("legacy");
 
         Files.delete(legacyFile);
 
-        assertThat(FlinkConfigurationUtils.usesStandardYaml(
+        assertThat(FlinkConfigurationLoader.usesStandardYaml(
             temporaryDirectory.toString(), "1.19.1")).isTrue();
         assertThat(
-            FlinkConfigurationUtils.loadConfiguration(
+            FlinkConfigurationLoader.loadConfiguration(
                 temporaryDirectory.toString(), "1.19.1")
                 .get("pipeline.name"))
                     .isEqualTo("standard");
@@ -106,26 +106,26 @@ class FlinkConfigurationUtilsTest {
     @Test
     void supportLegacyThroughFlink120() throws Exception {
         Path legacyFile =
-            temporaryDirectory.resolve(FlinkConfigurationUtils.LEGACY_FLINK_CONF_FILENAME);
+            temporaryDirectory.resolve(FlinkConfigurationLoader.LEGACY_FLINK_CONF_FILENAME);
         Files.writeString(legacyFile, "pipeline.name: legacy\n");
         Files.writeString(
-            temporaryDirectory.resolve(FlinkConfigurationUtils.FLINK_CONF_FILENAME),
+            temporaryDirectory.resolve(FlinkConfigurationLoader.FLINK_CONF_FILENAME),
             "pipeline:\n  name: standard\n");
 
-        assertThat(FlinkConfigurationUtils.usesStandardYaml(
+        assertThat(FlinkConfigurationLoader.usesStandardYaml(
             temporaryDirectory.toString(), "1.20.0")).isFalse();
         assertThat(
-            FlinkConfigurationUtils.loadConfiguration(
+            FlinkConfigurationLoader.loadConfiguration(
                 temporaryDirectory.toString(), "1.20.0")
                 .get("pipeline.name"))
                     .isEqualTo("legacy");
 
         Files.delete(legacyFile);
 
-        assertThat(FlinkConfigurationUtils.usesStandardYaml(
+        assertThat(FlinkConfigurationLoader.usesStandardYaml(
             temporaryDirectory.toString(), "1.20.3")).isTrue();
         assertThat(
-            FlinkConfigurationUtils.loadConfiguration(
+            FlinkConfigurationLoader.loadConfiguration(
                 temporaryDirectory.toString(), "1.20.3")
                 .get("pipeline.name"))
                     .isEqualTo("standard");
@@ -134,23 +134,23 @@ class FlinkConfigurationUtilsTest {
     @Test
     void requireConfigYamlFromFlink2() throws Exception {
         Files.writeString(
-            temporaryDirectory.resolve(FlinkConfigurationUtils.LEGACY_FLINK_CONF_FILENAME),
+            temporaryDirectory.resolve(FlinkConfigurationLoader.LEGACY_FLINK_CONF_FILENAME),
             "pipeline.name: legacy\n");
 
         assertThatThrownBy(
-            () -> FlinkConfigurationUtils.loadConfiguration(
+            () -> FlinkConfigurationLoader.loadConfiguration(
                 temporaryDirectory.toString(), "2.0.0"))
                     .isInstanceOf(ConfigException.class)
-                    .hasMessageContaining(FlinkConfigurationUtils.FLINK_CONF_FILENAME);
+                    .hasMessageContaining(FlinkConfigurationLoader.FLINK_CONF_FILENAME);
 
         Files.writeString(
-            temporaryDirectory.resolve(FlinkConfigurationUtils.FLINK_CONF_FILENAME),
+            temporaryDirectory.resolve(FlinkConfigurationLoader.FLINK_CONF_FILENAME),
             "pipeline:\n  name: standard\n");
 
-        assertThat(FlinkConfigurationUtils.usesStandardYaml(
+        assertThat(FlinkConfigurationLoader.usesStandardYaml(
             temporaryDirectory.toString(), "2.0.0")).isTrue();
         assertThat(
-            FlinkConfigurationUtils.loadConfiguration(
+            FlinkConfigurationLoader.loadConfiguration(
                 temporaryDirectory.toString(), "2.0.0")
                 .get("pipeline.name"))
                     .isEqualTo("standard");
@@ -159,7 +159,7 @@ class FlinkConfigurationUtilsTest {
     @Test
     void readLegacyFileAsUtf8() throws Exception {
         Path file =
-            temporaryDirectory.resolve(FlinkConfigurationUtils.LEGACY_FLINK_CONF_FILENAME);
+            temporaryDirectory.resolve(FlinkConfigurationLoader.LEGACY_FLINK_CONF_FILENAME);
         Files.writeString(
             file,
             "# comment-only lines must be ignored\n"
@@ -167,7 +167,7 @@ class FlinkConfigurationUtilsTest {
             StandardCharsets.UTF_8);
 
         Map<String, String> configuration =
-            FlinkConfigurationUtils.loadConfigurationFromFile(file.toFile());
+            FlinkConfigurationLoader.loadConfigurationFromFile(file.toFile());
 
         assertThat(configuration.get("pipeline.name")).isEqualTo("\u4e2d\u6587\u4f5c\u4e1a");
     }
@@ -175,7 +175,7 @@ class FlinkConfigurationUtilsTest {
     @Test
     void rejectMissingConfigurationDirectory() {
         assertThatThrownBy(
-            () -> FlinkConfigurationUtils.loadConfiguration(
+            () -> FlinkConfigurationLoader.loadConfiguration(
                 temporaryDirectory.resolve("missing").toString(), "1.20.0"))
                     .isInstanceOf(ConfigException.class)
                     .hasMessageContaining("does not exist");

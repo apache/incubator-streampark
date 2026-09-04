@@ -25,7 +25,7 @@ import javax.annotation.Nullable;
 import java.util.Map;
 
 /** Request to deploy a Flink session cluster. */
-public final class DeployRequest extends ClusterRequest {
+public final class DeployRequest extends AbstractClusterRequest {
 
     private static final long serialVersionUID = 1L;
 

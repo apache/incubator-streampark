@@ -26,8 +26,7 @@ import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.common.util.HdfsUtils;
 import org.apache.streampark.common.util.Tuple2;
 import org.apache.streampark.flink.client.bean.RemoteWorkspace;
-import org.apache.streampark.flink.client.bean.SubmitRequestResolver;
-import org.apache.streampark.flink.client.configuration.FlinkConfigurationOps;
+import org.apache.streampark.flink.client.bean.ResolvedSubmitRequest;
 import org.apache.streampark.flink.client.request.SubmitRequest;
 import org.apache.streampark.flink.client.response.SubmitResponse;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
@@ -49,7 +48,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-/** Yarn application mode submit. */
+/** Submits Flink jobs to application-scoped YARN clusters. */
 public final class YarnApplicationClient extends AbstractYarnClient {
 
     public static final YarnApplicationClient INSTANCE = new YarnApplicationClient();
@@ -59,9 +58,11 @@ public final class YarnApplicationClient extends AbstractYarnClient {
     private YarnApplicationClient() {
     }
 
+    /** Configures remote artifacts and PyFlink resources for YARN application mode. */
     @Override
-    protected void setConfig(SubmitRequest submitRequest, Configuration flinkConfig) {
-        super.setConfig(submitRequest, flinkConfig);
+    protected void setConfig(ResolvedSubmitRequest resolved, Configuration flinkConfig) {
+        SubmitRequest submitRequest = resolved.request();
+        super.setConfig(resolved, flinkConfig);
 
         List<String> providedLibs = new ArrayList<>();
         RemoteWorkspace hdfsWorkspace = RemoteWorkspace.resolve(submitRequest.flinkVersion());
@@ -82,68 +83,58 @@ public final class YarnApplicationClient extends AbstractYarnClient {
             }
         }
 
-        FlinkConfigurationOps.setIfPresent(flinkConfig, YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs);
-        FlinkConfigurationOps.setIfPresent(
-            flinkConfig, YarnConfigOptions.FLINK_DIST_JAR, hdfsWorkspace.flinkDistJar());
-        FlinkConfigurationOps.setIfPresent(
-            flinkConfig,
+        flinkConfig.set(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs);
+        flinkConfig.set(YarnConfigOptions.FLINK_DIST_JAR, hdfsWorkspace.flinkDistJar());
+        flinkConfig.set(
             PipelineOptions.JARS,
             Collections.singletonList(
                 ((ShadedBuildResponse) submitRequest.buildResult()).shadedJarPath()));
-        FlinkConfigurationOps.setIfPresent(
-            flinkConfig,
+        flinkConfig.set(
             YarnConfigOptions.APPLICATION_NAME,
-            SubmitRequestResolver.effectiveApplicationName(submitRequest));
-        FlinkConfigurationOps.setIfPresent(
-            flinkConfig,
+            resolved.getJobName());
+        flinkConfig.set(
             YarnConfigOptions.APPLICATION_TYPE,
             submitRequest.applicationType().getName());
 
         if (submitRequest.jobType() == FlinkJobType.PYFLINK) {
-            File userJar = SubmitRequestResolver.userJarFile(submitRequest);
-            AssertUtils.required(userJar != null, "PyFlink application archive is missing");
+            File userJar = resolved.getUserJarFile();
+            AssertUtils.required(userJar != null, "PyFlink job archive is missing");
             String pyVenv = WORKSPACE.pythonVenv;
             AssertUtils.required(FsOperator.hdfs().exists(pyVenv), pyVenv + " File does not exist");
 
-            String localLib =
-                Workspace.LOCAL.workspace + "/" + submitRequest.id() + "/lib";
+            String localLib = Workspace.LOCAL.workspace + "/" + submitRequest.id() + "/lib";
             if (FileUtils.exists(localLib) && FileUtils.directoryNotBlank(localLib)) {
-                FlinkConfigurationOps.setIfPresent(flinkConfig, PipelineOptions.JARS, Arrays.asList(localLib));
+                flinkConfig.set(PipelineOptions.JARS, Arrays.asList(localLib));
             }
 
             ArrayList<String> shipFiles = new ArrayList<>();
             shipFiles.add(userJar.getParentFile().getAbsolutePath());
 
-            FlinkConfigurationOps.setIfPresent(flinkConfig, YarnConfigOptions.SHIP_FILES, shipFiles);
-            FlinkConfigurationOps.setIfPresent(
-                flinkConfig,
-                PythonOptions.PYTHON_FILES,
-                userJar.getParentFile().getName());
-            FlinkConfigurationOps.setIfPresent(flinkConfig, PythonOptions.PYTHON_ARCHIVES, pyVenv);
-            FlinkConfigurationOps.setIfPresent(
-                flinkConfig, PythonOptions.PYTHON_CLIENT_EXECUTABLE, Constants.PYTHON_EXECUTABLE);
-            FlinkConfigurationOps.setIfPresent(
-                flinkConfig, PythonOptions.PYTHON_EXECUTABLE, Constants.PYTHON_EXECUTABLE);
+            flinkConfig.set(YarnConfigOptions.SHIP_FILES, shipFiles);
+            flinkConfig.set(PythonOptions.PYTHON_FILES, userJar.getParentFile().getName());
+            flinkConfig.set(PythonOptions.PYTHON_ARCHIVES, pyVenv);
+            flinkConfig.set(PythonOptions.PYTHON_CLIENT_EXECUTABLE, Constants.PYTHON_EXECUTABLE);
+            flinkConfig.set(PythonOptions.PYTHON_EXECUTABLE, Constants.PYTHON_EXECUTABLE);
 
             List<String> args = flinkConfig.get(ApplicationConfiguration.APPLICATION_ARGS);
             ArrayList<String> argsList = new ArrayList<>(args);
             argsList.add("-pym");
             argsList.add(
-                userJar
-                    .getName()
+                userJar.getName()
                     .substring(0, userJar.getName().length() - Constants.PYTHON_SUFFIX.length()));
-            FlinkConfigurationOps.setIfPresent(
-                flinkConfig, ApplicationConfiguration.APPLICATION_ARGS, argsList);
+            flinkConfig.set(ApplicationConfiguration.APPLICATION_ARGS, argsList);
         }
 
         logEffectiveSubmitConfiguration(flinkConfig);
     }
 
+    /** Deploys an application cluster and returns its YARN and REST identities. */
     @Override
     protected SubmitResponse doSubmit(
-                                      SubmitRequest submitRequest,
+                                      ResolvedSubmitRequest resolved,
                                       Configuration flinkConfig) throws FlinkException {
-        return callAsFlinkException(
+        SubmitRequest submitRequest = resolved.request();
+        return execute(
             () -> {
                 Tuple2<ClusterSpecification, YarnClusterDescriptor> deployDescriptor =
                     getYarnClusterDeployDescriptor(flinkConfig, submitRequest.hadoopUser());
@@ -168,8 +159,7 @@ public final class YarnApplicationClient extends AbstractYarnClient {
                         "",
                         clusterClient.getWebInterfaceURL());
                 } finally {
-                    closeSubmissionResources(
-                        submitRequest, clusterClient, clusterDescriptor);
+                    closeSubmissionResources(clusterClient, clusterDescriptor);
                 }
             });
     }

@@ -19,6 +19,7 @@ package org.apache.streampark.flink.client.bean;
 
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.JsonUtils;
+import org.apache.streampark.common.util.OkHttpUtils;
 import org.apache.streampark.flink.client.configuration.FlinkSavepointOptions;
 
 import org.apache.streampark.shaded.com.fasterxml.jackson.databind.JsonNode;
@@ -27,30 +28,24 @@ import org.apache.flink.client.deployment.application.ApplicationConfiguration;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.CoreOptions;
 
-import java.io.ByteArrayInputStream;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.SequenceInputStream;
-import java.io.UncheckedIOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /** Submits Flink jobs to session clusters through the Flink REST API. */
 public final class SessionClusterRestClient {
 
-    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(30);
-    private static final Duration REQUEST_TIMEOUT = Duration.ofMinutes(5);
+    private static final MediaType JAR_MEDIA_TYPE =
+        MediaType.parse("application/java-archive");
+    private static final MediaType JSON_MEDIA_TYPE =
+        MediaType.parse("application/json; charset=utf-8");
 
     private SessionClusterRestClient() {
     }
@@ -60,86 +55,55 @@ public final class SessionClusterRestClient {
                                 String jobManagerUrl,
                                 File jobJar,
                                 Configuration configuration) throws Exception {
-        AssertUtils.required(jobJar.isFile(), "Flink job JAR does not exist: " + jobJar);
-        HttpClient httpClient =
-            HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT).build();
+        AssertUtils.required(
+            jobManagerUrl != null && !jobManagerUrl.isBlank(),
+            "Flink JobManager URL must not be empty");
+        AssertUtils.required(
+            jobJar != null && jobJar.isFile(), "Flink job JAR does not exist: " + jobJar);
+        RequestBody uploadBody = new MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart(
+                "jarfile", jobJar.getName(), RequestBody.create(jobJar, JAR_MEDIA_TYPE))
+            .build();
+        Request uploadRequest = new Request.Builder()
+            .url(endpoint(jobManagerUrl, "/jars/upload"))
+            .post(uploadBody)
+            .build();
+        JarUploadResponse upload = parseUploadResponse(execute("upload job JAR", uploadRequest));
 
-        String boundary = "----StreamParkBoundary" + System.currentTimeMillis();
-        HttpRequest uploadRequest =
-            HttpRequest.newBuilder()
-                .uri(endpoint(jobManagerUrl, "/jars/upload"))
-                .timeout(REQUEST_TIMEOUT)
-                .header("Content-Type", "multipart/form-data; boundary=" + boundary)
-                .POST(multipartBody(boundary, jobJar))
-                .build();
-        HttpResponse<String> uploadResponse = send(httpClient, uploadRequest);
-        requireSuccess("upload job JAR", uploadResponse);
-        JarUploadResponse upload = parseUploadResponse(uploadResponse.body());
-
-        HttpRequest runRequest =
-            HttpRequest.newBuilder()
-                .uri(endpoint(jobManagerUrl, "/jars/" + upload.jarId() + "/run"))
-                .timeout(REQUEST_TIMEOUT)
-                .header("Content-Type", "application/json")
-                .POST(
-                    HttpRequest.BodyPublishers.ofString(
-                        JsonUtils.write(new JarRunRequest(configuration))))
-                .build();
-        HttpResponse<String> runResponse = send(httpClient, runRequest);
-        requireSuccess("start uploaded job", runResponse);
-        return parseJobId(runResponse.body());
+        RequestBody runBody = RequestBody.create(
+            JsonUtils.write(new JarRunRequest(configuration)), JSON_MEDIA_TYPE);
+        Request runRequest = new Request.Builder()
+            .url(endpoint(jobManagerUrl, "/jars/" + upload.jarId() + "/run"))
+            .post(runBody)
+            .build();
+        return parseJobId(execute("start uploaded job", runRequest));
     }
 
-    private static URI endpoint(String jobManagerUrl, String path) {
+    /** Joins a normalized JobManager base URL with a Flink REST resource path. */
+    private static String endpoint(String jobManagerUrl, String path) {
         String normalized =
             jobManagerUrl.endsWith("/")
                 ? jobManagerUrl.substring(0, jobManagerUrl.length() - 1)
                 : jobManagerUrl;
-        return URI.create(normalized + path);
+        return normalized + path;
     }
 
-    private static HttpResponse<String> send(HttpClient client, HttpRequest request) throws Exception {
-        return AccessController.doPrivileged(
-            (PrivilegedExceptionAction<HttpResponse<String>>) () -> client.send(
-                request,
-                HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)));
-    }
-
-    private static void requireSuccess(String action, HttpResponse<String> response) {
-        int status = response.statusCode();
-        if (status < 200 || status >= 300) {
-            throw new IllegalStateException(
-                "Failed to " + action + ": HTTP " + status + ", response=" + response.body());
+    /** Executes one REST request, consumes its body, and always closes the response. */
+    private static String execute(String action, Request request) throws Exception {
+        try (
+            Response response = AccessController.doPrivileged(
+                (PrivilegedExceptionAction<Response>) () -> OkHttpUtils.call(request))) {
+            String body = response.body() == null ? "" : response.body().string();
+            if (!response.isSuccessful()) {
+                throw new IllegalStateException(
+                    "Failed to " + action + ": HTTP " + response.code() + ", response=" + body);
+            }
+            return body;
         }
     }
 
-    private static HttpRequest.BodyPublisher multipartBody(String boundary, File jobJar) {
-        byte[] header =
-            ("--"
-                + boundary
-                + "\r\nContent-Disposition: form-data; name=\"jarfile\"; filename=\""
-                + jobJar.getName()
-                + "\"\r\nContent-Type: application/java-archive\r\n\r\n")
-                    .getBytes(StandardCharsets.UTF_8);
-        byte[] footer =
-            ("\r\n--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8);
-        return HttpRequest.BodyPublishers.ofInputStream(
-            () -> multipartStream(header, jobJar, footer));
-    }
-
-    private static InputStream multipartStream(byte[] header, File jobJar, byte[] footer) {
-        try {
-            List<InputStream> streams =
-                Arrays.asList(
-                    new ByteArrayInputStream(header),
-                    new FileInputStream(jobJar),
-                    new ByteArrayInputStream(footer));
-            return new SequenceInputStream(Collections.enumeration(streams));
-        } catch (IOException e) {
-            throw new UncheckedIOException("Failed to open Flink job JAR: " + jobJar, e);
-        }
-    }
-
+    /** Validates the Flink upload response and extracts the server-side JAR identity. */
     private static JarUploadResponse parseUploadResponse(String responseBody) {
         try {
             JsonNode node = JsonUtils.read(responseBody, JsonNode.class);
@@ -159,6 +123,7 @@ public final class SessionClusterRestClient {
         }
     }
 
+    /** Extracts a job ID while accepting the field casing used by supported Flink versions. */
     private static String parseJobId(String responseBody) {
         try {
             JsonNode node = JsonUtils.read(responseBody, JsonNode.class);

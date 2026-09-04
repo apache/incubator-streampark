@@ -27,14 +27,38 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
-/** Resolved HDFS paths used while submitting a Flink job through YARN. */
-public class RemoteWorkspace {
+/**
+ * Immutable remote workspace paths used by YARN submission.
+ *
+ * <p>The local Flink installation name identifies its corresponding directory in the shared
+ * workspace. Resolving symbolic links keeps this mapping stable when {@code FLINK_HOME} points to
+ * a version alias.
+ */
+public final class RemoteWorkspace {
 
     private final String flinkDistJar;
     private final String flinkLib;
     private final String flinkPlugins;
     private final String appJars;
 
+    private RemoteWorkspace(
+                            String flinkDistJar,
+                            String flinkLib,
+                            String flinkPlugins,
+                            String appJars) {
+        this.flinkDistJar = flinkDistJar;
+        this.flinkLib = flinkLib;
+        this.flinkPlugins = flinkPlugins;
+        this.appJars = appJars;
+    }
+
+    /**
+     * Resolves local and remote artifact paths for a registered Flink installation.
+     *
+     * @param flinkVersion registered Flink installation
+     * @return immutable paths required by YARN submission
+     * @throws UncheckedIOException if a symbolic Flink home cannot be resolved
+     */
     public static RemoteWorkspace resolve(FlinkVersion flinkVersion) {
         Workspace workspace = Workspace.REMOTE;
         String flinkHome = flinkVersion.flinkHome;
@@ -55,17 +79,6 @@ public class RemoteWorkspace {
             flinkHdfsHome + "/lib",
             flinkHdfsHome + "/plugins",
             workspace.jars);
-    }
-
-    private RemoteWorkspace(
-                            String flinkDistJar,
-                            String flinkLib,
-                            String flinkPlugins,
-                            String appJars) {
-        this.flinkDistJar = flinkDistJar;
-        this.flinkLib = flinkLib;
-        this.flinkPlugins = flinkPlugins;
-        this.appJars = appJars;
     }
 
     public String flinkDistJar() {

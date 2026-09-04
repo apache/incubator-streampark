@@ -32,8 +32,8 @@ import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationBackupService;
 import org.apache.streampark.console.core.util.FlinkEnvUtils;
+import org.apache.streampark.flink.client.FlinkShimsProxy;
 import org.apache.streampark.flink.core.FlinkSqlValidationResult;
-import org.apache.streampark.flink.proxy.FlinkShimsProxy;
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;

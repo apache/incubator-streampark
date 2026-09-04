@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.client.bean;
+package org.apache.streampark.flink.client.configuration;
 
 import org.apache.streampark.common.configuration.CommandLineParser;
 import org.apache.streampark.common.configuration.CommandLineTokenizer;
@@ -32,11 +32,10 @@ import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.ClassLoaderUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.common.util.FlinkConfigurationUtils;
+import org.apache.streampark.common.util.FlinkConfigurationLoader;
 import org.apache.streampark.common.util.LoggerSupport;
 import org.apache.streampark.common.util.SystemPropertyUtils;
-import org.apache.streampark.flink.client.configuration.FlinkConfigurationOps;
-import org.apache.streampark.flink.client.configuration.FlinkSavepointOptions;
+import org.apache.streampark.flink.client.bean.ResolvedSubmitRequest;
 import org.apache.streampark.flink.client.request.SubmitRequest;
 
 import org.apache.commons.cli.CommandLine;
@@ -71,11 +70,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** Builds the effective Flink configuration for a submission request. */
-public final class SubmissionConfigurationBuilder extends LoggerSupport {
+/**
+ * Builds the effective Flink configuration for a submission request.
+ *
+ * <p>Configuration is assembled from one installation snapshot and Flink's own command-line
+ * implementations. Installation defaults are applied first, request properties and CLI options
+ * override them, and deployment-specific clients add their platform settings afterward. Keeping
+ * these stages explicit avoids version-dependent option parsing outside Flink itself.
+ */
+public final class FlinkConfigurationBuilder extends LoggerSupport {
 
-    private static final SubmissionConfigurationBuilder INSTANCE =
-        new SubmissionConfigurationBuilder();
+    private static final FlinkConfigurationBuilder INSTANCE =
+        new FlinkConfigurationBuilder();
 
     private static final String PARAM_KEY_FLINK_CONF =
         CommandLineParser.LONG_OPTION_PREFIX + FlinkOptions.FLINK_CONFIGURATION.key();
@@ -91,64 +97,77 @@ public final class SubmissionConfigurationBuilder extends LoggerSupport {
     private static final String PARAM_KEY_FLINK_PARALLELISM =
         CommandLineParser.LONG_OPTION_PREFIX + FlinkOptions.PARALLELISM.key();
 
-    private SubmissionConfigurationBuilder() {
+    private FlinkConfigurationBuilder() {
     }
 
-    /** Builds the configuration used by a deployment client. */
-    public static Configuration build(SubmitRequest request) throws Exception {
-        return INSTANCE.buildConfiguration(request);
+    /**
+     * Builds the base configuration used by a deployment client.
+     *
+     * @param resolved request values resolved from one immutable configuration snapshot
+     * @return effective base configuration before platform-specific settings
+     */
+    public static Configuration build(ResolvedSubmitRequest resolved) throws Exception {
+        return INSTANCE.buildConfiguration(resolved);
     }
 
-    /** Extracts a Flink configuration from dynamic cluster properties. */
+    /**
+     * Extracts a Flink configuration from dynamic cluster properties.
+     *
+     * @param flinkHome registered Flink installation directory
+     * @param properties dynamic properties that override installation defaults
+     * @return configuration interpreted by the target Flink command line
+     */
     public static Configuration extract(String flinkHome, Map<String, Object> properties) throws Exception {
         return INSTANCE.extractConfiguration(flinkHome, properties);
     }
 
-    /** Loads the registered Flink installation's default configuration. */
+    /**
+     * Loads the registered Flink installation's default configuration.
+     *
+     * @param flinkHome registered Flink installation directory
+     * @return a new mutable Flink configuration populated from the compatible YAML loader
+     */
     public static Configuration loadDefault(String flinkHome) {
-        try {
-            return Configuration.fromMap(FlinkConfigurationUtils.loadFlinkHome(flinkHome));
-        } catch (Exception ignored) {
-            return new Configuration();
-        }
+        return Configuration.fromMap(FlinkConfigurationLoader.loadFlinkHome(flinkHome));
     }
 
-    /** Resolves the effective parallelism for the request. */
-    public static int parallelism(SubmitRequest request) {
-        Object configured = request.properties().get(FlinkOptions.PARALLELISM.key());
-        if (configured != null) {
-            return Integer.parseInt(configured.toString());
-        }
-        return loadDefault(request.flinkVersion().getFlinkHome())
-            .get(CoreOptions.DEFAULT_PARALLELISM, CoreOptions.DEFAULT_PARALLELISM.defaultValue());
-    }
-
-    /** Reads an option from the registered Flink installation. */
-    public static <T> T getDefaultOption(String flinkHome, ConfigOption<T> option) {
+    /**
+     * Reads a typed option from the registered Flink installation.
+     *
+     * @param flinkHome registered Flink installation directory
+     * @param option Flink option to read
+     * @param <T> option value type
+     * @return configured or default option value
+     */
+    public static <T> T loadDefaultOption(String flinkHome, ConfigOption<T> option) {
         return loadDefault(flinkHome).get(option);
     }
 
-    private Configuration buildConfiguration(SubmitRequest request) throws Exception {
-        CommandLineAndConfiguration cli = parseCommandLine(request);
+    /** Applies configuration stages in precedence order to one mutable Flink snapshot. */
+    private Configuration buildConfiguration(ResolvedSubmitRequest resolved) throws Exception {
+        SubmitRequest request = resolved.request();
+        CommandLineAndConfiguration cli = parseCommandLine(resolved);
         Configuration configuration = cli.configuration;
-        applyJobTypeConfiguration(request, cli.commandLine, configuration);
-        applyPipelineConfiguration(request, configuration);
+        applyJobTypeConfiguration(resolved, cli.commandLine, configuration);
+        applyPipelineConfiguration(resolved, configuration);
         applyCheckpointDefaults(request, configuration);
-        applySavepointConfiguration(request, configuration);
+        applySavepointConfiguration(resolved, configuration);
         applyEnvironmentProperties(request, configuration);
         return configuration;
     }
 
+    /** Applies the entry point and artifact metadata required by the submitted job type. */
     private void applyJobTypeConfiguration(
-                                           SubmitRequest request,
+                                           ResolvedSubmitRequest resolved,
                                            CommandLine commandLine,
                                            Configuration configuration) throws Exception {
+        SubmitRequest request = resolved.request();
         if (request.jobType() == FlinkJobType.PYFLINK) {
             applyPyFlinkConfiguration(request, configuration);
             return;
         }
 
-        File userJar = SubmitRequestResolver.userJarFile(request);
+        File userJar = resolved.getUserJarFile();
         if (userJar == null) {
             return;
         }
@@ -159,18 +178,16 @@ public final class SubmissionConfigurationBuilder extends LoggerSupport {
             .applyToConfiguration(configuration);
     }
 
+    /** Configures the managed Python environment used to launch PyFlink applications. */
     private void applyPyFlinkConfiguration(
                                            SubmitRequest request, Configuration configuration) throws Exception {
         String pythonVenv = Workspace.LOCAL.pythonVenv;
         AssertUtils.required(
             FsOperator.lfs().exists(pythonVenv), pythonVenv + " file does not exist");
 
-        FlinkConfigurationOps.setIfPresent(
-            configuration, PythonOptions.PYTHON_ARCHIVES, pythonVenv);
-        FlinkConfigurationOps.setIfPresent(
-            configuration, PythonOptions.PYTHON_CLIENT_EXECUTABLE, Constants.PYTHON_EXECUTABLE);
-        FlinkConfigurationOps.setIfPresent(
-            configuration, PythonOptions.PYTHON_EXECUTABLE, Constants.PYTHON_EXECUTABLE);
+        configuration.set(PythonOptions.PYTHON_ARCHIVES, pythonVenv);
+        configuration.set(PythonOptions.PYTHON_CLIENT_EXECUTABLE, Constants.PYTHON_EXECUTABLE);
+        configuration.set(PythonOptions.PYTHON_EXECUTABLE, Constants.PYTHON_EXECUTABLE);
 
         if (StringUtils.isBlank(System.getenv(ConfigConstants.ENV_FLINK_OPT_DIR))) {
             String flinkOptPath = request.flinkVersion().getFlinkHome() + "/opt";
@@ -183,44 +200,48 @@ public final class SubmissionConfigurationBuilder extends LoggerSupport {
         }
     }
 
+    /** Applies job identity, arguments, deployment target, and fixed job ID. */
     private void applyPipelineConfiguration(
-                                            SubmitRequest request, Configuration configuration) {
-        FlinkConfigurationOps.setIfPresent(
-            configuration, PipelineOptions.NAME, SubmitRequestResolver.effectiveApplicationName(request));
-        FlinkConfigurationOps.setIfPresent(
-            configuration, DeploymentOptions.TARGET, request.deployMode().getName());
-        FlinkConfigurationOps.setIfPresent(
-            configuration, FlinkSavepointOptions.SAVEPOINT_PATH, request.savePoint());
-        FlinkConfigurationOps.setIfPresent(
-            configuration,
-            ApplicationConfiguration.APPLICATION_MAIN_CLASS,
-            SubmitRequestResolver.applicationMain(request));
-        FlinkConfigurationOps.setIfPresent(
-            configuration, ApplicationConfiguration.APPLICATION_ARGS, programArguments(request));
-        FlinkConfigurationOps.setIfPresent(
-            configuration, PipelineOptionsInternal.PIPELINE_FIXED_JOB_ID, request.jobId());
+                                            ResolvedSubmitRequest resolved,
+                                            Configuration configuration) {
+        SubmitRequest request = resolved.request();
+        configuration.set(PipelineOptions.NAME, resolved.getJobName());
+        configuration.set(DeploymentOptions.TARGET, request.deployMode().getName());
+
+        String jobMainClass = resolved.getJobMainClass();
+        if (StringUtils.isNotEmpty(jobMainClass)) {
+            configuration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, jobMainClass);
+        }
+
+        configuration.set(ApplicationConfiguration.APPLICATION_ARGS, programArguments(resolved, configuration));
+        if (StringUtils.isNotEmpty(request.jobId())) {
+            configuration.set(PipelineOptionsInternal.PIPELINE_FIXED_JOB_ID, request.jobId());
+        }
     }
 
+    /** Materializes the retained-checkpoint default when no dynamic override was supplied. */
     private void applyCheckpointDefaults(
                                          SubmitRequest request, Configuration configuration) {
         ConfigOption<Integer> retainedCheckpoints = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS;
         if (!request.properties().containsKey(retainedCheckpoints.key())) {
             configuration.set(
                 retainedCheckpoints,
-                loadDefault(request.flinkVersion().getFlinkHome()).get(retainedCheckpoints));
+                configuration.get(retainedCheckpoints));
         }
     }
 
+    /** Applies savepoint restoration only when the request carries a restore path. */
     private void applySavepointConfiguration(
-                                             SubmitRequest request, Configuration configuration) {
+                                             ResolvedSubmitRequest resolved,
+                                             Configuration configuration) {
+        SubmitRequest request = resolved.request();
         if (StringUtils.isBlank(request.savePoint())) {
             return;
         }
-        FlinkConfigurationOps.setIfPresent(
-            configuration, FlinkSavepointOptions.SAVEPOINT_PATH, request.savePoint());
+        configuration.set(FlinkSavepointOptions.SAVEPOINT_PATH, request.savePoint());
         configuration.set(
             FlinkSavepointOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE,
-            SubmitRequestResolver.allowNonRestoredState(request));
+            resolved.isNonRestoredStateAllowed());
 
         if (request.restoreMode() != null
             && request.flinkVersion().checkVersion(FlinkRestoreMode.SINCE_FLINK_VERSION)) {
@@ -228,6 +249,7 @@ public final class SubmissionConfigurationBuilder extends LoggerSupport {
         }
     }
 
+    /** Applies environment-prefixed options and the default JVM file encoding. */
     private void applyEnvironmentProperties(
                                             SubmitRequest request, Configuration configuration) {
         if (MapUtils.isEmpty(request.properties())) {
@@ -243,30 +265,83 @@ public final class SubmissionConfigurationBuilder extends LoggerSupport {
 
         request.properties().forEach(
             (key, value) -> {
-                if (key.startsWith("env.")) {
+                if (key.startsWith("env.") && value != null) {
                     logInfo("Environment option: " + key + "=" + value);
                     configuration.setString(key, value.toString());
                 }
             });
     }
 
-    private CommandLineAndConfiguration parseCommandLine(SubmitRequest request) throws Exception {
+    /**
+     * Parses the request through Flink's own CLI using one default-configuration snapshot.
+     *
+     * <p>Reusing the command-line list and defaults prevents a concurrent file change from
+     * producing different option discovery and effective configuration in the same submission.
+     */
+    private CommandLineAndConfiguration parseCommandLine(ResolvedSubmitRequest resolved) throws Exception {
+        SubmitRequest request = resolved.request();
         String flinkHome = request.flinkVersion().getFlinkHome();
-        Options options = commandLineOptions(flinkHome);
-        List<String> arguments = cliArguments(request, buildOptionMap(request, options));
+        Configuration defaults = loadDefault(flinkHome);
+        expandJobPlaceholders(defaults, resolved);
+        List<CustomCommandLine> commandLines = customCommandLines(flinkHome, defaults);
+        Options options = commandLineOptions(commandLines);
+        List<String> arguments = cliArguments(request, buildOptionMap(resolved, options));
         logInfo("Flink CLI arguments: " + String.join(" ", arguments));
 
         CommandLine commandLine =
             FlinkRunOption.parse(options, arguments.toArray(new String[0]), true);
         CustomCommandLine activeCommandLine =
-            activeCommandLine(customCommandLines(flinkHome), commandLine);
+            activeCommandLine(commandLines, commandLine);
         return new CommandLineAndConfiguration(
-            commandLine, applyConfiguration(flinkHome, activeCommandLine, commandLine));
+            commandLine, applyConfiguration(defaults, activeCommandLine, commandLine));
     }
 
-    private Map<String, Object> buildOptionMap(SubmitRequest request, Options commandLineOptions) {
+    /**
+     * Replaces StreamPark job variables in deployment-scoped Flink defaults.
+     *
+     * <p>Session and remote clusters retain their shared installation configuration. Other modes
+     * create job-scoped runtimes and may safely resolve job name and ID placeholders.
+     */
+    static void expandJobPlaceholders(
+                                      Configuration configuration,
+                                      ResolvedSubmitRequest resolved) {
+        FlinkDeployMode deployMode = resolved.request().deployMode();
+        if (deployMode == FlinkDeployMode.REMOTE
+            || deployMode == FlinkDeployMode.YARN_SESSION
+            || deployMode == FlinkDeployMode.KUBERNETES_NATIVE_SESSION) {
+            return;
+        }
+
+        String jobName = resolved.getJobName();
+        String jobId = Long.toString(resolved.request().id());
+        for (String key : configuration.keySet()) {
+            String value = configuration.getString(key, null);
+            if (value != null) {
+                configuration.setString(key, replaceJobPlaceholder(value, jobName, jobId));
+            }
+        }
+    }
+
+    /** Replaces the historical braced and unbraced spellings of job variables. */
+    private static String replaceJobPlaceholder(String value, String jobName, String jobId) {
+        return value
+            .replace("${jobName}", jobName)
+            .replace("${jobname}", jobName)
+            .replace("$jobName", jobName)
+            .replace("$jobname", jobName)
+            .replace("${jobId}", jobId)
+            .replace("${jobid}", jobId)
+            .replace("$jobId", jobId)
+            .replace("$jobid", jobId);
+    }
+
+    /** Filters persisted job options against the options supported by the target Flink. */
+    private Map<String, Object> buildOptionMap(
+                                               ResolvedSubmitRequest resolved,
+                                               Options commandLineOptions) {
+        SubmitRequest request = resolved.request();
         Map<String, Object> options = new HashMap<>();
-        SubmitRequestResolver.applicationOptions(request).forEach(
+        resolved.jobOptions().forEach(
             (key, value) -> {
                 if (!commandLineOptions.hasOption(key)) {
                     logWarn("Ignoring unsupported Flink CLI option: " + key);
@@ -294,6 +369,7 @@ public final class SubmissionConfigurationBuilder extends LoggerSupport {
         return options;
     }
 
+    /** Converts validated options and dynamic properties to Flink CLI arguments. */
     private List<String> cliArguments(SubmitRequest request, Map<String, Object> options) {
         List<String> arguments = new ArrayList<>();
         options.forEach(
@@ -312,12 +388,16 @@ public final class SubmissionConfigurationBuilder extends LoggerSupport {
         return arguments;
     }
 
-    private List<String> programArguments(SubmitRequest request) {
+    /** Builds the argument vector delivered to the submitted job's main method. */
+    private List<String> programArguments(
+                                          ResolvedSubmitRequest resolved,
+                                          Configuration configuration) {
+        SubmitRequest request = resolved.request();
         List<String> arguments =
             new ArrayList<>(CommandLineTokenizer.tokenize(request.args()));
         if (request.applicationType() == ApplicationType.STREAMPARK_FLINK
             || request.jobType() == FlinkJobType.FLINK_SQL) {
-            addStreamParkArguments(request, arguments);
+            addStreamParkArguments(resolved, configuration, arguments);
         }
 
         Object runtimeMode = request.properties().get(ExecutionOptions.RUNTIME_MODE.key());
@@ -328,7 +408,7 @@ public final class SubmissionConfigurationBuilder extends LoggerSupport {
 
         if (request.jobType() == FlinkJobType.PYFLINK
             && request.deployMode() != FlinkDeployMode.YARN_APPLICATION) {
-            File userJar = SubmitRequestResolver.userJarFile(request);
+            File userJar = resolved.getUserJarFile();
             AssertUtils.notNull(userJar);
             arguments.add("-py");
             arguments.add(userJar.getAbsolutePath());
@@ -336,7 +416,12 @@ public final class SubmissionConfigurationBuilder extends LoggerSupport {
         return arguments;
     }
 
-    private void addStreamParkArguments(SubmitRequest request, List<String> arguments) {
+    /** Adds StreamPark transport arguments consumed by its Flink runtime entry points. */
+    private void addStreamParkArguments(
+                                        ResolvedSubmitRequest resolved,
+                                        Configuration configuration,
+                                        List<String> arguments) {
+        SubmitRequest request = resolved.request();
         arguments.add(PARAM_KEY_FLINK_CONF);
         arguments.add(request.flinkYaml());
         // Carry the persisted syntax snapshot so Flink 1.19 never re-resolves its configuration
@@ -344,42 +429,54 @@ public final class SubmissionConfigurationBuilder extends LoggerSupport {
         arguments.add(PARAM_KEY_FLINK_CONF_STANDARD_YAML);
         arguments.add(Boolean.toString(request.standardYaml()));
         arguments.add(PARAM_KEY_APP_NAME);
-        arguments.add(
-            DeflaterUtils.zipString(SubmitRequestResolver.effectiveApplicationName(request)));
+        arguments.add(DeflaterUtils.zipString(resolved.getJobName()));
         arguments.add(PARAM_KEY_FLINK_PARALLELISM);
-        arguments.add(Integer.toString(parallelism(request)));
+        arguments.add(
+            Integer.toString(
+                configuration.get(
+                    CoreOptions.DEFAULT_PARALLELISM,
+                    CoreOptions.DEFAULT_PARALLELISM.defaultValue())));
 
         if (request.jobType() == FlinkJobType.FLINK_SQL) {
             arguments.add(PARAM_KEY_FLINK_SQL);
-            arguments.add(SubmitRequestResolver.flinkSql(request));
-            addApplicationConfiguration(request.appConf(), arguments);
-        } else if (shouldAddApplicationConfiguration(request.appConf())) {
-            addApplicationConfiguration(request.appConf(), arguments);
+            arguments.add(resolved.getFlinkSqlContent());
+            addJobConfiguration(request.appConf(), arguments);
+        } else if (shouldAddJobConfiguration(request.appConf())) {
+            addJobConfiguration(request.appConf(), arguments);
         }
     }
 
-    private void addApplicationConfiguration(String appConf, List<String> arguments) {
+    /** Appends a non-null serialized job configuration argument. */
+    private void addJobConfiguration(String appConf, List<String> arguments) {
         if (appConf != null) {
             arguments.add(PARAM_KEY_APP_CONF);
             arguments.add(appConf);
         }
     }
 
+    /** Builds a Flink configuration from dynamic properties without a job request. */
     private Configuration extractConfiguration(
                                                String flinkHome, Map<String, Object> properties) throws Exception {
+        Configuration defaults = loadDefault(flinkHome);
+        List<CustomCommandLine> commandLines = customCommandLines(flinkHome, defaults);
         List<String> arguments = new ArrayList<>();
         if (MapUtils.isNotEmpty(properties)) {
             properties.forEach(
-                (key, value) -> arguments.add("-D" + key + "=" + value.toString().trim()));
+                (key, value) -> {
+                    if (value != null) {
+                        arguments.add("-D" + key + "=" + value.toString().trim());
+                    }
+                });
         }
         CommandLine commandLine =
             FlinkRunOption.parse(
-                commandLineOptions(flinkHome), arguments.toArray(new String[0]), true);
+                commandLineOptions(commandLines), arguments.toArray(new String[0]), true);
         CustomCommandLine activeCommandLine =
-            activeCommandLine(customCommandLines(flinkHome), commandLine);
-        return applyConfiguration(flinkHome, activeCommandLine, commandLine);
+            activeCommandLine(commandLines, commandLine);
+        return applyConfiguration(defaults, activeCommandLine, commandLine);
     }
 
+    /** Selects the first target-specific command line that accepts the parsed arguments. */
     private CustomCommandLine activeCommandLine(
                                                 List<CustomCommandLine> commandLines,
                                                 CommandLine commandLine) {
@@ -392,18 +489,21 @@ public final class SubmissionConfigurationBuilder extends LoggerSupport {
         throw new IllegalStateException("No active Flink command line found");
     }
 
-    private List<CustomCommandLine> customCommandLines(String flinkHome) {
-        Configuration defaultConfiguration = loadDefault(flinkHome);
+    /** Loads Flink's built-in and plugin command lines against the captured defaults. */
+    private List<CustomCommandLine> customCommandLines(
+                                                       String flinkHome,
+                                                       Configuration defaults) {
         String configurationDirectory = flinkHome + "/conf";
         return ClassLoaderUtils.runAsClassLoader(
-            SubmissionConfigurationBuilder.class.getClassLoader(),
+            FlinkConfigurationBuilder.class.getClassLoader(),
             () -> CliFrontend.loadCustomCommandLines(
-                defaultConfiguration, configurationDirectory));
+                defaults, configurationDirectory));
     }
 
-    private Options commandLineOptions(String flinkHome) {
+    /** Merges target-specific CLI options with Flink's standard run options. */
+    private Options commandLineOptions(List<CustomCommandLine> commandLines) {
         Options customOptions = new Options();
-        for (CustomCommandLine commandLine : customCommandLines(flinkHome)) {
+        for (CustomCommandLine commandLine : commandLines) {
             commandLine.addGeneralOptions(customOptions);
             commandLine.addRunOptions(customOptions);
         }
@@ -411,13 +511,13 @@ public final class SubmissionConfigurationBuilder extends LoggerSupport {
             CliFrontendParser.getRunCommandOptions(), customOptions);
     }
 
+    /** Applies captured defaults first and dynamic CLI configuration last. */
     private Configuration applyConfiguration(
-                                             String flinkHome,
+                                             Configuration defaults,
                                              CustomCommandLine activeCommandLine,
                                              CommandLine commandLine) throws Exception {
         Preconditions.checkNotNull(activeCommandLine, "activeCommandLine must not be null");
         Configuration configuration = new Configuration();
-        Configuration defaults = loadDefault(flinkHome);
         Set<String> keys = defaults.keySet();
         for (String key : keys) {
             String value = defaults.getString(key, null);
@@ -429,6 +529,7 @@ public final class SubmissionConfigurationBuilder extends LoggerSupport {
         return configuration;
     }
 
+    /** Preserves boolean flags as booleans while leaving valued options as strings. */
     private static Object parseOptionValue(String value) {
         if ("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
             return Boolean.parseBoolean(value);
@@ -436,7 +537,8 @@ public final class SubmissionConfigurationBuilder extends LoggerSupport {
         return value;
     }
 
-    private static boolean shouldAddApplicationConfiguration(String appConf) {
+    /** Determines whether job configuration must be forwarded to the runtime. */
+    private static boolean shouldAddJobConfiguration(String appConf) {
         return StringUtils.isNotBlank(appConf) && !appConf.startsWith("json:");
     }
 

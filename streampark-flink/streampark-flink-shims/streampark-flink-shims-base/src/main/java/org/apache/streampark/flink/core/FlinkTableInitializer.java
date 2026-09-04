@@ -25,7 +25,7 @@ import org.apache.streampark.common.configuration.FlinkOptions;
 import org.apache.streampark.common.configuration.option.ApplicationOptions;
 import org.apache.streampark.common.enums.PlannerType;
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.common.util.FlinkConfigurationUtils;
+import org.apache.streampark.common.util.FlinkConfigurationLoader;
 import org.apache.streampark.common.util.StreamParkLoggerFactory;
 import org.apache.streampark.flink.configuration.FlinkJobParameters;
 import org.apache.streampark.flink.configuration.FlinkRuntimeConfiguration;
@@ -145,7 +145,7 @@ public class FlinkTableInitializer extends FlinkStreamInitializer {
         // application YAML continues to use the engine-neutral parser.
         builder.withConfiguration(
             org.apache.flink.configuration.Configuration.fromMap(
-                FlinkConfigurationUtils.loadConfigurationFromString(
+                FlinkConfigurationLoader.loadConfigurationFromString(
                     DeflaterUtils.unzipString(flinkConf),
                     parameters.get(FlinkOptions.FLINK_CONFIGURATION_STANDARD_YAML))));
 

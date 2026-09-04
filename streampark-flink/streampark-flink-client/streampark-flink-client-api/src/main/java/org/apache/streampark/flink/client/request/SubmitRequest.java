@@ -30,7 +30,14 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Map;
 
-/** Immutable input for submitting a Flink job. */
+/**
+ * Immutable input for submitting a Flink job through the version-isolated client.
+ *
+ * <p>The request deliberately contains only StreamPark types and serializable values. This keeps
+ * target-version Flink classes behind the shims classloader boundary. Application and cluster
+ * specifications retain their separate ownership while convenience accessors preserve the
+ * established client API.
+ */
 public final class SubmitRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;

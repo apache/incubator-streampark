@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.util;
 
-import org.apache.streampark.common.util.FlinkConfigurationUtils;
+import org.apache.streampark.common.util.FlinkConfigurationLoader;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 
 import org.junit.jupiter.api.Test;
@@ -39,10 +39,10 @@ class FlinkEnvUtilsTest {
         Path configurationDirectory = Files.createDirectories(flinkHome.resolve("conf"));
         Path legacyFile =
             configurationDirectory.resolve(
-                FlinkConfigurationUtils.LEGACY_FLINK_CONF_FILENAME);
+                FlinkConfigurationLoader.LEGACY_FLINK_CONF_FILENAME);
         Files.writeString(legacyFile, "pipeline.name: legacy\n");
         Files.writeString(
-            configurationDirectory.resolve(FlinkConfigurationUtils.FLINK_CONF_FILENAME),
+            configurationDirectory.resolve(FlinkConfigurationLoader.FLINK_CONF_FILENAME),
             "pipeline:\n  name: standard\n");
         FlinkEnv environment = environment("1.20.0");
 
@@ -85,7 +85,7 @@ class FlinkEnvUtilsTest {
         Path conf = Files.createDirectories(home.resolve("conf"));
         Files.createFile(lib.resolve("flink-dist-" + version + ".jar"));
         String yaml =
-            FlinkConfigurationUtils.LEGACY_FLINK_CONF_FILENAME.equals(configFile)
+            FlinkConfigurationLoader.LEGACY_FLINK_CONF_FILENAME.equals(configFile)
                 ? "parallelism.default: 1\n"
                 : "parallelism:\n  default: 1\n";
         Files.writeString(conf.resolve(configFile), yaml);

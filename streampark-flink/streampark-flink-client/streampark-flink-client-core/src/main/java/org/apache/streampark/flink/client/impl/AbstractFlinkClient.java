@@ -24,12 +24,13 @@ import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.LoggerSupport;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.flink.client.bean.FlinkJobGraphBuilder;
-import org.apache.streampark.flink.client.bean.SubmissionConfigurationBuilder;
+import org.apache.streampark.flink.client.bean.ResolvedSubmitRequest;
 import org.apache.streampark.flink.client.bean.SubmitRequestResolver;
+import org.apache.streampark.flink.client.configuration.FlinkConfigurationBuilder;
+import org.apache.streampark.flink.client.request.AbstractSavepointRequest;
 import org.apache.streampark.flink.client.request.CancelRequest;
 import org.apache.streampark.flink.client.request.SavepointRequest;
 import org.apache.streampark.flink.client.request.SubmitRequest;
-import org.apache.streampark.flink.client.request.TriggerSavepointRequest;
 import org.apache.streampark.flink.client.response.CancelResponse;
 import org.apache.streampark.flink.client.response.SavepointResponse;
 import org.apache.streampark.flink.client.response.SubmitResponse;
@@ -40,7 +41,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.client.cli.CliArgsException;
 import org.apache.flink.client.program.ClusterClient;
-import org.apache.flink.client.program.PackagedProgram;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.ConfigOptions;
 import org.apache.flink.configuration.Configuration;
@@ -60,39 +60,41 @@ public abstract class AbstractFlinkClient extends LoggerSupport {
 
     /** Submits a job with the deployment-mode-specific client. */
     public final SubmitResponse submit(SubmitRequest request) throws FlinkException {
-        logSubmitRequest(request);
-        Configuration configuration =
-            callAsFlinkException(() -> SubmissionConfigurationBuilder.build(request));
-        setConfig(request, configuration);
-        return callAsFlinkException(
-            () -> doSubmit(request, configuration),
-            error -> logSubmitFailure(request, error));
+        ResolvedSubmitRequest resolved = execute(() -> SubmitRequestResolver.resolve(request));
+        logSubmitRequest(resolved);
+        Configuration configuration = execute(() -> FlinkConfigurationBuilder.build(resolved));
+        setConfig(resolved, configuration);
+        return execute(
+            () -> doSubmit(resolved, configuration),
+            error -> logSubmitFailure(resolved, error));
     }
 
     /** Triggers a savepoint for an existing job. */
-    public final SavepointResponse triggerSavepoint(TriggerSavepointRequest request) throws FlinkException {
+    public final SavepointResponse triggerSavepoint(SavepointRequest request) throws FlinkException {
         logSavepointRequest("trigger savepoint", request);
-        return callAsFlinkException(
+        return execute(
             () -> doTriggerSavepoint(request, new Configuration()));
     }
 
     /** Cancels an existing job, optionally creating a savepoint first. */
     public final CancelResponse cancel(CancelRequest request) throws FlinkException {
         logSavepointRequest("cancel", request);
-        return callAsFlinkException(() -> doCancel(request, new Configuration()));
+        return execute(() -> doCancel(request, new Configuration()));
     }
 
     /** Adds configuration required by a deployment mode. */
-    protected abstract void setConfig(SubmitRequest request, Configuration configuration);
+    protected abstract void setConfig(
+                                      ResolvedSubmitRequest resolved,
+                                      Configuration configuration);
 
     /** Performs the deployment-mode-specific submission. */
     protected abstract SubmitResponse doSubmit(
-                                               SubmitRequest request,
+                                               ResolvedSubmitRequest resolved,
                                                Configuration configuration) throws FlinkException;
 
     /** Performs the deployment-mode-specific savepoint operation. */
     protected abstract SavepointResponse doTriggerSavepoint(
-                                                            TriggerSavepointRequest request,
+                                                            SavepointRequest request,
                                                             Configuration configuration) throws FlinkException;
 
     /** Performs the deployment-mode-specific cancellation. */
@@ -101,7 +103,7 @@ public abstract class AbstractFlinkClient extends LoggerSupport {
                                                Configuration configuration) throws FlinkException;
 
     /** Converts infrastructure exceptions to the stable Flink client exception contract. */
-    protected static FlinkException asFlinkException(Throwable throwable) {
+    protected static FlinkException mapException(Throwable throwable) {
         if (throwable instanceof FlinkException) {
             return (FlinkException) throwable;
         }
@@ -111,14 +113,16 @@ public abstract class AbstractFlinkClient extends LoggerSupport {
         return new FlinkException(throwable.getMessage(), throwable);
     }
 
-    protected static <T> T callAsFlinkException(FlinkCallable<T> callable) throws FlinkException {
-        return callAsFlinkException(callable, ignored -> {
+    /** Executes an operation while preserving the public {@link FlinkException} contract. */
+    protected static <T> T execute(ClientOperation<T> callable) throws FlinkException {
+        return execute(callable, ignored -> {
         });
     }
 
-    protected static <T> T callAsFlinkException(
-                                                FlinkCallable<T> callable,
-                                                Consumer<Exception> onFailure) throws FlinkException {
+    /** Executes an operation and invokes the failure callback before exception conversion. */
+    protected static <T> T execute(
+                                   ClientOperation<T> callable,
+                                   Consumer<Exception> onFailure) throws FlinkException {
         try {
             return callable.call();
         } catch (FlinkException e) {
@@ -126,13 +130,14 @@ public abstract class AbstractFlinkClient extends LoggerSupport {
             throw e;
         } catch (Exception e) {
             onFailure.accept(e);
-            throw asFlinkException(e);
+            throw mapException(e);
         }
     }
 
-    protected static <T> T callAsFlinkExceptionMapping(
-                                                       FlinkCallable<T> callable,
-                                                       Function<Exception, FlinkException> exceptionMapper) throws FlinkException {
+    /** Executes an operation with caller-defined conversion for non-Flink exceptions. */
+    protected static <T> T executeAndMapError(
+                                              ClientOperation<T> callable,
+                                              Function<Exception, FlinkException> exceptionMapper) throws FlinkException {
         try {
             return callable.call();
         } catch (FlinkException e) {
@@ -142,33 +147,42 @@ public abstract class AbstractFlinkClient extends LoggerSupport {
         }
     }
 
+    /** Cancels a job and wraps its optional savepoint path in the stable response type. */
     protected final CancelResponse toCancelResponse(
                                                     CancelRequest request,
                                                     JobID jobId,
                                                     ClusterClient<?> client) throws FlinkException {
-        return callAsFlinkException(() -> new CancelResponse(cancelJob(request, jobId, client)));
+        return execute(() -> new CancelResponse(cancelJob(request, jobId, client)));
     }
 
+    /** Triggers a savepoint and wraps its path in the stable response type. */
     protected final SavepointResponse toSavepointResponse(
-                                                          TriggerSavepointRequest request,
+                                                          SavepointRequest request,
                                                           JobID jobId,
                                                           ClusterClient<?> client) throws FlinkException {
-        return callAsFlinkException(
+        return execute(
             () -> new SavepointResponse(triggerSavepoint(request, jobId, client)));
     }
 
+    /**
+     * Builds and submits a JobGraph while owning every resource opened for the submission.
+     *
+     * <p>The packaged program, cluster client, and supplied descriptors are closed on both success
+     * and failure. Callers must not reuse the supplied resources after this method returns.
+     */
     protected final SubmitResponse submitJobGraphToCluster(
-                                                           SubmitRequest request,
+                                                           ResolvedSubmitRequest resolved,
                                                            Configuration configuration,
                                                            File jarFile,
-                                                           FlinkCallable<ClusterClient<?>> clientSupplier,
-                                                           FlinkCallable<String> clusterIdSupplier,
+                                                           ClientOperation<ClusterClient<?>> clientSupplier,
+                                                           ClientOperation<String> clusterIdSupplier,
                                                            AutoCloseable... extraResources) throws FlinkException {
-        return callAsFlinkException(
+        return execute(
             () -> {
-                FlinkJobGraphBuilder.Result result = buildJobGraph(configuration, request, jarFile);
+                FlinkJobGraphBuilder.Result result = null;
                 ClusterClient<?> client = null;
                 try {
+                    result = buildJobGraph(configuration, resolved, jarFile);
                     client = clientSupplier.call();
                     String jobId = submitJobGraph(client, result.jobGraph());
                     return new SubmitResponse(
@@ -178,30 +192,30 @@ public abstract class AbstractFlinkClient extends LoggerSupport {
                         client.getWebInterfaceURL());
                 } finally {
                     AutoCloseable[] resources = new AutoCloseable[extraResources.length + 2];
-                    resources[0] = result.program();
+                    resources[0] = result == null ? null : result.program();
                     resources[1] = client;
                     System.arraycopy(extraResources, 0, resources, 2, extraResources.length);
-                    closeSubmissionResources(request, resources);
+                    closeSubmissionResources(resources);
                 }
             });
     }
 
     /** Tries JobGraph submission before falling back to the session REST API. */
     protected final SubmitResponse trySubmit(
-                                             SubmitRequest request,
+                                             ResolvedSubmitRequest resolved,
                                              Configuration configuration,
                                              File jarFile,
-                                             SubmitFunction jobGraphSubmit,
-                                             SubmitFunction restApiSubmit) throws FlinkException {
+                                             SubmissionStrategy jobGraphSubmit,
+                                             SubmissionStrategy restApiSubmit) throws FlinkException {
         try {
             logInfo("[flink-submit] Submitting with the JobGraph protocol");
-            return jobGraphSubmit.apply(request, configuration, jarFile);
+            return jobGraphSubmit.apply(resolved, configuration, jarFile);
         } catch (FlinkException jobGraphFailure) {
             logWarn(
                 "[flink-submit] JobGraph submission failed; trying the REST API: "
                     + ExceptionUtils.stringifyException(jobGraphFailure));
             try {
-                return restApiSubmit.apply(request, configuration, jarFile);
+                return restApiSubmit.apply(resolved, configuration, jarFile);
             } catch (FlinkException restFailure) {
                 restFailure.addSuppressed(jobGraphFailure);
                 throw new FlinkException(
@@ -211,13 +225,15 @@ public abstract class AbstractFlinkClient extends LoggerSupport {
         }
     }
 
+    /** Delegates JobGraph construction to the version-aware builder. */
     protected final FlinkJobGraphBuilder.Result buildJobGraph(
                                                               Configuration configuration,
-                                                              SubmitRequest request,
+                                                              ResolvedSubmitRequest resolved,
                                                               File jarFile) throws Exception {
-        return FlinkJobGraphBuilder.build(configuration, request, jarFile);
+        return FlinkJobGraphBuilder.build(configuration, resolved, jarFile);
     }
 
+    /** Parses a hexadecimal job ID and reports invalid input as a CLI argument error. */
     protected final JobID parseJobId(String jobId) throws CliArgsException {
         try {
             return JobID.fromHexString(jobId);
@@ -226,16 +242,19 @@ public abstract class AbstractFlinkClient extends LoggerSupport {
         }
     }
 
+    /** Extracts dynamic cluster properties through Flink's target-specific command line. */
     protected final Configuration extractConfiguration(
                                                        String flinkHome,
                                                        Map<String, Object> properties) throws Exception {
-        return SubmissionConfigurationBuilder.extract(flinkHome, properties);
+        return FlinkConfigurationBuilder.extract(flinkHome, properties);
     }
 
+    /** Loads the registered Flink installation's default configuration. */
     protected final Configuration loadDefaultConfiguration(String flinkHome) {
-        return SubmissionConfigurationBuilder.loadDefault(flinkHome);
+        return FlinkConfigurationBuilder.loadDefault(flinkHome);
     }
 
+    /** Cancels a job directly or stops it with a savepoint according to the request. */
     protected final String cancelJob(
                                      CancelRequest request, JobID jobId, ClusterClient<?> client) throws Exception {
         String savepointDirectory = resolveSavepointDirectory(request);
@@ -249,8 +268,9 @@ public abstract class AbstractFlinkClient extends LoggerSupport {
             .get();
     }
 
+    /** Triggers a savepoint with the request's format and resolved target directory. */
     protected final String triggerSavepoint(
-                                            TriggerSavepointRequest request,
+                                            SavepointRequest request,
                                             JobID jobId,
                                             ClusterClient<?> client) throws Exception {
         return new FlinkClusterClient<>(client)
@@ -259,20 +279,16 @@ public abstract class AbstractFlinkClient extends LoggerSupport {
             .get();
     }
 
-    protected final void closeSubmissionResources(
-                                                  SubmitRequest request,
-                                                  AutoCloseable... resources) {
+    /** Closes submission resources independently so one close failure cannot skip later resources. */
+    protected final void closeSubmissionResources(AutoCloseable... resources) {
         for (AutoCloseable resource : resources) {
-            if (resource == null) {
-                continue;
-            }
-            if (!(resource instanceof PackagedProgram)
-                || SubmitRequestResolver.canSafelyClosePackagedProgram(request)) {
+            if (resource != null) {
                 Utils.close(resource);
             }
         }
     }
 
+    /** Logs the final Flink configuration after all deployment-specific options are applied. */
     protected final void logEffectiveSubmitConfiguration(Configuration configuration) {
         logInfo(
             String.format(
@@ -282,7 +298,8 @@ public abstract class AbstractFlinkClient extends LoggerSupport {
                 configuration));
     }
 
-    private String resolveSavepointDirectory(SavepointRequest request) {
+    /** Resolves the explicit or installation-level savepoint directory for a job operation. */
+    private String resolveSavepointDirectory(AbstractSavepointRequest request) {
         if (!request.withSavepoint()) {
             return null;
         }
@@ -291,7 +308,7 @@ public abstract class AbstractFlinkClient extends LoggerSupport {
         }
 
         String defaultDirectory =
-            SubmissionConfigurationBuilder.getDefaultOption(
+            FlinkConfigurationBuilder.loadDefaultOption(
                 request.flinkVersion().getFlinkHome(),
                 ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
                     .stringType()
@@ -325,7 +342,9 @@ public abstract class AbstractFlinkClient extends LoggerSupport {
                 + client.getClass().getName());
     }
 
-    private void logSubmitRequest(SubmitRequest request) {
+    /** Logs a submission request without relying on mutable map iteration at call sites. */
+    private void logSubmitRequest(ResolvedSubmitRequest resolved) {
+        SubmitRequest request = resolved.request();
         logInfo(
             String.format(
                 "%n--------------------------------------- flink job start ---------------------------------------%n"
@@ -346,7 +365,7 @@ public abstract class AbstractFlinkClient extends LoggerSupport {
                     + "-------------------------------------------------------------------------------------------%n",
                 request.flinkVersion().getFlinkHome(),
                 request.flinkVersion().version(),
-                SubmitRequestResolver.effectiveApplicationName(request),
+                resolved.getJobName(),
                 request.jobType(),
                 request.deployMode(),
                 request.kubernetesNamespace(),
@@ -360,17 +379,20 @@ public abstract class AbstractFlinkClient extends LoggerSupport {
                 request.buildResult()));
     }
 
-    private void logSubmitFailure(SubmitRequest request, Exception error) {
+    /** Logs a submission failure with the resolved job and deployment mode. */
+    private void logSubmitFailure(ResolvedSubmitRequest resolved, Exception error) {
+        SubmitRequest request = resolved.request();
         logError(
             "Flink job "
-                + SubmitRequestResolver.effectiveApplicationName(request)
+                + resolved.getJobName()
                 + " failed to start in "
                 + request.deployMode().getName()
                 + ": "
                 + ExceptionUtils.stringifyException(error));
     }
 
-    private void logSavepointRequest(String operation, SavepointRequest request) {
+    /** Logs the stable identity and savepoint options of a job operation. */
+    private void logSavepointRequest(String operation, AbstractSavepointRequest request) {
         logInfo(
             "Flink job "
                 + operation
@@ -386,6 +408,7 @@ public abstract class AbstractFlinkClient extends LoggerSupport {
                 + request.nativeFormat());
     }
 
+    /** Formats dynamic properties for diagnostic logging. */
     private static String formatProperties(Map<String, Object> properties) {
         if (MapUtils.isEmpty(properties)) {
             return "";
@@ -395,15 +418,21 @@ public abstract class AbstractFlinkClient extends LoggerSupport {
             .collect(Collectors.joining(" "));
     }
 
+    /** Operation that may throw an infrastructure-specific checked exception. */
     @FunctionalInterface
-    protected interface FlinkCallable<T> {
+    protected interface ClientOperation<T> {
 
         T call() throws Exception;
     }
 
+    /** Submission strategy used by the JobGraph-to-REST fallback chain. */
     @FunctionalInterface
-    protected interface SubmitFunction {
+    protected interface SubmissionStrategy {
 
-        SubmitResponse apply(SubmitRequest request, Configuration configuration, File jarFile) throws FlinkException;
+        SubmitResponse apply(
+                             ResolvedSubmitRequest resolved,
+                             Configuration configuration,
+                             File jarFile) throws FlinkException;
     }
+
 }

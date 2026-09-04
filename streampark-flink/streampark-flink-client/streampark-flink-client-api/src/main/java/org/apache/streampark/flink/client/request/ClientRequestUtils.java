@@ -29,11 +29,18 @@ final class ClientRequestUtils {
     private ClientRequestUtils() {
     }
 
+    /** Returns a mutable defensive copy for callers that consume request properties. */
     static Map<String, Object> copyPropertiesMap(
                                                  @Nullable Map<String, Serializable> properties) {
         return properties == null ? new LinkedHashMap<>() : new LinkedHashMap<>(properties);
     }
 
+    /**
+     * Validates and copies properties stored on a request crossing the shims classloader boundary.
+     *
+     * <p>Null values carry no configuration meaning and are omitted. Rejecting non-serializable
+     * values at construction time produces a local error instead of a delayed proxy failure.
+     */
     static Map<String, Serializable> toSerializableMap(
                                                        @Nullable Map<String, Object> properties) {
         Map<String, Serializable> result = new LinkedHashMap<>();
@@ -42,10 +49,14 @@ final class ClientRequestUtils {
         }
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
             Object value = entry.getValue();
+            if (value == null) {
+                continue;
+            }
             if (value instanceof Serializable) {
                 result.put(entry.getKey(), (Serializable) value);
-            } else if (value != null) {
-                result.put(entry.getKey(), value.toString());
+            } else {
+                throw new IllegalArgumentException(
+                    "Flink client property is not serializable: " + entry.getKey());
             }
         }
         return result;

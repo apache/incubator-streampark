@@ -24,6 +24,7 @@ import org.apache.flink.client.deployment.application.ApplicationConfiguration;
 import org.apache.flink.client.program.PackagedProgram;
 import org.apache.flink.client.program.PackagedProgramUtils;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.CoreOptions;
 import org.apache.flink.runtime.jobgraph.JobGraph;
 
 import java.io.File;
@@ -32,7 +33,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** Builds a JobGraph with the classloader of the registered Flink version. */
+/**
+ * Builds a {@link JobGraph} with the classloader of the registered Flink version.
+ *
+ * <p>The builder temporarily installs the target-version parent classloader, constructs the
+ * packaged program, and restores the original thread context classloader in every outcome.
+ * Partially created resources are closed without replacing the original construction failure.
+ */
 public final class FlinkJobGraphBuilder {
 
     private FlinkJobGraphBuilder() {
@@ -41,18 +48,18 @@ public final class FlinkJobGraphBuilder {
     /** Creates the packaged program and its executable job graph. */
     public static Result build(
                                Configuration configuration,
-                               SubmitRequest request,
+                               ResolvedSubmitRequest resolved,
                                File jarFile) throws Exception {
+        SubmitRequest request = resolved.request();
         PackagedProgram.Builder builder =
             PackagedProgram.newBuilder()
-                .setSavepointRestoreSettings(
-                    SubmitRequestResolver.savepointRestoreSettings(request))
+                .setSavepointRestoreSettings(resolved.savepointRestoreSettings())
                 .setEntryPointClassName(
                     configuration
                         .getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS)
                         .orElseThrow(
                             () -> new IllegalStateException(
-                                "Application main class is not configured")))
+                                "Job main class is not configured")))
                 .setArguments(
                     configuration
                         .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
@@ -62,7 +69,7 @@ public final class FlinkJobGraphBuilder {
         if (request.jobType() != FlinkJobType.PYFLINK) {
             builder.setJarFile(jarFile);
             boolean flinkSqlJob = request.jobType() == FlinkJobType.FLINK_SQL;
-            builder.setUserClassPaths(userClassPaths(request, !flinkSqlJob));
+            builder.setUserClassPaths(userClassPaths(resolved, !flinkSqlJob));
             builder.setConfiguration(parentFirstConfiguration());
         }
 
@@ -85,12 +92,14 @@ public final class FlinkJobGraphBuilder {
                     PackagedProgramUtils.createJobGraph(
                         program,
                         jobGraphConfiguration,
-                        SubmissionConfigurationBuilder.parallelism(request),
+                        configuration.get(
+                            CoreOptions.DEFAULT_PARALLELISM,
+                            CoreOptions.DEFAULT_PARALLELISM.defaultValue()),
                         null,
                         false);
                 return new Result(program, jobGraph);
             } catch (Exception failure) {
-                closeAfterBuildFailure(request, program, failure);
+                closeAfterBuildFailure(program, failure);
                 throw failure;
             }
         } finally {
@@ -98,13 +107,9 @@ public final class FlinkJobGraphBuilder {
         }
     }
 
+    /** Closes a partially built program without hiding the original construction failure. */
     private static void closeAfterBuildFailure(
-                                               SubmitRequest request,
-                                               PackagedProgram program,
-                                               Exception failure) {
-        if (!SubmitRequestResolver.canSafelyClosePackagedProgram(request)) {
-            return;
-        }
+                                               PackagedProgram program, Exception failure) {
         try {
             program.close();
         } catch (Exception closeFailure) {
@@ -112,6 +117,7 @@ public final class FlinkJobGraphBuilder {
         }
     }
 
+    /** Declares packages that must retain one identity across the user-code classloader boundary. */
     private static Configuration parentFirstConfiguration() {
         Configuration configuration = new Configuration();
         configuration.setString(
@@ -159,8 +165,10 @@ public final class FlinkJobGraphBuilder {
      * <p>Thin uploaded jars need {@code flink-dist} on Flink 1.20 and later. SQL fat jars omit it
      * and use parent-first delegation to prevent dependency conflicts.
      */
-    private static List<URL> userClassPaths(SubmitRequest request, boolean includeFlinkDist) {
-        List<URL> classPaths = new ArrayList<>(SubmitRequestResolver.classPaths(request));
+    private static List<URL> userClassPaths(
+                                            ResolvedSubmitRequest resolved,
+                                            boolean includeFlinkDist) {
+        List<URL> classPaths = new ArrayList<>(resolved.getSubmissionClassPath());
         classPaths.removeIf(
             url -> {
                 String path = url.getPath();

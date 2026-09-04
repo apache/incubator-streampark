@@ -23,7 +23,12 @@ import javax.annotation.Nullable;
 
 import java.io.Serializable;
 
-/** Kubernetes-specific settings for session-cluster deployment. */
+/**
+ * Kubernetes-specific settings for session-cluster deployment.
+ *
+ * <p>A missing REST exposure type is normalized to {@code ClusterIP} at construction, allowing
+ * deployment clients to consume this object without repeating a platform default.
+ */
 public final class KubernetesDeploySpec implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -33,7 +38,6 @@ public final class KubernetesDeploySpec implements Serializable {
     private final String kubeConf;
     private final String serviceAccount;
     private final String flinkImage;
-    @Nullable
     private final FlinkKubernetesRestExposedType flinkRestExposedType;
 
     public KubernetesDeploySpec(
@@ -72,7 +76,6 @@ public final class KubernetesDeploySpec implements Serializable {
         return flinkImage;
     }
 
-    @Nullable
     public FlinkKubernetesRestExposedType flinkRestExposedType() {
         return flinkRestExposedType;
     }

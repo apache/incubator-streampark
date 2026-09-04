@@ -49,7 +49,7 @@ import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.request.JobClientTarget;
-import org.apache.streampark.flink.client.request.TriggerSavepointRequest;
+import org.apache.streampark.flink.client.request.SavepointRequest;
 import org.apache.streampark.flink.client.response.SavepointResponse;
 import org.apache.streampark.flink.util.FlinkUtils;
 
@@ -177,7 +177,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
         FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
 
         // infer savepoint
-        TriggerSavepointRequest request = renderTriggerSavepointRequest(savepointPath, nativeFormat, application,
+        SavepointRequest request = renderTriggerSavepointRequest(savepointPath, nativeFormat, application,
             flinkEnv);
 
         CompletableFuture<SavepointResponse> savepointFuture = CompletableFuture
@@ -488,11 +488,11 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
     }
 
     @Nonnull
-    private TriggerSavepointRequest renderTriggerSavepointRequest(
-                                                                  @Nullable String savepointPath,
-                                                                  Boolean nativeFormat,
-                                                                  FlinkApplication application,
-                                                                  FlinkEnv flinkEnv) {
+    private SavepointRequest renderTriggerSavepointRequest(
+                                                           @Nullable String savepointPath,
+                                                           Boolean nativeFormat,
+                                                           FlinkApplication application,
+                                                           FlinkEnv flinkEnv) {
         String customSavepoint = this.getFinalSavepointDir(savepointPath, application);
 
         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
@@ -500,7 +500,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
 
         Map<String, Object> properties = this.tryGetRestProps(application, cluster);
 
-        return new TriggerSavepointRequest(
+        return new SavepointRequest(
             application.getId(),
             FlinkEnvUtils.version(flinkEnv),
             application.getDeployModeEnum(),

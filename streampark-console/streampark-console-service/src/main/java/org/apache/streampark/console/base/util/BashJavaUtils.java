@@ -20,7 +20,7 @@ package org.apache.streampark.console.base.util;
 import org.apache.streampark.common.configuration.ConfigurationParser;
 import org.apache.streampark.common.core.FlinkVersion;
 import org.apache.streampark.common.util.FileUtils;
-import org.apache.streampark.common.util.FlinkConfigurationUtils;
+import org.apache.streampark.common.util.FlinkConfigurationLoader;
 
 import org.apache.commons.io.output.NullOutputStream;
 
@@ -84,7 +84,7 @@ public class BashJavaUtils {
 
                 String version = flinkVersion.majorVersion();
                 Map<String, String> config =
-                    FlinkConfigurationUtils.loadConfiguration(
+                    FlinkConfigurationLoader.loadConfiguration(
                         new File(flinkHome, "conf").getAbsolutePath(), version);
                 String flinkPort = config.getOrDefault("rest.port", "8081");
                 System.setOut(originalOut);

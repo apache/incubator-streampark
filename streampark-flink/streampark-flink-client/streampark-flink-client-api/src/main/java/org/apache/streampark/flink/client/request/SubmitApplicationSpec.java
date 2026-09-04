@@ -23,7 +23,12 @@ import org.apache.streampark.common.enums.FlinkRestoreMode;
 
 import java.io.Serializable;
 
-/** Application metadata for Flink submit requests. */
+/**
+ * Immutable application metadata for a Flink submit request.
+ *
+ * <p>The persisted Flink YAML syntax flag travels with the YAML content so Flink 1.19 submissions
+ * do not infer a different parser from files that changed after the environment was registered.
+ */
 public final class SubmitApplicationSpec implements Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -48,7 +48,7 @@ import java.util.regex.Pattern;
  * <p>Directory-based loading always requires the target Flink version. Callers that already know
  * the selected file or transported YAML format can use the corresponding explicit entry point.
  */
-public final class FlinkConfigurationUtils {
+public final class FlinkConfigurationLoader {
 
     /** Filename used by Flink's historical flat configuration syntax. */
     public static final String LEGACY_FLINK_CONF_FILENAME = "flink-conf.yaml";
@@ -65,9 +65,9 @@ public final class FlinkConfigurationUtils {
 
     private static final Logger LOG =
         StreamParkLoggerFactory.loggerFactory()
-            .getLogger(FlinkConfigurationUtils.class.getName());
+            .getLogger(FlinkConfigurationLoader.class.getName());
 
-    private FlinkConfigurationUtils() {
+    private FlinkConfigurationLoader() {
     }
 
     /**

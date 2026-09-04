@@ -25,7 +25,7 @@ import javax.annotation.Nullable;
 import java.util.Map;
 
 /** Request to shut down a Flink session cluster. */
-public final class ShutdownRequest extends ClusterRequest {
+public final class ShutdownRequest extends AbstractClusterRequest {
 
     private static final long serialVersionUID = 1L;
 
