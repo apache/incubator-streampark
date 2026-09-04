@@ -38,7 +38,8 @@ export interface UserInfo {
   avatar: string;
   desc?: string;
   homePath?: string;
-  roles: RoleInfo[];
+  roles?: RoleInfo[];
+  userType?: 'ADMIN' | 'EDITOR';
 }
 
 export interface BeforeMiniState {

@@ -17,14 +17,13 @@
 import { UserInfo } from '/#/store';
 import { AxiosResponse } from 'axios';
 import { defHttp } from '/@/utils/http/axios';
-import { GetUserInfoModel, TeamSetResponse, UserListRecord } from './model/userModel';
+import { GetUserInfoModel, UserListRecord } from './model/userModel';
 
 import { Result } from '/#/axios';
 import { BasicTableParams } from '../model/baseModel';
 
 enum Api {
   Login = '/passport/signin',
-  GetPermCode = '/getPermCode',
   UserList = '/user/list',
   NoTokenUsers = '/user/getNoTokenUser',
   UserUpdate = '/user/update',
@@ -33,17 +32,8 @@ enum Api {
   ResetPassword = '/user/password/reset',
   Password = '/user/password',
   CheckName = '/user/check/name',
-  SET_TEAM = '/user/set_team',
   APP_OWNERS = '/user/appOwners',
   TransferUserResource = '/user/transferResource',
-}
-
-/**
- * get user permission code list
- * @returns {Promise<string[]>}
- */
-export function getPermCode(): Promise<string[]> {
-  return defHttp.get({ url: Api.GetPermCode });
 }
 
 /**
@@ -104,16 +94,9 @@ export function fetchAppOwners(data: Recordable): Promise<Array<UserInfo>> {
   });
 }
 
-export function fetchSetUserTeam(data: { teamId: string }): Promise<TeamSetResponse> {
-  return defHttp.post({
-    url: Api.SET_TEAM,
-    data,
-  });
-}
-
 export function transferUserResource(data: {
   userId: string;
   targetUserId: string;
-}): Promise<TeamSetResponse> {
+}): Promise<boolean> {
   return defHttp.put({ url: Api.TransferUserResource, data });
 }

@@ -60,7 +60,6 @@
         :showText="false"
         :class="`${prefixCls}-action__item`"
       />
-      <UserTeam />
       <UserDropDown :theme="getHeaderTheme" />
     </div>
   </Header>
@@ -85,7 +84,6 @@
   import { AppLocalePicker } from '/@/components/Application';
 
   import {
-    UserTeam,
     UserDropDown,
     LayoutBreadcrumb,
     FullScreen,
@@ -111,7 +109,6 @@
       LayoutBreadcrumb,
       LayoutMenu,
       UserDropDown,
-      UserTeam,
       AppLocalePicker,
       FullScreen,
       Notify,

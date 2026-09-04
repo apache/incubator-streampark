@@ -99,6 +99,7 @@ public final class UserAssembler {
         response.setUsername(user.getUsername());
         response.setNickName(user.getNickName());
         response.setDescription(user.getDescription());
+        response.setUserType(user.getUserType());
         response.setLastTeamId(user.getLastTeamId());
         response.setId(user.getId());
         return response;
@@ -116,9 +117,9 @@ public final class UserAssembler {
         if (userObj instanceof User) {
             response.setUser(toBriefResponse((User) userObj));
         }
-        Object permissions = userInfo.get("permissions");
-        if (permissions instanceof Set) {
-            response.setPermissions((Set<String>) permissions);
+        Object roles = userInfo.get("roles");
+        if (roles instanceof Set) {
+            response.setRoles((Set<String>) roles);
         }
         return response;
     }
