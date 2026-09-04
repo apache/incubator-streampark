@@ -17,7 +17,7 @@
 
 package org.apache.streampark.spark.core.util
 
-import org.apache.streampark.common.conf.ConfigKeys.PARAM_PREFIX
+import org.apache.streampark.common.configuration.CommandLineParser
 import org.apache.streampark.common.enums.SparkSqlValidationFailedType
 import org.apache.streampark.common.util.Logger
 
@@ -395,7 +395,7 @@ case class SqlSegment(start: Int, end: Int, sql: String)
 
 object SqlSplitter {
 
-  private lazy val singleLineCommentPrefixList = Set[String](PARAM_PREFIX)
+  private lazy val singleLineCommentPrefixList = Set[String](CommandLineParser.LONG_OPTION_PREFIX)
 
   /**
    * Split whole text into multiple sql statements. Two Steps: Step 1, split the whole text into
@@ -432,7 +432,7 @@ object SqlSplitter {
         lineNumber += 1
         val line = scanner.nextLine().trim
         val nonEmpty =
-          StringUtils.isNotBlank(line) && !line.startsWith(PARAM_PREFIX)
+          StringUtils.isNotBlank(line) && !line.startsWith(CommandLineParser.LONG_OPTION_PREFIX)
         if (line.startsWith("/*")) {
           startComment = true
           hasComment = true
@@ -590,7 +590,7 @@ object SqlSplitter {
   }
 
   private[this] def isSingleLineComment(text: String) =
-    text.trim.startsWith(PARAM_PREFIX)
+    text.trim.startsWith(CommandLineParser.LONG_OPTION_PREFIX)
 
   private[this] def isMultipleLineComment(text: String) =
     text.trim.startsWith("/*") && text.trim.endsWith("*/")

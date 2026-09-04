@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.kubernetes.model;
 
 import org.apache.streampark.common.util.Utils;
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sDeployMode;
+import org.apache.streampark.flink.kubernetes.enums.FlinkKubernetesDeployMode;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,12 +28,12 @@ import lombok.Builder;
 @AllArgsConstructor
 public class ClusterKey {
 
-    private final FlinkK8sDeployMode executeMode;
+    private final FlinkKubernetesDeployMode executeMode;
     @Builder.Default
     private final String namespace = "default";
     private final String clusterId;
 
-    public FlinkK8sDeployMode executeMode() {
+    public FlinkKubernetesDeployMode executeMode() {
         return executeMode;
     }
 

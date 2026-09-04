@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.InternalConfigHolder;
-import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.configuration.GlobalConfiguration;
+import org.apache.streampark.common.configuration.Workspace;
+import org.apache.streampark.common.configuration.option.MavenOptions;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.util.WebUtils;
@@ -106,7 +106,7 @@ public class Project implements Serializable {
     /** get project source */
     @JsonIgnore
     public File getAppSource() {
-        File sourcePath = new File(Workspace.PROJECT_LOCAL_PATH());
+        File sourcePath = new File(Workspace.PROJECT_LOCAL_PATH);
         if (!sourcePath.exists()) {
             sourcePath.mkdirs();
         } else if (sourcePath.isFile()) {
@@ -148,7 +148,7 @@ public class Project implements Serializable {
 
     @JsonIgnore
     public File getDistHome() {
-        return new File(Workspace.APP_LOCAL_DIST(), id.toString());
+        return new File(Workspace.APP_LOCAL_DIST, id.toString());
     }
 
     @JsonIgnore
@@ -187,7 +187,8 @@ public class Project implements Serializable {
         }
 
         // --settings
-        String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
+        String setting =
+            GlobalConfiguration.current().getOptional(MavenOptions.SETTINGS_PATH).orElse(null);
         if (StringUtils.isNotBlank(setting)) {
             File file = new File(setting);
             if (file.exists() && file.isFile()) {

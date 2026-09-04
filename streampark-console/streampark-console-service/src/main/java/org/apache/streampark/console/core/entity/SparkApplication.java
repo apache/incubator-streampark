@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.conf.ConfigKeys;
-import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.configuration.Constants;
+import org.apache.streampark.common.configuration.option.DeploymentOptions;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.SparkDeployMode;
 import org.apache.streampark.common.enums.SparkJobType;
@@ -31,8 +31,10 @@ import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.ResourceFromEnum;
 import org.apache.streampark.console.core.enums.SparkAppStateEnum;
 import org.apache.streampark.console.core.metrics.spark.SparkApplicationSummary;
+import org.apache.streampark.console.core.util.ApplicationEntitySupport;
 import org.apache.streampark.console.core.util.YarnQueueLabelExpression;
-import org.apache.streampark.spark.kubernetes.model.SparkK8sPodTemplates;
+import org.apache.streampark.spark.configuration.SparkOptions;
+import org.apache.streampark.spark.kubernetes.model.SparkKubernetesPodTemplates;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -248,8 +250,10 @@ public class SparkApplication extends BaseEntity implements ApplicationEntitySup
             this.yarnQueue = "default";
         }
         Map<String, String> queueLabelMap = YarnQueueLabelExpression.getQueueLabelMap(this.yarnQueue);
-        this.setYarnQueueName(queueLabelMap.getOrDefault(ConfigKeys.KEY_YARN_APP_QUEUE(), "default"));
-        this.setYarnQueueLabel(queueLabelMap.getOrDefault(ConfigKeys.KEY_YARN_APP_NODE_LABEL(), null));
+        this.setYarnQueueName(
+            queueLabelMap.getOrDefault(DeploymentOptions.YARN_QUEUE.key(), "default"));
+        this.setYarnQueueLabel(
+            queueLabelMap.getOrDefault(DeploymentOptions.YARN_NODE_LABEL.key(), null));
     }
 
     /**
@@ -264,16 +268,17 @@ public class SparkApplication extends BaseEntity implements ApplicationEntitySup
      *            configuration template and custom configurations.
      */
     public void resolveScheduleConf(Map<String, String> map) {
-        this.setDriverCores(map.get(ConfigKeys.KEY_SPARK_DRIVER_CORES()));
-        this.setDriverMemory(map.get(ConfigKeys.KEY_SPARK_DRIVER_MEMORY()));
-        this.setExecutorCores(map.get(ConfigKeys.KEY_SPARK_EXECUTOR_CORES()));
-        this.setExecutorMemory(map.get(ConfigKeys.KEY_SPARK_EXECUTOR_MEMORY()));
+        this.setDriverCores(map.get(SparkOptions.DRIVER_CORES.key()));
+        this.setDriverMemory(map.get(SparkOptions.DRIVER_MEMORY.key()));
+        this.setExecutorCores(map.get(SparkOptions.EXECUTOR_CORES.key()));
+        this.setExecutorMemory(map.get(SparkOptions.EXECUTOR_MEMORY.key()));
         boolean isDynamicAllocationEnabled =
-            Boolean.parseBoolean(map.get(ConfigKeys.KEY_SPARK_DYNAMIC_ALLOCATION_ENABLED()));
+            Boolean.parseBoolean(map.get(SparkOptions.DYNAMIC_ALLOCATION_ENABLED.key()));
         if (isDynamicAllocationEnabled) {
-            this.setExecutorMaxNums(map.getOrDefault(ConfigKeys.KEY_SPARK_DYNAMIC_ALLOCATION_MAX_EXECUTORS(), "inf"));
+            this.setExecutorMaxNums(
+                map.getOrDefault(SparkOptions.DYNAMIC_ALLOCATION_MAX_EXECUTORS.key(), "inf"));
         } else {
-            this.setExecutorMaxNums(map.get(ConfigKeys.KEY_SPARK_EXECUTOR_INSTANCES()));
+            this.setExecutorMaxNums(map.get(SparkOptions.EXECUTOR_INSTANCES.key()));
         }
     }
 
@@ -362,8 +367,8 @@ public class SparkApplication extends BaseEntity implements ApplicationEntitySup
         return ApplicationType.of(appType);
     }
 
-    public SparkK8sPodTemplates getK8sPodTemplates() {
-        return SparkK8sPodTemplates.of(k8sDriverPodTemplate, k8sExecutorPodTemplate);
+    public SparkKubernetesPodTemplates getK8sPodTemplates() {
+        return SparkKubernetesPodTemplates.of(k8sDriverPodTemplate, k8sExecutorPodTemplate);
     }
 
     @JsonIgnore

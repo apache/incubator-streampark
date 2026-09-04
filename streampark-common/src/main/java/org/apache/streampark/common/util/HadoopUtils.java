@@ -17,9 +17,8 @@
 
 package org.apache.streampark.common.util;
 
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.ConfigKeys;
-import org.apache.streampark.common.conf.InternalConfigHolder;
+import org.apache.streampark.common.configuration.GlobalConfiguration;
+import org.apache.streampark.common.configuration.option.HadoopOptions;
 
 import org.apache.streampark.shaded.org.slf4j.Logger;
 
@@ -77,10 +76,10 @@ public final class HadoopUtils {
 
     public static UserGroupInformation getUgi() {
         if (ugi == null) {
-            if (HadoopConfigUtils.KERBEROS_ENABLE) {
+            if (HadoopConfigUtils.kerberosEnabled()) {
                 ugi = getKerberosUGI();
             } else {
-                ugi = UserGroupInformation.createRemoteUser(HadoopConfigUtils.HADOOP_USER_NAME);
+                ugi = UserGroupInformation.createRemoteUser(HadoopConfigUtils.hadoopUserName());
             }
         }
         return ugi;
@@ -115,27 +114,10 @@ public final class HadoopUtils {
                     tgtRefreshTime = (long) ((end - start) * 0.90f);
                 } else {
                     LOG.warn("[StreamPark] get kerberos tgtRefreshTime failed, try get kerberos.ttl.");
-                    DateUtils.TimeUnitPair timeUnit =
-                        DateUtils.getTimeUnit(InternalConfigHolder.get(CommonConfig.KERBEROS_TTL()));
-                    switch (timeUnit.unit) {
-                        case SECONDS:
-                            tgtRefreshTime = (long) timeUnit.num * 1000;
-                            break;
-                        case MINUTES:
-                            tgtRefreshTime = (long) timeUnit.num * 60 * 1000;
-                            break;
-                        case HOURS:
-                            tgtRefreshTime = (long) timeUnit.num * 60 * 60 * 1000;
-                            break;
-                        case DAYS:
-                            tgtRefreshTime = (long) timeUnit.num * 60 * 60 * 24 * 1000;
-                            break;
-                        default:
-                            throw new IllegalArgumentException(
-                                "[StreamPark] parameter:"
-                                    + CommonConfig.KERBEROS_TTL().getKey()
-                                    + " invalided, unit options are [s|m|h|d]");
-                    }
+                    tgtRefreshTime =
+                        GlobalConfiguration.current()
+                            .get(HadoopOptions.KERBEROS_TICKET_LIFETIME)
+                            .toMillis();
                 }
             } catch (Exception e) {
                 throw new IllegalStateException("Failed to resolve kerberos TTL configuration", e);
@@ -228,34 +210,34 @@ public final class HadoopUtils {
     private static UserGroupInformation getKerberosUGI() {
         LOG.info("[StreamPark] kerberos login starting....");
 
-        if (HadoopConfigUtils.KERBEROS_PRINCIPAL.isEmpty()
-            || HadoopConfigUtils.KERBEROS_KEYTAB.isEmpty()) {
+        String principal = HadoopConfigUtils.kerberosPrincipal();
+        String keytab = HadoopConfigUtils.kerberosKeytab();
+        if (principal.isEmpty() || keytab.isEmpty()) {
             throw new IllegalArgumentException(
-                ConfigKeys.KEY_SECURITY_KERBEROS_PRINCIPAL()
+                HadoopOptions.KERBEROS_PRINCIPAL.key()
                     + " and "
-                    + ConfigKeys.KEY_SECURITY_KERBEROS_KEYTAB()
+                    + HadoopOptions.KERBEROS_KEYTAB.key()
                     + " must not be empty");
         }
 
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
 
-        if (!HadoopConfigUtils.KERBEROS_KRB5.isEmpty()) {
-            System.setProperty("java.security.krb5.conf", HadoopConfigUtils.KERBEROS_KRB5);
-            System.setProperty("java.security.krb5.conf.path", HadoopConfigUtils.KERBEROS_KRB5);
+        String krb5 = HadoopConfigUtils.kerberosKrb5();
+        if (!krb5.isEmpty()) {
+            System.setProperty("java.security.krb5.conf", krb5);
+            System.setProperty("java.security.krb5.conf.path", krb5);
         }
 
-        System.setProperty("sun.security.spnego.debug", HadoopConfigUtils.KERBEROS_DEBUG);
-        System.setProperty("sun.security.krb5.debug", HadoopConfigUtils.KERBEROS_DEBUG);
-        hadoopConf()
-            .set(
-                ConfigKeys.KEY_HADOOP_SECURITY_AUTHENTICATION(),
-                ConfigKeys.KEY_KERBEROS());
+        String debug = Boolean.toString(HadoopConfigUtils.kerberosDebug());
+        System.setProperty("sun.security.spnego.debug", debug);
+        System.setProperty("sun.security.krb5.debug", debug);
+        hadoopConf().set("hadoop.security.authentication", "kerberos");
 
         try {
             UserGroupInformation.setConfiguration(hadoopConf());
             UserGroupInformation kerberosUgi =
                 UserGroupInformation.loginUserFromKeytabAndReturnUGI(
-                    HadoopConfigUtils.KERBEROS_PRINCIPAL, HadoopConfigUtils.KERBEROS_KEYTAB);
+                    principal, keytab);
             UserGroupInformation.setLoginUser(kerberosUgi);
             LOG.info("[StreamPark] kerberos authentication successful");
             return kerberosUgi;
@@ -267,17 +249,14 @@ public final class HadoopUtils {
     public static FileSystem hdfs() {
         if (reusableHdfs == null) {
             try {
-                reusableHdfs =
-                    getUgi()
-                        .doAs(
-                            (PrivilegedAction<FileSystem>) () -> {
-                                try {
-                                    return FileSystem.get(hadoopConf());
-                                } catch (IOException e) {
-                                    throw new IllegalStateException("Failed to obtain HDFS FileSystem", e);
-                                }
-                            });
-                if (HadoopConfigUtils.KERBEROS_ENABLE) {
+                reusableHdfs = getUgi().doAs((PrivilegedAction<FileSystem>) () -> {
+                    try {
+                        return FileSystem.get(hadoopConf());
+                    } catch (IOException e) {
+                        throw new IllegalStateException("Failed to obtain HDFS FileSystem", e);
+                    }
+                });
+                if (HadoopConfigUtils.kerberosEnabled()) {
                     Timer timer = new Timer();
                     long refreshTime = getTgtRefreshTime();
                     timer.schedule(
@@ -304,17 +283,15 @@ public final class HadoopUtils {
     public static YarnClient yarnClient() {
         if (reusableYarnClient == null || !reusableYarnClient.isInState(Service.STATE.STARTED)) {
             try {
-                reusableYarnClient =
-                    getUgi()
-                        .doAs(
-                            (PrivilegedAction<YarnClient>) () -> {
-                                YarnConfiguration yarnConf =
-                                    new YarnConfiguration(hadoopConf());
-                                YarnClient client = YarnClient.createYarnClient();
-                                client.init(yarnConf);
-                                client.start();
-                                return client;
-                            });
+                reusableYarnClient = getUgi().doAs(
+                    (PrivilegedAction<YarnClient>) () -> {
+                        YarnConfiguration yarnConf =
+                            new YarnConfiguration(hadoopConf());
+                        YarnClient client = YarnClient.createYarnClient();
+                        client.init(yarnConf);
+                        client.start();
+                        return client;
+                    });
             } catch (Exception e) {
                 throw new IllegalArgumentException(
                     "[StreamPark] access yarnClient error: " + e, e);

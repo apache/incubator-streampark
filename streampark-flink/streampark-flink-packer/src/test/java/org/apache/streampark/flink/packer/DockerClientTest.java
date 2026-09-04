@@ -17,8 +17,8 @@
 
 package org.apache.streampark.flink.packer;
 
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.InternalConfigHolder;
+import org.apache.streampark.common.configuration.GlobalConfiguration;
+import org.apache.streampark.common.configuration.option.DockerOptions;
 import org.apache.streampark.flink.packer.docker.DockerImageExist;
 import org.apache.streampark.flink.packer.docker.DockerRetriever;
 import org.apache.streampark.flink.packer.docker.DockerUtils;
@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -86,13 +85,11 @@ class DockerClientTest {
             new ApacheDockerHttpClient.Builder()
                 .dockerHost(DockerRetriever.dockerClientConf.getDockerHost())
                 .sslConfig(DockerRetriever.dockerClientConf.getSSLConfig())
-                .maxConnections(InternalConfigHolder.get(CommonConfig.DOCKER_MAX_CONNECTIONS()))
+                .maxConnections(GlobalConfiguration.current().get(DockerOptions.MAX_CONNECTIONS))
                 .connectionTimeout(
-                    Duration.ofSeconds(
-                        InternalConfigHolder.get(CommonConfig.DOCKER_CONNECTION_TIMEOUT_SEC())))
+                    GlobalConfiguration.current().get(DockerOptions.CONNECTION_TIMEOUT))
                 .responseTimeout(
-                    Duration.ofSeconds(
-                        InternalConfigHolder.get(CommonConfig.DOCKER_RESPONSE_TIMEOUT_SEC())));
+                    GlobalConfiguration.current().get(DockerOptions.RESPONSE_TIMEOUT));
         assertNotNull(dockerHttpClientBuilder);
     }
 

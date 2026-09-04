@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.base.util;
 
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.InternalConfigHolder;
+import org.apache.streampark.common.configuration.GlobalConfiguration;
+import org.apache.streampark.common.configuration.option.WorkspaceOptions;
 import org.apache.streampark.console.core.bean.FlinkConnector;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
@@ -52,11 +52,11 @@ class DependencyUtilsTest {
 
     @Disabled("Disabled due to unstable performance.")
     @Test
-    public void resolveFlinkConnector() throws Exception {
+    void resolveFlinkConnector() throws Exception {
 
         Artifact artifact = new Artifact("com.ververica", "flink-connector-mysql-cdc", "2.4.1", null);
 
-        InternalConfigHolder.set(CommonConfig.STREAMPARK_WORKSPACE_LOCAL(), "~/tmp");
+        GlobalConfiguration.set(WorkspaceOptions.LOCAL_ROOT, "~/tmp", "test");
 
         List<File> files = MavenTool.resolveArtifacts(artifact);
         if (files.isEmpty()) {
@@ -123,13 +123,6 @@ class DependencyUtilsTest {
             return value.toString().replace("PT", "").toLowerCase();
         }
         return value.toString();
-    }
-
-    @Test
-    public void testDuration() {
-        String s = "PT30H";
-        Duration duration = Duration.parse(s);
-        System.out.println(duration.getSeconds());
     }
 
     private List<String> getConnectorFactory(File connector) throws Exception {

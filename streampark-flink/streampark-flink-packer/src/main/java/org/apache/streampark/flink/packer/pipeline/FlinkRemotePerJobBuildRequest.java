@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
-import org.apache.streampark.common.conf.FlinkVersion;
+import org.apache.streampark.common.core.FlinkVersion;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;

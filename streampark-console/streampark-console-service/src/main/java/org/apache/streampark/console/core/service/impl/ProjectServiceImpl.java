@@ -17,13 +17,14 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.InternalConfigHolder;
-import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.configuration.Constants;
+import org.apache.streampark.common.configuration.GlobalConfiguration;
+import org.apache.streampark.common.configuration.Workspace;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.FileUtils;
+import org.apache.streampark.common.util.PathUtils;
+import org.apache.streampark.console.base.config.ConsoleOptions;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
@@ -43,7 +44,6 @@ import org.apache.streampark.console.core.task.ProjectBuildTask;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.configuration.MemorySize;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -60,6 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -269,8 +270,11 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public List<String> listJars(Project project) {
         ApiAlertException.throwIfNull(
             project.getModule(), "Project module can't be null, please check.");
-        File projectModuleDir = new File(project.getDistHome(), project.getModule());
-        return Arrays.stream(Objects.requireNonNull(projectModuleDir.listFiles()))
+        File[] files = resolveModule(project).listFiles();
+        if (files == null) {
+            return Collections.emptyList();
+        }
+        return Arrays.stream(files)
             .map(File::getName)
             .filter(name -> name.endsWith(Constants.JAR_SUFFIX))
             .collect(Collectors.toList());
@@ -306,7 +310,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Override
     public List<Map<String, Object>> listConf(Project project) {
         try {
-            File file = new File(project.getDistHome(), project.getModule());
+            File file = resolveModule(project);
             File unzipFile = new File(file.getAbsolutePath().replaceAll(".tar.gz", ""));
             if (!unzipFile.exists()) {
                 GZipUtils.deCompress(file.getAbsolutePath(), file.getParentFile().getAbsolutePath());
@@ -321,7 +325,17 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         } catch (Exception e) {
             log.error("List project conf failed", e);
         }
-        return null;
+        return Collections.emptyList();
+    }
+
+    /** Resolves a request-supplied module below the project's distribution directory. */
+    private File resolveModule(Project project) {
+        try {
+            Path distHome = project.getDistHome().toPath();
+            return PathUtils.resolveChild(distHome, project.getModule()).toFile();
+        } catch (IOException e) {
+            throw new ApiDetailException("Invalid project module path", e);
+        }
     }
 
     private void eachFile(File file, List<Map<String, Object>> list, Boolean isRoot) {
@@ -374,7 +388,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             startOffset = 0L;
         }
         try {
-            long maxSize = MemorySize.parse(InternalConfigHolder.get(CommonConfig.READ_LOG_MAX_SIZE())).getBytes();
+            long maxSize =
+                GlobalConfiguration.current().get(ConsoleOptions.BUILD_LOG_READ_MAX_SIZE).bytes();
             if (startOffset == null) {
                 fileContent = FileUtils.readEndOfFile(logFile, maxSize);
             } else {
@@ -396,7 +411,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     private String getBuildLogPath(Long projectId) {
-        return String.format("%s/%s/build.log", Workspace.PROJECT_BUILD_LOG_PATH(), projectId);
+        return String.format("%s/%s/build.log", Workspace.PROJECT_BUILD_LOG_PATH, projectId);
     }
 
     @Override

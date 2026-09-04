@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.kubernetes.model;
 
 import org.apache.streampark.common.util.Utils;
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sDeployMode;
+import org.apache.streampark.flink.kubernetes.enums.FlinkKubernetesDeployMode;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,7 +30,7 @@ import java.util.Properties;
 @AllArgsConstructor
 public class TrackId {
 
-    private final FlinkK8sDeployMode executeMode;
+    private final FlinkKubernetesDeployMode executeMode;
     @Builder.Default
     private final String namespace = "default";
     private final String clusterId;
@@ -39,7 +39,7 @@ public class TrackId {
     private final String groupId;
     private final Properties properties;
 
-    public FlinkK8sDeployMode executeMode() {
+    public FlinkKubernetesDeployMode executeMode() {
         return executeMode;
     }
 
@@ -99,7 +99,7 @@ public class TrackId {
                                     String groupId,
                                     Properties properties) {
         return TrackId.builder()
-            .executeMode(FlinkK8sDeployMode.SESSION)
+            .executeMode(FlinkKubernetesDeployMode.SESSION)
             .namespace(namespace)
             .clusterId(clusterId)
             .appId(appId)
@@ -117,7 +117,7 @@ public class TrackId {
                                         String groupId,
                                         Properties properties) {
         return TrackId.builder()
-            .executeMode(FlinkK8sDeployMode.APPLICATION)
+            .executeMode(FlinkKubernetesDeployMode.APPLICATION)
             .namespace(namespace)
             .clusterId(clusterId)
             .appId(appId)

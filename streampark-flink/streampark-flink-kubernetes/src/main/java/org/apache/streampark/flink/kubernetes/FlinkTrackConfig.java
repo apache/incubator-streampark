@@ -17,8 +17,9 @@
 
 package org.apache.streampark.flink.kubernetes;
 
-import org.apache.streampark.common.conf.InternalConfigHolder;
-import org.apache.streampark.common.conf.K8sFlinkConfig;
+import org.apache.streampark.common.configuration.Configuration;
+import org.apache.streampark.common.configuration.GlobalConfiguration;
+import org.apache.streampark.flink.kubernetes.configuration.KubernetesOptions;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -56,21 +57,33 @@ public class FlinkTrackConfig {
             .build();
     }
 
-    /** create from ConfigHub */
-    public static FlinkTrackConfig fromConfigHub() {
+    /** Creates tracking configuration from the current immutable server snapshot. */
+    public static FlinkTrackConfig fromConfiguration() {
+        Configuration configuration = GlobalConfiguration.current();
         return FlinkTrackConfig.builder()
             .jobStatusWatcherConf(
                 JobStatusWatcherConfig.builder()
-                    .requestTimeoutSec(InternalConfigHolder.get(K8sFlinkConfig.jobStatusTrackTaskTimeoutSec))
-                    .requestIntervalSec(InternalConfigHolder.get(K8sFlinkConfig.jobStatueTrackTaskIntervalSec))
+                    .requestTimeoutSec(
+                        configuration.get(KubernetesOptions.JOB_STATUS_REQUEST_TIMEOUT).getSeconds())
+                    .requestIntervalSec(
+                        configuration.get(KubernetesOptions.JOB_STATUS_POLL_INTERVAL).getSeconds())
                     .silentStateJobKeepTrackingSec(
-                        InternalConfigHolder.get(K8sFlinkConfig.silentStateJobKeepTrackingSec))
-                    .jobStatusCacheTimeOutSec(InternalConfigHolder.get(K8sFlinkConfig.jobStatusTrackCacheTimeoutSec))
+                        Math.toIntExact(
+                            configuration
+                                .get(KubernetesOptions.SILENT_STATE_TRACKING_RETENTION)
+                                .getSeconds()))
+                    .jobStatusCacheTimeOutSec(
+                        Math.toIntExact(
+                            configuration
+                                .get(KubernetesOptions.JOB_STATUS_CACHE_TIMEOUT)
+                                .getSeconds()))
                     .build())
             .metricWatcherConf(
                 MetricWatcherConfig.builder()
-                    .requestTimeoutSec(InternalConfigHolder.get(K8sFlinkConfig.metricTrackTaskTimeoutSec))
-                    .requestIntervalSec(InternalConfigHolder.get(K8sFlinkConfig.metricTrackTaskIntervalSec))
+                    .requestTimeoutSec(
+                        configuration.get(KubernetesOptions.METRIC_REQUEST_TIMEOUT).getSeconds())
+                    .requestIntervalSec(
+                        configuration.get(KubernetesOptions.METRIC_POLL_INTERVAL).getSeconds())
                     .build())
             .build();
     }

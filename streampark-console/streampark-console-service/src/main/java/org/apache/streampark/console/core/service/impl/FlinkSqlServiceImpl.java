@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.FlinkApplication;
@@ -32,8 +31,9 @@ import org.apache.streampark.console.core.service.FlinkEffectiveService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationBackupService;
+import org.apache.streampark.console.core.util.FlinkEnvUtils;
+import org.apache.streampark.flink.client.FlinkShimsProxy;
 import org.apache.streampark.flink.core.FlinkSqlValidationResult;
-import org.apache.streampark.flink.proxy.FlinkShimsProxy;
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -46,6 +46,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
@@ -72,7 +73,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
     public FlinkSql getEffective(Long appId, boolean decode) {
         FlinkSql flinkSql = baseMapper.getEffective(appId);
         if (flinkSql != null && decode) {
-            flinkSql.setSql(DeflaterUtils.toPlainText(flinkSql.getSql()));
+            flinkSql.decode();
         }
         return flinkSql;
     }
@@ -90,7 +91,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
             .map(
                 flinkSql -> {
                     if (decode) {
-                        flinkSql.setSql(DeflaterUtils.toPlainText(flinkSql.getSql()));
+                        flinkSql.decode();
                     }
                     return flinkSql;
                 })
@@ -101,7 +102,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
     public void create(FlinkSql flinkSql) {
         Integer version = this.baseMapper.getLatestVersion(flinkSql.getAppId());
         flinkSql.setVersion(version == null ? 1 : version + 1);
-        flinkSql.setSql(DeflaterUtils.compressForStorage(flinkSql.getSql()));
+        flinkSql.setSql(DeflaterUtils.zipString(flinkSql.getSql()));
         this.save(flinkSql);
         this.setCandidate(CandidateTypeEnum.NEW, flinkSql.getAppId(), flinkSql.getId());
     }
@@ -182,7 +183,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
     public FlinkSqlValidationResult verifySql(String sql, Long versionId) {
         FlinkEnv flinkEnv = flinkEnvService.getById(versionId);
         return FlinkShimsProxy.proxyVerifySql(
-            flinkEnv.getFlinkVersion(),
+            FlinkEnvUtils.version(flinkEnv),
             classLoader -> {
                 try {
                     Class<?> clazz = classLoader.loadClass(FLINKSQL_VALIDATOR_CLASS);
@@ -194,12 +195,10 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
                     }
                     return FlinkShimsProxy.getObject(
                         this.getClass().getClassLoader(), result, FlinkSqlValidationResult.class);
-                } catch (Throwable e) {
-                    log.error(
-                        "verifySql invocationTargetException: {}",
-                        ExceptionUtils.stringifyException(e));
+                } catch (ReflectiveOperationException | IOException e) {
+                    throw new IllegalStateException(
+                        "Failed to validate SQL with Flink " + flinkEnv.getVersion(), e);
                 }
-                return null;
             });
     }
 

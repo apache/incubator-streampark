@@ -21,7 +21,6 @@ import org.apache.streampark.common.util.Utils;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -184,18 +183,27 @@ public final class LfsOperator {
         }
     }
 
-    public static String fileMd5(String path) {
+    /**
+     * Returns the SHA-256 digest of a local file.
+     *
+     * @param path local file path
+     * @return lowercase hexadecimal SHA-256 digest
+     */
+    public static String fileSha256(String path) {
         if (path == null || path.isEmpty()) {
-            throw new IllegalArgumentException("[StreamPark] LFsOperator.fileMd5: file must not be null.");
+            throw new IllegalArgumentException(
+                "[StreamPark] LFsOperator.fileSha256: file must not be null.");
         }
         File file = new File(path);
         if (!file.exists()) {
-            throw new IllegalArgumentException("[StreamPark] LFsOperator.fileMd5: file must exists.");
+            throw new IllegalArgumentException(
+                "[StreamPark] LFsOperator.fileSha256: file must exist.");
         }
-        try (FileInputStream inputStream = new FileInputStream(path)) {
-            return DigestUtils.md5Hex(IOUtils.toByteArray(inputStream));
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            return DigestUtils.sha256Hex(inputStream);
         } catch (IOException e) {
-            throw new IllegalStateException("[StreamPark] Failed to compute md5 for: " + path, e);
+            throw new IllegalStateException(
+                "[StreamPark] Failed to compute SHA-256 for: " + path, e);
         }
     }
 

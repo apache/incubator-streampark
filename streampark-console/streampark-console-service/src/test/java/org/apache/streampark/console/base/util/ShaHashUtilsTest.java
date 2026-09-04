@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.base.util;
 
-import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.configuration.Constants;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

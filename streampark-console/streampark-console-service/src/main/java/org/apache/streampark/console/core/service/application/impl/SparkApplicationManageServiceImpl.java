@@ -17,10 +17,9 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
-import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.configuration.Constants;
+import org.apache.streampark.common.configuration.Workspace;
 import org.apache.streampark.common.enums.SparkDeployMode;
-import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
@@ -193,9 +192,9 @@ public class SparkApplicationManageServiceImpl
         try {
             application
                 .getFsOperator()
-                .delete(application.getWorkspace().APP_WORKSPACE().concat("/").concat(appId.toString()));
+                .delete(application.getWorkspace().workspace.concat("/").concat(appId.toString()));
             // try to delete yarn-application, and leave no trouble.
-            String path = Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString());
+            String path = Workspace.REMOTE.workspace.concat("/").concat(appId.toString());
             if (HdfsOperator.exists(path)) {
                 HdfsOperator.delete(path);
             }
@@ -266,7 +265,7 @@ public class SparkApplicationManageServiceImpl
         }
         if (appParam.isFromUploadJob()) {
             String jarPath = String.format(
-                "%s/%d/%s", Workspace.local().APP_UPLOADS(), appParam.getTeamId(), appParam.getJar());
+                "%s/%d/%s", Workspace.LOCAL.uploads, appParam.getTeamId(), appParam.getJar());
             if (!new File(jarPath).exists()) {
                 Resource resource = resourceService.findByResourceName(appParam.getTeamId(), appParam.getJar());
                 if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {

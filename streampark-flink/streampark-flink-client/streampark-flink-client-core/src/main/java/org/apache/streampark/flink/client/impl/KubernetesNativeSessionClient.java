@@ -18,23 +18,24 @@
 package org.apache.streampark.flink.client.impl;
 
 import org.apache.streampark.common.enums.FlinkDeployMode;
+import org.apache.streampark.common.util.Tuple2;
 import org.apache.streampark.common.util.Utils;
-import org.apache.streampark.flink.client.bean.CancelRequest;
-import org.apache.streampark.flink.client.bean.CancelResponse;
-import org.apache.streampark.flink.client.bean.DeployRequest;
-import org.apache.streampark.flink.client.bean.DeployRequestTrait;
-import org.apache.streampark.flink.client.bean.DeployResponse;
-import org.apache.streampark.flink.client.bean.SavepointResponse;
-import org.apache.streampark.flink.client.bean.ShutDownRequest;
-import org.apache.streampark.flink.client.bean.ShutDownResponse;
-import org.apache.streampark.flink.client.bean.SubmitRequest;
-import org.apache.streampark.flink.client.bean.SubmitResponse;
-import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
-import org.apache.streampark.flink.client.tool.FlinkSessionSubmitHelper;
-import org.apache.streampark.flink.client.trait.KubernetesNativeClientTrait;
+import org.apache.streampark.flink.client.bean.ResolvedSubmitRequest;
+import org.apache.streampark.flink.client.bean.SessionClusterRestClient;
+import org.apache.streampark.flink.client.request.AbstractClusterRequest;
+import org.apache.streampark.flink.client.request.CancelRequest;
+import org.apache.streampark.flink.client.request.DeployRequest;
+import org.apache.streampark.flink.client.request.SavepointRequest;
+import org.apache.streampark.flink.client.request.ShutdownRequest;
+import org.apache.streampark.flink.client.request.SubmitRequest;
+import org.apache.streampark.flink.client.response.CancelResponse;
+import org.apache.streampark.flink.client.response.DeployResponse;
+import org.apache.streampark.flink.client.response.SavepointResponse;
+import org.apache.streampark.flink.client.response.ShutdownResponse;
+import org.apache.streampark.flink.client.response.SubmitResponse;
 import org.apache.streampark.flink.core.FlinkKubernetesClient;
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sDeployMode;
+import org.apache.streampark.flink.kubernetes.enums.FlinkKubernetesDeployMode;
 import org.apache.streampark.flink.kubernetes.model.ClusterKey;
 
 import org.apache.commons.lang3.StringUtils;
@@ -53,90 +54,15 @@ import org.apache.flink.util.FlinkException;
 
 import java.io.File;
 
-import scala.Tuple2;
+/** Manages Flink jobs and clusters in Kubernetes native session mode. */
+public final class KubernetesNativeSessionClient extends AbstractKubernetesNativeClient {
 
-/** Kubernetes native session mode submit. */
-public final class KubernetesNativeSessionClient extends KubernetesNativeClientTrait {
-
-    public static final KubernetesNativeSessionClient INSTANCE =
-        new KubernetesNativeSessionClient();
+    public static final KubernetesNativeSessionClient INSTANCE = new KubernetesNativeSessionClient();
 
     private KubernetesNativeSessionClient() {
     }
 
-    @Override
-    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws FlinkException {
-        if (StringUtils.isBlank(submitRequest.clusterId())) {
-            throw new IllegalArgumentException(
-                String.format(
-                    "[flink-submit] submit flink job failed, clusterId is null, mode=%s",
-                    flinkConfig.get(DeploymentOptions.TARGET)));
-        }
-        return trySubmit(
-            submitRequest,
-            flinkConfig,
-            submitRequest.userJarFile(),
-            this::jobGraphSubmit,
-            this::restApiSubmit);
-    }
-
-    /** Submit flink session job via rest api. */
-    public SubmitResponse restApiSubmit(
-                                        SubmitRequest submitRequest,
-                                        Configuration flinkConfig,
-                                        File fatJar) throws FlinkException {
-        return callAsFlinkException(
-            () -> {
-                ClusterKey clusterKey =
-                    ClusterKey.builder()
-                        .executeMode(FlinkK8sDeployMode.SESSION)
-                        .namespace(submitRequest.kubernetesNamespace())
-                        .clusterId(submitRequest.clusterId())
-                        .build();
-                String jmRestUrl =
-                    KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
-                        .orElseThrow(
-                            () -> new FlinkException(
-                                "[flink-submit] retrieve flink session rest url failed, clusterKey="
-                                    + clusterKey));
-                String jobId =
-                    FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl, fatJar, flinkConfig);
-                return new SubmitResponse(
-                    clusterKey.clusterId(), flinkConfig.toMap(), jobId, jmRestUrl);
-            });
-    }
-
-    /** Submit flink session job with building JobGraph via ClusterClient api. */
-    public SubmitResponse jobGraphSubmit(
-                                         SubmitRequest submitRequest,
-                                         Configuration flinkConfig,
-                                         File jarFile) throws FlinkException {
-        return callAsFlinkException(
-            () -> {
-                SubmitResponse result =
-                    submitJobGraphToCluster(
-                        submitRequest,
-                        flinkConfig,
-                        jarFile,
-                        () -> getK8sClusterDescriptor(flinkConfig)
-                            .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
-                            .getClusterClient(),
-                        () -> flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID));
-                logInfo(
-                    "[flink-submit] flink job has been submitted. "
-                        + flinkConfIdentifierInfo(flinkConfig)
-                        + ", jobId: "
-                        + result.jobId());
-                return result;
-            });
-    }
-
-    @Override
-    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig) throws FlinkException {
-        setK8sDeployTarget(flinkConfig, FlinkDeployMode.KUBERNETES_NATIVE_SESSION);
-        return super.doCancel(cancelRequest, flinkConfig);
-    }
-
+    /** Deploys or reconnects to the requested Kubernetes session cluster. */
     public DeployResponse deploy(DeployRequest deployRequest) throws Exception {
         logInfo(
             String.format(
@@ -156,23 +82,23 @@ public final class KubernetesNativeSessionClient extends KubernetesNativeClientT
                 deployRequest.flinkVersion().version(),
                 deployRequest.deployMode().name(),
                 deployRequest.clusterId(),
-                deployRequest.k8sParam().kubernetesNamespace(),
-                deployRequest.k8sParam().flinkRestExposedType(),
-                deployRequest.k8sParam().serviceAccount(),
-                deployRequest.k8sParam().flinkImage(),
+                deployRequest.kubernetesDeploySpec().kubernetesNamespace(),
+                deployRequest.kubernetesDeploySpec().flinkRestExposedType(),
+                deployRequest.kubernetesDeploySpec().serviceAccount(),
+                deployRequest.kubernetesDeploySpec().flinkImage(),
                 deployRequest.properties()));
 
-        Configuration flinkConfig = getFlinkK8sConfig(deployRequest);
-        FlinkKubeClient kubeClient =
-            FlinkKubeClientFactory.getInstance().fromConfiguration(flinkConfig, "client");
+        Configuration flinkConfig = getFlinkKubernetesConfig(deployRequest);
+
+        FlinkKubeClient kubeClient = FlinkKubeClientFactory.getInstance().fromConfiguration(flinkConfig, "client");
 
         KubernetesClusterDescriptor clusterDescriptor = null;
         ClusterClient<String> client = null;
 
         try {
             Tuple2<KubernetesClusterDescriptor, ClusterSpecification> kubernetesClusterDescriptor =
-                getK8sClusterDescriptorAndSpecification(flinkConfig);
-            clusterDescriptor = kubernetesClusterDescriptor._1();
+                createClusterDescriptorAndSpec(flinkConfig);
+            clusterDescriptor = kubernetesClusterDescriptor._1;
 
             FlinkKubernetesClient kubeClientWrapper = new FlinkKubernetesClient(kubeClient);
             if (kubeClientWrapper.getService(deployRequest.clusterId()).isPresent()) {
@@ -181,7 +107,7 @@ public final class KubernetesNativeSessionClient extends KubernetesNativeClientT
             } else {
                 client =
                     clusterDescriptor
-                        .deploySessionCluster(kubernetesClusterDescriptor._2())
+                        .deploySessionCluster(kubernetesClusterDescriptor._2)
                         .getClusterClient();
             }
             return new DeployResponse(
@@ -193,75 +119,138 @@ public final class KubernetesNativeSessionClient extends KubernetesNativeClientT
         }
     }
 
-    public ShutDownResponse shutdown(ShutDownRequest shutDownRequest) throws Exception {
+    /** Stops a Kubernetes session cluster when it exists. */
+    public ShutdownResponse shutdown(ShutdownRequest shutdownRequest) throws Exception {
         FlinkKubeClient kubeClient = null;
         try {
-            Configuration flinkConfig = getFlinkK8sConfig(shutDownRequest);
+            Configuration flinkConfig = getFlinkKubernetesConfig(shutdownRequest);
             kubeClient =
                 FlinkKubeClientFactory.getInstance().fromConfiguration(flinkConfig, "client");
             FlinkKubernetesClient kubeClientWrapper = new FlinkKubernetesClient(kubeClient);
 
-            boolean stopAndCleanupState =
-                shutDownRequest.clusterId() != null
-                    && kubeClientWrapper.getService(shutDownRequest.clusterId()).isPresent();
-            if (stopAndCleanupState) {
-                kubeClient.stopAndCleanupCluster(shutDownRequest.clusterId());
-                return new ShutDownResponse(shutDownRequest.clusterId());
+            boolean clusterExists =
+                shutdownRequest.clusterId() != null
+                    && kubeClientWrapper.getService(shutdownRequest.clusterId()).isPresent();
+            if (clusterExists) {
+                kubeClient.stopAndCleanupCluster(shutdownRequest.clusterId());
             }
-            return null;
+            // Shutdown is idempotent: an already absent cluster is the desired final state.
+            return new ShutdownResponse(shutdownRequest.clusterId());
         } catch (Exception e) {
             logError(
-                "shutdown flink session fail in " + shutDownRequest.deployMode() + " mode", e);
+                "shutdown flink session fail in " + shutdownRequest.deployMode() + " mode", e);
             throw e;
         } finally {
             Utils.close(kubeClient);
         }
     }
 
+    /** Submits a job to an existing Kubernetes session cluster through its REST endpoint. */
     @Override
-    public SavepointResponse doTriggerSavepoint(
-                                                TriggerSavepointRequest triggerSavepointRequest,
-                                                Configuration flinkConfig) throws FlinkException {
-        FlinkConfigurationOps.safeSet(
-            flinkConfig,
+    protected SubmitResponse doSubmit(
+                                      ResolvedSubmitRequest resolved,
+                                      Configuration flinkConfig) throws FlinkException {
+        SubmitRequest submitRequest = resolved.request();
+        if (StringUtils.isBlank(submitRequest.clusterId())) {
+            throw new IllegalArgumentException(
+                String.format(
+                    "[flink-submit] submit flink job failed, clusterId is null, mode=%s",
+                    flinkConfig.get(DeploymentOptions.TARGET)));
+        }
+
+        return restApiSubmit(submitRequest, flinkConfig, resolved.getUserJarFile());
+    }
+
+    /** Cancels a job while retaining its Kubernetes session cluster. */
+    @Override
+    protected CancelResponse doCancel(
+                                      CancelRequest cancelRequest,
+                                      Configuration flinkConfig) throws FlinkException {
+        flinkConfig.set(
+            DeploymentOptions.TARGET,
+            FlinkDeployMode.KUBERNETES_NATIVE_SESSION.getName());
+        return super.doCancel(cancelRequest, flinkConfig);
+    }
+
+    /** Triggers a savepoint against an existing Kubernetes session cluster. */
+    @Override
+    protected SavepointResponse doTriggerSavepoint(
+                                                   SavepointRequest triggerSavepointRequest,
+                                                   Configuration flinkConfig) throws FlinkException {
+        flinkConfig.set(
             DeploymentOptions.TARGET,
             FlinkDeployMode.KUBERNETES_NATIVE_SESSION.getName());
         return super.doTriggerSavepoint(triggerSavepointRequest, flinkConfig);
     }
 
-    private Configuration getFlinkK8sConfig(DeployRequestTrait deployRequest) throws Exception {
-        Configuration flinkConfig =
-            extractConfiguration(
-                deployRequest.flinkVersion().getFlinkHome(), deployRequest.properties());
-        FlinkConfigurationOps.safeSet(
-            flinkConfig, DeploymentOptions.TARGET, KubernetesDeploymentTarget.SESSION.getName());
-        FlinkConfigurationOps.safeSet(
-            flinkConfig,
-            KubernetesConfigOptions.NAMESPACE,
-            deployRequest.k8sParam().kubernetesNamespace());
-        FlinkConfigurationOps.safeSet(
-            flinkConfig,
-            KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT,
-            deployRequest.k8sParam().serviceAccount());
-        FlinkConfigurationOps.safeSet(
-            flinkConfig, KubernetesConfigOptions.CLUSTER_ID, deployRequest.clusterId());
-        FlinkConfigurationOps.safeSet(
-            flinkConfig,
-            KubernetesConfigOptions.CONTAINER_IMAGE,
-            deployRequest.k8sParam().flinkImage());
-        FlinkConfigurationOps.safeSet(
-            flinkConfig,
+    /** Submits the uploaded job JAR and returns the session cluster job identity. */
+    private SubmitResponse restApiSubmit(
+                                         SubmitRequest submitRequest,
+                                         Configuration flinkConfig,
+                                         File fatJar) throws FlinkException {
+        return execute(
+            () -> {
+                ClusterKey clusterKey =
+                    ClusterKey.builder()
+                        .executeMode(FlinkKubernetesDeployMode.SESSION)
+                        .namespace(submitRequest.kubernetesNamespace())
+                        .clusterId(submitRequest.clusterId())
+                        .build();
+                String jmRestUrl =
+                    KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
+                        .orElseThrow(
+                            () -> new FlinkException(
+                                "[flink-submit] retrieve flink session rest url failed, clusterKey="
+                                    + clusterKey));
+                String jobId =
+                    SessionClusterRestClient.submit(jmRestUrl, fatJar, flinkConfig);
+                return new SubmitResponse(
+                    clusterKey.clusterId(), flinkConfig.toMap(), jobId, jmRestUrl);
+            });
+    }
+
+    /** Builds the Flink configuration shared by session deployment and shutdown operations. */
+    private Configuration getFlinkKubernetesConfig(AbstractClusterRequest request) throws Exception {
+        Configuration flinkConfig = extractConfiguration(
+            request.flinkVersion().getFlinkHome(), request.properties());
+
+        flinkConfig.set(
+            DeploymentOptions.TARGET, KubernetesDeploymentTarget.SESSION.getName());
+
+        if (StringUtils.isNotEmpty(
+            request.kubernetesDeploySpec().kubernetesNamespace())) {
+            flinkConfig.set(
+                KubernetesConfigOptions.NAMESPACE,
+                request.kubernetesDeploySpec().kubernetesNamespace());
+        }
+
+        if (StringUtils.isNotEmpty(request.kubernetesDeploySpec().serviceAccount())) {
+            flinkConfig.set(
+                KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT,
+                request.kubernetesDeploySpec().serviceAccount());
+        }
+
+        flinkConfig.set(KubernetesConfigOptions.CLUSTER_ID, request.clusterId());
+
+        if (StringUtils.isNotEmpty(request.kubernetesDeploySpec().flinkImage())) {
+            flinkConfig.set(
+                KubernetesConfigOptions.CONTAINER_IMAGE,
+                request.kubernetesDeploySpec().flinkImage());
+        }
+
+        flinkConfig.set(
             KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE,
             ServiceExposedType.valueOf(
-                deployRequest.k8sParam().flinkRestExposedType().getName()));
-        FlinkConfigurationOps.safeSet(
-            flinkConfig,
+                request.kubernetesDeploySpec().flinkRestExposedType().getName()));
+
+        flinkConfig.set(
             KubernetesConfigOptions.KUBE_CONFIG_FILE,
-            getDefaultKubernetesConf(deployRequest.k8sParam().kubeConf()));
-        FlinkConfigurationOps.safeSet(
-            flinkConfig,
+            getDefaultKubernetesConf(request.kubernetesDeploySpec().kubeConf()));
+
+        flinkConfig.set(
             DeploymentOptionsInternal.CONF_DIR,
-            deployRequest.flinkVersion().getFlinkHome() + "/conf");
+            request.flinkVersion().getFlinkHome() + "/conf");
+
         return flinkConfig;
     }
 }

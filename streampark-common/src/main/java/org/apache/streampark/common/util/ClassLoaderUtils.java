@@ -17,7 +17,7 @@
 
 package org.apache.streampark.common.util;
 
-import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.configuration.Constants;
 
 import org.apache.streampark.shaded.org.slf4j.Logger;
 

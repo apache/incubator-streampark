@@ -17,110 +17,27 @@
 
 package org.apache.streampark.flink.core;
 
-import org.apache.flink.table.api.CompiledPlan;
-import org.apache.flink.table.api.ExplainDetail;
-import org.apache.flink.table.api.ExplainFormat;
-import org.apache.flink.table.api.PlanReference;
+import org.apache.streampark.flink.configuration.FlinkJobParameters;
+import org.apache.streampark.flink.core.bean.TableContextSpec;
+
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.TableEnvironment;
-import org.apache.flink.table.api.TableException;
-import org.apache.flink.table.catalog.CatalogDescriptor;
-import org.apache.flink.table.module.ModuleEntry;
-import org.apache.flink.table.resource.ResourceUri;
-import org.apache.flink.util.ParameterTool;
-
-import java.util.List;
 
 /** Flink 2.0 table environment context. */
-public class TableContext extends FlinkTableTrait {
+public class TableContext extends AbstractFlinkTable {
 
-    public TableContext(ParameterTool parameter, TableEnvironment tableEnv) {
+    public TableContext(FlinkJobParameters parameter, TableEnvironment tableEnv) {
         super(parameter, tableEnv);
     }
 
-    public TableContext(FlinkTableInitializerV2.TableInitResult init) {
-        this(init.parameter, init.tableEnv);
-    }
-
-    public TableContext(TableEnvConfig config) {
-        this(FlinkTableInitializerV2.initialize(config));
+    public TableContext(TableContextSpec contextConfig) {
+        this(contextConfig.parameter, contextConfig.tableEnv);
     }
 
     @Override
-    public void useModules(String... moduleNames) {
-        getTableEnv().useModules(moduleNames);
-    }
-
-    @Override
-    public void createTemporaryTable(String path, TableDescriptor descriptor) {
-        getTableEnv().createTemporaryTable(path, descriptor);
-    }
-
-    @Override
-    public void createTable(String path, TableDescriptor descriptor) {
-        getTableEnv().createTable(path, descriptor);
-    }
-
-    @Override
-    public Table from(TableDescriptor descriptor) {
-        return getTableEnv().from(descriptor);
-    }
-
-    @Override
-    public ModuleEntry[] listFullModules() {
-        return getTableEnv().listFullModules();
-    }
-
-    @Override
-    public String[] listTables(String catalogName, String databaseName) {
-        return getTableEnv().listTables(catalogName, databaseName);
-    }
-
-    @Override
-    public CompiledPlan loadPlan(PlanReference planReference) throws TableException {
-        return getTableEnv().loadPlan(planReference);
-    }
-
-    @Override
-    public CompiledPlan compilePlanSql(String statement) throws TableException {
-        return getTableEnv().compilePlanSql(statement);
-    }
-
-    @Override
-    public void createFunction(String path, String className, List<ResourceUri> resourceUris) {
-        getTableEnv().createFunction(path, className, resourceUris);
-    }
-
-    @Override
-    public void createFunction(
-                               String path,
-                               String className,
-                               List<ResourceUri> resourceUris,
-                               boolean ignoreIfExists) {
-        getTableEnv().createFunction(path, className, resourceUris, ignoreIfExists);
-    }
-
-    @Override
-    public void createTemporaryFunction(
-                                        String path, String className, List<ResourceUri> resourceUris) {
-        getTableEnv().createTemporaryFunction(path, className, resourceUris);
-    }
-
-    @Override
-    public void createTemporarySystemFunction(
-                                              String name, String className, List<ResourceUri> resourceUris) {
-        getTableEnv().createTemporarySystemFunction(name, className, resourceUris);
-    }
-
-    @Override
-    public String explainSql(String statement, ExplainFormat format, ExplainDetail... extraDetails) {
-        return getTableEnv().explainSql(statement, format, extraDetails);
-    }
-
-    @Override
-    public void createCatalog(String catalogName, CatalogDescriptor catalogDescriptor) {
-        getTableEnv().createCatalog(catalogName, catalogDescriptor);
+    public void createTemporaryTable(String path, TableDescriptor descriptor, boolean ignoreIfExists) {
+        getTableEnv().createTemporaryTable(path, descriptor, ignoreIfExists);
     }
 
     @Override
@@ -129,9 +46,8 @@ public class TableContext extends FlinkTableTrait {
     }
 
     @Override
-    public void createTemporaryTable(
-                                     String path, TableDescriptor descriptor, boolean ignoreIfExists) {
-        getTableEnv().createTemporaryTable(path, descriptor, ignoreIfExists);
+    public void createView(String path, Table view) {
+        getTableEnv().createView(path, view);
     }
 
     @Override
@@ -140,8 +56,8 @@ public class TableContext extends FlinkTableTrait {
     }
 
     @Override
-    public void createView(String path, Table view) {
-        getTableEnv().createView(path, view);
+    public boolean dropTable(String path) {
+        return getTableEnv().dropTable(path);
     }
 
     @Override
@@ -150,17 +66,12 @@ public class TableContext extends FlinkTableTrait {
     }
 
     @Override
-    public boolean dropTable(String path) {
-        return getTableEnv().dropTable(path);
+    public boolean dropView(String path) {
+        return getTableEnv().dropView(path);
     }
 
     @Override
     public boolean dropView(String path, boolean ignoreIfNotExists) {
         return getTableEnv().dropView(path, ignoreIfNotExists);
-    }
-
-    @Override
-    public boolean dropView(String path) {
-        return getTableEnv().dropView(path);
     }
 }

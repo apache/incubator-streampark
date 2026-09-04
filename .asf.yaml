@@ -16,16 +16,17 @@
 #
 
 github:
-  description: Make stream processing easier! Easy-to-use streaming application development framework and operation platform.
+  description: The Open Control Plane for Real-Time Data
   homepage: https://streampark.apache.org/
   labels:
     - streaming
-    - operation-platform
-    - development-framework
-    - easy-to-use
-    - etl-pipeline
-    - apache
-    - streampark
+    - data-computing
+    - control-plane
+    - flink
+    - spark
+    - lakehouse
+    - cloud-native
+    - kubernetes
   enabled_merge_buttons:
     squash: true
     merge: false
@@ -37,7 +38,6 @@ github:
         strict: false
         contexts:
           - Backend - Result
-          - E2E - Result
           - Docs - Result
           - Frontend - Result
           - Unit-Test - Result

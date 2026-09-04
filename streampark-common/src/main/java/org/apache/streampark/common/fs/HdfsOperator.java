@@ -116,14 +116,22 @@ public final class HdfsOperator {
         mkdirs(path);
     }
 
-    public static String fileMd5(String path) {
+    /**
+     * Returns the SHA-256 digest of an HDFS file.
+     *
+     * @param path HDFS file path
+     * @return lowercase hexadecimal SHA-256 digest
+     */
+    public static String fileSha256(String path) {
         if (path == null || path.isEmpty()) {
-            throw new IllegalArgumentException("[StreamPark] HdfsOperator.fileMd5: file must not be null.");
+            throw new IllegalArgumentException(
+                "[StreamPark] HdfsOperator.fileSha256: file must not be null.");
         }
         try {
-            return HdfsUtils.fileMd5(toHdfsPath(path));
+            return HdfsUtils.fileSha256(toHdfsPath(path));
         } catch (IOException e) {
-            throw new IllegalStateException("[StreamPark] Failed to compute md5 for: " + path, e);
+            throw new IllegalStateException(
+                "[StreamPark] Failed to compute SHA-256 for: " + path, e);
         }
     }
 

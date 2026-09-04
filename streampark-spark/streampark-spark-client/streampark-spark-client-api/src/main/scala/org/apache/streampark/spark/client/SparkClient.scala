@@ -17,7 +17,7 @@
 
 package org.apache.streampark.spark.client
 
-import org.apache.streampark.common.conf.SparkVersion
+import org.apache.streampark.common.core.SparkVersion
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.spark.client.bean._
 import org.apache.streampark.spark.client.proxy.SparkShimsProxy

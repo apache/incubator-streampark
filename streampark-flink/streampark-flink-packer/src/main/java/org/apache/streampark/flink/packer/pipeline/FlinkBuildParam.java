@@ -17,8 +17,8 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
-import org.apache.streampark.common.conf.FlinkVersion;
-import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.configuration.Workspace;
+import org.apache.streampark.common.core.FlinkVersion;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
@@ -43,11 +43,11 @@ public interface FlinkBuildParam extends BuildParam {
 
     default DependencyInfo providedLibs() {
         Set<String> libs = new HashSet<>(Arrays.asList(
-            Workspace.local().APP_JARS(),
+            Workspace.LOCAL.jars,
             customFlinkUserJar()));
         if (flinkJobType() == FlinkJobType.FLINK_SQL) {
             libs.add(
-                Workspace.local().APP_SHIMS()
+                Workspace.LOCAL.shims
                     + "/flink-"
                     + flinkVersion().majorVersion());
         }

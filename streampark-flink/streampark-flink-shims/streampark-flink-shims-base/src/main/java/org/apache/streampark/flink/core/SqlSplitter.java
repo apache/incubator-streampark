@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.core;
 
-import org.apache.streampark.common.conf.ConfigKeys;
+import org.apache.streampark.common.configuration.CommandLineParser;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -38,7 +38,7 @@ public final class SqlSplitter {
 
     static {
         Set<String> prefixes = new HashSet<>();
-        prefixes.add(ConfigKeys.PARAM_PREFIX());
+        prefixes.add(CommandLineParser.LONG_OPTION_PREFIX);
         SINGLE_LINE_COMMENT_PREFIX_LIST = Collections.unmodifiableSet(prefixes);
     }
 
@@ -284,7 +284,8 @@ public final class SqlSplitter {
             lineNumber++;
             String line = scanner.nextLine().trim();
             boolean nonEmpty =
-                StringUtils.isNotBlank(line) && !line.startsWith(ConfigKeys.PARAM_PREFIX());
+                StringUtils.isNotBlank(line)
+                    && !line.startsWith(CommandLineParser.LONG_OPTION_PREFIX);
             if (line.startsWith("/*")) {
                 startComment = true;
                 hasComment = true;
@@ -333,7 +334,7 @@ public final class SqlSplitter {
     }
 
     private static boolean isSingleLineComment(String text) {
-        return text.trim().startsWith(ConfigKeys.PARAM_PREFIX());
+        return text.trim().startsWith(CommandLineParser.LONG_OPTION_PREFIX);
     }
 
     private static boolean isMultipleLineComment(String text) {

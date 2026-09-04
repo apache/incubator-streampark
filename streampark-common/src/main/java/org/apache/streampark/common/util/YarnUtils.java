@@ -17,9 +17,9 @@
 
 package org.apache.streampark.common.util;
 
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.InternalConfigHolder;
-import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.configuration.Constants;
+import org.apache.streampark.common.configuration.GlobalConfiguration;
+import org.apache.streampark.common.configuration.option.YarnOptions;
 
 import org.apache.streampark.shaded.org.slf4j.Logger;
 
@@ -56,25 +56,17 @@ public final class YarnUtils {
 
     private static String rmHttpURL;
 
-    public static final String PROXY_YARN_URL =
-        InternalConfigHolder.get(CommonConfig.STREAMPARK_PROXY_YARN_URL());
-
-    public static final boolean HAS_YARN_HTTP_KERBEROS_AUTH =
-        "kerberos"
-            .equalsIgnoreCase(InternalConfigHolder.get(CommonConfig.STREAMPARK_YARN_AUTH()));
-
-    public static final boolean HAS_YARN_HTTP_SIMPLE_AUTH =
-        "simple".equalsIgnoreCase(InternalConfigHolder.get(CommonConfig.STREAMPARK_YARN_AUTH()));
-
     private YarnUtils() {
     }
 
     public static boolean hasYarnHttpKerberosAuth() {
-        return HAS_YARN_HTTP_KERBEROS_AUTH;
+        return "kerberos"
+            .equalsIgnoreCase(GlobalConfiguration.current().get(YarnOptions.HTTP_AUTHENTICATION));
     }
 
     public static boolean hasYarnHttpSimpleAuth() {
-        return HAS_YARN_HTTP_SIMPLE_AUTH;
+        return "simple"
+            .equalsIgnoreCase(GlobalConfiguration.current().get(YarnOptions.HTTP_AUTHENTICATION));
     }
 
     public static List<ApplicationId> getAppId(String appName) {
@@ -127,8 +119,9 @@ public final class YarnUtils {
     }
 
     public static String getRMWebAppProxyURL() {
-        if (StringUtils.isNotBlank(PROXY_YARN_URL)) {
-            return PROXY_YARN_URL;
+        String proxyUrl = GlobalConfiguration.current().get(YarnOptions.PROXY_URL);
+        if (StringUtils.isNotBlank(proxyUrl)) {
+            return proxyUrl;
         }
         return getRMWebAppURL();
     }
@@ -261,7 +254,7 @@ public final class YarnUtils {
             try {
                 return request(url, timeout);
             } catch (Exception e) {
-                if (HAS_YARN_HTTP_KERBEROS_AUTH) {
+                if (hasYarnHttpKerberosAuth()) {
                     throw new IOException("yarnUtils authRestRequest error, url: " + url + ", detail: " + e, e);
                 }
                 throw new IOException("yarnUtils restRequest error, url: " + url + ", detail: " + e, e);
@@ -285,16 +278,16 @@ public final class YarnUtils {
 
     private static String request(String reqUrl, Timeout timeout) throws Exception {
         RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout).build();
-        if (HAS_YARN_HTTP_KERBEROS_AUTH) {
+        if (hasYarnHttpKerberosAuth()) {
             return HadoopUtils.getUgi()
                 .doAs(
                     (PrivilegedExceptionAction<String>) () -> HttpClientUtils.httpAuthGetRequest(reqUrl, config));
         }
         String url;
-        if (!HAS_YARN_HTTP_SIMPLE_AUTH) {
+        if (!hasYarnHttpSimpleAuth()) {
             url = reqUrl;
         } else {
-            url = reqUrl + "?user.name=" + HadoopConfigUtils.HADOOP_USER_NAME;
+            url = reqUrl + "?user.name=" + HadoopConfigUtils.hadoopUserName();
         }
         return HttpClientUtils.httpGetRequest(url, config);
     }

@@ -88,6 +88,13 @@
             <artifactId>guava</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <!-- Session-cluster REST submission uses the application-owned shared HTTP client. -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <profiles>
         <profile>

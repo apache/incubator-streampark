@@ -26,6 +26,7 @@ import org.apache.streampark.console.core.mapper.FlinkEnvMapper;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
+import org.apache.streampark.console.core.util.FlinkEnvUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -93,8 +94,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
         long count = this.baseMapper.selectCount(null);
         version.setIsDefault(count == 0);
         version.setCreateTime(new Date());
-        version.doSetVersion();
-        version.doSetFlinkConf();
+        FlinkEnvUtils.refresh(version, version.getFlinkHome());
         return save(version);
     }
 
@@ -117,9 +117,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
         flinkEnv.setDescription(version.getDescription());
         flinkEnv.setFlinkName(version.getFlinkName());
         if (!version.getFlinkHome().equals(flinkEnv.getFlinkHome())) {
-            flinkEnv.setFlinkHome(version.getFlinkHome());
-            flinkEnv.doSetFlinkConf();
-            flinkEnv.doSetVersion();
+            FlinkEnvUtils.refresh(flinkEnv, version.getFlinkHome());
         }
         updateById(flinkEnv);
     }
@@ -151,7 +149,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     @Override
     public void syncConf(Long id) {
         FlinkEnv flinkEnv = getById(id);
-        flinkEnv.doSetFlinkConf();
+        FlinkEnvUtils.sync(flinkEnv);
         updateById(flinkEnv);
     }
 

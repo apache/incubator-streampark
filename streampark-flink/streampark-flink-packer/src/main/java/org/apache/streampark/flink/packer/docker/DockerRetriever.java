@@ -17,8 +17,9 @@
 
 package org.apache.streampark.flink.packer.docker;
 
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.InternalConfigHolder;
+import org.apache.streampark.common.configuration.Configuration;
+import org.apache.streampark.common.configuration.GlobalConfiguration;
+import org.apache.streampark.common.configuration.option.DockerOptions;
 import org.apache.streampark.common.util.Utils;
 
 import com.github.dockerjava.api.DockerClient;
@@ -28,7 +29,6 @@ import com.github.dockerjava.core.HackDockerClient;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 
 import java.net.URI;
-import java.time.Duration;
 
 /** Docker client factory. */
 public final class DockerRetriever {
@@ -36,33 +36,23 @@ public final class DockerRetriever {
     public static final DockerClientConfig dockerClientConf =
         DefaultDockerClientConfig.createDefaultConfigBuilder().build();
 
-    private static final ApacheDockerHttpClient.Builder dockerHttpClientBuilder =
-        new ApacheDockerHttpClient.Builder()
-            .dockerHost(dockerClientConf.getDockerHost())
-            .sslConfig(dockerClientConf.getSSLConfig())
-            .maxConnections(InternalConfigHolder.get(CommonConfig.DOCKER_MAX_CONNECTIONS()))
-            .connectionTimeout(
-                Duration.ofSeconds(
-                    InternalConfigHolder.get(CommonConfig.DOCKER_CONNECTION_TIMEOUT_SEC())))
-            .responseTimeout(
-                Duration.ofSeconds(
-                    InternalConfigHolder.get(CommonConfig.DOCKER_RESPONSE_TIMEOUT_SEC())));
-
     private DockerRetriever() {
     }
 
-    /** get new DockerClient instance */
+    /** Returns a new Docker client built from one consistent configuration snapshot. */
     public static DockerClient newDockerClient() {
-        setDockerHost();
-        return HackDockerClient.getInstance(dockerClientConf, dockerHttpClientBuilder.build());
-    }
-
-    /** set docker-host for kata */
-    private static void setDockerHost() {
-        String dockerHost = InternalConfigHolder.get(CommonConfig.DOCKER_HOST());
+        Configuration configuration = GlobalConfiguration.current();
+        ApacheDockerHttpClient.Builder builder =
+            new ApacheDockerHttpClient.Builder()
+                .dockerHost(dockerClientConf.getDockerHost())
+                .sslConfig(dockerClientConf.getSSLConfig())
+                .maxConnections(configuration.get(DockerOptions.MAX_CONNECTIONS))
+                .connectionTimeout(configuration.get(DockerOptions.CONNECTION_TIMEOUT))
+                .responseTimeout(configuration.get(DockerOptions.RESPONSE_TIMEOUT));
+        String dockerHost = configuration.get(DockerOptions.HOST);
         if (Utils.isNotEmpty(dockerHost)) {
-            URI dockerHostUri = URI.create(dockerHost);
-            dockerHttpClientBuilder.dockerHost(dockerHostUri);
+            builder.dockerHost(URI.create(dockerHost));
         }
+        return HackDockerClient.getInstance(dockerClientConf, builder.build());
     }
 }

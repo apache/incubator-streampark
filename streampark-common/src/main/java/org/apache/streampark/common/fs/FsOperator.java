@@ -66,8 +66,8 @@ public abstract class FsOperator {
         }
 
         @Override
-        public String fileMd5(String path) {
-            return LfsOperator.fileMd5(path);
+        public String fileSha256(String path) {
+            return LfsOperator.fileSha256(path);
         }
     };
 
@@ -115,8 +115,8 @@ public abstract class FsOperator {
         }
 
         @Override
-        public String fileMd5(String path) {
-            return HdfsOperator.fileMd5(path);
+        public String fileSha256(String path) {
+            return HdfsOperator.fileSha256(path);
         }
     };
 
@@ -176,5 +176,14 @@ public abstract class FsOperator {
 
     public abstract void move(String srcPath, String dstPath);
 
-    public abstract String fileMd5(String path);
+    /**
+     * Returns the SHA-256 digest of a file for collision-resistant content comparison.
+     *
+     * @param path file path understood by this operator
+     * @return lowercase hexadecimal SHA-256 digest
+     * @throws UnsupportedOperationException when a custom operator does not provide digest support
+     */
+    public String fileSha256(String path) {
+        throw new UnsupportedOperationException("SHA-256 is not supported by this file system");
+    }
 }

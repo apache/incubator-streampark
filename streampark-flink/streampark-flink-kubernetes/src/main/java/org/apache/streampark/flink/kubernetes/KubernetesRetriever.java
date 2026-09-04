@@ -19,7 +19,7 @@ package org.apache.streampark.flink.kubernetes;
 
 import org.apache.streampark.common.util.AutoCloseUtils;
 import org.apache.streampark.common.util.LoggerSupport;
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sDeployMode;
+import org.apache.streampark.flink.kubernetes.enums.FlinkKubernetesDeployMode;
 import org.apache.streampark.flink.kubernetes.ingress.IngressController;
 import org.apache.streampark.flink.kubernetes.model.ClusterKey;
 
@@ -79,7 +79,7 @@ public final class KubernetesRetriever extends LoggerSupport {
     public static Optional<ClusterClient<String>> newFinkClusterClient(
                                                                        String clusterId,
                                                                        @Nullable String namespace,
-                                                                       FlinkK8sDeployMode executeMode) {
+                                                                       FlinkKubernetesDeployMode executeMode) {
         Configuration flinkConfig = new Configuration();
         flinkConfig.setString(DeploymentOptions.TARGET, executeMode.toString());
         flinkConfig.setString(KubernetesConfigOptions.CLUSTER_ID, clusterId);

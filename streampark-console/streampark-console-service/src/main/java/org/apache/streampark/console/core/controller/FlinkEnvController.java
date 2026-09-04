@@ -82,8 +82,7 @@ public class FlinkEnvController {
     public RestResponseBody<FlinkEnvResponse> get(@Valid IdRequest request) throws Exception {
         FlinkEnv flinkEnv = flinkEnvService.getById(request.getId());
         ApiAlertException.throwIfNull(flinkEnv, "Flink environment not found.");
-        flinkEnv.unzipFlinkConf();
-        return RestResponseBody.success(FlinkEnvAssembler.toResponse(flinkEnv));
+        return RestResponseBody.success(FlinkEnvAssembler.toDetailResponse(flinkEnv));
     }
 
     @PostMapping("sync")

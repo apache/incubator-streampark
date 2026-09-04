@@ -17,32 +17,49 @@
 
 package org.apache.streampark.console.base.config;
 
-import org.apache.streampark.common.conf.ConfigKeys;
-import org.apache.streampark.common.util.PropertiesUtils;
-import org.apache.streampark.common.util.SystemPropertyUtils;
+import org.apache.streampark.common.configuration.ConfigSource;
+import org.apache.streampark.common.configuration.Configuration;
+import org.apache.streampark.common.configuration.ConfigurationLoader;
+import org.apache.streampark.common.configuration.ConfigurationParser;
+import org.apache.streampark.common.configuration.GlobalConfiguration;
+import org.apache.streampark.common.configuration.option.CoreOptions;
 import org.apache.streampark.console.base.util.WebUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.google.common.collect.Maps;
-
 import java.io.File;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
-public class SpringProperties {
+/**
+ * Loads the console configuration file and derives Spring Boot properties.
+ *
+ * <p>The method also installs the initial StreamPark configuration snapshot. It does not copy
+ * application values into JVM system properties: Spring and StreamPark receive the same source
+ * values, while each framework retains its own explicit precedence rules.
+ */
+public final class SpringProperties {
 
+    /** Returns Spring Boot defaults combined with the external StreamPark configuration file. */
     public static Properties get() {
-        // 1) get spring config
         Properties springConfig = getSpringConfig();
-        // 2) get user config
-        Properties userConfig = getUserConfig();
-        // 3) merge config
+        Configuration userConfiguration = getUserConfig();
+        Properties userConfig = new Properties();
+        userConfig.putAll(userConfiguration.toMap());
         mergeConfig(userConfig, springConfig);
-        // 4) datasource
         dataSourceConfig(userConfig, springConfig);
-        // 5) system.setProperties
-        springConfig.forEach((k, v) -> SystemPropertyUtils.set(k.toString(), v.toString()));
+
+        Map<String, Object> defaults = new LinkedHashMap<>();
+        springConfig.forEach((key, value) -> defaults.put(key.toString(), value));
+        Configuration configuration = new ConfigurationLoader()
+            .add(ConfigSource.DEFAULTS, "console defaults", defaults)
+            .add(ConfigSource.FILE, "conf/config.yaml", userConfiguration.toMap())
+            .addSystemProperties()
+            .load();
+        GlobalConfiguration.update(configuration);
         return springConfig;
     }
 
@@ -110,7 +127,7 @@ public class SpringProperties {
     }
 
     private static void mergeConfig(Properties userConfig, Properties springConfig) {
-        Map<String, String> configMapping = Maps.newHashMap();
+        Map<String, String> configMapping = new HashMap<>();
         configMapping.put("datasource.username", "spring.datasource.username");
         configMapping.put("datasource.password", "spring.datasource.password");
         configMapping.put("datasource.url", "spring.datasource.url");
@@ -126,7 +143,7 @@ public class SpringProperties {
             });
     }
 
-    private static Properties getUserConfig() {
+    private static Configuration getUserConfig() {
         String appHome = WebUtils.getAppHome();
         if (StringUtils.isBlank(appHome)) {
             throw new ExceptionInInitializerError(
@@ -134,14 +151,11 @@ public class SpringProperties {
                     "[StreamPark] The system initialization check failed. If started local for development and debugging,"
                         + " please ensure the -D%s parameter is clearly specified,"
                         + " more detail: https://streampark.apache.org/docs/development/development/",
-                    ConfigKeys.KEY_APP_HOME()));
+                    CoreOptions.APP_HOME.key()));
         }
-        Properties properties = new Properties();
         File file = new File(appHome, "conf/config.yaml");
         if (file.exists() && file.isFile()) {
-            Map<String, String> config = PropertiesUtils.fromYamlFileAsJava(file.getAbsolutePath());
-            properties.putAll(config);
-            return properties;
+            return ConfigurationParser.parse(Path.of(file.getAbsolutePath()));
         } else {
             throw new ExceptionInInitializerError(file.getAbsolutePath() + " not found, please check.");
         }
@@ -172,5 +186,8 @@ public class SpringProperties {
         // metrics
         config.put("management.health.ldap.enabled", "false");
         return config;
+    }
+
+    private SpringProperties() {
     }
 }

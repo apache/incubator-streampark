@@ -63,7 +63,7 @@ class UtilsTest {
     }
 
     @Test
-    void requireCheckJarFileShouldThrowIOExceptionIfJarFilePathIsInvalid() throws Exception {
+    void rejectNonFileJarUrl() throws Exception {
         URL jar = new URL("http://host/file");
         IOException ex = assertThrows(IOException.class, () -> Utils.requireCheckJarFile(jar));
         assertTrue(ex.getMessage().contains("http://host/file"));

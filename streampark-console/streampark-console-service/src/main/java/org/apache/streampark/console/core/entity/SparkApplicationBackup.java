@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.configuration.Workspace;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -70,13 +70,13 @@ public class SparkApplicationBackup {
             case LOCAL:
                 this.path = String.format(
                     "%s/%d/%d",
-                    Workspace.local().APP_BACKUPS(), application.getId(), createTime.getTime());
+                    Workspace.LOCAL.backups, application.getId(), createTime.getTime());
                 break;
             case YARN_CLUSTER:
             case YARN_CLIENT:
                 this.path = String.format(
                     "%s/%d/%d",
-                    Workspace.remote().APP_BACKUPS(), application.getId(), createTime.getTime());
+                    Workspace.REMOTE.backups, application.getId(), createTime.getTime());
                 break;
             default:
                 throw new UnsupportedOperationException(

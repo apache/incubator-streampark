@@ -21,12 +21,11 @@ import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.Flushable;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -36,7 +35,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.locks.LockSupport;
-import java.util.jar.JarInputStream;
+import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
 
@@ -84,9 +83,16 @@ public final class Utils {
     }
 
     public static void requireCheckJarFile(URL jar) throws IOException {
-        try (
-            InputStream in = SafePathUtils.openJarFile(jar);
-            JarInputStream ignored = new JarInputStream(new BufferedInputStream(in))) {
+        if (!"file".equalsIgnoreCase(jar.getProtocol())) {
+            throw new IOException("Only local JAR files are supported: " + jar);
+        }
+        File jarFile;
+        try {
+            jarFile = new File(jar.toURI());
+        } catch (URISyntaxException e) {
+            throw new IOException("Invalid JAR file URL: " + jar, e);
+        }
+        try (JarFile ignored = new JarFile(jarFile)) {
             // verify jar is readable
         } catch (IOException e) {
             throw new IOException("Error while opening jar file '" + jar + "'", e);
@@ -94,16 +100,17 @@ public final class Utils {
     }
 
     public static Manifest getJarManifest(File jarFile) throws IOException {
-        try (
-            InputStream in = SafePathUtils.openJarFile(jarFile.toURI().toURL());
-            JarInputStream jarInputStream = new JarInputStream(new BufferedInputStream(in))) {
-            return jarInputStream.getManifest();
+        try (JarFile jar = new JarFile(jarFile)) {
+            return jar.getManifest();
         }
     }
 
     public static String getJarManClass(File jarFile) {
         try {
             Manifest manifest = getJarManifest(jarFile);
+            if (manifest == null) {
+                return null;
+            }
             String mainClass = manifest.getMainAttributes().getValue("Main-Class");
             if (mainClass == null) {
                 mainClass = manifest.getMainAttributes().getValue("program-class");
@@ -231,7 +238,7 @@ public final class Utils {
         System.out.println("      ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<        ");
         System.out.println("     /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/ ____/\\__,_/_/  /_/|_|   ");
         System.out.println("                                       /_/                        \n\n");
-        System.out.println("    Version:  3.0.0-SNAPSHOT                                          ");
+        System.out.println("    Version:  3.0.0                                          ");
         System.out.println("    WebSite:  https://streampark.apache.org                           ");
         System.out.println("    GitHub :  https://github.com/apache/streampark                    ");
         System.out.println("    Info   :  " + info + "                                 ");

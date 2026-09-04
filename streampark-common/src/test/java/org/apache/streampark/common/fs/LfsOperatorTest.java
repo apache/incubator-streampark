@@ -25,7 +25,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -171,9 +173,9 @@ class LfsOperatorTest {
             });
     }
 
-    private String md5Hex(File file) throws Exception {
+    private String sha256Hex(File file) throws Exception {
         try (FileInputStream input = new FileInputStream(file)) {
-            return DigestUtils.md5Hex(IOUtils.toByteArray(input));
+            return DigestUtils.sha256Hex(IOUtils.toByteArray(input));
         }
     }
 
@@ -183,16 +185,16 @@ class LfsOperatorTest {
         if (!names1.equals(names2)) {
             return false;
         }
-        List<String> md5s1 =
-            Arrays.stream(f1).map(this::md5HexSafe).sorted().collect(Collectors.toList());
-        List<String> md5s2 =
-            Arrays.stream(f2).map(this::md5HexSafe).sorted().collect(Collectors.toList());
-        return md5s1.equals(md5s2);
+        List<String> digests1 =
+            Arrays.stream(f1).map(this::sha256HexSafe).sorted().collect(Collectors.toList());
+        List<String> digests2 =
+            Arrays.stream(f2).map(this::sha256HexSafe).sorted().collect(Collectors.toList());
+        return digests1.equals(digests2);
     }
 
-    private String md5HexSafe(File file) {
+    private String sha256HexSafe(File file) {
         try {
-            return md5Hex(file);
+            return sha256Hex(file);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -257,21 +259,21 @@ class LfsOperatorTest {
                 assertDoesNotThrow(
                     () -> {
                         File out = genRandomFile(outputDir + "/out-9", "114514-233.dat");
-                        String md5Before = md5Hex(out);
+                        String digestBefore = sha256Hex(out);
                         LfsOperator.copy(file.getAbsolutePath(), out.getAbsolutePath(), false, true);
-                        String md5After = md5Hex(new File(out.getAbsolutePath()));
-                        assertNotEquals(md5Before, md5After);
-                        assertEquals(md5After, md5Hex(file));
+                        String digestAfter = sha256Hex(new File(out.getAbsolutePath()));
+                        assertNotEquals(digestBefore, digestAfter);
+                        assertEquals(digestAfter, sha256Hex(file));
                     });
 
                 assertDoesNotThrow(
                     () -> {
                         File out = genRandomFile(outputDir + "/out-10", "114514-233.dat");
-                        String md5Before = md5Hex(out);
+                        String digestBefore = sha256Hex(out);
                         LfsOperator.copy(file.getAbsolutePath(), out.getAbsolutePath(), false, false);
-                        String md5After = md5Hex(new File(out.getAbsolutePath()));
-                        assertEquals(md5Before, md5After);
-                        assertNotEquals(md5After, md5Hex(file));
+                        String digestAfter = sha256Hex(new File(out.getAbsolutePath()));
+                        assertEquals(digestBefore, digestAfter);
+                        assertNotEquals(digestAfter, sha256Hex(file));
                     });
             });
     }
@@ -331,9 +333,9 @@ class LfsOperatorTest {
                 assertDoesNotThrow(
                     () -> {
                         File sourceFile = genRandomFile(outputDir);
-                        String sourceMd5;
+                        String sourceDigest;
                         try (FileInputStream input = new FileInputStream(sourceFile)) {
-                            sourceMd5 = DigestUtils.md5Hex(IOUtils.toByteArray(input));
+                            sourceDigest = DigestUtils.sha256Hex(IOUtils.toByteArray(input));
                         }
                         String targetPath = outputDir + "/target-1";
                         LfsOperator.move(sourceFile.getAbsolutePath(), targetPath);
@@ -341,7 +343,9 @@ class LfsOperatorTest {
                         File targetFile = new File(targetPath, sourceFile.getName());
                         assertTrue(targetFile.exists());
                         try (FileInputStream input = new FileInputStream(targetFile)) {
-                            assertEquals(sourceMd5, DigestUtils.md5Hex(IOUtils.toByteArray(input)));
+                            assertEquals(
+                                sourceDigest,
+                                DigestUtils.sha256Hex(IOUtils.toByteArray(input)));
                         }
                     });
 
@@ -393,9 +397,21 @@ class LfsOperatorTest {
     }
 
     @Test
-    void testfileMd5() {
-        assertThrows(IllegalArgumentException.class, () -> LfsOperator.fileMd5(null));
-        assertThrows(IllegalArgumentException.class, () -> LfsOperator.fileMd5(""));
-        assertThrows(IllegalArgumentException.class, () -> LfsOperator.fileMd5("ttt/144514.dat"));
+    void rejectInvalidDigestPaths() {
+        assertThrows(IllegalArgumentException.class, () -> LfsOperator.fileSha256(null));
+        assertThrows(IllegalArgumentException.class, () -> LfsOperator.fileSha256(""));
+        assertThrows(IllegalArgumentException.class, () -> LfsOperator.fileSha256("ttt/144514.dat"));
+    }
+
+    @Test
+    void computeSha256() throws Exception {
+        withTempDir(
+            outputDir -> {
+                byte[] content = "streampark".getBytes(StandardCharsets.UTF_8);
+                Path file = Paths.get(outputDir, "artifact.jar");
+                Files.write(file, content);
+
+                assertEquals(DigestUtils.sha256Hex(content), LfsOperator.fileSha256(file.toString()));
+            });
     }
 }

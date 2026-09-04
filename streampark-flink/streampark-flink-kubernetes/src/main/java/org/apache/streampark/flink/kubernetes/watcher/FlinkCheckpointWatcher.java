@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.kubernetes.watcher;
 
 import org.apache.streampark.flink.kubernetes.ChangeEventBus;
-import org.apache.streampark.flink.kubernetes.FlinkK8sWatchController;
+import org.apache.streampark.flink.kubernetes.FlinkKubernetesWatchController;
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
 import org.apache.streampark.flink.kubernetes.MetricWatcherConfig;
 import org.apache.streampark.flink.kubernetes.event.FlinkJobCheckpointChangeEvent;
@@ -46,14 +46,14 @@ import java.util.stream.Collectors;
 public class FlinkCheckpointWatcher extends FlinkWatcher {
 
     private final MetricWatcherConfig conf;
-    private final FlinkK8sWatchController watchController;
+    private final FlinkKubernetesWatchController watchController;
     private final ChangeEventBus eventBus;
 
     private ScheduledFuture<?> timerSchedule;
 
     public FlinkCheckpointWatcher(
                                   MetricWatcherConfig conf,
-                                  FlinkK8sWatchController watchController,
+                                  FlinkKubernetesWatchController watchController,
                                   ChangeEventBus eventBus) {
         this.conf = conf;
         this.watchController = watchController;

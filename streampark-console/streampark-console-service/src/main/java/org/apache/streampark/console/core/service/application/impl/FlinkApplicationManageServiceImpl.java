@@ -17,13 +17,11 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
-import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.configuration.Workspace;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkJobType;
-import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
-import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -54,11 +52,12 @@ import org.apache.streampark.console.core.service.application.FlinkApplicationBa
 import org.apache.streampark.console.core.service.application.FlinkApplicationBuildPipelineService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationConfigService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
+import org.apache.streampark.console.core.util.FlinkApplicationConfigUtils;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
 import org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper;
-import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
+import org.apache.streampark.flink.kubernetes.FlinkKubernetesWatcher;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -127,7 +126,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
     private SettingService settingService;
 
     @Autowired
-    private FlinkK8sWatcher k8SFlinkTrackMonitor;
+    private FlinkKubernetesWatcher k8SFlinkTrackMonitor;
 
     @Autowired
     private FlinkApplicationBuildPipelineService appBuildPipeService;
@@ -159,7 +158,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         if (config != null) {
             this.configService.toEffective(appParam.getId(), config.getId());
         }
-        if (appParam.isFlinkSql()) {
+        if (appParam.isFlinkSqlJob()) {
             FlinkSql flinkSql = flinkSqlService.getCandidate(appParam.getId(), null);
             if (flinkSql != null) {
                 flinkSqlService.toEffective(appParam.getId(), flinkSql.getId());
@@ -238,9 +237,9 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         try {
             application
                 .getFsOperator()
-                .delete(application.getWorkspace().APP_WORKSPACE().concat("/").concat(appId.toString()));
+                .delete(application.getWorkspace().workspace.concat("/").concat(appId.toString()));
             // try to delete yarn-application, and leave no trouble.
-            String path = Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString());
+            String path = Workspace.REMOTE.workspace.concat("/").concat(appId.toString());
             if (HdfsOperator.exists(path)) {
                 HdfsOperator.delete(path);
             }
@@ -335,7 +334,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         appParam.doSetHotParams();
         if (appParam.isUploadResource()) {
             String jarPath = String.format(
-                "%s/%d/%s", Workspace.local().APP_UPLOADS(), appParam.getTeamId(), appParam.getJar());
+                "%s/%d/%s", Workspace.LOCAL.uploads, appParam.getTeamId(), appParam.getJar());
             if (!new File(jarPath).exists()) {
                 Resource resource = resourceService.findByResourceName(appParam.getTeamId(), appParam.getJar());
                 if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
@@ -429,7 +428,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
 
         boolean saved = save(newApp);
         if (saved) {
-            if (newApp.isFlinkSql()) {
+            if (newApp.isFlinkSqlJob()) {
                 FlinkSql copyFlinkSql = flinkSqlService.getLatestFlinkSql(appParam.getId(), true);
                 newApp.setFlinkSql(copyFlinkSql.getSql());
                 newApp.setDependency(copyFlinkSql.getDependency());
@@ -564,7 +563,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         }
 
         // Flink Sql job...
-        if (application.isFlinkSql()) {
+        if (application.isFlinkSqlJob()) {
             updateFlinkSqlJob(application, appParam);
             return true;
         }
@@ -702,7 +701,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
             update.update();
 
             // backup
-            if (appParam.isFlinkSql()) {
+            if (appParam.isFlinkSqlJob()) {
                 FlinkSql newFlinkSql = flinkSqlService.getCandidate(appParam.getId(), CandidateTypeEnum.NEW);
                 if (!appParam.isNeedRollback() && newFlinkSql != null) {
                     backUpService.backup(appParam, newFlinkSql);
@@ -731,15 +730,16 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         FlinkApplicationConfig config = configService.getEffective(id);
         config = config == null ? configService.getLatest(id) : config;
         if (config != null) {
-            config.setToApplication(application);
+            FlinkApplicationConfigUtils.applyTo(config, application);
         }
-        if (application.isFlinkSql()) {
+        if (application.isFlinkSqlJob()) {
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), true);
             if (flinkSql == null) {
                 flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.NEW);
-                flinkSql.setSql(DeflaterUtils.unzipString(flinkSql.getSql()));
+                ApiAlertException.throwIfNull(flinkSql, "Flink SQL not found for application id=%s.", id);
+                flinkSql.decode();
             }
-            flinkSql.setToApplication(application);
+            flinkSql.applyToApplication(application);
         } else {
             if (application.isBuildResource()) {
                 String path = this.projectService.getAppConfPath(application.getProjectId(), application.getModule());

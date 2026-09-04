@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
-import org.apache.streampark.common.conf.ConfigKeys;
-import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.configuration.Constants;
+import org.apache.streampark.common.configuration.Workspace;
+import org.apache.streampark.common.configuration.option.ApplicationOptions;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.SparkDeployMode;
 import org.apache.streampark.common.enums.SparkJobType;
@@ -63,6 +63,7 @@ import org.apache.streampark.spark.client.bean.CancelRequest;
 import org.apache.streampark.spark.client.bean.CancelResponse;
 import org.apache.streampark.spark.client.bean.SubmitRequest;
 import org.apache.streampark.spark.client.bean.SubmitResponse;
+import org.apache.streampark.spark.configuration.SparkOptions;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -292,7 +293,7 @@ public class SparkApplicationActionServiceImpl
             // Get the sql of the replaced placeholder
             String realSql = variableService.replaceVariable(application.getTeamId(), sparkSql.getSql());
             sparkSql.setSql(DeflaterUtils.zipString(realSql));
-            extraParameter.put(ConfigKeys.KEY_SPARK_SQL(null), sparkSql.getSql());
+            extraParameter.put(ApplicationOptions.SQL.key(), sparkSql.getSql());
         }
 
         Tuple2<String, String> userJarAndAppConf = getUserJarAndAppConf(sparkEnv, application);
@@ -303,10 +304,10 @@ public class SparkApplicationActionServiceImpl
         if (SparkDeployMode.isYarnMode(application.getDeployModeEnum())) {
             buildResult = new ShadedBuildResponse(null, sparkUserJar, true);
             if (StringUtils.isNotBlank(application.getYarnQueueName())) {
-                extraParameter.put(ConfigKeys.KEY_SPARK_YARN_QUEUE_NAME(), application.getYarnQueueName());
+                extraParameter.put(SparkOptions.YARN_QUEUE_NAME.key(), application.getYarnQueueName());
             }
             if (StringUtils.isNotBlank(application.getYarnQueueLabel())) {
-                extraParameter.put(ConfigKeys.KEY_SPARK_YARN_QUEUE_LABEL(), application.getYarnQueueLabel());
+                extraParameter.put(SparkOptions.YARN_QUEUE_LABEL.key(), application.getYarnQueueLabel());
             }
         }
 
@@ -432,7 +433,7 @@ public class SparkApplicationActionServiceImpl
                     : String.format("yaml://%s", applicationConfig.getContent());
                 // 3) client
                 if (SparkDeployMode.YARN_CLUSTER == deployModeEnum) {
-                    String clientPath = Workspace.remote().APP_CLIENT();
+                    String clientPath = Workspace.REMOTE.client;
                     sparkUserJar = String.format("%s/%s", clientPath, sqlDistJar);
                 }
                 break;
@@ -441,19 +442,20 @@ public class SparkApplicationActionServiceImpl
                 appConf = applicationConfig == null
                     ? null
                     : String.format("yaml://%s", applicationConfig.getContent());
-                Resource resource = resourceService.findByResourceName(application.getTeamId(), application.getJar());
+                Resource pythonResource =
+                    resourceService.findByResourceName(application.getTeamId(), application.getJar());
 
                 ApiAlertException.throwIfNull(
-                    resource, "pyflink file can't be null, start application failed.");
+                    pythonResource, "pyflink file can't be null, start application failed.");
 
                 ApiAlertException.throwIfNull(
-                    resource.getFilePath(), "pyflink file can't be null, start application failed.");
+                    pythonResource.getFilePath(), "pyflink file can't be null, start application failed.");
 
                 ApiAlertException.throwIfFalse(
-                    resource.getFilePath().endsWith(Constants.PYTHON_SUFFIX),
+                    pythonResource.getFilePath().endsWith(Constants.PYTHON_SUFFIX),
                     "pyflink format error, must be a \".py\" suffix, start application failed.");
 
-                sparkUserJar = resource.getFilePath();
+                sparkUserJar = pythonResource.getFilePath();
                 break;
 
             case SPARK_JAR:
@@ -476,7 +478,7 @@ public class SparkApplicationActionServiceImpl
                         case APACHE_SPARK:
                             appConf = String.format(
                                 "json://{\"%s\":\"%s\"}",
-                                ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
+                                ApplicationOptions.MAIN_CLASS.key(), application.getMainClass());
                             break;
                         default:
                             throw new IllegalArgumentException(
@@ -495,13 +497,15 @@ public class SparkApplicationActionServiceImpl
                         case APACHE_SPARK:
                             sparkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
                             if (!FsOperator.hdfs().exists(sparkUserJar)) {
-                                resource = resourceService.findByResourceName(
-                                    application.getTeamId(), application.getJar());
-                                if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
+                                Resource jarResource =
+                                    resourceService.findByResourceName(
+                                        application.getTeamId(), application.getJar());
+                                if (jarResource != null
+                                    && StringUtils.isNotBlank(jarResource.getFilePath())) {
                                     sparkUserJar = String.format(
                                         "%s/%s",
                                         application.getAppHome(),
-                                        new File(resource.getFilePath()).getName());
+                                        new File(jarResource.getFilePath()).getName());
                                 }
                             }
                             break;

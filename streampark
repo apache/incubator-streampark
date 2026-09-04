@@ -1,0 +1,510 @@
+#!/usr/bin/env bash
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -euo pipefail
+
+MAIN_CLASS="org.apache.streampark.console.StreamParkConsoleBootstrap"
+BASH_UTIL_CLASS="org.apache.streampark.console.base.util.BashJavaUtils"
+DEFAULT_DIST="dist/apache-streampark-3.0.0-bin"
+SERVICE_MODULE="streampark-console/streampark-console-service"
+BUILD_MODULES="streampark-common,streampark-flink/streampark-flink-client/streampark-flink-client-api,streampark-flink/streampark-flink-client/streampark-flink-client-core,$SERVICE_MODULE"
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  streampark [command]
+  streampark [flag] [command]
+
+Default:
+  streampark
+      Same as "streampark start". Build current source, then start streampark from
+      target/classes in the background. If an streampark dev process is already
+      running, it is restarted after the build succeeds.
+
+Commands:
+  build
+      Compile current source with:
+      ./mvnw -pl streampark-common,streampark-flink-client-api,
+        streampark-flink-client-core,streampark-console-service -DskipTests compile
+      This matches the IDEA development loop and does not package dist.
+
+  start
+      Build current source, then start the platform in the background.
+      Runtime app.home still points to dist for conf/log/license/temp/JDK,
+      but platform classes are loaded from current target/classes first.
+
+  run
+      Build current source, then start the platform in the foreground.
+      Use this when you want logs directly in the terminal.
+
+  stop
+      Stop the background dev process started by "streampark" or "streampark start".
+
+  restart
+      Stop the background dev process, build current source, then start it
+      again in the background.
+
+  status
+      Show whether the background dev process is running.
+
+  logs | log
+      Tail the background dev log:
+      $STREAMPARK_APP_HOME/logs/streampark-dev.log
+
+  classpath
+      Build current source and print the effective development classpath.
+      Source module target/classes entries are placed before dependency jars.
+
+  info
+      Print resolved paths: repo.home, app.home, java.home, pid.file,
+      log.file, and main.class.
+
+  help | --help | -h
+      Print this help.
+
+Flags:
+  --no-build CMD
+      Run start, run, or classpath without compiling first. Useful when the
+      code was already compiled by IDEA or a previous "streampark build".
+
+  --no-compile CMD
+      Alias for --no-build.
+
+Environment:
+  STREAMPARK_APP_HOME
+      Runtime app.home directory.
+      Default: repo/dist/apache-streampark-3.0.0-bin
+
+  STREAMPARK_JAVA_HOME
+      Java home for the platform process and build.
+      Default: bundled JDK, JAVA_HOME, macOS JDK 11, or java from PATH.
+
+  STREAMPARK_JAVA_OPTS
+      Extra JVM options for the platform process.
+      Example: STREAMPARK_JAVA_OPTS="-Xms1g -Xmx4g"
+
+  STREAMPARK_MVN_OPTS
+      Extra Maven options appended to build and classpath commands.
+      Example: STREAMPARK_MVN_OPTS="-o"
+
+  STREAMPARK_STARTUP_TIMEOUT
+      Seconds to wait for the Spring Boot ready log. Default: 60.
+
+Examples:
+  streampark
+      Build latest code and deploy it in the background.
+
+  streampark build
+      Only compile latest code.
+
+  streampark --no-build start
+      Restart from existing target/classes without compiling.
+
+  STREAMPARK_JAVA_OPTS="-Xms1g -Xmx4g" streampark start
+      Start with extra JVM memory options.
+USAGE
+}
+
+resolve_script() {
+  local source="${BASH_SOURCE[0]}"
+  while [[ -L "$source" ]]; do
+    local dir
+    dir="$(cd -P "$(dirname "$source")" >/dev/null 2>&1 && pwd)"
+    source="$(readlink "$source")"
+    [[ "$source" != /* ]] && source="$dir/$source"
+  done
+  cd -P "$(dirname "$source")" >/dev/null 2>&1 && pwd
+}
+
+SCRIPT_DIR="$(resolve_script)"
+REPO_HOME="$SCRIPT_DIR"
+APP_HOME="${STREAMPARK_APP_HOME:-$REPO_HOME/$DEFAULT_DIST}"
+MVNW="$REPO_HOME/mvnw"
+CACHE_DIR="$REPO_HOME/target/dev"
+DEPENDENCY_CP_FILE="$CACHE_DIR/streampark-console-runtime.cp"
+PID_FILE="$APP_HOME/.streampark-dev.pid"
+LOG_FILE="$APP_HOME/logs/streampark-dev.log"
+LOCK_DIR="$APP_HOME/.streampark-dev.lock"
+export APP_LOG="$APP_HOME/logs"
+
+if [[ ! -x "$MVNW" ]]; then
+  echo "Cannot find executable Maven wrapper: $MVNW" >&2
+  exit 1
+fi
+
+if [[ ! -d "$APP_HOME" ]]; then
+  echo "Cannot find streampark app.home: $APP_HOME" >&2
+  exit 1
+fi
+
+if [[ -n "${STREAMPARK_JAVA_HOME:-}" ]]; then
+  JAVA_HOME="$STREAMPARK_JAVA_HOME"
+elif [[ -x "$APP_HOME/opt/jdk/bin/java" ]]; then
+  JAVA_HOME="$APP_HOME/opt/jdk"
+elif [[ -n "${JAVA_HOME:-}" && -x "$JAVA_HOME/bin/java" ]]; then
+  JAVA_HOME="$JAVA_HOME"
+elif [[ -x /usr/libexec/java_home ]]; then
+  JAVA_HOME="$(/usr/libexec/java_home -v 11 2>/dev/null || /usr/libexec/java_home 2>/dev/null || true)"
+elif command -v java >/dev/null 2>&1; then
+  JAVA_HOME="$(java -XshowSettings:properties -version 2>&1 \
+    | awk -F'= ' '/^[[:space:]]*java.home = / { print $2; exit }')"
+else
+  JAVA_HOME=""
+fi
+
+if [[ -z "$JAVA_HOME" ]]; then
+  echo "Cannot find a JDK. Set STREAMPARK_JAVA_HOME or JAVA_HOME." >&2
+  exit 1
+fi
+export JAVA_HOME
+
+JAVA_CMD="$JAVA_HOME/bin/java"
+if [[ ! -x "$JAVA_CMD" ]]; then
+  echo "Cannot execute Java: $JAVA_CMD" >&2
+  exit 1
+fi
+
+compile_sources() {
+  echo "[streampark] Compiling current source from $REPO_HOME"
+  (
+    cd "$REPO_HOME"
+    # shellcheck disable=SC2086
+    "$MVNW" -pl "$BUILD_MODULES" \
+      -DskipTests \
+      -Dcheckstyle.skip=true \
+      -Dspotless.skip=true \
+      -Dscalastyle.skip=true \
+      -Drat.skip=true \
+      ${STREAMPARK_MVN_OPTS:-} \
+      compile
+  )
+}
+
+refresh_dependency_classpath() {
+  mkdir -p "$CACHE_DIR"
+  local needs_refresh="false"
+  if [[ ! -s "$DEPENDENCY_CP_FILE" ]]; then
+    needs_refresh="true"
+  elif [[ "$SCRIPT_DIR/streampark" -nt "$DEPENDENCY_CP_FILE" ]]; then
+    needs_refresh="true"
+  elif find "$REPO_HOME" -path "$REPO_HOME/dist" -prune -o -name pom.xml -newer "$DEPENDENCY_CP_FILE" -print -quit | grep -q .; then
+    needs_refresh="true"
+  fi
+
+  if [[ "$needs_refresh" == "true" ]]; then
+    echo "[streampark] Refreshing Maven dependency classpath"
+    (
+      cd "$REPO_HOME"
+      # shellcheck disable=SC2086
+      # Resolve reactor projects so stale local SNAPSHOT POMs cannot alter the runtime classpath.
+      "$MVNW" -q -pl "$SERVICE_MODULE" -am \
+        -DskipTests \
+        -Dcheckstyle.skip=true \
+        -Dspotless.skip=true \
+        -Dscalastyle.skip=true \
+        ${STREAMPARK_MVN_OPTS:-} \
+        dependency:build-classpath \
+        -DincludeScope=runtime \
+        -Dmdep.outputFile="$DEPENDENCY_CP_FILE"
+    )
+  fi
+}
+
+module_classpath() {
+  local paths=(
+    "$REPO_HOME/streampark-console/streampark-console-service/target/classes"
+    "$REPO_HOME/streampark-common/target/classes"
+    "$REPO_HOME/streampark-flink/streampark-flink-client/streampark-flink-client-api/target/classes"
+    "$REPO_HOME/streampark-flink/streampark-flink-client/streampark-flink-client-core/target/classes"
+  )
+
+  local existing=()
+  local path
+  for path in "${paths[@]}"; do
+    [[ -d "$path" ]] && existing+=("$path")
+  done
+
+  if [[ "${#existing[@]}" -gt 0 ]]; then
+    local IFS=:
+    printf '%s' "${existing[*]}"
+  fi
+}
+
+filtered_dependency_classpath() {
+  if [[ ! -s "$DEPENDENCY_CP_FILE" ]]; then
+    return 0
+  fi
+
+  # SQL clients are standalone launch artifacts under the distribution's client/ directory.
+  tr ':' '\n' < "$DEPENDENCY_CP_FILE" \
+    | grep -v '/org/apache/streampark/streampark-console-service/' \
+    | grep -v '/org/apache/streampark/streampark-common/' \
+    | grep -v '/org/apache/streampark/streampark-flink-client-api/' \
+    | grep -v '/org/apache/streampark/streampark-flink-client-core/' \
+    | grep -v '/org/apache/streampark/streampark-flink-sqlclient/' \
+    | grep -v '/org/apache/streampark/streampark-spark-sqlclient_' \
+    | paste -sd ':' -
+}
+
+build_classpath() {
+  local module_cp dependency_cp
+  module_cp="$(module_classpath)"
+  dependency_cp="$(filtered_dependency_classpath)"
+
+  printf '.:%s/lib:%s/jre/lib' "$JAVA_HOME" "$JAVA_HOME"
+  [[ -n "$module_cp" ]] && printf ':%s' "$module_cp"
+  [[ -n "$dependency_cp" ]] && printf ':%s' "$dependency_cp"
+}
+
+build_java_command() {
+  local cp="$1"
+  STREAMPARK_JAVA_COMMAND=("$JAVA_CMD")
+
+  if [[ -n "${STREAMPARK_JAVA_OPTS:-}" ]]; then
+    # shellcheck disable=SC2206
+    local extra_opts=( ${STREAMPARK_JAVA_OPTS} )
+    STREAMPARK_JAVA_COMMAND+=("${extra_opts[@]}")
+  fi
+
+  local default_opts=(
+    "-Dstreampark.enterprise=true"
+    "-Dapp.home=$APP_HOME"
+    "-DAPP_LOG=$APP_HOME/logs"
+    "-Dlogging.config=$APP_HOME/conf/logback-spring.xml"
+    "-Djava.io.tmpdir=$APP_HOME/temp"
+  )
+
+  STREAMPARK_JAVA_COMMAND+=("${default_opts[@]}" "-classpath" "$cp" "$MAIN_CLASS")
+}
+
+resolve_server_port() {
+  "$JAVA_CMD" -cp "$APP_HOME/lib/*" "$BASH_UTIL_CLASS" \
+    --get_yaml "server.port" "$APP_HOME/conf/config.yaml"
+}
+
+wait_for_server_port() {
+  local port="$1"
+  local used
+  local i
+  for i in {1..10}; do
+    used="$("$JAVA_CMD" -cp "$APP_HOME/lib/*" "$BASH_UTIL_CLASS" --check_port "$port")"
+    [[ "$used" != "used" ]] && return 0
+    sleep 1
+  done
+  echo "[streampark] Cannot start: server port $port is still in use" >&2
+  return 1
+}
+
+is_running() {
+  [[ -f "$PID_FILE" ]] || return 1
+  local pid
+  pid="$(cat "$PID_FILE" 2>/dev/null || true)"
+  [[ "$pid" =~ ^[0-9]+$ ]] || return 1
+  kill -0 "$pid" >/dev/null 2>&1
+}
+
+acquire_process_lock() {
+  if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+    echo "[streampark] Another start, run, restart, or stop command is in progress" >&2
+    exit 1
+  fi
+  trap 'rmdir "$LOCK_DIR" >/dev/null 2>&1 || true' EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
+}
+
+stop_process() {
+  if ! is_running; then
+    echo "[streampark] streampark dev process is not running"
+    rm -f "$PID_FILE" >/dev/null 2>&1 || true
+    return 0
+  fi
+
+  local pid
+  pid="$(cat "$PID_FILE")"
+  echo "[streampark] Stopping streampark dev process: $pid"
+  kill -TERM "$pid" >/dev/null 2>&1 || true
+
+  local i
+  for i in {1..20}; do
+    if ! kill -0 "$pid" >/dev/null 2>&1; then
+      rm -f "$PID_FILE" >/dev/null 2>&1 || true
+      echo "[streampark] Stopped"
+      return 0
+    fi
+    sleep 1
+  done
+
+  echo "[streampark] Process did not stop after 20s, sending KILL"
+  kill -KILL "$pid" >/dev/null 2>&1 || true
+  rm -f "$PID_FILE" >/dev/null 2>&1 || true
+}
+
+prepare() {
+  local build="$1"
+  [[ "$build" == "true" ]] && compile_sources
+  refresh_dependency_classpath
+  mkdir -p "$APP_HOME/logs/audit" "$APP_HOME/temp"
+}
+
+run_foreground() {
+  local build="$1"
+  prepare "$build"
+  local cp
+  cp="$(build_classpath)"
+  echo "[streampark] Starting from current target/classes"
+  local -a STREAMPARK_JAVA_COMMAND
+  build_java_command "$cp"
+  "${STREAMPARK_JAVA_COMMAND[@]}"
+}
+
+run_background() {
+  local build="$1"
+  prepare "$build"
+  local cp
+  cp="$(build_classpath)"
+  if is_running; then
+    echo "[streampark] Existing dev process detected; restarting to deploy current source"
+    stop_process
+  fi
+  echo "[streampark] Starting from current target/classes in background"
+  echo "[streampark] Log: $LOG_FILE"
+  local server_port
+  server_port="$(resolve_server_port)"
+  if [[ ! "$server_port" =~ ^[0-9]+$ ]]; then
+    echo "[streampark] Cannot resolve server.port from $APP_HOME/conf/config.yaml" >&2
+    return 1
+  fi
+  wait_for_server_port "$server_port"
+  local info_log="$APP_HOME/logs/info.$(date +%F).log"
+  local info_start_line=0
+  [[ -f "$info_log" ]] && info_start_line="$(wc -l < "$info_log")"
+  local -a STREAMPARK_JAVA_COMMAND
+  build_java_command "$cp"
+  local timeout="${STREAMPARK_STARTUP_TIMEOUT:-60}"
+  if [[ ! "$timeout" =~ ^[0-9]+$ ]]; then
+    echo "STREAMPARK_STARTUP_TIMEOUT must be a non-negative integer" >&2
+    return 1
+  fi
+
+  nohup "${STREAMPARK_JAVA_COMMAND[@]}" >> "$LOG_FILE" 2>&1 &
+  local pid=$!
+  echo "$pid" > "$PID_FILE"
+
+  local i
+  for ((i = 0; i < timeout; i++)); do
+    if ! kill -0 "$pid" >/dev/null 2>&1; then
+      rm -f "$PID_FILE"
+      echo "[streampark] Process exited during startup. Recent log output:" >&2
+      tail -n 40 "$LOG_FILE" >&2
+      return 1
+    fi
+    if [[ -f "$info_log" ]] && awk -v start="$info_start_line" \
+      'NR > start && /Started StreamParkConsoleBootstrap/ { found = 1 } END { exit !found }' \
+      "$info_log"; then
+      echo "[streampark] Started. PID: $pid"
+      return 0
+    fi
+    sleep 1
+  done
+
+  echo "[streampark] Process is running but readiness was not confirmed within ${timeout}s. PID: $pid"
+}
+
+print_classpath() {
+  local build="$1"
+  prepare "$build"
+  build_classpath
+  printf '\n'
+}
+
+tail_logs() {
+  mkdir -p "$(dirname "$LOG_FILE")"
+  touch "$LOG_FILE"
+  tail -f "$LOG_FILE"
+}
+
+print_info() {
+  echo "repo.home=$REPO_HOME"
+  echo "app.home=$APP_HOME"
+  echo "java.home=$JAVA_HOME"
+  echo "pid.file=$PID_FILE"
+  echo "log.file=$LOG_FILE"
+  echo "main.class=$MAIN_CLASS"
+}
+
+build_only() {
+  compile_sources
+  refresh_dependency_classpath
+  echo "[streampark] Build complete"
+}
+
+cmd="${1:-start}"
+build="true"
+if [[ "$cmd" == "--no-build" || "$cmd" == "--no-compile" ]]; then
+  build="false"
+  cmd="${2:-start}"
+fi
+
+case "$cmd" in
+  start|run|restart|stop)
+    acquire_process_lock
+    ;;
+esac
+
+case "$cmd" in
+  build)
+    build_only
+    ;;
+  run)
+    run_foreground "$build"
+    ;;
+  start)
+    run_background "$build"
+    ;;
+  stop)
+    stop_process
+    ;;
+  restart)
+    stop_process
+    run_background "$build"
+    ;;
+  status)
+    if is_running; then
+      echo "streampark dev process is running: $(cat "$PID_FILE")"
+    else
+      echo "streampark dev process is not running"
+    fi
+    ;;
+  info)
+    print_info
+    ;;
+  logs|log)
+    tail_logs
+    ;;
+  classpath)
+    print_classpath "$build"
+    ;;
+  -h|--help|help)
+    usage
+    ;;
+  *)
+    echo "Unknown command: $cmd" >&2
+    usage >&2
+    exit 1
+    ;;
+esac

@@ -17,8 +17,8 @@
 
 package org.apache.streampark.flink.packer;
 
-import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.configuration.Constants;
+import org.apache.streampark.common.configuration.Workspace;
 import org.apache.streampark.common.util.LoggerSupport;
 
 import org.apache.commons.io.FileUtils;
@@ -33,7 +33,7 @@ public final class PackerResourceGC extends LoggerSupport {
 
     private static final PackerResourceGC INSTANCE = new PackerResourceGC();
 
-    private static final String APP_WORKSPACE_PATH = Workspace.local().APP_WORKSPACE();
+    private static final String APP_WORKSPACE_PATH = Workspace.LOCAL.workspace;
 
     private PackerResourceGC() {
     }

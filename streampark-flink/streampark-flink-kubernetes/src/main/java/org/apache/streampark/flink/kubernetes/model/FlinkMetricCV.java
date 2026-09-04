@@ -20,7 +20,7 @@ package org.apache.streampark.flink.kubernetes.model;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 
-/** flink cluster metric info */
+/** Immutable snapshot of the aggregate metrics reported by a Flink cluster. */
 @Builder
 @AllArgsConstructor
 public class FlinkMetricCV {
@@ -119,7 +119,7 @@ public class FlinkMetricCV {
 
     public boolean equalsPayload(FlinkMetricCV another) {
         return java.util.Objects.equals(groupId, another.groupId())
-            && totalJmMemory.equals(another.totalTmMemory())
+            && totalJmMemory.equals(another.totalJmMemory())
             && totalTmMemory.equals(another.totalTmMemory())
             && totalTm.equals(another.totalTm())
             && totalSlot.equals(another.totalSlot())

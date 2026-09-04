@@ -17,15 +17,11 @@
 
 package org.apache.streampark.console.core.runner;
 
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.ConfigKeys;
-import org.apache.streampark.common.conf.InternalConfigHolder;
-import org.apache.streampark.common.conf.InternalOption;
-import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.configuration.Workspace;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.AssertUtils;
-import org.apache.streampark.common.util.SystemPropertyUtils;
+import org.apache.streampark.console.base.config.SpringConfigurationInitializer;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.SparkEnv;
@@ -35,12 +31,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -55,34 +49,51 @@ import java.util.regex.Pattern;
 
 import static org.apache.streampark.common.enums.StorageType.LFS;
 
+/**
+ * Prepares Console runtime resources after the Spring application context has started.
+ *
+ * <p>Configuration resolution is delegated to {@link SpringConfigurationInitializer}. This runner
+ * coordinates only the dependent startup work: applying database-backed Maven settings and
+ * preparing local or remote artifact storage.
+ */
 @Order(1)
 @Slf4j
 @Component
 public class EnvInitializer implements ApplicationRunner {
 
-    @Autowired
-    private ApplicationContext context;
-
-    @Autowired
-    private SettingService settingService;
+    private final ApplicationContext context;
+    private final SettingService settingService;
+    private final SpringConfigurationInitializer springConfigurationInitializer;
 
     private final Set<StorageType> initialized = new HashSet<>(2);
 
     private final FileFilter fileFilter = p -> !".gitkeep".equals(p.getName());
 
     private static final Pattern PATTERN_FLINK_SHIMS_JAR = Pattern.compile(
-        "^streampark-flink-shims_flink-(1\\.1[7-9]|1\\.2[0-9]|2\\.[0-3])-(.*).jar$",
+        "^streampark-flink-shims_flink-(1\\.1[8-9]|1\\.2\\d|2\\.[0-3])-(.*).jar$",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static final Pattern PATTERN_FLINK_SHIMS_BASE_JAR = Pattern.compile(
-        "^streampark-flink-shims-base(-v2)?-(.*)\\.jar$",
-        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    /**
+     * Creates the ordered Console runtime initializer.
+     *
+     * @param context active Spring application context
+     * @param settingService persistent Console setting service
+     * @param springConfigurationInitializer Spring-to-StreamPark configuration bridge
+     */
+    public EnvInitializer(
+                          ApplicationContext context,
+                          SettingService settingService,
+                          SpringConfigurationInitializer springConfigurationInitializer) {
+        this.context = context;
+        this.settingService = settingService;
+        this.springConfigurationInitializer = springConfigurationInitializer;
+    }
 
     @SneakyThrows
     @Override
     public void run(ApplicationArguments args) throws Exception {
 
-        // init InternalConfig
+        // Resolve framework-specific sources after Spring has applied environment and CLI rules.
         initConfig();
 
         boolean isTest = Arrays.asList(context.getEnvironment().getActiveProfiles()).contains("test");
@@ -93,31 +104,9 @@ public class EnvInitializer implements ApplicationRunner {
     }
 
     private void initConfig() {
-        Environment env = context.getEnvironment();
-        InternalConfigHolder.initConfigHub();
-        // override config from spring application.yaml
-        InternalConfigHolder.keys().stream()
-            .filter(env::containsProperty)
-            .forEach(
-                key -> {
-                    InternalOption config = InternalConfigHolder.getConfig(key);
-                    AssertUtils.notNull(config);
-                    InternalConfigHolder.set(config, env.getProperty(key, config.classType()));
-                });
-
-        InternalConfigHolder.log();
+        springConfigurationInitializer.initialize(context.getEnvironment());
 
         settingService.getMavenConfig().updateConfig();
-
-        // overwrite system variable HADOOP_USER_NAME
-        String hadoopUserName = InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME());
-        overrideSystemProp(ConfigKeys.KEY_HADOOP_USER_NAME(), hadoopUserName);
-    }
-
-    private void overrideSystemProp(String key, String defaultValue) {
-        String value = context.getEnvironment().getProperty(key, defaultValue);
-        log.info("initialize system properties: key:{}, value:{}", key, value);
-        SystemPropertyUtils.set(key, value);
     }
 
     public synchronized void storageInitialize(StorageType storageType) {
@@ -127,7 +116,7 @@ public class EnvInitializer implements ApplicationRunner {
         }
 
         FsOperator fsOperator = FsOperator.of(storageType);
-        Workspace workspace = Workspace.of(storageType);
+        Workspace workspace = LFS == storageType ? Workspace.LOCAL : Workspace.REMOTE;
 
         // 1. prepare workspace dir
         prepareWorkspace(storageType, fsOperator, workspace);
@@ -146,35 +135,36 @@ public class EnvInitializer implements ApplicationRunner {
     private void prepareWorkspace(
                                   StorageType storageType, FsOperator fsOperator, Workspace workspace) {
         if (LFS == storageType) {
-            fsOperator.mkdirsIfNotExists(Workspace.APP_LOCAL_DIST());
+            fsOperator.mkdirsIfNotExists(Workspace.APP_LOCAL_DIST);
         }
         Arrays.asList(
-            workspace.APP_UPLOADS(),
-            workspace.APP_WORKSPACE(),
-            workspace.APP_BACKUPS(),
-            workspace.APP_SAVEPOINTS(),
-            workspace.APP_PYTHON(),
-            workspace.APP_JARS())
+            workspace.uploads,
+            workspace.workspace,
+            workspace.backups,
+            workspace.savepoints,
+            workspace.python,
+            workspace.jars)
             .forEach(fsOperator::mkdirsIfNotExists);
     }
 
     private static void createMvnLocalRepoDir() {
-        String localMavenRepo = Workspace.MAVEN_LOCAL_PATH();
-        if (FsOperator.lfs().exists(localMavenRepo)) {
+        String localMavenRepo = Workspace.MAVEN_LOCAL_PATH;
+        if (!FsOperator.lfs().exists(localMavenRepo)) {
             FsOperator.lfs().mkdirs(localMavenRepo);
         }
     }
 
     private void uploadClientJar(Workspace workspace, FsOperator fsOperator) {
         File client = WebUtils.getAppClientDir();
+        File[] clientFiles = client.listFiles(fileFilter);
         AssertUtils.required(
-            client.exists() && client.listFiles().length > 0,
+            client.isDirectory() && clientFiles != null && clientFiles.length > 0,
             client.getAbsolutePath().concat(" is not exists or empty directory "));
 
-        String appClient = workspace.APP_CLIENT();
+        String appClient = workspace.client;
         fsOperator.mkCleanDirs(appClient);
 
-        for (File file : client.listFiles(fileFilter)) {
+        for (File file : clientFiles) {
             log.info("load client:{} to {}", file.getName(), appClient);
             fsOperator.upload(file.getAbsolutePath(), appClient);
         }
@@ -185,12 +175,8 @@ public class EnvInitializer implements ApplicationRunner {
             .listFiles(pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_JAR.pattern()));
         AssertUtils.required(shims != null && shims.length > 0, "streampark-flink-shims jar not exist");
 
-        String appShims = workspace.APP_SHIMS();
+        String appShims = workspace.shims;
         fsOperator.delete(appShims);
-
-        File[] shimsBaseJars =
-            WebUtils.getAppLibDir().listFiles(
-                pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_BASE_JAR.pattern()));
 
         for (File file : shims) {
             Matcher matcher = PATTERN_FLINK_SHIMS_JAR.matcher(file.getName());
@@ -200,23 +186,7 @@ public class EnvInitializer implements ApplicationRunner {
                 fsOperator.mkdirs(shimsPath);
                 log.info("load shims:{} to {}", file.getName(), shimsPath);
                 fsOperator.upload(file.getAbsolutePath(), shimsPath);
-                if (isFlink2MajorVersion(version) && shimsBaseJars != null) {
-                    uploadShimsBaseJars(fsOperator, shimsBaseJars, shimsPath);
-                }
             }
-        }
-    }
-
-    private static boolean isFlink2MajorVersion(String majorVersion) {
-        int dot = majorVersion.indexOf('.');
-        String major = dot < 0 ? majorVersion : majorVersion.substring(0, dot);
-        return "2".equals(major);
-    }
-
-    private void uploadShimsBaseJars(FsOperator fsOperator, File[] shimsBaseJars, String shimsPath) {
-        for (File baseJar : shimsBaseJars) {
-            log.info("load shims base:{} to {}", baseJar.getName(), shimsPath);
-            fsOperator.upload(baseJar.getAbsolutePath(), shimsPath);
         }
     }
 
@@ -226,8 +196,8 @@ public class EnvInitializer implements ApplicationRunner {
             throw new ExceptionInInitializerError(
                 "[StreamPark] FLINK_HOME is undefined,Make sure that Flink is installed.");
         }
-        Workspace workspace = Workspace.of(storageType);
-        String appFlink = workspace.APP_FLINK();
+        Workspace workspace = LFS == storageType ? Workspace.LOCAL : Workspace.REMOTE;
+        String appFlink = workspace.flink;
         FsOperator fsOperator = FsOperator.of(storageType);
         if (!fsOperator.exists(appFlink)) {
             log.info("checkFlinkEnv, now mkdir [{}] starting ...", appFlink);
@@ -251,8 +221,8 @@ public class EnvInitializer implements ApplicationRunner {
             throw new ExceptionInInitializerError(
                 "[StreamPark] SPARK_HOME is undefined,Make sure that Spark is installed.");
         }
-        Workspace workspace = Workspace.of(storageType);
-        String appSpark = workspace.APP_SPARK();
+        Workspace workspace = LFS == storageType ? Workspace.LOCAL : Workspace.REMOTE;
+        String appSpark = workspace.spark;
         FsOperator fsOperator = FsOperator.of(storageType);
         if (!fsOperator.exists(appSpark)) {
             log.info("checkSparkEnv, now mkdir [{}] starting ...", appSpark);

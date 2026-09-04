@@ -17,31 +17,52 @@
 
 package org.apache.streampark.flink.core;
 
-import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.streampark.flink.core.bean.StreamTableContextSpec;
+
+import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.table.api.bridge.java.StreamStatementSet;
-import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+import org.apache.flink.table.functions.AggregateFunction;
+import org.apache.flink.table.functions.TableAggregateFunction;
+import org.apache.flink.table.functions.TableFunction;
 
-/** Flink 1.19 stream-table environment context. */
-public class StreamTableContext extends FlinkStreamTableTrait {
+/**
+ * Flink 1.19 stream-table environment context.
+ *
+ * <p>Legacy registration methods remain in this version-specific adapter because Flink 2.x removed
+ * them from {@code StreamTableEnvironment}. Keeping them outside the shared base prevents 1.x API
+ * references from leaking into Flink 2.x shims.
+ */
+public class StreamTableContext extends AbstractFlinkStreamTable {
 
-    public StreamTableContext(
-                              ParameterTool parameter,
-                              StreamExecutionEnvironment streamEnv,
-                              StreamTableEnvironment tableEnv) {
-        super(parameter, streamEnv, tableEnv);
+    public StreamTableContext(StreamTableContextSpec streamContextConfig) {
+        super(streamContextConfig.parameter, streamContextConfig.streamEnv, streamContextConfig.streamTableEnv);
     }
 
-    public StreamTableContext(FlinkTableInitializer.StreamTableInitResult init) {
-        this(init.parameter, init.streamEnv, init.streamTableEnv);
+    @Override
+    public <T> void registerFunction(String name, TableFunction<T> tableFunction) {
+        getStreamTableEnv().registerFunction(name, tableFunction);
     }
 
-    public StreamTableContext(StreamTableEnvConfig config) {
-        this(FlinkTableInitializer.initialize(config));
+    @Override
+    public <T, ACC> void registerFunction(String name, AggregateFunction<T, ACC> aggregateFunction) {
+        getStreamTableEnv().registerFunction(name, aggregateFunction);
+    }
+
+    @Override
+    public <T, ACC> void registerFunction(
+                                          String name,
+                                          TableAggregateFunction<T, ACC> tableAggregateFunction) {
+        getStreamTableEnv().registerFunction(name, tableAggregateFunction);
+    }
+
+    @Override
+    public <T> void registerDataStream(String name, DataStream<T> dataStream) {
+        getStreamTableEnv().registerDataStream(name, dataStream);
     }
 
     @Override
     public StreamStatementSet createStatementSet() {
         return getStreamTableEnv().createStatementSet();
     }
+
 }

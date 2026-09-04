@@ -64,7 +64,7 @@
 
     <modules>
         <module>streampark-common</module>
-        <module>streampark-common-scala-bridge</module>
+        <module>streampark-scala</module>
         <module>streampark-flink</module>
         <module>streampark-spark</module>
         <module>streampark-console</module>
@@ -83,7 +83,7 @@
     </issueManagement>
 
     <properties>
-        <revision>3.0.0-SNAPSHOT</revision>
+        <revision>3.0.0</revision>
         <project.build.jdk>11</project.build.jdk>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -98,20 +98,14 @@
         <flink.version>1.20.1</flink.version>
         <flink.shaded.version>1.8.1</flink.shaded.version>
         <streampark.shaded.version>1.0.0</streampark.shaded.version>
-        <streampark.flink.shims.version>1.17</streampark.flink.shims.version>
+        <streampark.flink.shims.version>1.18</streampark.flink.shims.version>
         <spark.version>3.1.2</spark.version>
         <scalikejdbc.version>4.0.0</scalikejdbc.version>
-        <hive.version>2.3.4</hive.version>
-        <hadoop.version>3.3.4</hadoop.version>
+        <hadoop.version>3.3.5</hadoop.version>
         <hbase.version>2.1.10</hbase.version>
-        <redis.version>3.3.0</redis.version>
-        <zoopkeeper.version>3.6.3</zoopkeeper.version>
-        <es.version>6.2.3</es.version>
-        <influxdb.version>2.17</influxdb.version>
         <protobuf.version>2.5.0</protobuf.version>
         <slf4j.version>1.7.32</slf4j.version>
         <logback.version>1.2.11</logback.version>
-        <grpc.version>1.15.0</grpc.version>
         <jackson.version>2.13.5</jackson.version>
         <guava.version>30.0-jre</guava.version>
         <caffeine.version>2.8.6</caffeine.version>
@@ -143,6 +137,8 @@
         <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
         <streampark.shaded.package>org.apache.streampark.shaded</streampark.shaded.package>
         <httpclient5.version>5.1</httpclient5.version>
+        <okhttp.version>4.11.0</okhttp.version>
+        <okio.version>3.5.0</okio.version>
         <lombok.version>1.18.24</lombok.version>
         <jupiter.version>5.9.1</jupiter.version>
         <mockito.version>3.4.6</mockito.version>
@@ -228,7 +224,7 @@
 
             <dependency>
                 <groupId>org.apache.streampark</groupId>
-                <artifactId>streampark-common-scala-bridge_${scala.binary.version}</artifactId>
+                <artifactId>streampark-scala_${scala.binary.version}</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -249,18 +245,6 @@
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.version}</version>
                 <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.zookeeper</groupId>
-                <artifactId>zookeeper</artifactId>
-                <version>${zoopkeeper.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>redis.clients</groupId>
-                <artifactId>jedis</artifactId>
-                <version>${redis.version}</version>
             </dependency>
 
             <dependency>
@@ -352,6 +336,18 @@
                 <groupId>org.apache.httpcomponents.client5</groupId>
                 <artifactId>httpclient5-fluent</artifactId>
                 <version>${httpclient5.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${okhttp.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.squareup.okio</groupId>
+                <artifactId>okio</artifactId>
+                <version>${okio.version}</version>
             </dependency>
 
             <dependency>
@@ -496,25 +492,6 @@
             <artifactId>force-shading</artifactId>
         </dependency>
 
-        <!--scala-->
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-compiler</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-reflect</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -631,8 +608,6 @@
                             <includes>
                                 <include>src/main/java/**/*.java</include>
                                 <include>src/test/java/**/*.java</include>
-                                <include>streampark-e2e/streampark-e2e-case/src/test/java/**/*.java</include>
-                                <include>streampark-e2e/streampark-e2e-core/src/main/java/**/*.java</include>
                             </includes>
                             <eclipse>
                                 <file>${maven.multiModuleProjectDirectory}/tools/checkstyle/spotless_streampark_formatter.xml</file>

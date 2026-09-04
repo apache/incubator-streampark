@@ -35,7 +35,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <postgresql.version>42.5.1</postgresql.version>
         <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
-        <streampark.flink.shims.version>1.17</streampark.flink.shims.version>
+        <streampark.flink.shims.version>1.18</streampark.flink.shims.version>
         <frontend.project.name>streampark-console-webapp</frontend.project.name>
         <CodeCacheSize>512m</CodeCacheSize>
 
@@ -366,25 +366,19 @@
             <artifactId>streampark-common</artifactId>
         </dependency>
 
+        <!-- OkHttp is used for streaming Flink, YARN, and component proxy responses. -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.streampark</groupId>
             <artifactId>streampark-flink-shims-base</artifactId>
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims-base-v2</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <!-- Ensure all Flink shims are built when console-service is built with -am -->
-        <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-1.17</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>org.apache.streampark</groupId>
             <artifactId>streampark-flink-shims_flink-1.18</artifactId>
@@ -600,13 +594,6 @@
                     <excludeTransitive>false</excludeTransitive>
                     <stripVersion>false</stripVersion>
                     <artifactItems>
-                        <!-- flink 1.17 support-->
-                        <dependency>
-                            <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-1.17</artifactId>
-                            <version>${project.version}</version>
-                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                        </dependency>
                         <!-- flink 1.18 support-->
                         <dependency>
                             <groupId>org.apache.streampark</groupId>

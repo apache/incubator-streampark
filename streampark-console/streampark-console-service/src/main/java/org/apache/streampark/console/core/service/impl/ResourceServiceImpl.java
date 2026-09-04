@@ -17,11 +17,12 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.configuration.Constants;
+import org.apache.streampark.common.configuration.Workspace;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
+import org.apache.streampark.common.util.PathUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -47,7 +48,6 @@ import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.table.factories.Factory;
@@ -70,6 +70,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,15 +82,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.ServiceLoader;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
-
-import static org.apache.streampark.common.enums.StorageType.LFS;
 
 @Slf4j
 @Service
@@ -149,10 +150,9 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
         if (!jars.isEmpty()) {
             String resourcePath = jars.get(0);
-            resource.setResourcePath(resourcePath);
-            // copy jar to team upload directory
-            String upFile = resourcePath.split(":", 2)[1];
-            transferTeamResource(resource.getTeamId(), upFile);
+            String[] resourceEntry = splitResourceEntry(resourcePath);
+            String storedPath = transferUploadedResource(resource.getTeamId(), resourceEntry[1]);
+            resource.setResourcePath(resourceEntry[0] + ":" + storedPath);
         }
 
         resource.setCreatorId(ServiceHelper.getUserId());
@@ -205,8 +205,10 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
             Dependency dependency = Dependency.toDependency(resource.getResource());
             if (!dependency.getJar().isEmpty()) {
-                String jarFile = dependency.getJar().get(0).split(":", 2)[1];
-                transferTeamResource(findResource.getTeamId(), jarFile);
+                String[] resourceEntry = splitResourceEntry(dependency.getJar().get(0));
+                String storedPath =
+                    transferUploadedResource(findResource.getTeamId(), resourceEntry[1]);
+                findResource.setResourcePath(resourceEntry[0] + ":" + storedPath);
             }
         }
 
@@ -223,17 +225,18 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         Resource findResource = getById(id);
         checkOrElseAlert(findResource);
 
-        String filePath = String.format(
-            "%s/%d/%s",
-            Workspace.local().APP_UPLOADS(),
-            findResource.getTeamId(),
-            findResource.getResourceName());
-
-        if (!new File(filePath).exists() && StringUtils.isNotBlank(findResource.getFilePath())) {
-            filePath = findResource.getFilePath();
+        if (StringUtils.isNotBlank(findResource.getFilePath())) {
+            String teamUploads = String.format("%s/%d", Workspace.LOCAL.uploads, findResource.getTeamId());
+            try {
+                Path file =
+                    PathUtils.resolveChild(Path.of(teamUploads), findResource.getFilePath());
+                FsOperator.lfs().delete(file.toString());
+            } catch (NoSuchFileException ignored) {
+                // Deletion is idempotent when the managed resource file is already absent.
+            } catch (IOException exception) {
+                throw new ApiDetailException("Invalid stored resource path", exception);
+            }
         }
-
-        FsOperator.lfs().delete(filePath);
 
         this.removeById(id);
     }
@@ -257,31 +260,44 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     }
 
     /**
-     * @param file
-     * @return
+     * Stores an uploaded resource under a server-generated temporary filename.
+     *
+     * @param file uploaded JAR or Python resource
+     * @return detected main class and server-side temporary path
      */
     @Override
     public UploadResponse upload(MultipartFile file) throws IOException {
-        File temp = WebUtils.getAppTempDir();
-        String fileName = FilenameUtils.getName(Objects.requireNonNull(file.getOriginalFilename()));
-        File saveFile = new File(temp, fileName);
-        if (!saveFile.exists()) {
-            // save file to temp dir
-            try {
-                file.transferTo(saveFile);
-            } catch (Exception e) {
-                throw new ApiDetailException(e);
-            }
+        String originalName = file.getOriginalFilename();
+        ApiAlertException.throwIfTrue(
+            StringUtils.isBlank(originalName), "Uploaded resource name must not be blank");
+        ApiAlertException.throwIfTrue(file.isEmpty(), "Uploaded resource must not be empty");
+        boolean jar = StringUtils.endsWithIgnoreCase(originalName, ".jar");
+        boolean python = StringUtils.endsWithIgnoreCase(originalName, ".py");
+        ApiAlertException.throwIfTrue(!jar && !python, "Only JAR and Python resources are supported");
+        String suffix = python ? ".py" : ".jar";
+        Path temp = WebUtils.getAppTempDir().toPath();
+        Files.createDirectories(temp);
+        Path savePath = Files.createTempFile(temp, "upload-", suffix);
+        File saveFile = savePath.toFile();
+        try (InputStream input = file.getInputStream()) {
+            Files.copy(input, savePath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e) {
+            Files.deleteIfExists(savePath);
+            throw new ApiDetailException(e);
         }
         String mainClass = null;
-        try {
-            mainClass = Utils.getJarManClass(saveFile);
-        } catch (Exception ignored) {
+        if (jar) {
+            try {
+                Utils.requireCheckJarFile(saveFile.toURI().toURL());
+                mainClass = Utils.getJarManClass(saveFile);
+            } catch (Exception exception) {
+                Files.deleteIfExists(savePath);
+                throw new ApiDetailException("Uploaded JAR is invalid", exception);
+            }
         }
-        String path = saveFile.getAbsolutePath();
         UploadResponse uploadResponse = new UploadResponse();
         uploadResponse.setMainClass(mainClass);
-        uploadResponse.setPath(path);
+        uploadResponse.setPath(saveFile.getAbsolutePath());
         return uploadResponse;
     }
 
@@ -300,7 +316,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
     @Override
     public List<String> listHistoryUploadJars() {
-        return Arrays.stream(LfsOperator.listDir(Workspace.of(LFS).APP_UPLOADS()))
+        return Arrays.stream(LfsOperator.listDir(Workspace.LOCAL.uploads))
             .filter(File::isFile)
             .sorted(Comparator.comparingLong(File::lastModified).reversed())
             .map(File::getName)
@@ -465,8 +481,31 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         }
     }
 
-    private void transferTeamResource(Long teamId, String resourcePath) {
-        String teamUploads = String.format("%s/%d", Workspace.local().APP_UPLOADS(), teamId);
+    /** Transfers a client-selected upload only after resolving it below the managed temp root. */
+    private String transferUploadedResource(Long teamId, String resourcePath) {
+        try {
+            Path temp = WebUtils.getAppTempDir().toPath();
+            Path upload = PathUtils.resolveChild(temp, resourcePath);
+            return transferTeamResource(teamId, upload.toString());
+        } catch (IOException exception) {
+            throw new ApiDetailException("Invalid uploaded resource path", exception);
+        }
+    }
+
+    /** Validates the display-name and path pair used by uploaded resource requests. */
+    private String[] splitResourceEntry(String resourcePath) {
+        String[] entry = resourcePath.split(":", 2);
+        ApiAlertException.throwIfTrue(
+            entry.length != 2
+                || StringUtils.isBlank(entry[0])
+                || StringUtils.isBlank(entry[1]),
+            "Invalid uploaded resource entry");
+        return entry;
+    }
+
+    /** Copies a trusted local artifact into durable team storage and returns its final path. */
+    private String transferTeamResource(Long teamId, String resourcePath) {
+        String teamUploads = String.format("%s/%d", Workspace.LOCAL.uploads, teamId);
         if (!FsOperator.lfs().exists(teamUploads)) {
             FsOperator.lfs().mkdirs(teamUploads);
         }
@@ -476,6 +515,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             localJar.exists(), "Missing file: " + resourcePath + ", please upload again");
         FsOperator.lfs()
             .upload(localJar.getAbsolutePath(), teamUploadJar.getAbsolutePath(), false, true);
+        return teamUploadJar.getAbsolutePath();
     }
 
     private void checkOrElseAlert(Resource resource) {

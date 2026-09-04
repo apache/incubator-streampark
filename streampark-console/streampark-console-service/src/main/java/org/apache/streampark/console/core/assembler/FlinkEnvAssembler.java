@@ -24,6 +24,7 @@ import org.apache.streampark.console.core.request.flink.FlinkEnvCreateRequest;
 import org.apache.streampark.console.core.request.flink.FlinkEnvPageQueryRequest;
 import org.apache.streampark.console.core.request.flink.FlinkEnvUpdateRequest;
 import org.apache.streampark.console.core.response.flink.FlinkEnvResponse;
+import org.apache.streampark.console.core.util.FlinkEnvUtils;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.BeanUtils;
@@ -93,6 +94,15 @@ public final class FlinkEnvAssembler {
         }
         FlinkEnvResponse response = new FlinkEnvResponse();
         BeanUtils.copyProperties(env, response);
+        return response;
+    }
+
+    /** Converts an entity to a detail response with readable YAML configuration. */
+    public static FlinkEnvResponse toDetailResponse(FlinkEnv env) {
+        FlinkEnvResponse response = toResponse(env);
+        if (response != null) {
+            response.setFlinkConf(FlinkEnvUtils.yaml(env));
+        }
         return response;
     }
 

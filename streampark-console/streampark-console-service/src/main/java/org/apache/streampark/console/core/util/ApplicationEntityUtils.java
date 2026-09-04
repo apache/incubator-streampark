@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.util;
 
-import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.configuration.Workspace;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.console.core.bean.Dependency;
@@ -26,6 +26,7 @@ import org.apache.streampark.flink.packer.maven.DependencyInfo;
 
 import lombok.extern.slf4j.Slf4j;
 
+/** Derives runtime paths and state from persisted application fields. */
 @Slf4j
 public final class ApplicationEntityUtils {
 
@@ -33,19 +34,19 @@ public final class ApplicationEntityUtils {
     }
 
     public static String distHome(Long projectId, String module) {
-        String path = String.format("%s/%s/%s", Workspace.APP_LOCAL_DIST(), projectId.toString(), module);
+        String path = String.format("%s/%s/%s", Workspace.APP_LOCAL_DIST, projectId.toString(), module);
         log.info("local distHome:{}", path);
         return path;
     }
 
     public static String localAppHome(Long id) {
-        String path = String.format("%s/%s", Workspace.local().APP_WORKSPACE(), id.toString());
+        String path = String.format("%s/%s", Workspace.LOCAL.workspace, id.toString());
         log.info("local appHome:{}", path);
         return path;
     }
 
     public static String remoteAppHome(Long id) {
-        String path = String.format("%s/%s", Workspace.remote().APP_WORKSPACE(), id.toString());
+        String path = String.format("%s/%s", Workspace.REMOTE.workspace, id.toString());
         log.info("remote appHome:{}", path);
         return path;
     }
@@ -70,6 +71,6 @@ public final class ApplicationEntityUtils {
     }
 
     public static Workspace workspace(StorageType storageType) {
-        return Workspace.of(storageType);
+        return StorageType.LFS == storageType ? Workspace.LOCAL : Workspace.REMOTE;
     }
 }

@@ -17,21 +17,20 @@
 
 package org.apache.streampark.flink.core;
 
-import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.streampark.flink.configuration.FlinkJobParameters;
+import org.apache.streampark.flink.core.bean.TableContextSpec;
+
 import org.apache.flink.table.api.TableEnvironment;
 
 /** Flink 1.19 table environment context. */
-public class TableContext extends FlinkTableTrait {
+public class TableContext extends AbstractFlinkTable {
 
-    public TableContext(ParameterTool parameter, TableEnvironment tableEnv) {
+    public TableContext(FlinkJobParameters parameter, TableEnvironment tableEnv) {
         super(parameter, tableEnv);
     }
 
-    public TableContext(FlinkTableInitializer.TableInitResult init) {
-        this(init.parameter, init.tableEnv);
+    public TableContext(TableContextSpec contextConfig) {
+        this(contextConfig.parameter, contextConfig.tableEnv);
     }
 
-    public TableContext(TableEnvConfig config) {
-        this(FlinkTableInitializer.initialize(config));
-    }
 }

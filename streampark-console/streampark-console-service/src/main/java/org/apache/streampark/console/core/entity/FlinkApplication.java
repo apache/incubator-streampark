@@ -17,12 +17,12 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.conf.ConfigKeys;
-import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.configuration.Constants;
+import org.apache.streampark.common.configuration.option.DeploymentOptions;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkJobType;
-import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
+import org.apache.streampark.common.enums.FlinkKubernetesRestExposedType;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
 import org.apache.streampark.console.base.util.JacksonUtils;
@@ -32,8 +32,9 @@ import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.ResourceFromEnum;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
+import org.apache.streampark.console.core.util.ApplicationEntitySupport;
 import org.apache.streampark.console.core.util.YarnQueueLabelExpression;
-import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates;
+import org.apache.streampark.flink.kubernetes.model.KubernetesPodTemplates;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -62,10 +63,6 @@ import java.util.Optional;
 @TableName("t_flink_app")
 @Slf4j
 public class FlinkApplication extends BaseEntity implements ApplicationEntitySupport, ReleaseOutcomeTarget {
-
-    private static final TypeReference<Map<String, Object>> STRING_OBJECT_MAP =
-        new TypeReference<Map<String, Object>>() {
-        };
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -322,8 +319,8 @@ public class FlinkApplication extends BaseEntity implements ApplicationEntitySup
         this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? Constants.DEFAULT : k8sNamespace;
     }
 
-    public K8sPodTemplates getK8sPodTemplates() {
-        return K8sPodTemplates.of(k8sPodTemplate, k8sJmPodTemplate, k8sTmPodTemplate);
+    public KubernetesPodTemplates getK8sPodTemplates() {
+        return KubernetesPodTemplates.of(k8sPodTemplate, k8sJmPodTemplate, k8sTmPodTemplate);
     }
 
     public void setState(Integer state) {
@@ -339,9 +336,9 @@ public class FlinkApplication extends BaseEntity implements ApplicationEntitySup
 
         Map<String, Object> hotParamsMap = this.getHotParamsMap();
         if (MapUtils.isNotEmpty(hotParamsMap)
-            && hotParamsMap.containsKey(ConfigKeys.KEY_YARN_APP_QUEUE())) {
-            String yarnQueue = hotParamsMap.get(ConfigKeys.KEY_YARN_APP_QUEUE()).toString();
-            String labelExpr = Optional.ofNullable(hotParamsMap.get(ConfigKeys.KEY_YARN_APP_NODE_LABEL()))
+            && hotParamsMap.containsKey(DeploymentOptions.YARN_QUEUE.key())) {
+            String yarnQueue = hotParamsMap.get(DeploymentOptions.YARN_QUEUE.key()).toString();
+            String labelExpr = Optional.ofNullable(hotParamsMap.get(DeploymentOptions.YARN_NODE_LABEL.key()))
                 .map(Object::toString)
                 .orElse(null);
             this.setYarnQueue(YarnQueueLabelExpression.of(yarnQueue, labelExpr).toString());
@@ -407,8 +404,8 @@ public class FlinkApplication extends BaseEntity implements ApplicationEntitySup
     }
 
     @JsonIgnore
-    public FlinkK8sRestExposedType getK8sRestExposedTypeEnum() {
-        return FlinkK8sRestExposedType.of(this.k8sRestExposedType);
+    public FlinkKubernetesRestExposedType getK8sRestExposedTypeEnum() {
+        return FlinkKubernetesRestExposedType.of(this.k8sRestExposedType);
     }
 
     @JsonIgnore
@@ -474,13 +471,15 @@ public class FlinkApplication extends BaseEntity implements ApplicationEntitySup
         if (StringUtils.isBlank(this.options)) {
             return new HashMap<>();
         }
-        Map<String, Object> optionMap = JacksonUtils.read(this.options, STRING_OBJECT_MAP);
+        Map<String, Object> optionMap = JacksonUtils.read(this.options, new TypeReference<>() {
+        });
         optionMap.entrySet().removeIf(entry -> entry.getValue() == null);
         return optionMap;
     }
 
+    /** Returns whether this application runs Flink SQL. */
     @JsonIgnore
-    public boolean isFlinkSql() {
+    public boolean isFlinkSqlJob() {
         return FlinkJobType.FLINK_SQL.getMode().equals(this.getJobType());
     }
 
@@ -547,7 +546,8 @@ public class FlinkApplication extends BaseEntity implements ApplicationEntitySup
     @SneakyThrows
     public Map<String, Object> getHotParamsMap() {
         if (this.hotParams != null) {
-            Map<String, Object> map = JacksonUtils.read(this.hotParams, STRING_OBJECT_MAP);
+            Map<String, Object> map = JacksonUtils.read(this.hotParams, new TypeReference<>() {
+            });
             map.entrySet().removeIf(entry -> entry.getValue() == null);
             return map;
         }
@@ -571,7 +571,9 @@ public class FlinkApplication extends BaseEntity implements ApplicationEntitySup
         }
         if (deployModeEnum == FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION) {
             if (StringUtils.isNotBlank(appParam.getServiceAccount())) {
-                hotParams.put(ConfigKeys.KEY_KERBEROS_SERVICE_ACCOUNT(), appParam.getServiceAccount());
+                hotParams.put(
+                    DeploymentOptions.KUBERNETES_SERVICE_ACCOUNT.key(),
+                    appParam.getServiceAccount());
             }
         }
         if (!hotParams.isEmpty()) {

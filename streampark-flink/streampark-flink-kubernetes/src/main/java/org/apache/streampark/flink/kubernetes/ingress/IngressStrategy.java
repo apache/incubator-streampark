@@ -17,10 +17,9 @@
 
 package org.apache.streampark.flink.kubernetes.ingress;
 
-import org.apache.streampark.common.conf.ConfigKeys;
-import org.apache.streampark.common.conf.InternalConfigHolder;
-import org.apache.streampark.common.conf.K8sFlinkConfig;
+import org.apache.streampark.common.configuration.GlobalConfiguration;
 import org.apache.streampark.common.util.FileUtils;
+import org.apache.streampark.flink.kubernetes.configuration.KubernetesOptions;
 
 import org.apache.flink.client.program.ClusterClient;
 import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.api.model.OwnerReference;
@@ -35,9 +34,10 @@ import java.util.Map;
 public interface IngressStrategy {
 
     String REST_SERVICE_IDENTIFICATION = "rest";
+    String FLINK_NATIVE_KUBERNETES_LABEL = "flink-native-kubernetes";
 
     default String ingressClass() {
-        return InternalConfigHolder.get(K8sFlinkConfig.ingressClass);
+        return GlobalConfiguration.current().get(KubernetesOptions.INGRESS_CLASS);
     }
 
     String getIngressUrl(String nameSpace, String clusterId, ClusterClient<?> clusterClient);
@@ -77,7 +77,7 @@ public interface IngressStrategy {
     default Map<String, String> buildIngressLabels(String clusterId) {
         Map<String, String> labels = new HashMap<>();
         labels.put("app", clusterId);
-        labels.put("type", ConfigKeys.FLINK_NATIVE_KUBERNETES_LABEL());
+        labels.put("type", FLINK_NATIVE_KUBERNETES_LABEL);
         labels.put("component", "ingress");
         return labels;
     }

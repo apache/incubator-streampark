@@ -18,10 +18,11 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.SpringUnitTestBase;
+import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.bean.UploadResponse;
 
 import org.apache.hc.core5.http.ContentType;
 
-import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +32,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.jar.Attributes;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** org.apache.streampark.console.core.service.ResourceServiceTest. */
 class ResourceServiceTest extends SpringUnitTestBase {
@@ -41,14 +46,15 @@ class ResourceServiceTest extends SpringUnitTestBase {
     private ResourceService resourceService;
 
     @Test
-    void testUpload(@TempDir Path tempDir) throws Exception {
-        // specify the file path
-        File fileToStoreUploadFile =
-            new File(tempDir.toFile().getAbsolutePath() + "/fileToStoreUploadFile");
-        FileUtils.createFile(fileToStoreUploadFile.getAbsolutePath());
-
+    void uploadUsesGeneratedPath(@TempDir Path tempDir) throws Exception {
         File fileToUpload = new File(tempDir.toFile().getAbsolutePath() + "/fileToUpload.jar");
-        FileUtils.createFile(fileToUpload.getAbsolutePath());
+        Manifest manifest = new Manifest();
+        manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+        try (
+            JarOutputStream ignored =
+                new JarOutputStream(Files.newOutputStream(fileToUpload.toPath()), manifest)) {
+            // A manifest-only JAR is sufficient for upload validation.
+        }
         assertThat(fileToUpload).exists();
         MultipartFile mulFile =
             new MockMultipartFile(
@@ -56,7 +62,29 @@ class ResourceServiceTest extends SpringUnitTestBase {
                 fileToUpload.getAbsolutePath(), // originalFilename (eg: path + fileName =
                 // /tmp/file/streampark.jar)
                 ContentType.APPLICATION_OCTET_STREAM.toString(),
-                Files.newInputStream(fileToStoreUploadFile.toPath()));
-        resourceService.upload(mulFile);
+                Files.newInputStream(fileToUpload.toPath()));
+        UploadResponse response = resourceService.upload(mulFile);
+        Path uploaded = Path.of(response.getPath());
+        try {
+            assertThat(uploaded).exists();
+            assertThat(uploaded.getParent().toRealPath())
+                .isEqualTo(WebUtils.getAppTempDir().toPath().toRealPath());
+            assertThat(uploaded.getFileName().toString())
+                .startsWith("upload-")
+                .endsWith(".jar")
+                .doesNotContain(fileToUpload.getName());
+        } finally {
+            Files.deleteIfExists(uploaded);
+        }
+    }
+
+    @Test
+    void rejectUnsupportedUpload() {
+        MultipartFile file =
+            new MockMultipartFile(
+                "file", "payload.exe", ContentType.APPLICATION_OCTET_STREAM.toString(), new byte[]{1});
+
+        assertThatThrownBy(() -> resourceService.upload(file))
+            .hasMessageContaining("Only JAR and Python resources");
     }
 }
