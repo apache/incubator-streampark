@@ -205,7 +205,7 @@ export const useSparkTableAction = (handlePageDataReload: Fn, optionApps: Record
   /* Click to edit */
   function handleEdit(app: SparkApplication, currentPageNo: number) {
     // Record the current page number
-    sessionStorage.setItem('sparkAppPageNo', String(currentPageNo || 1));
+    sessionStorage.setItem('appPageNo', String(currentPageNo || 1));
     router.push({ path: '/spark/app/edit', query: { appId: app.id } });
   }
 
